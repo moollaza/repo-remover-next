@@ -1,8 +1,10 @@
+"use client";
+
 import axios from "axios";
 import { useEffect, useState } from "react";
 import useSWR from "swr";
 
-import GitHubTokenForm from "../components/github-token-form";
+import GitHubTokenForm from "@components/github-token-form";
 
 const fetcher = (url: string, token: string) =>
   axios
