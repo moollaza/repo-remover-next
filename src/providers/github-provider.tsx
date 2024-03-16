@@ -9,14 +9,18 @@ export default function GitHubProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [pat, setPat] = useState<string | null>(localStorage.getItem("pat"));
+  const [pat, setPat] = useState<string | null>(
+    typeof localStorage !== "undefined" ? localStorage?.getItem("pat") : null,
+  );
   const [login, setLogin] = useState<string | null>(
-    localStorage.getItem("login"),
+    typeof localStorage !== "undefined" ? localStorage?.getItem("login") : null,
   );
 
   useEffect(() => {
-    localStorage.setItem("pat", pat || "");
-    localStorage.setItem("login", login || "");
+    if (typeof localStorage !== "undefined") {
+      localStorage?.setItem("pat", pat || "");
+      localStorage?.setItem("login", login || "");
+    }
   }, [pat, login]);
 
   return (
