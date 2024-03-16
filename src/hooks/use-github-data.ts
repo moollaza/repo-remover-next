@@ -72,13 +72,14 @@ export default function useGitHubData({
   const octokit = new MyOctokit({ auth: pat });
 
   const fetcher = async () => {
-    const { data } = await octokit.graphql.paginate<{
-      data: {
-        user: User;
-      };
+    const data = await octokit.graphql.paginate<{
+      user: User;
     }>(GET_REPOS, {
       login,
     });
+
+    console.log(data);
+
     return data;
   };
 
