@@ -78,14 +78,19 @@ export default function useGitHubData({
       login,
     });
 
-    console.log(data);
-
     return data;
   };
 
   const { data, error } = useSWR(GET_REPOS, fetcher);
 
   return {
+    user: {
+      id: data?.user?.id,
+      name: data?.user?.name,
+      login: data?.user?.login,
+      avatarUrl: data?.user?.avatarUrl,
+      bioHTML: data?.user?.bioHTML,
+    },
     repos: data?.user?.repositories?.nodes,
     isLoading: !error && !data,
     isError: error,

@@ -1,8 +1,8 @@
+import clsx from "clsx";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import clsx from "clsx";
 
-import GitHubProvider from "@providers/github-provider";
+import { Providers } from "./providers";
 
 import "@/globals.css";
 
@@ -20,14 +20,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <GitHubProvider>
-      <html lang="en">
-        <body
-          className={clsx(
-            inter.className,
-            "antialiased min-h-screen flex flex-col",
-          )}
-        >
+    <html lang="en">
+      <body
+        className={clsx(
+          inter.className,
+          "antialiased min-h-screen flex flex-col",
+        )}
+      >
+        <Providers>
           <header className="p-4">{/* TODO */}</header>
 
           <main className="flex-grow p-4">{children}</main>
@@ -36,8 +36,8 @@ export default function RootLayout({
             Repo Remover by <a href="https://zaahir.ca">Zaahir Moolla</a> |
             Copyright © 2024
           </footer>
-        </body>
-      </html>
-    </GitHubProvider>
+        </Providers>
+      </body>
+    </html>
   );
 }

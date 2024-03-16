@@ -1,20 +1,44 @@
-import React, { useContext } from "react";
+import { useContext } from "react";
+import { User, Link } from "@nextui-org/react";
+
+import useGitHubData from "@hooks/use-github-data";
 
 import RepoTable from "@components/repo-table";
-import useGitHubData from "@hooks/use-github-data";
 import GitHubContext from "@contexts/github-context";
 
 export default function DashboardPage() {
   const { pat, login } = useContext(GitHubContext);
-  const { repos, isLoading, isError } = useGitHubData({ pat, login });
+  const { user, repos, isLoading, isError } = useGitHubData({ pat, login });
 
   return (
     <div>
       <h1>Dashboard</h1>
 
-      {isLoading && <div>Loading...</div>}
       {isError && <div>Error!</div>}
-      {repos && <RepoTable repos={repos} />}
+
+      {(isLoading || repos) && (
+        <>
+          <User
+            className="mt-5"
+            name={user?.name}
+            description={
+              <Link
+                href={`https://github.com/${user?.login}`}
+                size="sm"
+                isExternal
+              >
+                {user?.login}
+              </Link>
+            }
+            avatarProps={{
+              src: user?.avatarUrl,
+            }}
+          />
+          <div className="mt-5">
+            <RepoTable user={user} repos={repos} isLoading={isLoading} />
+          </div>
+        </>
+      )}
     </div>
   );
 }
