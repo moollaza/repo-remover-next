@@ -2,6 +2,7 @@ import { Octokit } from "@octokit/core";
 import { paginateGraphQL } from "@octokit/plugin-paginate-graphql";
 import useSWR from "swr";
 
+const MyOctokit = Octokit.plugin(paginateGraphQL);
 const gql = String.raw;
 
 const GET_REPOS = gql`
@@ -53,17 +54,13 @@ export default function useGitHubData({
     };
   }
 
-  const MyOctokit = Octokit.plugin(paginateGraphQL);
   const octokit = new MyOctokit({ auth: pat });
 
-  console.log("useGitHubData", { pat, login });
   const fetcher = () => {
     return octokit.graphql.paginate(GET_REPOS, { login });
   };
 
   const { data, error } = useSWR(GET_REPOS, fetcher);
-
-  console.log(data, error);
 
   return {
     repos: data?.user?.repositories?.nodes,

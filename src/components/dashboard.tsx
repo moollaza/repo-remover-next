@@ -6,9 +6,6 @@ import GitHubContext from "@contexts/github-context";
 
 export default function DashboardPage() {
   const { pat, login } = useContext(GitHubContext);
-
-  console.log(pat, login);
-
   const { repos, isLoading, isError } = useGitHubData({ pat, login });
 
   return (
