@@ -23,6 +23,7 @@
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
     "autoprefixer": "^10.0.1",
     "axios": "^1.6.7",
     "clsx": "^2.1.0",
