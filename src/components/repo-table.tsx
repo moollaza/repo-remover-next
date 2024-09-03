@@ -45,7 +45,7 @@ export default function RepoTable({
         <TableColumn>Last Updated</TableColumn>
       </TableHeader>
       <TableBody
-        items={repos || []}
+        items={repos ?? []}
         emptyContent={"No repos to display."}
         isLoading={isLoading}
         loadingContent={<Spinner label="Loading..." />}
@@ -55,7 +55,7 @@ export default function RepoTable({
             <TableCell>{repo.name}</TableCell>
             <TableCell>
               <span
-                title={new Date(repo.updatedAt).toLocaleString(
+                title={new Date(repo.updatedAt as string).toLocaleString(
                   navigator.language,
                   {
                     month: "short",
@@ -64,7 +64,7 @@ export default function RepoTable({
                   },
                 )}
               >
-                {getRelativeDate(new Date(repo.updatedAt))}
+                {getRelativeDate(new Date(repo.updatedAt as string))}
               </span>
             </TableCell>
           </TableRow>

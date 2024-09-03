@@ -31,11 +31,12 @@ export default function DashboardPage() {
               </Link>
             }
             avatarProps={{
-              src: user?.avatarUrl,
+              src: user?.avatarUrl as string,
+              showFallback: true,
             }}
           />
           <div className="mt-5">
-            <RepoTable user={user} repos={repos} isLoading={isLoading} />
+            <RepoTable repos={repos} isLoading={isLoading} />
           </div>
         </>
       )}

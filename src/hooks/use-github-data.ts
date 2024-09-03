@@ -1,7 +1,7 @@
 import { Octokit } from "@octokit/core";
-import { Repository, User } from "@octokit/graphql-schema";
+import { PageInfo, Repository, User } from "@octokit/graphql-schema";
 import { paginateGraphQL } from "@octokit/plugin-paginate-graphql";
-import useSWR from "swr";
+import useSWR, { SWRResponse } from "swr";
 
 const MyOctokit = Octokit.plugin(paginateGraphQL);
 const gql = String.raw;
@@ -48,51 +48,54 @@ const GET_REPOS = gql`
   }
 `;
 
-export interface RepoData {
-  repositories: {
-    nodes: Repository[];
+interface RepositoriesResponse {
+  user: User & {
+    repositories: {
+      nodes: Repository[];
+      pageInfo: PageInfo;
+    };
   };
+}
+
+interface GitHubData {
+  user: User | null;
+  repos: Repository[] | null;
+  isLoading: boolean;
+  isError: boolean;
+}
+
+interface UseGitHubDataArgs {
+  pat: string | null;
+  login: string | null;
 }
 
 export default function useGitHubData({
   pat,
   login,
-}: {
-  pat: string | null;
-  login: string | null;
-}) {
-  if (!pat || !login) {
-    return {
-      repos: null,
-      isLoading: false,
-      isError: false,
-    };
-  }
+}: UseGitHubDataArgs): GitHubData {
+  const fetcher = async (): Promise<RepositoriesResponse | null> => {
+    if (!pat || !login) {
+      return null;
+    }
+    const octokit = new MyOctokit({ auth: pat });
 
-  const octokit = new MyOctokit({ auth: pat });
-
-  const fetcher = async () => {
-    const data = await octokit.graphql.paginate<{
-      user: User;
-    }>(GET_REPOS, {
-      login,
-    });
+    const data = await octokit.graphql.paginate<RepositoriesResponse>(
+      GET_REPOS,
+      {
+        login,
+      },
+    );
 
     return data;
   };
 
-  const { data, error } = useSWR(GET_REPOS, fetcher);
+  const { data, error }: SWRResponse<RepositoriesResponse | null, Error> =
+    useSWR(GET_REPOS, fetcher);
 
   return {
-    user: {
-      id: data?.user?.id,
-      name: data?.user?.name,
-      login: data?.user?.login,
-      avatarUrl: data?.user?.avatarUrl,
-      bioHTML: data?.user?.bioHTML,
-    },
-    repos: data?.user?.repositories?.nodes,
+    user: data?.user ?? null,
+    repos: data?.user?.repositories?.nodes ?? null,
     isLoading: !error && !data,
-    isError: error,
-  };
+    isError: !!error,
+  } as GitHubData;
 }
