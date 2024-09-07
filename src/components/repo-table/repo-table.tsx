@@ -72,8 +72,8 @@ export default function RepoTable({
           : b.name.localeCompare(a.name);
       } else {
         return sortDirection === "asc"
-          ? new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime()
-          : new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+          ? new Date(a.updatedAt as string).getTime() - new Date(b.updatedAt as string).getTime()
+          : new Date(b.updatedAt as string).getTime() - new Date(a.updatedAt as string).getTime();
       }
     });
   }, [filteredRepos, sortColumn, sortDirection]);
