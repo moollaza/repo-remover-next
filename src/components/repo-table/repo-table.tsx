@@ -96,6 +96,11 @@ export default function RepoTable({
     }
   };
 
+  const handlePerPageChange = (value: string) => {
+    setPerPage(Number(value));
+    setCurrentPage(1);
+  };
+
   return (
     <div>
       <div className="mb-4 space-x-10 flex">
@@ -124,8 +129,10 @@ export default function RepoTable({
         </Select>
         <Select
           placeholder="Per page"
-          value={perPage.toString()}
-          onChange={(value) => setPerPage(Number(value))}
+          selectedKeys={new Set([perPage.toString()])}
+          onSelectionChange={(keys) =>
+            handlePerPageChange(Array.from(keys)[0] as string)
+          }
         >
           {PER_PAGE_OPTIONS.map((option) => (
             <SelectItem key={option} value={option.toString()}>
@@ -207,7 +214,7 @@ export default function RepoTable({
         </TableBody>
       </Table>
       <Pagination
-        total={Math.ceil(filteredRepos.length / perPage)}
+        total={Math.max(1, Math.ceil(filteredRepos.length / perPage))}
         initialPage={1}
         page={currentPage}
         onChange={(page) => setCurrentPage(page)}
