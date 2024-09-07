@@ -2,7 +2,7 @@ import { Link, User } from "@nextui-org/react";
 
 import useGitHubData from "@hooks/use-github-data";
 
-import RepoTable from "@components/repo-table";
+import RepoTable from "@components/repo-table/repo-table";
 
 export default function DashboardPage() {
   const { user, repos, isLoading, isError } = useGitHubData();
