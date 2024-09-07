@@ -27,6 +27,7 @@ const REPO_TYPES = [
   { key: "private", label: "Private" },
   { key: "organization", label: "Organization" },
   { key: "forked", label: "Forked" },
+{ key: "archived", label: "Archived" },
 ];
 
 export default function RepoTable({
@@ -58,7 +59,8 @@ export default function RepoTable({
         selectedTypes.size === 0 ||
         (selectedTypes.has("private") && repo.isPrivate === true) ||
         (selectedTypes.has("organization") && repo.isInOrganization === true) ||
-        (selectedTypes.has("forked") && repo.isFork === true);
+        (selectedTypes.has("forked") && repo.isFork === true) ||
+        (selectedTypes.has("archived") && repo.isArchived === true);
       return matchesSearchQuery && matchesType;
     });
   }, [repos, searchQuery, selectedTypes]);
@@ -190,22 +192,13 @@ export default function RepoTable({
                       {repo.name}
                     </a>
                   </div>
-                  <div className="flex gap-2">
-                    {repo.isPrivate && (
-                      <Chip color="primary" size="sm">
-                        private
-                      </Chip>
-                    )}
+                  <div className="flex gap-2 mb-5">
+                    {repo.isPrivate && <Chip size="sm">Private</Chip>}
                     {repo.isInOrganization && (
-                      <Chip color="secondary" size="sm">
-                        organization
-                      </Chip>
+                      <Chip size="sm">Organization</Chip>
                     )}
-                    {repo.isFork && (
-                      <Chip color="warning" size="sm">
-                        fork
-                      </Chip>
-                    )}
+                    {repo.isFork && <Chip size="sm">Fork</Chip>}
+                    {repo.isArchived && <Chip size="sm">Archived</Chip>}
                   </div>
                   <div>{repo.description ?? "No description"}</div>
                 </div>
