@@ -9,12 +9,10 @@ import {
   useState,
 } from "react";
 
-// Define an interface for the GitHub user response
 interface GitHubUser {
   login: string;
 }
 
-// Define the context value type
 interface GitHubContextType {
   pat: string | null;
   setPat: (pat: string | null) => void;
@@ -23,6 +21,11 @@ interface GitHubContextType {
 
 const GitHubContext = createContext<GitHubContextType | undefined>(undefined);
 
+/**
+ * Custom hook that provides access to the GitHub context.
+ * @returns The GitHub context.
+ * @throws {Error} If used outside of a GitHubProvider.
+ */
 export const useGitHub = (): GitHubContextType => {
   const context = useContext(GitHubContext);
   if (!context) {
@@ -31,6 +34,11 @@ export const useGitHub = (): GitHubContextType => {
   return context;
 };
 
+/**
+ * Provider component that wraps the application and provides the GitHub context.
+ * @param children The child elements to render.
+ * @returns The GitHub context provider.
+ */
 export default function GitHubProvider({ children }: { children: ReactNode }) {
   const [pat, setPat] = useState<string | null>(
     typeof localStorage !== "undefined" ? localStorage.getItem("pat") : null,
@@ -49,12 +57,20 @@ export default function GitHubProvider({ children }: { children: ReactNode }) {
             "https://api.github.com/user",
             {
               headers: {
-                Authorization: `token ${pat}`,
+                Authorization: `Bearer ${pat}`,
+                "X-GitHub-Api-Version": "2022-11-28",
               },
             },
           );
 
-          setLogin(response.data.login);
+          if (response.data.login) {
+            setLogin(response.data.login);
+          } else {
+            console.error("No login found in response:", response.data);
+            throw new Error("[Error] Unable to fetch login");
+            // Reset login on error
+            setLogin(null);
+          }
         } catch (error) {
           if (axios.isAxiosError(error)) {
             console.error("Error fetching login:", error.message);
