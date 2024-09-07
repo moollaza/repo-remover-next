@@ -17,7 +17,7 @@ interface GitHubContextType {
   pat: string | null;
   setPat: (pat: string | null) => void;
   login: string | null;
-  isLoading: boolean; // Add loading state
+  isLoading: boolean;
 }
 
 const GitHubContext = createContext<GitHubContextType | undefined>(undefined);
@@ -40,8 +40,6 @@ export default function GitHubProvider({ children }: { children: ReactNode }) {
     if (typeof localStorage !== "undefined") {
       const storedPat = localStorage.getItem("pat");
       const storedLogin = localStorage.getItem("login");
-
-      console.log({ storedPat, storedLogin });
 
       setPat(storedPat);
       setLogin(storedLogin);

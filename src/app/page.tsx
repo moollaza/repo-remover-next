@@ -5,9 +5,9 @@ import Dashboard from "@components/dashboard";
 import Homepage from "@components/homepage";
 
 export default function App() {
-  const { pat, login } = useGitHub();
+  const { pat, login, isLoading } = useGitHub();
 
-  if (pat && login) {
+  if (pat && login && !isLoading) {
     return <Dashboard />;
   } else {
     return <Homepage />;
