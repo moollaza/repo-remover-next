@@ -1,13 +1,11 @@
 "use client";
 
-import { useContext } from "react";
-
+import { useGitHub } from "@/providers/github-provider";
 import Dashboard from "@components/dashboard";
 import Homepage from "@components/homepage";
-import GitHubContext from "@contexts/github-context";
 
 export default function App() {
-  const { pat, login } = useContext(GitHubContext);
+  const { pat, login } = useGitHub();
 
   if (pat && login) {
     return <Dashboard />;
