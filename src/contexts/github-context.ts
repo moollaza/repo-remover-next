@@ -11,8 +11,12 @@ interface GitHubContextProps {
 const GitHubContext = createContext<GitHubContextProps>({
   pat: null,
   login: null,
-  setPat: () => {},
-  setLogin: () => {},
+  setPat: () => {
+    // do nothing
+  },
+  setLogin: () => {
+    // do nothing
+  },
 });
 
 export default GitHubContext;
