@@ -1,5 +1,11 @@
 import {
+  Button,
+  ButtonGroup,
   Chip,
+  Dropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownTrigger,
   Input,
   Pagination,
   Select,
@@ -18,6 +24,8 @@ import { Repository } from "@octokit/graphql-schema";
 import { formatDistanceToNow } from "date-fns";
 import { useCallback, useMemo, useState } from "react";
 
+import { ChevronDownIcon } from "@heroicons/react/16/solid";
+
 interface RepoTableProps {
   repos: Repository[] | null;
   isLoading: boolean;
@@ -34,6 +42,18 @@ const REPO_TYPES = [
   { key: "organization", label: "Organization" },
   { key: "forked", label: "Forked" },
   { key: "archived", label: "Archived" },
+];
+const REPO_ACTIONS = [
+  {
+    key: "archive",
+    label: "Archive Selected Repos",
+    description: "Archive the selected repositories",
+  },
+  {
+    key: "delete",
+    label: "Delete Selected Repos",
+    description: "Delete the selected repositories",
+  },
 ];
 
 export default function RepoTable({
@@ -52,12 +72,39 @@ export default function RepoTable({
     column: COLUMNS.updatedAt.key,
     direction: "descending",
   });
+  const [selectedRepos, setSelectedRepos] = useState<Selection>(new Set());
+  const [repoAction, setRepoAction] = useState<SelectionSet>(
+    new Set([REPO_ACTIONS[0].key]),
+  );
+
+  console.log({
+    selectedTypes,
+    searchQuery,
+    perPage,
+    currentPage,
+    sortDescriptor,
+    selectedRepos,
+    repoAction,
+  });
+
+  interface RepositoryWithkey extends Repository {
+    key: string;
+  }
+  // Add keys to the repos for React to track them
+  const reposWithKeys: RepositoryWithkey[] = useMemo(() => {
+    if (!repos) return [];
+
+    return repos.map((repo) => ({
+      ...repo,
+      key: repo.id,
+    }));
+  }, [repos]);
 
   // First we filter the repos based on the search query and selected types
   const filteredRepos = useMemo(() => {
-    if (!repos) return [];
+    if (!reposWithKeys) return [];
 
-    return repos.filter((repo) => {
+    return reposWithKeys.filter((repo) => {
       const matchesSearchQuery =
         repo.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         repo.description?.toLowerCase().includes(searchQuery.toLowerCase());
@@ -70,7 +117,7 @@ export default function RepoTable({
         (selectedTypes.has("archived") && repo.isArchived === true);
       return matchesSearchQuery && matchesType;
     });
-  }, [repos, searchQuery, selectedTypes]);
+  }, [reposWithKeys, searchQuery, selectedTypes]);
 
   // Then we sort the filtered repos
   const sortedRepos = useMemo(() => {
@@ -109,6 +156,14 @@ export default function RepoTable({
   const handlePerPageChange = (value: string) => {
     setPerPage(Number(value));
     setCurrentPage(1);
+  };
+
+  const handleAction = () => {
+    if (repoAction.has("delete")) {
+      console.log("Deleting selected repos:", Array.from(selectedRepos));
+    } else if (repoAction.has("archive")) {
+      console.log("Archiving selected repos:", Array.from(selectedRepos));
+    }
   };
 
   return (
@@ -155,6 +210,42 @@ export default function RepoTable({
         </Select>
       </div>
 
+      {/* ACTION BUTTONS */}
+      <ButtonGroup variant="flat" className="mb-4">
+        <Button
+          color={repoAction.has("delete") ? "danger" : "warning"}
+          isDisabled={selectedRepos.size === 0}
+          onPress={handleAction}
+        >
+          {REPO_ACTIONS.find((action) => repoAction.has(action.key))?.label ??
+            "Select Action"}
+        </Button>
+        <Dropdown placement="bottom-end">
+          <DropdownTrigger>
+            <Button
+              color={repoAction.has("delete") ? "danger" : "warning"}
+              isIconOnly
+            >
+              <ChevronDownIcon className="h-4 w-4" />
+            </Button>
+          </DropdownTrigger>
+          <DropdownMenu
+            aria-label="Repo actions"
+            disallowEmptySelection
+            selectionMode="single"
+            selectedKeys={repoAction}
+            onSelectionChange={setRepoAction}
+            className="max-w-[300px]"
+          >
+            {REPO_ACTIONS.map((action) => (
+              <DropdownItem key={action.key} description={action.description}>
+                {action.label}
+              </DropdownItem>
+            ))}
+          </DropdownMenu>
+        </Dropdown>
+      </ButtonGroup>
+
       {/* TABLE HEADERS */}
       <Table
         selectionMode="multiple"
@@ -162,6 +253,9 @@ export default function RepoTable({
         aria-label="Repos table"
         sortDescriptor={sortDescriptor}
         onSortChange={setSortDescriptor}
+        selectedKeys={selectedRepos}
+        onSelectionChange={setSelectedRepos}
+        className="mb-5"
       >
         <TableHeader>
           {COLUMN_ORDER.map((column) => (
@@ -182,8 +276,8 @@ export default function RepoTable({
           isLoading={isLoading}
           loadingContent={<Spinner label="Loading..." />}
         >
-          {(repo: Repository) => (
-            <TableRow key={repo.id}>
+          {(repo: RepositoryWithkey) => (
+            <TableRow key={repo.key}>
               <TableCell>
                 <div>
                   <div className="text-blue-500 hover:text-blue-900 font-semibold text-lg mb-2">
@@ -224,6 +318,8 @@ export default function RepoTable({
           )}
         </TableBody>
       </Table>
+
+      {/* PAGINATION */}
       <Pagination
         total={Math.max(1, Math.ceil(filteredRepos.length / perPage))}
         page={currentPage}
