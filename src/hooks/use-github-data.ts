@@ -92,7 +92,7 @@ export default function useGitHubData(): GitHubData {
   return {
     user: data?.user ?? null,
     repos: data?.user?.repositories?.nodes ?? null,
-    isLoading: !error && !data,
-    isError: !!error,
+    isLoading: pat && login && !error && !data,
+    isError: pat && login && typeof error !== "undefined",
   } as GitHubData;
 }
