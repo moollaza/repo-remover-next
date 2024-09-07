@@ -18,8 +18,8 @@ export default function GitHubProvider({
 
   useEffect(() => {
     if (typeof localStorage !== "undefined") {
-      localStorage?.setItem("pat", pat || "");
-      localStorage?.setItem("login", login || "");
+      localStorage?.setItem("pat", pat ?? "");
+      localStorage?.setItem("login", login ?? "");
     }
   }, [pat, login]);
 
