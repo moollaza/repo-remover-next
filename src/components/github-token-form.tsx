@@ -1,6 +1,6 @@
-import axios from "axios";
+import { useGitHub } from "@/providers/github-provider";
 import clsx from "clsx";
-import { useContext, useEffect, useReducer, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 
 import {
   Button,
@@ -10,8 +10,6 @@ import {
   Label,
   TextField,
 } from "react-aria-components";
-
-import GitHubContext from "@contexts/github-context";
 
 type State = "idle" | "invalid" | "validated";
 type Action = { type: "validate"; isValid: boolean } | { type: "reset" };
@@ -27,23 +25,8 @@ function reducer(state: State, action: Action): State {
   }
 }
 
-async function getLogin(pat: string): Promise<string> {
-  try {
-    const response = await axios.get("https://api.github.com/user", {
-      headers: {
-        Authorization: `token ${pat}`,
-      },
-    });
-
-    return response.data.login;
-  } catch (error) {
-    console.error("Error fetching user login:", error);
-    return "";
-  }
-}
-
 export default function GitHubTokenForm({ className }: { className?: string }) {
-  const { pat, setPat, setLogin } = useContext(GitHubContext);
+  const { setPat } = useGitHub();
   const [value, setValue] = useState("");
   const [state, dispatch] = useReducer(reducer, "idle");
 
@@ -52,16 +35,11 @@ export default function GitHubTokenForm({ className }: { className?: string }) {
     return ret;
   }
 
-  async function onSubmit(
-    event: React.FormEvent<HTMLFormElement>,
-  ): Promise<void> {
+  function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (state === "validated") {
       setPat(value);
-
-      const login = await getLogin(value);
-      setLogin(login);
     }
   }
 
