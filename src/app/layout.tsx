@@ -24,7 +24,7 @@ export default function RootLayout({
       <body
         className={clsx(
           inter.className,
-          "antialiased min-h-screen flex flex-col",
+          "antialiased min-h-screen flex flex-col max-w-7xl mx-auto",
         )}
       >
         <Providers>
