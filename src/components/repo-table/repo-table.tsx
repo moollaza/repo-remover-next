@@ -35,6 +35,10 @@ export default function RepoTable({
   const [searchQuery, setSearchQuery] = useState("");
   const [perPage, setPerPage] = useState(PER_PAGE_OPTIONS[0]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [sortColumn, setSortColumn] = useState<"name" | "updatedAt">(
+    "updatedAt",
+  );
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
 
   const filteredRepos = useMemo(() => {
     if (!repos) return [];
@@ -53,11 +57,25 @@ export default function RepoTable({
     });
   }, [repos, searchQuery, selectedTypes]);
 
+  const sortedRepos = useMemo(() => {
+    return [...filteredRepos].sort((a, b) => {
+      if (sortColumn === "name") {
+        return sortDirection === "asc"
+          ? a.name.localeCompare(b.name)
+          : b.name.localeCompare(a.name);
+      } else {
+        return sortDirection === "asc"
+          ? new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime()
+          : new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+      }
+    });
+  }, [filteredRepos, sortColumn, sortDirection]);
+
   const paginatedRepos = useMemo(() => {
     const start = (currentPage - 1) * perPage;
     const end = start + perPage;
-    return filteredRepos.slice(start, end);
-  }, [filteredRepos, currentPage, perPage]);
+    return sortedRepos.slice(start, end);
+  }, [sortedRepos, currentPage, perPage]);
 
   const onSelectedRepoTypesChange = useCallback(
     (value: Selection) => {
@@ -66,6 +84,17 @@ export default function RepoTable({
     },
     [setSelectedTypes],
   );
+
+  const handleSort = (column: "name" | "updatedAt") => {
+    if (sortColumn === column) {
+      setSortDirection((prevDirection) =>
+        prevDirection === "asc" ? "desc" : "asc",
+      );
+    } else {
+      setSortColumn(column);
+      setSortDirection("asc");
+    }
+  };
 
   return (
     <div>
@@ -107,8 +136,18 @@ export default function RepoTable({
       </div>
       <Table removeWrapper aria-label="Repos table">
         <TableHeader>
-          <TableColumn>Name</TableColumn>
-          <TableColumn>Last Updated</TableColumn>
+          <TableColumn className="w-3/4" onClick={() => handleSort("name")}>
+            Name{" "}
+            {sortColumn === "name" && (sortDirection === "asc" ? "↑" : "↓")}
+          </TableColumn>
+          <TableColumn
+            className="w-1/4"
+            onClick={() => handleSort("updatedAt")}
+          >
+            Last Updated{" "}
+            {sortColumn === "updatedAt" &&
+              (sortDirection === "asc" ? "↑" : "↓")}
+          </TableColumn>
         </TableHeader>
         <TableBody
           items={paginatedRepos}
