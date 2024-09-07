@@ -12,22 +12,28 @@ import {
   TableHeader,
   TableRow,
   type Selection,
+  type SortDescriptor,
 } from "@nextui-org/react";
 import { Repository } from "@octokit/graphql-schema";
-import { useCallback, useMemo, useState } from "react";
 import { formatDistanceToNow } from "date-fns";
+import { useCallback, useMemo, useState } from "react";
 
 interface RepoTableProps {
   repos: Repository[] | null;
   isLoading: boolean;
 }
 
+const COLUMNS = {
+  name: { key: "name", label: "Name", className: "w-4/5" },
+  updatedAt: { key: "updatedAt", label: "Last Updated", className: "w-1/5" },
+};
+const COLUMN_ORDER = [COLUMNS.name, COLUMNS.updatedAt];
 const PER_PAGE_OPTIONS = [5, 10, 20, 50, 100];
 const REPO_TYPES = [
   { key: "private", label: "Private" },
   { key: "organization", label: "Organization" },
   { key: "forked", label: "Forked" },
-{ key: "archived", label: "Archived" },
+  { key: "archived", label: "Archived" },
 ];
 
 export default function RepoTable({
@@ -42,11 +48,12 @@ export default function RepoTable({
   const [searchQuery, setSearchQuery] = useState("");
   const [perPage, setPerPage] = useState(PER_PAGE_OPTIONS[0]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [sortColumn, setSortColumn] = useState<"name" | "updatedAt">(
-    "updatedAt",
-  );
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+  const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({
+    column: COLUMNS.updatedAt.key,
+    direction: "descending",
+  });
 
+  // First we filter the repos based on the search query and selected types
   const filteredRepos = useMemo(() => {
     if (!repos) return [];
 
@@ -65,25 +72,29 @@ export default function RepoTable({
     });
   }, [repos, searchQuery, selectedTypes]);
 
+  // Then we sort the filtered repos
   const sortedRepos = useMemo(() => {
     return [...filteredRepos].sort((a, b) => {
-      if (sortColumn === "name") {
-        return sortDirection === "asc"
-          ? a.name.localeCompare(b.name)
-          : b.name.localeCompare(a.name);
-      } else {
-        return sortDirection === "asc"
-          ? new Date(a.updatedAt as string).getTime() -
-              new Date(b.updatedAt as string).getTime()
-          : new Date(b.updatedAt as string).getTime() -
-              new Date(a.updatedAt as string).getTime();
-      }
-    });
-  }, [filteredRepos, sortColumn, sortDirection]);
+      const first = a[sortDescriptor.column as keyof Repository] as string;
+      const second = b[sortDescriptor.column as keyof Repository] as string;
 
+      let cmp = 0;
+
+      if (sortDescriptor.column === COLUMNS.name.key) {
+        cmp = first.localeCompare(second);
+      } else if (sortDescriptor.column === COLUMNS.updatedAt.key) {
+        cmp = new Date(first).getTime() - new Date(second).getTime();
+      }
+
+      return sortDescriptor.direction === "descending" ? -cmp : cmp;
+    });
+  }, [filteredRepos, sortDescriptor]);
+
+  // Then we paginate the sorted repos
   const paginatedRepos = useMemo(() => {
     const start = (currentPage - 1) * perPage;
     const end = start + perPage;
+
     return sortedRepos.slice(start, end);
   }, [sortedRepos, currentPage, perPage]);
 
@@ -94,17 +105,6 @@ export default function RepoTable({
     },
     [setSelectedTypes],
   );
-
-  const handleSort = (column: "name" | "updatedAt") => {
-    if (sortColumn === column) {
-      setSortDirection((prevDirection) =>
-        prevDirection === "asc" ? "desc" : "asc",
-      );
-    } else {
-      setSortColumn(column);
-      setSortDirection("asc");
-    }
-  };
 
   const handlePerPageChange = (value: string) => {
     setPerPage(Number(value));
@@ -156,20 +156,23 @@ export default function RepoTable({
       </div>
 
       {/* TABLE HEADERS */}
-      <Table removeWrapper aria-label="Repos table">
+      <Table
+        selectionMode="multiple"
+        removeWrapper
+        aria-label="Repos table"
+        sortDescriptor={sortDescriptor}
+        onSortChange={setSortDescriptor}
+      >
         <TableHeader>
-          <TableColumn className="w-3/4" onClick={() => handleSort("name")}>
-            Name{" "}
-            {sortColumn === "name" && (sortDirection === "asc" ? "↑" : "↓")}
-          </TableColumn>
-          <TableColumn
-            className="w-1/4"
-            onClick={() => handleSort("updatedAt")}
-          >
-            Last Updated{" "}
-            {sortColumn === "updatedAt" &&
-              (sortDirection === "asc" ? "↑" : "↓")}
-          </TableColumn>
+          {COLUMN_ORDER.map((column) => (
+            <TableColumn
+              key={column.key}
+              allowsSorting
+              className={column.className}
+            >
+              {column.label}
+            </TableColumn>
+          ))}
         </TableHeader>
 
         {/* TABLE BODY */}
@@ -183,7 +186,7 @@ export default function RepoTable({
             <TableRow key={repo.id}>
               <TableCell>
                 <div>
-                  <div className="text-blue-500 hover:text-blue-900 text-medium font-semibold">
+                  <div className="text-blue-500 hover:text-blue-900 font-semibold text-lg mb-2">
                     <a
                       href={repo.url as string}
                       target="_blank"
