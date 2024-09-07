@@ -24,6 +24,11 @@ interface RepoTableProps {
 }
 
 const PER_PAGE_OPTIONS = [5, 10, 20, 50, 100];
+const REPO_TYPES = [
+  { key: "private", label: "Private" },
+  { key: "organization", label: "Organization" },
+  { key: "forked", label: "Forked" },
+];
 
 export default function RepoTable({
   repos,
@@ -31,7 +36,9 @@ export default function RepoTable({
 }: RepoTableProps): JSX.Element {
   // Remove unused `all` type from the Selection type
   type SelectionSet = Exclude<Selection, "all">;
-  const [selectedTypes, setSelectedTypes] = useState<SelectionSet>(new Set([]));
+  const [selectedTypes, setSelectedTypes] = useState<SelectionSet>(
+    new Set(REPO_TYPES.map((type) => type.key)),
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const [perPage, setPerPage] = useState(PER_PAGE_OPTIONS[0]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -104,6 +111,7 @@ export default function RepoTable({
   return (
     <div>
       <div className="mb-4 space-x-10 flex">
+        {/* SEARCH INPUT */}
         <Input
           isClearable
           placeholder="Search by name or description"
@@ -111,36 +119,40 @@ export default function RepoTable({
           onChange={(e) => setSearchQuery(e.target.value)}
         />
 
+        {/* REPO TYPE SELECTOR */}
         <Select
           selectionMode="multiple"
           placeholder="Filter by type"
           selectedKeys={selectedTypes}
           onSelectionChange={onSelectedRepoTypesChange}
+          defaultSelectedKeys={new Set(REPO_TYPES.map((type) => type.key))}
+          items={REPO_TYPES}
         >
-          <SelectItem key="private" textValue="private">
-            Private
-          </SelectItem>
-          <SelectItem key="organization" textValue="organization">
-            Organization
-          </SelectItem>
-          <SelectItem key="forked" textValue="forked">
-            Forked
-          </SelectItem>
+          {(repoType) => (
+            <SelectItem key={repoType.key}>{repoType.label}</SelectItem>
+          )}
         </Select>
+
+        {/* PER PAGE SELECTOR */}
         <Select
           placeholder="Per page"
+          selectionMode="single"
+          defaultSelectedKeys={[perPage.toString()]}
           selectedKeys={new Set([perPage.toString()])}
           onSelectionChange={(keys) =>
             handlePerPageChange(Array.from(keys)[0] as string)
           }
+          disallowEmptySelection
         >
           {PER_PAGE_OPTIONS.map((option) => (
-            <SelectItem key={option} value={option.toString()}>
+            <SelectItem key={option} textValue={option.toString()}>
               {option}
             </SelectItem>
           ))}
         </Select>
       </div>
+
+      {/* TABLE HEADERS */}
       <Table removeWrapper aria-label="Repos table">
         <TableHeader>
           <TableColumn className="w-3/4" onClick={() => handleSort("name")}>
@@ -156,6 +168,8 @@ export default function RepoTable({
               (sortDirection === "asc" ? "↑" : "↓")}
           </TableColumn>
         </TableHeader>
+
+        {/* TABLE BODY */}
         <TableBody
           items={paginatedRepos}
           emptyContent={"No repos to display."}
@@ -215,7 +229,6 @@ export default function RepoTable({
       </Table>
       <Pagination
         total={Math.max(1, Math.ceil(filteredRepos.length / perPage))}
-        initialPage={1}
         page={currentPage}
         onChange={(page) => setCurrentPage(page)}
       />
