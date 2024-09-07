@@ -15,8 +15,7 @@ import {
 } from "@nextui-org/react";
 import { Repository } from "@octokit/graphql-schema";
 import { useCallback, useMemo, useState } from "react";
-
-import { getRelativeDate } from "./utils";
+import { formatDistanceToNow } from "date-fns";
 
 interface RepoTableProps {
   repos: Repository[] | null;
@@ -72,8 +71,10 @@ export default function RepoTable({
           : b.name.localeCompare(a.name);
       } else {
         return sortDirection === "asc"
-          ? new Date(a.updatedAt as string).getTime() - new Date(b.updatedAt as string).getTime()
-          : new Date(b.updatedAt as string).getTime() - new Date(a.updatedAt as string).getTime();
+          ? new Date(a.updatedAt as string).getTime() -
+              new Date(b.updatedAt as string).getTime()
+          : new Date(b.updatedAt as string).getTime() -
+              new Date(a.updatedAt as string).getTime();
       }
     });
   }, [filteredRepos, sortColumn, sortDirection]);
@@ -220,7 +221,7 @@ export default function RepoTable({
                     },
                   )}
                 >
-                  {getRelativeDate(new Date(repo.updatedAt as string))}
+                  {formatDistanceToNow(new Date(repo.updatedAt as string))}
                 </span>
               </TableCell>
             </TableRow>
