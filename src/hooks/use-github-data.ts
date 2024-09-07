@@ -3,6 +3,8 @@ import { PageInfo, Repository, User } from "@octokit/graphql-schema";
 import { paginateGraphQL } from "@octokit/plugin-paginate-graphql";
 import useSWR, { SWRResponse } from "swr";
 
+import { useGitHub } from "@providers/github-provider";
+
 const MyOctokit = Octokit.plugin(paginateGraphQL);
 const gql = String.raw;
 
@@ -64,19 +66,14 @@ interface GitHubData {
   isError: boolean;
 }
 
-interface UseGitHubDataArgs {
-  pat: string | null;
-  login: string | null;
-}
+export default function useGitHubData(): GitHubData {
+  const { pat, login } = useGitHub();
 
-export default function useGitHubData({
-  pat,
-  login,
-}: UseGitHubDataArgs): GitHubData {
   const fetcher = async (): Promise<RepositoriesResponse | null> => {
     if (!pat || !login) {
       return null;
     }
+
     const octokit = new MyOctokit({ auth: pat });
 
     const data = await octokit.graphql.paginate<RepositoriesResponse>(

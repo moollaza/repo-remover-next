@@ -1,14 +1,11 @@
-import { useContext } from "react";
-import { User, Link } from "@nextui-org/react";
+import { Link, User } from "@nextui-org/react";
 
 import useGitHubData from "@hooks/use-github-data";
 
 import RepoTable from "@components/repo-table";
-import GitHubContext from "@contexts/github-context";
 
 export default function DashboardPage() {
-  const { pat, login } = useContext(GitHubContext);
-  const { user, repos, isLoading, isError } = useGitHubData({ pat, login });
+  const { user, repos, isLoading, isError } = useGitHubData();
 
   return (
     <div>
