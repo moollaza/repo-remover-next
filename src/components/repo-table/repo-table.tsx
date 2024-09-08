@@ -38,10 +38,13 @@ const COLUMNS = {
 const COLUMN_ORDER = [COLUMNS.name, COLUMNS.updatedAt];
 const PER_PAGE_OPTIONS = [5, 10, 20, 50, 100];
 const REPO_TYPES = [
-  { key: "private", label: "Private" },
-  { key: "organization", label: "Organization" },
-  { key: "forked", label: "Forked" },
-  { key: "archived", label: "Archived" },
+  { key: "private", label: "Private", check: "isPrivate" },
+  { key: "organization", label: "In Organization", check: "isInOrganization" },
+  { key: "forked", label: "Forked", check: "isFork" },
+  { key: "archived", label: "Archived", check: "isArchived" },
+  { key: "template", label: "Template", check: "isTemplate" },
+  { key: "mirror", label: "Mirror", check: "isMirror" },
+  { key: "disabled", label: "Disabled", check: "isDisabled" },
 ];
 const REPO_ACTIONS = [
   {

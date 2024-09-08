@@ -34,6 +34,12 @@ const GET_REPOS = gql`
           isFork
           isPrivate
           isArchived
+          isTemplate
+          isMirror
+          isInOrganization
+          isLocked
+          isDisabled
+          isEmpty
           updatedAt
           url
           parent {
@@ -41,8 +47,12 @@ const GET_REPOS = gql`
             url
           }
           owner {
+            __typename
             login
             url
+            ... on Organization {
+              name
+            }
           }
         }
       }
