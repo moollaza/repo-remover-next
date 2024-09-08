@@ -1,4 +1,4 @@
-import { Link, User } from "@nextui-org/react";
+import { Divider, Link, User } from "@nextui-org/react";
 
 import useGitHubData from "@hooks/use-github-data";
 
@@ -9,14 +9,15 @@ export default function DashboardPage() {
 
   return (
     <div>
-      <h1>Dashboard</h1>
+      <h1 className="text-2xl font-semibold mb-5">Dashboard</h1>
 
       {isError && <div>Error!</div>}
 
       {(isLoading || repos) && (
         <>
+          {/* <p className="text-small text-gray-600">Authenticated as:</p> */}
           <User
-            className="mt-5"
+            className="mt-2 mb-4"
             name={user?.name}
             description={
               <Link
@@ -32,7 +33,10 @@ export default function DashboardPage() {
               showFallback: true,
             }}
           />
-          <div className="mt-5">
+
+          <Divider />
+
+          <div className="mt-6">
             <RepoTable repos={repos} isLoading={isLoading} />
           </div>
         </>

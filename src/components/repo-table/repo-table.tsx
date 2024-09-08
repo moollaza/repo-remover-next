@@ -7,6 +7,7 @@ import {
   DropdownMenu,
   DropdownTrigger,
   Input,
+  Link,
   Pagination,
   Select,
   SelectItem,
@@ -17,6 +18,7 @@ import {
   TableColumn,
   TableHeader,
   TableRow,
+  useDisclosure,
   type Selection,
   type SortDescriptor,
 } from "@nextui-org/react";
@@ -24,7 +26,13 @@ import { Repository } from "@octokit/graphql-schema";
 import { formatDistanceToNow } from "date-fns";
 import { useCallback, useMemo, useState, useEffect } from "react";
 
-import { ChevronDownIcon } from "@heroicons/react/16/solid";
+import {
+  ChevronDownIcon,
+  ArrowTopRightOnSquareIcon,
+} from "@heroicons/react/16/solid";
+import ConfirmationModal from "./confirmation-modal";
+
+import { useGitHub } from "@/providers/github-provider";
 
 interface RepoTableProps {
   repos: Repository[] | null;
@@ -38,24 +46,24 @@ const COLUMNS = {
 const COLUMN_ORDER = [COLUMNS.name, COLUMNS.updatedAt];
 const PER_PAGE_OPTIONS = [5, 10, 20, 50, 100];
 const REPO_TYPES = [
-  { key: "private", label: "Private", check: "isPrivate" },
-  { key: "organization", label: "In Organization", check: "isInOrganization" },
-  { key: "forked", label: "Forked", check: "isFork" },
-  { key: "archived", label: "Archived", check: "isArchived" },
-  { key: "template", label: "Template", check: "isTemplate" },
-  { key: "mirror", label: "Mirror", check: "isMirror" },
-  { key: "disabled", label: "Disabled", check: "isDisabled" },
+  { key: "isPrivate", label: "Private" },
+  { key: "isInOrganization", label: "Organization" },
+  { key: "isFork", label: "Forked" },
+  { key: "isArchived", label: "Archived" },
+  { key: "isTemplate", label: "Template" },
+  { key: "isMirror", label: "Mirror" },
+  { key: "isDisabled", label: "Disabled" },
 ];
 const REPO_ACTIONS = [
   {
     key: "archive",
     label: "Archive Selected Repos",
-    description: "Archive the selected repositories",
+    description: "This can be undone later",
   },
   {
     key: "delete",
     label: "Delete Selected Repos",
-    description: "Delete the selected repositories",
+    description: "This action is irreversible",
   },
 ];
 
@@ -74,6 +82,7 @@ export default function RepoTable({
   repos,
   isLoading,
 }: RepoTableProps): JSX.Element {
+  const { login } = useGitHub();
   const [repoTypesFilter, setRepoTypesFilter] = useState<SelectionSet>(
     new Set(REPO_TYPES.map((type) => type.key)),
   );
@@ -84,10 +93,24 @@ export default function RepoTable({
     column: COLUMNS.updatedAt.key,
     direction: "descending",
   });
-  const [selectedRepos, setSelectedRepos] = useState<Selection>(new Set());
-  const [repoAction, setRepoAction] = useState<SelectionSet>(
+  const [selectedRepoKeys, setSelectedRepoKeys] = useState<Selection>(
+    new Set(),
+  );
+  const [selectedRepoAction, setSelectedRepoAction] = useState<SelectionSet>(
     new Set([REPO_ACTIONS[0].key]),
   );
+
+  // Build the list of selected repos based on the keys
+  const selectedRepos = useMemo(() => {
+    if (selectedRepoKeys === "all") {
+      return repos;
+    }
+
+    return repos?.filter((repo) => selectedRepoKeys.has(repo.id));
+  }, [repos, selectedRepoKeys]);
+
+  // For the confirmation modal
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   // For debugging purposes
   (window as Window).repos = repos;
@@ -120,12 +143,18 @@ export default function RepoTable({
         repo.description?.toLowerCase().includes(searchQuery.toLowerCase());
 
       const matchesType =
-        repoTypesFilter.size === 0 ||
-        (repoTypesFilter.has("private") && repo.isPrivate === true) ||
-        (repoTypesFilter.has("organization") &&
-          repo.isInOrganization === true) ||
-        (repoTypesFilter.has("forked") && repo.isFork === true) ||
-        (repoTypesFilter.has("archived") && repo.isArchived === true);
+        // For each type, if it is not selected, we check if the repo has it and return false
+        REPO_TYPES.every((type) => {
+          // If the type is not selected, check if the repo has it and return false
+          if (!repoTypesFilter.has(type.key)) {
+            if (repo[type.key as keyof Repository]) {
+              return false;
+            }
+            return true;
+          }
+          return true;
+        });
+
       return matchesSearchQuery && matchesType;
     });
   }, [reposWithKeys, searchQuery, repoTypesFilter]);
@@ -176,25 +205,36 @@ export default function RepoTable({
   );
 
   const handleRepoActionClick = () => {
-    if (repoAction.has("delete")) {
-      console.log("Deleting selected repos:", Array.from(selectedRepos));
-    } else if (repoAction.has("archive")) {
-      console.log("Archiving selected repos:", Array.from(selectedRepos));
+    if (selectedRepoAction.has("delete")) {
+      console.log("Deleting selected repos:", Array.from(selectedRepoKeys));
+    } else if (selectedRepoAction.has("archive")) {
+      console.log("Archiving selected repos:", Array.from(selectedRepoKeys));
     }
+
+    // Open the confirmation modal
+    onOpen();
   };
 
   const handleRepoActionChange = useCallback(
     (keys: Selection) => {
-      setRepoAction(keys as SelectionSet);
+      setSelectedRepoAction(keys as SelectionSet);
     },
-    [setRepoAction],
+    [setSelectedRepoAction],
   );
 
+  const handleConfirm = () => {
+    console.log(
+      `Confirmed ${selectedRepoAction.values().next().value} by ${login}`,
+    );
+
+    // TODO: handle the archival or deletion here
+  };
+
   return (
-    <div>
+    <div className="space-y-5">
       <h1 className="text-2xl font-semibold mb-5">Select Repos to Modify </h1>
 
-      <div className="mb-4 space-x-10 flex">
+      <div className="space-x-10 flex">
         {/* SEARCH INPUT */}
         <Input
           type="text"
@@ -208,7 +248,7 @@ export default function RepoTable({
 
         {/* REPO TYPE SELECTOR */}
         <Select
-          label="Filter by Repo type"
+          label="Repo types to show"
           selectionMode="multiple"
           placeholder="Filter by type"
           selectedKeys={repoTypesFilter}
@@ -221,46 +261,11 @@ export default function RepoTable({
           )}
         </Select>
 
-        {/* ACTION BUTTONS */}
-        <ButtonGroup>
-          <Button
-            color={repoAction.has("delete") ? "danger" : "warning"}
-            isDisabled={selectedRepos !== "all" && selectedRepos.size === 0}
-            onPress={handleRepoActionClick}
-          >
-            {REPO_ACTIONS.find((action) => repoAction.has(action.key))?.label ??
-              "Select Action"}
-          </Button>
-          <Dropdown placement="bottom-end">
-            <DropdownTrigger>
-              <Button
-                color={repoAction.has("delete") ? "danger" : "warning"}
-                isIconOnly
-              >
-                <ChevronDownIcon className="h-4 w-4" />
-              </Button>
-            </DropdownTrigger>
-            <DropdownMenu
-              aria-label="Repo actions"
-              disallowEmptySelection
-              selectionMode="single"
-              selectedKeys={repoAction}
-              onSelectionChange={handleRepoActionChange}
-              className="max-w-[300px]"
-            >
-              {REPO_ACTIONS.map((action) => (
-                <DropdownItem key={action.key} description={action.description}>
-                  {action.label}
-                </DropdownItem>
-              ))}
-            </DropdownMenu>
-          </Dropdown>
-        </ButtonGroup>
-
         {/* PER PAGE SELECTOR */}
         <Select
           placeholder="Per page"
           selectionMode="single"
+          label="Repos Per page"
           defaultSelectedKeys={[perPage.toString()]}
           selectedKeys={new Set([perPage.toString()])}
           onSelectionChange={handlePerPageChange}
@@ -274,6 +279,48 @@ export default function RepoTable({
         </Select>
       </div>
 
+      <div className="flex">
+        {/* ACTION BUTTONS */}
+        <ButtonGroup>
+          <Button
+            size="lg"
+            color={selectedRepoAction.has("delete") ? "danger" : "warning"}
+            isDisabled={
+              selectedRepoKeys !== "all" && selectedRepoKeys.size === 0
+            }
+            onPress={handleRepoActionClick}
+          >
+            {REPO_ACTIONS.find((action) => selectedRepoAction.has(action.key))
+              ?.label ?? "Select Action"}
+          </Button>
+          <Dropdown size="lg" placement="bottom-end">
+            <DropdownTrigger>
+              <Button
+                size="lg"
+                color={selectedRepoAction.has("delete") ? "danger" : "warning"}
+                isIconOnly
+              >
+                <ChevronDownIcon className="h-4 w-4" />
+              </Button>
+            </DropdownTrigger>
+            <DropdownMenu
+              aria-label="Repo actions"
+              disallowEmptySelection
+              selectionMode="single"
+              selectedKeys={selectedRepoAction}
+              onSelectionChange={handleRepoActionChange}
+              className="max-w-[300px]"
+            >
+              {REPO_ACTIONS.map((action) => (
+                <DropdownItem key={action.key} description={action.description}>
+                  {action.label}
+                </DropdownItem>
+              ))}
+            </DropdownMenu>
+          </Dropdown>
+        </ButtonGroup>
+      </div>
+
       {/* TABLE HEADERS */}
       <Table
         selectionMode="multiple"
@@ -281,8 +328,8 @@ export default function RepoTable({
         aria-label="Repos table"
         sortDescriptor={sortDescriptor}
         onSortChange={setSortDescritor}
-        selectedKeys={selectedRepos}
-        onSelectionChange={setSelectedRepos}
+        selectedKeys={selectedRepoKeys}
+        onSelectionChange={setSelectedRepoKeys}
         className="mb-5"
       >
         <TableHeader>
@@ -308,14 +355,18 @@ export default function RepoTable({
             <TableRow key={repo.key}>
               <TableCell>
                 <div>
-                  <div className="text-blue-500 hover:text-blue-900 font-semibold text-lg mb-2">
-                    <a
+                  <div className="mb-2">
+                    <Link
                       href={repo.url as string}
-                      target="_blank"
-                      rel="noreferrer"
+                      isExternal
+                      showAnchorIcon
+                      anchorIcon={
+                        <ArrowTopRightOnSquareIcon className="h-5 w-5 mx-1" />
+                      }
+                      className="font-semibold text-xl"
                     >
                       {repo.name}
-                    </a>
+                    </Link>
                   </div>
                   <div className="flex gap-2 mb-5">
                     {repo.isPrivate && <Chip size="sm">Private</Chip>}
@@ -354,6 +405,20 @@ export default function RepoTable({
         page={currentPage}
         onChange={setCurrentPage}
       />
+
+      {/* CONFIRMATION MODAL */}
+      {repos && selectedRepos && login && (
+        <ConfirmationModal
+          action={
+            selectedRepoAction.values().next().value as "archive" | "delete"
+          }
+          repos={selectedRepos}
+          login={login}
+          isOpen={isOpen}
+          onConfirm={handleConfirm}
+          onClose={onClose}
+        />
+      )}
     </div>
   );
 }
