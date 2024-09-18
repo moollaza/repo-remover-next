@@ -1,6 +1,6 @@
 import { faker } from "@faker-js/faker";
-import { Repository } from "@octokit/graphql-schema";
-import { Octokit } from "@octokit/rest";
+import { type Repository } from "@octokit/graphql-schema";
+import { type Octokit } from "@octokit/rest";
 
 export async function generateRepos(
   octokit: Octokit,
@@ -27,3 +27,55 @@ export async function generateRepos(
   }
 }
 
+export async function deleteRepos(
+  octokit: Octokit,
+  repos: Repository[],
+  setLoading: (loading: boolean) => void,
+): Promise<void> {
+  console.log("Deleting repos...");
+  setLoading(true);
+
+  try {
+    for (const repo of repos) {
+      console.log(`Deleting repo ${repo.name}...`);
+
+      await octokit.rest.repos.delete({
+        owner: repo.owner.login,
+        repo: repo.name,
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    }
+  } catch (error) {
+    console.error("Error deleting repos:", error);
+  } finally {
+    setLoading(false);
+  }
+}
+
+export async function archiveRepos(
+  octokit: Octokit,
+  repos: Repository[],
+  setLoading: (loading: boolean) => void,
+): Promise<void> {
+  console.log("Archiving repos...");
+  setLoading(true);
+
+  try {
+    for (const repo of repos) {
+      console.log(`Archiving repo ${repo.name}...`);
+
+      await octokit.rest.repos.update({
+        owner: repo.owner.login,
+        repo: repo.name,
+        archived: true,
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    }
+  } catch (error) {
+    console.error("Error archiving repos:", error);
+  } finally {
+    setLoading(false);
+  }
+}
