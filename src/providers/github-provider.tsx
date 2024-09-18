@@ -1,6 +1,6 @@
 "use client";
 
-import axios from "axios";
+import { Octokit } from "@octokit/rest";
 import {
   createContext,
   ReactNode,
@@ -52,15 +52,11 @@ export default function GitHubProvider({ children }: { children: ReactNode }) {
     if (pat) {
       const fetchLogin = async (): Promise<void> => {
         try {
-          const response = await axios.get<GitHubUser>(
-            "https://api.github.com/user",
-            {
-              headers: {
-                Authorization: `Bearer ${pat}`,
-                "X-GitHub-Api-Version": "2022-11-28",
-              },
-            },
-          );
+          const octokit = new Octokit({
+            auth: pat,
+          });
+
+          const response = await octokit.rest.users.getAuthenticated();
 
           if (response.data.login) {
             setLogin(response.data.login);
