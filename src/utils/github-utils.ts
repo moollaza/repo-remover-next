@@ -2,16 +2,19 @@ import { faker } from "@faker-js/faker";
 import { type Repository } from "@octokit/graphql-schema";
 import { type Octokit } from "@octokit/rest";
 
+const DEBUG = false;
+
 export async function generateRepos(
   octokit: Octokit,
   setLoading: (loading: boolean) => void,
+  numberOfRepos = 10,
 ): Promise<void> {
-  console.log("Generating random repos...");
+  DEBUG && console.log("Generating random repos...");
   setLoading(true);
 
   try {
-    for (let i = 0; i < 10; i++) {
-      console.log(`Creating repo ${i + 1}...`);
+    for (let i = 0; i < numberOfRepos; i++) {
+      DEBUG && console.log(`Creating repo ${i + 1}...`);
       await octokit.rest.repos.createForAuthenticatedUser({
         name: faker.company.name(),
         description: faker.company.catchPhrase(),
@@ -32,12 +35,12 @@ export async function deleteRepos(
   repos: Repository[],
   setLoading: (loading: boolean) => void,
 ): Promise<void> {
-  console.log("Deleting repos...");
+  DEBUG && console.log("Deleting repos...");
   setLoading(true);
 
   try {
     for (const repo of repos) {
-      console.log(`Deleting repo ${repo.name}...`);
+      DEBUG && console.log(`Deleting repo ${repo.name}...`);
 
       await octokit.rest.repos.delete({
         owner: repo.owner.login,
@@ -58,12 +61,12 @@ export async function archiveRepos(
   repos: Repository[],
   setLoading: (loading: boolean) => void,
 ): Promise<void> {
-  console.log("Archiving repos...");
+  DEBUG && console.log("Archiving repos...");
   setLoading(true);
 
   try {
     for (const repo of repos) {
-      console.log(`Archiving repo ${repo.name}...`);
+      DEBUG && console.log(`Archiving repo ${repo.name}...`);
 
       await octokit.rest.repos.update({
         owner: repo.owner.login,
