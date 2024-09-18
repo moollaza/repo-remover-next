@@ -1,6 +1,7 @@
 "use client";
 
 import { Octokit } from "@octokit/rest";
+import { throttling } from "@octokit/plugin-throttling";
 import {
   createContext,
   ReactNode,
@@ -8,6 +9,8 @@ import {
   useEffect,
   useState,
 } from "react";
+
+const MyOctokit = Octokit.plugin(throttling);
 
 interface GitHubContextType {
   pat: string | null;
@@ -48,8 +51,27 @@ export default function GitHubProvider({ children }: { children: ReactNode }) {
   // Create and set the Octokit instance when the PAT changes
   useEffect(() => {
     if (pat) {
-      const newOctokit = new Octokit({
+      const newOctokit = new MyOctokit({
         auth: pat,
+        throttle: {
+          onRateLimit: (retryAfter, options, octokit, retryCount) => {
+            octokit.log.warn(
+              `Request quota exhausted for request ${options.method} ${options.url}`,
+            );
+
+            if (retryCount < 3) {
+              // retries a request three times
+              octokit.log.info(`Retrying after ${retryAfter} seconds!`);
+              return true;
+            }
+          },
+          onSecondaryRateLimit: (retryAfter, options, octokit) => {
+            // does not retry, only logs a warning
+            octokit.log.warn(
+              `SecondaryRateLimit detected for request ${options.method} ${options.url}`,
+            );
+          },
+        },
       });
       setOctokit(newOctokit);
 
