@@ -9,15 +9,12 @@ import {
   useState,
 } from "react";
 
-interface GitHubUser {
-  login: string;
-}
-
 interface GitHubContextType {
   pat: string | null;
   setPat: (pat: string | null) => void;
   login: string | null;
   isLoading: boolean;
+  octokit: Octokit | null;
 }
 
 const GitHubContext = createContext<GitHubContextType | undefined>(undefined);
@@ -34,6 +31,7 @@ export default function GitHubProvider({ children }: { children: ReactNode }) {
   const [pat, setPat] = useState<string | null>(null);
   const [login, setLogin] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [octokit, setOctokit] = useState<Octokit | null>(null);
 
   // Load PAT and login from localStorage on client mount
   useEffect(() => {
@@ -47,16 +45,17 @@ export default function GitHubProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  // Fetch the login information when the PAT changes
+  // Create and set the Octokit instance when the PAT changes
   useEffect(() => {
     if (pat) {
+      const newOctokit = new Octokit({
+        auth: pat,
+      });
+      setOctokit(newOctokit);
+
       const fetchLogin = async (): Promise<void> => {
         try {
-          const octokit = new Octokit({
-            auth: pat,
-          });
-
-          const response = await octokit.rest.users.getAuthenticated();
+          const response = await newOctokit.rest.users.getAuthenticated();
 
           if (response.data.login) {
             setLogin(response.data.login);
@@ -71,6 +70,8 @@ export default function GitHubProvider({ children }: { children: ReactNode }) {
       };
 
       void fetchLogin();
+    } else {
+      setOctokit(null);
     }
   }, [pat]);
 
@@ -88,7 +89,7 @@ export default function GitHubProvider({ children }: { children: ReactNode }) {
   }, [pat, login]);
 
   return (
-    <GitHubContext.Provider value={{ pat, setPat, login, isLoading }}>
+    <GitHubContext.Provider value={{ pat, setPat, login, isLoading, octokit }}>
       {children}
     </GitHubContext.Provider>
   );
