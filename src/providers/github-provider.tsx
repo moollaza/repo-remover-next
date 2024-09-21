@@ -46,9 +46,15 @@ export default function GitHubProvider({ children }: { children: ReactNode }) {
       const storedPat = localStorage.getItem("pat");
       const storedLogin = localStorage.getItem("login");
 
-      setPat(storedPat);
-      setLogin(storedLogin);
       setIsLoading(false);
+
+      if (storedPat) {
+        setPat(storedPat);
+      }
+
+      if (storedLogin) {
+        setLogin(storedLogin);
+      }
     }
   }, []);
 
