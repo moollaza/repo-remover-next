@@ -16,6 +16,8 @@ export type MyOctokitType = InstanceType<typeof MyOctokit>;
 interface GitHubContextType {
   pat: string | null;
   setPat: (pat: string | null) => void;
+  remember: boolean;
+  setRemember: (remember: boolean) => void;
   login: string | null;
   isLoading: boolean;
   octokit: MyOctokitType | null;
@@ -23,7 +25,7 @@ interface GitHubContextType {
 
 const GitHubContext = createContext<GitHubContextType | undefined>(undefined);
 
-export function useGitHub(): GitHubContextType {
+export function useGitHub() {
   const context = useContext(GitHubContext);
   if (!context) {
     throw new Error("useGitHub must be used within a GitHubProvider");
@@ -33,6 +35,7 @@ export function useGitHub(): GitHubContextType {
 
 export default function GitHubProvider({ children }: { children: ReactNode }) {
   const [pat, setPat] = useState<string | null>(null);
+  const [remember, setRemember] = useState<boolean>(true);
   const [login, setLogin] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [octokit, setOctokit] = useState<MyOctokitType | null>(null);
@@ -98,21 +101,27 @@ export default function GitHubProvider({ children }: { children: ReactNode }) {
     }
   }, [pat]);
 
-  // Persist PAT and login in localStorage
+  // Persist PAT and login to localStorage
   useEffect(() => {
-    if (typeof localStorage !== "undefined") {
+    if (remember && typeof localStorage !== "undefined") {
       if (pat) {
         localStorage.setItem("pat", pat);
+      } else {
+        localStorage.removeItem("pat");
       }
 
       if (login) {
         localStorage.setItem("login", login);
+      } else {
+        localStorage.removeItem("login");
       }
     }
-  }, [pat, login]);
+  }, [pat, login, remember]);
 
   return (
-    <GitHubContext.Provider value={{ pat, setPat, login, isLoading, octokit }}>
+    <GitHubContext.Provider
+      value={{ pat, setPat, remember, setRemember, login, isLoading, octokit }}
+    >
       {children}
     </GitHubContext.Provider>
   );

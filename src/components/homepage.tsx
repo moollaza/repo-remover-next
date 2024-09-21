@@ -7,7 +7,7 @@ const HomePage = () => {
 
   return (
     <div>
-      <h1>Welcome</h1>
+      <h1 className="text-4xl font-bold mb-5">Welcome</h1>
       {!pat && <GitHubTokenForm />}
     </div>
   );

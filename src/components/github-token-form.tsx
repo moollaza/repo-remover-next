@@ -1,15 +1,7 @@
 import { useGitHub } from "@/providers/github-provider";
+import { Button, Input, Checkbox } from "@nextui-org/react";
 import clsx from "clsx";
 import { useEffect, useReducer, useState } from "react";
-
-import {
-  Button,
-  FieldError,
-  Form,
-  Input,
-  Label,
-  TextField,
-} from "react-aria-components";
 
 type State = "idle" | "invalid" | "validated";
 type Action = { type: "validate"; isValid: boolean } | { type: "reset" };
@@ -26,13 +18,12 @@ function reducer(state: State, action: Action): State {
 }
 
 export default function GitHubTokenForm({ className }: { className?: string }) {
-  const { setPat } = useGitHub();
+  const { setPat, remember, setRemember } = useGitHub();
   const [value, setValue] = useState("");
   const [state, dispatch] = useReducer(reducer, "idle");
 
   function checkTokenFormat(token: string) {
-    const ret = token.length >= 40 && /^[a-z0-9_]+$/i.test(token);
-    return ret;
+    return token.length >= 40 && /^[a-z0-9_]+$/i.test(token);
   }
 
   function onSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -44,43 +35,51 @@ export default function GitHubTokenForm({ className }: { className?: string }) {
   }
 
   useEffect(() => {
-    const isValid = checkTokenFormat(value);
-    dispatch({ type: "validate", isValid });
+    if (value === "") {
+      dispatch({ type: "reset" });
+    } else {
+      const isValid = checkTokenFormat(value);
+      dispatch({ type: "validate", isValid });
+    }
   }, [value]);
 
   return (
-    <Form onSubmit={onSubmit} className={clsx("flex flex-col", className)}>
-      <TextField
-        value={value}
-        onChange={setValue}
-        name="personal-access-token"
-        type="text"
-        isRequired
-        className={"flex flex-col mb-3 "}
-        maxLength={40}
-        minLength={40}
-        autoComplete="off"
-      >
-        <Label className="mr-3 mb-2 font-semibold">
-          Please enter your Personal Access Token
-        </Label>
-        <Input className={"border-2"} />
-        {state === "invalid" && (
-          <FieldError className={"mt-1 text-red-500"}>
-            Invalid token format
-          </FieldError>
-        )}
-      </TextField>
+    <form
+      onSubmit={onSubmit}
+      className={clsx("flex flex-col gap-10", className)}
+    >
+      <div className="flex flex-col gap-4">
+        <Input
+          required
+          isClearable
+          name="personal-access-token"
+          type="text"
+          label="Please enter your Personal Access Token"
+          maxLength={40}
+          minLength={40}
+          autoComplete="off"
+          value={value}
+          color={state === "validated" ? "success" : undefined}
+          isInvalid={state === "invalid"}
+          errorMessage={state === "invalid" ? "Invalid token format" : ""}
+          onClear={() => setValue("")}
+          className={"w-1/2"}
+          onChange={(e) => setValue(e.target.value)}
+        />
+
+        <Checkbox isSelected={remember} onValueChange={setRemember}>
+          Remember me (token is stored locally, on your device)
+        </Checkbox>
+      </div>
+
       <Button
         type="submit"
-        isDisabled={state !== "validated"}
-        className={clsx(
-          "mt-2 px-2 py-1 bg-green-500 text-white disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 disabled:shadow-none",
-          {},
-        )}
+        disabled={state !== "validated" || value === ""}
+        color="primary"
+        className="w-20"
       >
         Submit
       </Button>
-    </Form>
+    </form>
   );
 }
