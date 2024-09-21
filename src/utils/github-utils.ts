@@ -30,55 +30,73 @@ export async function generateRepos(
   }
 }
 
+async function processRepos(
+  octokit: MyOctokitType,
+  repos: Repository[],
+  setProgress: (progress: number) => void,
+  processRepo: (octokit: MyOctokitType, repo: Repository) => Promise<void>,
+  actionName: string,
+): Promise<void> {
+  DEBUG && console.log(`${actionName} repos...`);
+
+  try {
+    for (let i = 0; i < repos.length; i++) {
+      const repo = repos[i];
+      DEBUG && console.log(`${actionName} repo ${repo.name}...`);
+
+      try {
+        await processRepo(octokit, repo);
+      } catch (error) {
+        console.error(
+          `Error ${actionName.toLowerCase()} repo ${repo.name}:`,
+          error,
+        );
+      }
+
+      setProgress(i + 1);
+
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+    }
+  } finally {
+    // todo
+  }
+}
+
 export async function deleteRepos(
   octokit: MyOctokitType,
   repos: Repository[],
-  setLoading: (loading: boolean) => void,
+  setProgress: (progress: number) => void,
 ): Promise<void> {
-  DEBUG && console.log("Deleting repos...");
-  setLoading(true);
-
-  try {
-    for (const repo of repos) {
-      DEBUG && console.log(`Deleting repo ${repo.name}...`);
-
+  await processRepos(
+    octokit,
+    repos,
+    setProgress,
+    async (octokit, repo) => {
       await octokit.rest.repos.delete({
         owner: repo.owner.login,
         repo: repo.name,
       });
-
-      await new Promise((resolve) => setTimeout(resolve, 500));
-    }
-  } catch (error) {
-    console.error("Error deleting repos:", error);
-  } finally {
-    setLoading(false);
-  }
+    },
+    "Deleting",
+  );
 }
 
 export async function archiveRepos(
   octokit: MyOctokitType,
   repos: Repository[],
-  setLoading: (loading: boolean) => void,
+  setProgress: (progress: number) => void,
 ): Promise<void> {
-  DEBUG && console.log("Archiving repos...");
-  setLoading(true);
-
-  try {
-    for (const repo of repos) {
-      DEBUG && console.log(`Archiving repo ${repo.name}...`);
-
+  await processRepos(
+    octokit,
+    repos,
+    setProgress,
+    async (octokit, repo) => {
       await octokit.rest.repos.update({
         owner: repo.owner.login,
         repo: repo.name,
         archived: true,
       });
-
-      await new Promise((resolve) => setTimeout(resolve, 500));
-    }
-  } catch (error) {
-    console.error("Error archiving repos:", error);
-  } finally {
-    setLoading(false);
-  }
+    },
+    "Archiving",
+  );
 }
