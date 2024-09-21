@@ -11,13 +11,14 @@ import {
 } from "react";
 
 const MyOctokit = Octokit.plugin(throttling);
+export type MyOctokitType = InstanceType<typeof MyOctokit>;
 
 interface GitHubContextType {
   pat: string | null;
   setPat: (pat: string | null) => void;
   login: string | null;
   isLoading: boolean;
-  octokit: Octokit | null;
+  octokit: MyOctokitType | null;
 }
 
 const GitHubContext = createContext<GitHubContextType | undefined>(undefined);
@@ -34,7 +35,7 @@ export default function GitHubProvider({ children }: { children: ReactNode }) {
   const [pat, setPat] = useState<string | null>(null);
   const [login, setLogin] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [octokit, setOctokit] = useState<Octokit | null>(null);
+  const [octokit, setOctokit] = useState<MyOctokitType | null>(null);
 
   // Load PAT and login from localStorage on client mount
   useEffect(() => {

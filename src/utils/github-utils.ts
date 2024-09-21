@@ -1,11 +1,11 @@
 import { faker } from "@faker-js/faker";
 import { type Repository } from "@octokit/graphql-schema";
-import { type Octokit } from "@octokit/rest";
+import { type MyOctokitType } from "@providers/github-provider";
 
 const DEBUG = false;
 
 export async function generateRepos(
-  octokit: Octokit,
+  octokit: MyOctokitType,
   setLoading: (loading: boolean) => void,
   numberOfRepos = 10,
 ): Promise<void> {
@@ -31,7 +31,7 @@ export async function generateRepos(
 }
 
 export async function deleteRepos(
-  octokit: Octokit,
+  octokit: MyOctokitType,
   repos: Repository[],
   setLoading: (loading: boolean) => void,
 ): Promise<void> {
@@ -57,7 +57,7 @@ export async function deleteRepos(
 }
 
 export async function archiveRepos(
-  octokit: Octokit,
+  octokit: MyOctokitType,
   repos: Repository[],
   setLoading: (loading: boolean) => void,
 ): Promise<void> {
