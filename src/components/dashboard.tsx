@@ -10,7 +10,7 @@ export default function DashboardPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold mb-5">Dashboard</h1>
+      <h1 className="text-2xl font-semibold mb-5">Repo Remover Dashboard</h1>
 
       {isError && <div>Error!</div>}
 

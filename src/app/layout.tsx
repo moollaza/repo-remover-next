@@ -9,7 +9,7 @@ import "@/globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "RepoRemover | Cleanup your GitHub repos with ease.",
+  title: "Repo Remover | Cleanup your GitHub repos with ease.",
   description:
     "Repo Remover makes it easy to archive and delete multiple GitHub repos at the same time. Free to use, and 100% open source.",
 };
