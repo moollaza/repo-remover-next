@@ -1,7 +1,8 @@
 import { useGitHub } from "@/providers/github-provider";
 import { Button } from "@nextui-org/react";
 import { useState } from "react";
-import { generateRepos } from "./../utils/github-utils";
+
+import { generateRepos } from "@utils/github-utils";
 
 export function GenerateReposButton() {
   const { octokit } = useGitHub();
@@ -15,7 +16,7 @@ export function GenerateReposButton() {
     <Button
       color="secondary"
       size="md"
-      variant="bordered"
+      variant="ghost"
       isLoading={isLoading}
       onClick={() => void generateRepos(octokit, setIsLoading)}
     >
