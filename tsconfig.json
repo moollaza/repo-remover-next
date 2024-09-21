@@ -21,9 +21,10 @@
       "@/*": ["./src/*"],
       "@components/*": ["./src/components/*"],
       "@contexts/*": ["./src/contexts/*"],
+      "@graphql/*": ["./src/graphql/*"],
       "@hooks/*": ["./src/hooks/*"],
       "@providers/*": ["./src/providers/*"],
-      "@graphql/*": ["./src/graphql/*"]
+      "@utils/*": ["./src/utils/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
