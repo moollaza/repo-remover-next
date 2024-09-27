@@ -6,14 +6,14 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
-  Spacer,
   Progress,
+  Spacer,
 } from "@nextui-org/react";
 import { Repository } from "@octokit/graphql-schema";
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState } from "react";
 
 import { useGitHub } from "@providers/github-provider";
-import { archiveRepos, deleteRepos } from "@utils/github-utils";
+import { processRepo } from "@utils/github-utils";
 
 interface ConfirmationModalProps {
   action: "archive" | "delete";
@@ -24,7 +24,7 @@ interface ConfirmationModalProps {
   onConfirm: () => void;
 }
 
-function ConfirmationModal({
+export default function ConfirmationModal({
   action,
   login,
   repos,
@@ -34,133 +34,49 @@ function ConfirmationModal({
 }: ConfirmationModalProps) {
   const count = repos.length;
 
-  const [loading, setLoading] = useState<boolean>(false);
-  const [username, setUsername] = useState<string>("");
-  const [isCorrectUsername, setIsCorrectUsername] = useState<boolean>(false);
-  const [progress, setProgress] = useState<number>(0);
-  const currentRepoRef = useRef<string>("");
   const { octokit } = useGitHub();
+  const [actionInProgress, setActionInProgress] = useState(false);
+  const [actionCompleted, setActionCompleted] = useState(false);
+  const [errors, setErrors] = useState<
+    { repository?: Repository; error: Error }[]
+  >([]);
+  const [username, setUsername] = useState("");
+  const [isCorrectUsername, setIsCorrectUsername] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [currentRepo, setCurrentRepo] = useState("");
 
   useEffect(() => {
-    if (login && username && username === login) {
-      setIsCorrectUsername(true);
-    } else {
-      setIsCorrectUsername(false);
-    }
+    setIsCorrectUsername(username === login);
   }, [login, username]);
 
-  const handleConfirm = useCallback(async () => {
+  async function handleConfirm() {
     if (!octokit) return;
 
     onConfirm();
 
-    console.log("Handling confirm...");
-
-    setLoading(true);
+    setActionInProgress(true);
     setProgress(0);
 
-    try {
-      if (action === "archive") {
-        await archiveRepos(octokit, repos, () => {
-          setProgress((prevProgress) => {
-            const newProgress = prevProgress + 1;
-            currentRepoRef.current = repos[newProgress]?.name;
-            console.log({ prevProgress, newProgress, currentRepoRef });
-            return newProgress;
-          });
-        });
-      } else {
-        await deleteRepos(octokit, repos, () => {
-          setProgress((prevProgress) => {
-            const newProgress = prevProgress + 1;
-            currentRepoRef.current = repos[newProgress]?.name;
-            return newProgress;
-          });
-        });
+    for (const repo of repos) {
+      setCurrentRepo(repo.name);
+
+      try {
+        await processRepo(octokit, repo, action);
+      } catch (error) {
+        if (error instanceof Error) {
+          console.error(`Failed to ${action} the repo:`, error);
+          setErrors([...errors, { repository: repo, error }]);
+        } else {
+          console.error("An unknown error occurred");
+        }
+      } finally {
+        setProgress((prevProgress) => prevProgress + 1);
       }
-    } catch (error) {
-      console.error("Failed to complete the operation:", error);
-    } finally {
-      setLoading(false);
-      onClose();
     }
-  }, [octokit, action, repos, onConfirm, onClose]);
 
-  function ActionInProgress({ action }: { action: "archive" | "delete" }) {
-    return (
-      <>
-        <ModalHeader>
-          <h3>
-            {action === "archive" ? "Archiving" : "Deleting"} Repositories
-          </h3>
-        </ModalHeader>
-        <ModalBody>
-          <p>Current Repo: {currentRepoRef.current}</p>
-          <p>Progress: {progress}</p>
-          <Progress
-            label={`${action === "archive" ? "Archiving" : "Deleting"} repositories...`}
-            value={progress}
-            color="success"
-            minValue={0}
-            maxValue={repos.length}
-          />
-        </ModalBody>
-      </>
-    );
-  }
-
-  type ConfirmActionProps = Pick<
-    ConfirmationModalProps,
-    "action" | "repos" | "login" | "isOpen" | "onConfirm" | "onClose"
-  >;
-
-  function ConfirmAction({ action, repos, onClose }: ConfirmActionProps) {
-    return (
-      <>
-        <ModalHeader>
-          <h3>Confirm {action === "archive" ? "Archival" : "Deletion"}</h3>
-        </ModalHeader>
-        <ModalBody>
-          <p>
-            Are you sure you want to <b>{action}</b> the following {count}{" "}
-            repositor{count > 1 ? "ies" : "y"}?
-          </p>
-          <ol className="list-disc list-inside">
-            {repos.map((repo, index) => (
-              <li key={index}>{repo.name}</li>
-            ))}
-          </ol>
-          <Spacer y={1} />
-          <strong>Please type your GitHub username to confirm:</strong>
-          <Input
-            type="text"
-            autoFocus
-            autoCapitalize="none"
-            autoCorrect="off"
-            autoComplete="off"
-            fullWidth
-            placeholder="GitHub Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
-        </ModalBody>
-        <ModalFooter>
-          <Button variant="bordered" onPress={onClose}>
-            Cancel
-          </Button>
-          <Button
-            color={action === "archive" ? "warning" : "danger"}
-            isDisabled={!isCorrectUsername}
-            onPress={() => {
-              void handleConfirm();
-            }}
-          >
-            I understand the consequences, {action} the repositor
-            {count > 1 ? "ies" : "y"}
-          </Button>
-        </ModalFooter>
-      </>
-    );
+    setActionInProgress(false);
+    setActionCompleted(true);
+    onClose();
   }
 
   return (
@@ -172,21 +88,197 @@ function ConfirmationModal({
       backdrop="blur"
     >
       <ModalContent>
-        {loading ? (
-          <ActionInProgress action={action} />
-        ) : (
-          <ConfirmAction
-            action={action}
-            repos={repos}
-            onClose={onClose}
-            login={login}
-            isOpen={false}
-            onConfirm={onConfirm}
-          />
+        {(onClose) => (
+          <>
+            {actionInProgress && (
+              <RepoActionProgress
+                action={action}
+                progress={progress}
+                count={count}
+                currentRepo={currentRepo}
+              />
+            )}
+
+            {actionCompleted && (
+              <RepoActionResult
+                action={action}
+                count={count}
+                errors={errors}
+                onClose={onClose}
+              />
+            )}
+
+            {!actionInProgress && !actionCompleted && (
+              <RepoActionConfirmation
+                action={action}
+                repos={repos}
+                count={count}
+                username={username}
+                setUsername={setUsername}
+                isCorrectUsername={isCorrectUsername}
+                handleConfirm={() => void handleConfirm()}
+                onClose={onClose}
+              />
+            )}
+          </>
         )}
       </ModalContent>
     </Modal>
   );
 }
 
-export default ConfirmationModal;
+interface RepoActionProgressProps {
+  action: "archive" | "delete";
+  progress: number;
+  count: number;
+  currentRepo: string;
+}
+
+function RepoActionProgress({
+  action,
+  progress,
+  count,
+  currentRepo,
+}: RepoActionProgressProps) {
+  return (
+    <>
+      <ModalHeader>
+        <h3>{action === "archive" ? "Archiving" : "Deleting"} Repositories</h3>
+      </ModalHeader>
+      <ModalBody>
+        <p>Current Repo: {currentRepo}</p>
+        <p>Progress: {progress}</p>
+        <Progress
+          label={`${action === "archive" ? "Archiving" : "Deleting"} repositories...`}
+          value={progress}
+          minValue={0}
+          maxValue={count}
+          color="success"
+        />
+      </ModalBody>
+    </>
+  );
+}
+
+interface RepoActionResultProps {
+  action: "archive" | "delete";
+  count: number;
+  errors?: { repository?: Repository; error: Error }[];
+  onClose: () => void;
+}
+
+function RepoActionResult({
+  action,
+  count,
+  errors,
+  onClose,
+}: RepoActionResultProps) {
+  const errorCount = errors ? errors.length : 0;
+
+  return (
+    <>
+      <ModalHeader>
+        <h3>{action === "archive" ? "Archival" : "Deletion"} Complete</h3>
+      </ModalHeader>
+      <ModalBody>
+        <p>
+          {count - errorCount} out of {count}{" "}
+          {action === "archive" ? "archived" : "deleted"} successfully.
+        </p>
+
+        <Spacer y={1} />
+
+        {/* Report Errors */}
+        {errorCount > 0 && (
+          <>
+            <p>
+              {errorCount} error{errorCount > 1 ? "s" : ""} occurred while{" "}
+              {action === "archive" ? "archiving" : "deleting"} the following{" "}
+              repositor{errorCount > 1 ? "ies" : "y"}:
+            </p>
+            <ol className="list-disc list-inside">
+              {errors?.map(({ repository, error }, index) => (
+                <li key={index}>
+                  {repository ? repository.name : "Unknown Repository"}:{" "}
+                  {error.message}
+                </li>
+              ))}
+            </ol>
+          </>
+        )}
+      </ModalBody>
+      <ModalFooter>
+        <Button variant="bordered" onPress={onClose}>
+          Close
+        </Button>
+      </ModalFooter>
+    </>
+  );
+}
+
+interface RepoActionConfirmationProps
+  extends Pick<ConfirmationModalProps, "action" | "repos" | "onClose"> {
+  count: number;
+  username: string;
+  setUsername: React.Dispatch<React.SetStateAction<string>>;
+  isCorrectUsername: boolean;
+  handleConfirm: () => void;
+}
+
+function RepoActionConfirmation({
+  action,
+  repos,
+  onClose,
+  count,
+  username,
+  setUsername,
+  isCorrectUsername,
+  handleConfirm,
+}: RepoActionConfirmationProps) {
+  return (
+    <>
+      <ModalHeader>
+        <h3>Confirm {action === "archive" ? "Archival" : "Deletion"}</h3>
+      </ModalHeader>
+      <ModalBody>
+        <p>
+          Are you sure you want to <b>{action}</b> the following {count}{" "}
+          repositor{count > 1 ? "ies" : "y"}?
+        </p>
+        <ol className="list-disc list-inside">
+          {repos.map((repo, index) => (
+            <li key={index}>{repo.name}</li>
+          ))}
+        </ol>
+        <Spacer y={1} />
+        <strong>Please type your GitHub username to confirm:</strong>
+        <Input
+          type="text"
+          autoFocus
+          autoCapitalize="none"
+          autoCorrect="off"
+          autoComplete="off"
+          fullWidth
+          placeholder="GitHub Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        />
+      </ModalBody>
+      <ModalFooter>
+        <Button variant="bordered" onPress={onClose}>
+          Cancel
+        </Button>
+        <Button
+          color={action === "archive" ? "warning" : "danger"}
+          isDisabled={!isCorrectUsername}
+          onPress={() => {
+            void handleConfirm();
+          }}
+        >
+          I understand the consequences, {action} the repositor
+          {count > 1 ? "ies" : "y"}
+        </Button>
+      </ModalFooter>
+    </>
+  );
+}

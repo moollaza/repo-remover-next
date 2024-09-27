@@ -30,73 +30,50 @@ export async function generateRepos(
   }
 }
 
-async function processRepos(
+export const archiveRepo = async (
   octokit: MyOctokitType,
-  repos: Repository[],
-  setProgress: (progress: number) => void,
-  processRepo: (octokit: MyOctokitType, repo: Repository) => Promise<void>,
-  actionName: string,
-): Promise<void> {
-  DEBUG && console.log(`${actionName} repos...`);
-
+  repo: Repository,
+): Promise<void> => {
   try {
-    for (let i = 0; i < repos.length; i++) {
-      const repo = repos[i];
-      DEBUG && console.log(`${actionName} repo ${repo.name}...`);
-
-      try {
-        await processRepo(octokit, repo);
-      } catch (error) {
-        console.error(
-          `Error ${actionName.toLowerCase()} repo ${repo.name}:`,
-          error,
-        );
-      }
-
-      setProgress(i + 1);
-
-      await new Promise((resolve) => setTimeout(resolve, 5000));
-    }
-  } finally {
-    // todo
+    await octokit.rest.repos.update({
+      owner: repo.owner.login,
+      repo: repo.name,
+      archived: true,
+    });
+  } catch (error) {
+    throw new Error(
+      `Failed to archive ${repo.name}: ${(error as Error).message}`,
+    );
   }
-}
+};
 
-export async function deleteRepos(
+export const deleteRepo = async (
   octokit: MyOctokitType,
-  repos: Repository[],
-  setProgress: (progress: number) => void,
-): Promise<void> {
-  await processRepos(
-    octokit,
-    repos,
-    setProgress,
-    async (octokit, repo) => {
-      await octokit.rest.repos.delete({
-        owner: repo.owner.login,
-        repo: repo.name,
-      });
-    },
-    "Deleting",
-  );
-}
+  repo: Repository,
+): Promise<void> => {
+  try {
+    await octokit.rest.repos.delete({
+      owner: repo.owner.login,
+      repo: repo.name,
+    });
+  } catch (error) {
+    throw new Error(
+      `Failed to delete ${repo.name}: ${(error as Error).message}`,
+    );
+  }
+};
 
-export async function archiveRepos(
+export const processRepo = async (
   octokit: MyOctokitType,
-  repos: Repository[],
-  setProgress: (progress: number) => void,
-): Promise<void> {
-  await processRepos(
-    octokit,
-    repos,
-    setProgress,
-    async (octokit, repo) => {
-      await octokit.rest.repos.update({
-        owner: repo.owner.login,
-        repo: repo.name,
-        archived: true,
-      });
-    },
-    "Archiving",
-  );
-}
+  repo: Repository,
+  action: "archive" | "delete",
+): Promise<void> => {
+  if (action === "archive") {
+    await archiveRepo(octokit, repo);
+  } else if (action === "delete") {
+    await deleteRepo(octokit, repo);
+  }
+
+  // Wait for 1 second to prevent rate limiting
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+};
