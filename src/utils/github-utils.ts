@@ -24,7 +24,9 @@ export async function generateRepos(
       await new Promise((resolve) => setTimeout(resolve, 500));
     }
   } catch (error) {
-    console.error("Error generating repos:", error);
+    const errorMessage = (error as Error).message;
+    console.error(errorMessage);
+    throw new Error(`Failed to create repositories: ${errorMessage}`);
   } finally {
     setLoading(false);
   }
@@ -41,6 +43,8 @@ export const archiveRepo = async (
       archived: true,
     });
   } catch (error) {
+    const errorMessage = (error as Error).message;
+    console.error(errorMessage);
     throw new Error(
       `Failed to archive ${repo.name}: ${(error as Error).message}`,
     );
@@ -57,6 +61,8 @@ export const deleteRepo = async (
       repo: repo.name,
     });
   } catch (error) {
+    const errorMessage = (error as Error).message;
+    console.error(errorMessage);
     throw new Error(
       `Failed to delete ${repo.name}: ${(error as Error).message}`,
     );

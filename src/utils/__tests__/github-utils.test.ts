@@ -1,9 +1,20 @@
-import { faker } from "@faker-js/faker";
-import { type Repository } from "@octokit/graphql-schema";
+import { User, type Repository } from "@octokit/graphql-schema";
 import { Octokit } from "@octokit/rest";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { archiveRepos, deleteRepos, generateRepos } from "../github-utils";
+import { archiveRepo, deleteRepo, generateRepos } from "../github-utils";
+
+const testUser: User = {
+  login: "test-user",
+  avatarUrl: "",
+  resourcePath: "",
+  url: "",
+} as User;
+
+const testRepo: Repository = {
+  name: "test-repo",
+  owner: testUser,
+} as Repository;
 
 // Mock the Octokit module
 vi.mock("@octokit/rest", () => {
@@ -57,7 +68,9 @@ describe("GitHub Repository Management", () => {
         .spyOn(octokit.rest.repos, "createForAuthenticatedUser")
         .mockRejectedValue(new Error("Test Error"));
 
-      await generateRepos(octokit, setLoading, 3);
+      await expect(() =>
+        generateRepos(octokit, setLoading, 1),
+      ).rejects.toThrowError("Failed to create repositories: Test Error");
 
       expect(setLoading).toHaveBeenCalledWith(true);
       expect(setLoading).toHaveBeenCalledWith(false);
@@ -65,75 +78,54 @@ describe("GitHub Repository Management", () => {
     });
   });
 
-  describe("deleteRepos", () => {
-    it("should delete all provided repositories", async () => {
-      const repos: Repository[] = Array.from({ length: 5 }, () => ({
-        name: faker.company.name(),
-        owner: { login: faker.internet.userName() },
-      })) as Repository[];
-
-      const deleteRepo = vi
-        .spyOn(octokit.rest.repos, "delete")
+  describe("archiveRepo", () => {
+    it("should archive a repository", async () => {
+      const update = vi
+        .spyOn(octokit.rest.repos, "update")
         .mockResolvedValue({} as never);
 
-      await deleteRepos(octokit, repos, setLoading);
+      await archiveRepo(octokit, testRepo);
 
-      expect(setLoading).toHaveBeenCalledWith(true);
-      expect(setLoading).toHaveBeenCalledWith(false);
-      expect(deleteRepo).toHaveBeenCalledTimes(repos.length);
+      expect(update).toHaveBeenCalledWith({
+        owner: testRepo.owner.login,
+        repo: testRepo.name,
+        archived: true,
+      });
     });
 
-    it("should handle errors gracefully", async () => {
-      const repos: Repository[] = Array.from({ length: 5 }, () => ({
-        name: faker.company.name(),
-        owner: { login: faker.internet.userName() },
-      })) as Repository[];
+    it("should handle archive errors gracefully", async () => {
+      vi.spyOn(octokit.rest.repos, "update").mockRejectedValue(
+        new Error("Test Error"),
+      );
 
-      const deleteRepo = vi
-        .spyOn(octokit.rest.repos, "delete")
-        .mockRejectedValue(new Error("Test Error"));
-
-      await deleteRepos(octokit, repos, setLoading);
-
-      expect(setLoading).toHaveBeenCalledWith(true);
-      expect(setLoading).toHaveBeenCalledWith(false);
-      expect(deleteRepo).toHaveBeenCalledTimes(1);
+      await expect(() => archiveRepo(octokit, testRepo)).rejects.toThrowError(
+        "Failed to archive test-repo: Test Error",
+      );
     });
   });
 
-  describe("archiveRepos", () => {
-    it("should archive all provided repositories", async () => {
-      const repos: Repository[] = Array.from({ length: 5 }, () => ({
-        name: faker.company.name(),
-        owner: { login: faker.internet.userName() },
-      })) as Repository[];
-
-      const updateRepo = vi
-        .spyOn(octokit.rest.repos, "update")
+  describe("deleteRepo", () => {
+    it("should delete a repository", async () => {
+      const del = vi
+        .spyOn(octokit.rest.repos, "delete")
         .mockResolvedValue({} as never);
 
-      await archiveRepos(octokit, repos, setLoading);
+      await deleteRepo(octokit, testRepo);
 
-      expect(setLoading).toHaveBeenCalledWith(true);
-      expect(setLoading).toHaveBeenCalledWith(false);
-      expect(updateRepo).toHaveBeenCalledTimes(repos.length);
+      expect(del).toHaveBeenCalledWith({
+        owner: testRepo.owner.login,
+        repo: testRepo.name,
+      });
     });
 
     it("should handle errors gracefully", async () => {
-      const repos: Repository[] = Array.from({ length: 5 }, () => ({
-        name: faker.company.name(),
-        owner: { login: faker.internet.userName() },
-      })) as Repository[];
+      vi.spyOn(octokit.rest.repos, "delete").mockRejectedValue(
+        new Error("Test Error"),
+      );
 
-      const updateRepo = vi
-        .spyOn(octokit.rest.repos, "update")
-        .mockRejectedValue(new Error("Test Error"));
-
-      await archiveRepos(octokit, repos, setLoading);
-
-      expect(setLoading).toHaveBeenCalledWith(true);
-      expect(setLoading).toHaveBeenCalledWith(false);
-      expect(updateRepo).toHaveBeenCalledTimes(1);
+      await expect(() => deleteRepo(octokit, testRepo)).rejects.toThrowError(
+        "Failed to delete test-repo: Test Error",
+      );
     });
   });
 });
