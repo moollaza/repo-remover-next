@@ -11,7 +11,9 @@ import {
 } from "@nextui-org/react";
 import { Repository } from "@octokit/graphql-schema";
 import { useEffect, useState } from "react";
+import { useSWRConfig } from "swr";
 
+import { GET_REPOS } from "@/hooks/use-github-data";
 import { useGitHub } from "@providers/github-provider";
 import { processRepo } from "@utils/github-utils";
 
@@ -44,6 +46,8 @@ export default function ConfirmationModal({
   const [isCorrectUsername, setIsCorrectUsername] = useState(false);
   const [progress, setProgress] = useState(0);
   const [currentRepo, setCurrentRepo] = useState("");
+
+  const { mutate } = useSWRConfig();
 
   useEffect(() => {
     setIsCorrectUsername(username === login);
@@ -90,6 +94,7 @@ export default function ConfirmationModal({
   function handleOnClose() {
     resetState();
     onClose();
+    void mutate(GET_REPOS);
   }
 
   return (

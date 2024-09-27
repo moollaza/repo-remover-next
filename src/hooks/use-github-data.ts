@@ -8,7 +8,7 @@ import { useGitHub } from "@providers/github-provider";
 const MyOctokit = Octokit.plugin(paginateGraphQL);
 const gql = String.raw;
 
-const GET_REPOS = gql`
+export const GET_REPOS = gql`
   query GetRepos($cursor: String, $login: String!) {
     user(login: $login) {
       id
@@ -96,13 +96,20 @@ export default function useGitHubData(): GitHubData {
     return data;
   };
 
-  const { data, error }: SWRResponse<RepositoriesResponse | null, Error> =
-    useSWR(GET_REPOS, fetcher);
+  const {
+    data,
+    mutate,
+    error,
+  }: SWRResponse<RepositoriesResponse | null, Error> = useSWR(
+    GET_REPOS,
+    fetcher,
+  );
 
   return {
     user: data?.user ?? null,
     repos: data?.user?.repositories?.nodes ?? null,
     isLoading: pat && login && !error && !data,
     isError: pat && login && typeof error !== "undefined",
+    mutate,
   } as GitHubData;
 }
