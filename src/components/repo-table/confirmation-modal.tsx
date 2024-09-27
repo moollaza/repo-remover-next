@@ -71,11 +71,24 @@ export default function ConfirmationModal({
         }
       } finally {
         setProgress((prevProgress) => prevProgress + 1);
+        await new Promise((resolve) => setTimeout(resolve, 1000));
       }
     }
 
     setActionInProgress(false);
     setActionCompleted(true);
+  }
+
+  function resetState() {
+    setActionInProgress(false);
+    setActionCompleted(false);
+    setErrors([]);
+    setProgress(0);
+    setCurrentRepo("");
+  }
+
+  function handleOnClose() {
+    resetState();
     onClose();
   }
 
@@ -88,40 +101,38 @@ export default function ConfirmationModal({
       backdrop="blur"
     >
       <ModalContent>
-        {(onClose) => (
-          <>
-            {actionInProgress && (
-              <RepoActionProgress
-                action={action}
-                progress={progress}
-                count={count}
-                currentRepo={currentRepo}
-              />
-            )}
+        <>
+          {actionInProgress && (
+            <RepoActionProgress
+              action={action}
+              progress={progress}
+              count={count}
+              currentRepo={currentRepo}
+            />
+          )}
 
-            {actionCompleted && (
-              <RepoActionResult
-                action={action}
-                count={count}
-                errors={errors}
-                onClose={onClose}
-              />
-            )}
+          {actionCompleted && (
+            <RepoActionResult
+              action={action}
+              count={count}
+              errors={errors}
+              onClose={handleOnClose}
+            />
+          )}
 
-            {!actionInProgress && !actionCompleted && (
-              <RepoActionConfirmation
-                action={action}
-                repos={repos}
-                count={count}
-                username={username}
-                setUsername={setUsername}
-                isCorrectUsername={isCorrectUsername}
-                handleConfirm={() => void handleConfirm()}
-                onClose={onClose}
-              />
-            )}
-          </>
-        )}
+          {!actionInProgress && !actionCompleted && (
+            <RepoActionConfirmation
+              action={action}
+              repos={repos}
+              count={count}
+              username={username}
+              setUsername={setUsername}
+              isCorrectUsername={isCorrectUsername}
+              handleConfirm={() => void handleConfirm()}
+              onClose={handleOnClose}
+            />
+          )}
+        </>
       </ModalContent>
     </Modal>
   );
@@ -182,8 +193,8 @@ function RepoActionResult({
       </ModalHeader>
       <ModalBody>
         <p>
-          {count - errorCount} out of {count}{" "}
-          {action === "archive" ? "archived" : "deleted"} successfully.
+          {count - errorCount} out of {count} repos{" "}
+          {action === "archive" ? "archived" : "deleted"} successfully!
         </p>
 
         <Spacer y={1} />

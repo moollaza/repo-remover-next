@@ -73,7 +73,4 @@ export const processRepo = async (
   } else if (action === "delete") {
     await deleteRepo(octokit, repo);
   }
-
-  // Wait for 1 second to prevent rate limiting
-  await new Promise((resolve) => setTimeout(resolve, 1000));
 };
