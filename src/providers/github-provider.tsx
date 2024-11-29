@@ -25,6 +25,16 @@ interface GitHubContextType {
 
 const GitHubContext = createContext<GitHubContextType | undefined>(undefined);
 
+/**
+ * Hook to access the GitHub context. PRovides access to the PAT, login, and Octokit instance.
+ *
+ * @example
+ * const { pat, login, isLoading } = useGitHub();
+ *
+ * @returns {GitHubContextType} The GitHub context value.
+ * @throws {Error} If the hook is used outside of a `GitHubProvider`.
+ * @note This hook must be used within a `GitHubProvider`.
+ */
 export function useGitHub() {
   const context = useContext(GitHubContext);
   if (!context) {
@@ -33,6 +43,15 @@ export function useGitHub() {
   return context;
 }
 
+/**
+ * Provides GitHub authentication and context
+ *
+ * This component handles the following:
+ * - Loading the Personal Access Token (PAT) and login from localStorage on client mount.
+ * - Creating and setting the Octokit instance when the PAT changes.
+ * - Fetching the authenticated user's login using the Octokit instance.
+ * - Persisting the PAT and login to localStorage based on the `remember` state.
+ */
 export default function GitHubProvider({ children }: { children: ReactNode }) {
   const [pat, setPat] = useState<string | null>(null);
   const [remember, setRemember] = useState<boolean>(true);
