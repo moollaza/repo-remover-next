@@ -11,12 +11,12 @@ export default function DashboardPage() {
   const router = useRouter();
 
   useLayoutEffect(() => {
-    if (!pat || !login || isLoading) {
+    if (!pat || !login) {
       router.push("/");
     }
-  }, [pat, login, isLoading, router]);
+  }, [pat, login, router]);
 
-  if (!pat || !login || isLoading) {
+  if (isLoading) {
     return null; // or a loading spinner
   }
 
