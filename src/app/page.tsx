@@ -73,6 +73,17 @@ export default function HomePage() {
         </section>
 
         <section className="mb-16">
+          <h2 className="text-4xl font-bold mb-8">Impact</h2>
+          <p className="text-2xl font-semibold">
+            Over 235,000 repositories archived and deleted!
+          </p>
+          <p className="text-lg mt-4">
+            Join thousands of developers who have simplified their GitHub
+            management with Repo Remover.
+          </p>
+        </section>
+
+        <section className="mb-16">
           <h2 className="text-4xl font-bold mb-8">How It Works</h2>
           <ol className="list-decimal list-inside space-y-4">
             <li className="text-lg">
@@ -97,30 +108,6 @@ export default function HomePage() {
               Create a new GitHub token with the correct permissions
             </Link>
           </div>
-        </section>
-
-        <section className="mb-16">
-          <h2 className="text-4xl font-bold mb-8">Pricing</h2>
-          <p className="text-xl mb-4">
-            Repo Remover is completely{" "}
-            <span className="font-bold text-success">free</span> to use!
-          </p>
-          <p className="text-lg">
-            We don&apos;t store your GitHub token or any of your data. All
-            operations are performed client-side for maximum privacy and
-            security.
-          </p>
-        </section>
-
-        <section className="mb-16">
-          <h2 className="text-4xl font-bold mb-8">Impact</h2>
-          <p className="text-2xl font-semibold">
-            Over 235,000 repositories archived and deleted!
-          </p>
-          <p className="text-lg mt-4">
-            Join thousands of developers who have simplified their GitHub
-            management with Repo Remover.
-          </p>
         </section>
 
         <section className="mb-16">
