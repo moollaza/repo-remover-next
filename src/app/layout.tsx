@@ -1,12 +1,24 @@
 import clsx from "clsx";
-import type { Metadata } from "next";
+import { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 
 import { Providers } from "./providers";
 
 import "@/globals.css";
 
+// Font Awesome
+import { config } from "@fortawesome/fontawesome-svg-core";
+import "@fortawesome/fontawesome-svg-core/styles.css";
+config.autoAddCss = false;
+
 const inter = Inter({ subsets: ["latin"] });
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "white" },
+    { media: "(prefers-color-scheme: dark)", color: "black" },
+  ],
+};
 
 export const metadata: Metadata = {
   title: "Repo Remover | Cleanup your GitHub repos with ease.",
@@ -20,22 +32,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html suppressHydrationWarning lang="en">
       <body
         className={clsx(
           inter.className,
-          "antialiased min-h-screen flex flex-col max-w-7xl mx-auto",
+          "min-h-screen bg-background font-sans antialiased",
         )}
       >
-        <Providers>
-          <header className="p-4">{/* TODO */}</header>
-
-          <main className="flex-grow p-4">{children}</main>
-
-          <footer className="p-4">
-            Repo Remover by <a href="https://zaahir.ca">Zaahir Moolla</a> |
-            Copyright © 2024
-          </footer>
+        <Providers themeProps={{ attribute: "class", defaultTheme: "light" }}>
+          <div className="relative flex flex-col h-screen">{children}</div>
         </Providers>
       </body>
     </html>
