@@ -1,7 +1,11 @@
-import { useGitHub } from "@/providers/github-provider";
-import { Button, Input, Checkbox } from "@nextui-org/react";
+"use client";
+
+import { Button, Checkbox, Input } from "@nextui-org/react";
 import clsx from "clsx";
+import { useRouter } from "next/navigation";
 import { useEffect, useReducer, useState } from "react";
+
+import { useGitHub } from "@/providers/github-provider";
 
 type State = "idle" | "invalid" | "validated";
 type Action = { type: "validate"; isValid: boolean } | { type: "reset" };
@@ -21,6 +25,7 @@ export default function GitHubTokenForm({ className }: { className?: string }) {
   const { setPat, remember, setRemember } = useGitHub();
   const [value, setValue] = useState("");
   const [state, dispatch] = useReducer(reducer, "idle");
+  const router = useRouter(); // Initialize the router
 
   function checkTokenFormat(token: string) {
     return token.length >= 40 && /^[a-z0-9_]+$/i.test(token);
@@ -31,6 +36,7 @@ export default function GitHubTokenForm({ className }: { className?: string }) {
 
     if (state === "validated") {
       setPat(value);
+      void router.push("/dashboard");
     }
   }
 
