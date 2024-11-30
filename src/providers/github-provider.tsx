@@ -26,7 +26,7 @@ interface GitHubContextType {
 const GitHubContext = createContext<GitHubContextType | undefined>(undefined);
 
 /**
- * Hook to access the GitHub context. PRovides access to the PAT, login, and Octokit instance.
+ * Hook to access the GitHub context. Provides access to the PAT, login, and Octokit instance.
  *
  * @example
  * const { pat, login, isLoading } = useGitHub();

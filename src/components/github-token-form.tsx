@@ -25,10 +25,10 @@ export default function GitHubTokenForm({ className }: { className?: string }) {
   const { setPat, remember, setRemember } = useGitHub();
   const [value, setValue] = useState("");
   const [state, dispatch] = useReducer(reducer, "idle");
-  const router = useRouter(); // Initialize the router
+  const router = useRouter();
 
   function checkTokenFormat(token: string) {
-    return token.length >= 40 && /^[a-z0-9_]+$/i.test(token);
+    return token?.length >= 40 && /^[a-z0-9_]+$/i.test(token);
   }
 
   function onSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -80,7 +80,7 @@ export default function GitHubTokenForm({ className }: { className?: string }) {
 
       <Button
         type="submit"
-        disabled={state !== "validated" || value === ""}
+        isDisabled={state !== "validated" || value === ""}
         color="primary"
         className="w-20"
       >

@@ -76,6 +76,14 @@ interface GitHubData {
   isError: boolean;
 }
 
+/**
+ * Custom hook to fetch GitHub data using a personal access token (PAT) and login.
+ *
+ * @returns {GitHubData} An object containing user data, repositories, loading state, error state, and a mutate function.
+ *
+ * @example
+ * const { user, repos, isLoading, isError, mutate } = useGitHubData();
+ */
 export default function useGitHubData(): GitHubData {
   const { pat, login } = useGitHub();
 
