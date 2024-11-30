@@ -3,6 +3,7 @@ import { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 
 import { Providers } from "./providers";
+import { Header } from "@components/header";
 
 import "@/globals.css";
 
@@ -40,7 +41,10 @@ export default function RootLayout({
         )}
       >
         <Providers themeProps={{ attribute: "class", defaultTheme: "light" }}>
-          <div className="relative flex flex-col h-screen">{children}</div>
+          <div className="relative flex flex-col h-screen">
+            <Header />
+            {children}
+          </div>
         </Providers>
       </body>
     </html>

@@ -3,11 +3,13 @@
 import { useRouter } from "next/navigation";
 import { useLayoutEffect } from "react";
 
+import useGitHubData from "@/hooks/use-github-data";
 import { useGitHub } from "@/providers/github-provider";
 import Dashboard from "@components/dashboard";
 
 export default function DashboardPage() {
-  const { pat, login, isLoading } = useGitHub();
+  const { pat, login } = useGitHub();
+  const { isLoading } = useGitHubData();
   const router = useRouter();
 
   useLayoutEffect(() => {
@@ -21,11 +23,8 @@ export default function DashboardPage() {
   }
 
   return (
-    <>
-      <header></header>
-      <main className="flex-grow p-4">
-        <Dashboard />
-      </main>
-    </>
+    <main className="container mx-auto max-w-7xl pt-16 px-6 flex-grow">
+      <Dashboard />
+    </main>
   );
 }
