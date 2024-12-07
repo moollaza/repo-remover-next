@@ -7,7 +7,7 @@ import { useEffect, useReducer, useState } from "react";
 
 import { useGitHub } from "@/providers/github-provider";
 
-type Action = { isValid: boolean; type: "validate"; } | { type: "reset" };
+type Action = { isValid: boolean; type: "validate" } | { type: "reset" };
 type State = "idle" | "invalid" | "validated";
 
 export default function GitHubTokenForm({ className }: { className?: string }) {
@@ -26,7 +26,10 @@ export default function GitHubTokenForm({ className }: { className?: string }) {
     if (state === "validated") {
       setPat(value);
       void router.push("/dashboard");
+      return;
     }
+
+    return false;
   }
 
   useEffect(() => {
@@ -79,6 +82,24 @@ export default function GitHubTokenForm({ className }: { className?: string }) {
   );
 }
 
+/**
+ * Reducer function to manage the state transitions for the form validation process
+ *
+ * @param {State} state - The current state of the form
+ * @param {Action} action - The action dispatched to change the state
+ * @returns {State} The new state after applying the action
+ *
+ * @throws {Error} If the action type is not recognized
+ *
+ * The state can be one of the following:
+ * - "idle": The initial state or after a reset
+ * - "validated": The state when the form is successfully validated
+ * - "invalid": The state when the form validation fails
+ *
+ * The action can be one of the following:
+ * - { type: "reset" }: Resets the state to "idle"
+ * - { type: "validate", isValid: boolean }: Sets the state to "validated" if isValid is true, otherwise sets it to "invalid"
+ */
 function reducer(state: State, action: Action): State {
   switch (action.type) {
     case "reset":
@@ -86,6 +107,8 @@ function reducer(state: State, action: Action): State {
     case "validate":
       return action.isValid ? "validated" : "invalid";
     default:
-      throw new Error();
+      throw new Error(
+        "Unknown action type. Please provide a valid action type.",
+      );
   }
 }
