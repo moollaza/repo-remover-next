@@ -73,7 +73,7 @@ export default function HomePage() {
                 <h3 className="text-xl font-semibold mb-2">Easy to Use</h3>
                 <p className="text-pretty">
                   Our simple interface makes it incredibly easy to find what
-                  you're looking for and get rid of it quickly.
+                  you&apos;re looking for and get rid of it quickly.
                 </p>
               </div>
               <div className="flex flex-col items-center text-center p-6 bg-content2 rounded-lg shadow-md">
@@ -113,7 +113,7 @@ export default function HomePage() {
               onPress={scrollToForm}
               className="mt-10 bg-secondary"
             >
-              Get Started It's Free!
+              Get Started It&apos;s Free!
             </Button>
           </div>
         </section>
@@ -134,7 +134,7 @@ export default function HomePage() {
               onPress={scrollToForm}
               className="mt-10 bg-success"
             >
-              Get Started It's Free!
+              Get Started It&apos;s Free!
             </Button>
           </div>
 
