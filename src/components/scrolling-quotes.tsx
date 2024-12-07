@@ -6,36 +6,36 @@ import { useEffect, useState } from "react";
 import styles from "./scrolling-quotes.module.css";
 
 interface Quote {
-  text: string;
   author: string;
   source: string;
   sourceName: string;
+  text: string;
 }
 
 const quotes: Quote[] = [
   {
-    text: "Cleaning up old repos is like digital spring cleaning for devs.",
     author: "CodeNinja42",
     source: "https://twitter.com/CodeNinja42",
     sourceName: "Twitter",
+    text: "Cleaning up old repos is like digital spring cleaning for devs.",
   },
   {
-    text: "Repo Remover saved me hours of manual work. Highly recommended!",
     author: "DevOpsGuru",
     source: "https://github.com/DevOpsGuru",
     sourceName: "GitHub",
+    text: "Repo Remover saved me hours of manual work. Highly recommended!",
   },
   {
-    text: "Finally, a tool that understands the struggle of repo management.",
     author: "GitMaster",
     source: "https://linkedin.com/in/GitMaster",
     sourceName: "LinkedIn",
+    text: "Finally, a tool that understands the struggle of repo management.",
   },
   {
-    text: "Decluttering my GitHub has never been easier. Thanks, Repo Remover!",
     author: "CleanCodeAdvocate",
     source: "https://dev.to/CleanCodeAdvocate",
     sourceName: "Dev.to",
+    text: "Decluttering my GitHub has never been easier. Thanks, Repo Remover!",
   },
 ];
 
@@ -50,8 +50,8 @@ export function ScrollingQuotes() {
 
   return (
     <div
-      className="w-full"
       aria-label="Scrolling quotes"
+      className="w-full"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
@@ -67,11 +67,11 @@ export function ScrollingQuotes() {
       >
         {[...shuffledQuotes, ...shuffledQuotes].map((quote, index) => (
           <Link
+            className="w-72 flex-shrink-0 transition-transform duration-300 ease-in-out hover:scale-105 cursor-pointer"
             href={quote.source}
             key={index}
-            target="_blank"
             rel="noopener noreferrer"
-            className="w-72 flex-shrink-0 transition-transform duration-300 ease-in-out hover:scale-105 cursor-pointer"
+            target="_blank"
           >
             <Card className="h-full bg-success-50 text-success-900 shadow-md">
               <CardBody className="relative">

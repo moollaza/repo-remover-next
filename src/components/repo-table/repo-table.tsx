@@ -1,4 +1,8 @@
 import {
+  ArrowTopRightOnSquareIcon,
+  ChevronDownIcon,
+} from "@heroicons/react/16/solid";
+import {
   Button,
   ButtonGroup,
   Chip,
@@ -10,7 +14,9 @@ import {
   Link,
   Pagination,
   Select,
+  type Selection,
   SelectItem,
+  type SortDescriptor,
   Spinner,
   Table,
   TableBody,
@@ -19,29 +25,23 @@ import {
   TableHeader,
   TableRow,
   useDisclosure,
-  type Selection,
-  type SortDescriptor,
 } from "@nextui-org/react";
 import { Repository } from "@octokit/graphql-schema";
 import { formatDistanceToNow } from "date-fns";
-import { useCallback, useMemo, useState, useEffect } from "react";
-
-import {
-  ChevronDownIcon,
-  ArrowTopRightOnSquareIcon,
-} from "@heroicons/react/16/solid";
-import ConfirmationModal from "./confirmation-modal";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useGitHub } from "@/providers/github-provider";
 
+import ConfirmationModal from "./confirmation-modal";
+
 interface RepoTableProps {
-  repos: Repository[] | null;
   isLoading: boolean;
+  repos: null | Repository[];
 }
 
 const COLUMNS = {
-  name: { key: "name", label: "Name", className: "w-4/5" },
-  updatedAt: { key: "updatedAt", label: "Last Updated", className: "w-1/5" },
+  name: { className: "w-4/5", key: "name", label: "Name" },
+  updatedAt: { className: "w-1/5", key: "updatedAt", label: "Last Updated" },
 };
 const COLUMN_ORDER = [COLUMNS.name, COLUMNS.updatedAt];
 const PER_PAGE_OPTIONS = [5, 10, 20, 50, 100];
@@ -56,31 +56,31 @@ const REPO_TYPES = [
 ];
 const REPO_ACTIONS = [
   {
+    description: "This can be undone later",
     key: "archive",
     label: "Archive Selected Repos",
-    description: "This can be undone later",
   },
   {
+    description: "This action is irreversible",
     key: "delete",
     label: "Delete Selected Repos",
-    description: "This action is irreversible",
   },
 ];
-
-// Remove unused `all` type from the Selection type
-type SelectionSet = Exclude<Selection, "all">;
 
 interface RepositoryWithkey extends Repository {
   key: string;
 }
 
+// Remove unused `all` type from the Selection type
+type SelectionSet = Exclude<Selection, "all">;
+
 interface Window {
-  repos?: Repository[] | undefined | null;
+  repos?: null | Repository[] | undefined;
 }
 
 export default function RepoTable({
-  repos,
   isLoading,
+  repos,
 }: RepoTableProps): JSX.Element {
   const { login } = useGitHub();
   const [repoTypesFilter, setRepoTypesFilter] = useState<SelectionSet>(
@@ -110,7 +110,7 @@ export default function RepoTable({
   }, [repos, selectedRepoKeys]);
 
   // For the confirmation modal
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen, onClose, onOpen } = useDisclosure();
 
   // For debugging purposes
   (window as Window).repos = repos;
@@ -237,24 +237,24 @@ export default function RepoTable({
       <div className="space-x-10 flex">
         {/* SEARCH INPUT */}
         <Input
-          type="text"
-          label="Search"
           isClearable
-          placeholder="Search by name or description"
-          value={searchQuery}
+          label="Search"
           onChange={(e) => setSearchQuery(e.target.value)}
           onClear={() => setSearchQuery("")}
+          placeholder="Search by name or description"
+          type="text"
+          value={searchQuery}
         />
 
         {/* REPO TYPE SELECTOR */}
         <Select
-          label="Repo types to show"
-          selectionMode="multiple"
-          placeholder="Filter by type"
-          selectedKeys={repoTypesFilter}
-          onSelectionChange={handleRepoTypesFilterChange}
           defaultSelectedKeys={new Set(REPO_TYPES.map((type) => type.key))}
           items={REPO_TYPES}
+          label="Repo types to show"
+          onSelectionChange={handleRepoTypesFilterChange}
+          placeholder="Filter by type"
+          selectedKeys={repoTypesFilter}
+          selectionMode="multiple"
         >
           {(repoType) => (
             <SelectItem key={repoType.key}>{repoType.label}</SelectItem>
@@ -263,13 +263,13 @@ export default function RepoTable({
 
         {/* PER PAGE SELECTOR */}
         <Select
-          placeholder="Per page"
-          selectionMode="single"
-          label="Repos Per page"
           defaultSelectedKeys={[perPage.toString()]}
-          selectedKeys={new Set([perPage.toString()])}
-          onSelectionChange={handlePerPageChange}
           disallowEmptySelection
+          label="Repos Per page"
+          onSelectionChange={handlePerPageChange}
+          placeholder="Per page"
+          selectedKeys={new Set([perPage.toString()])}
+          selectionMode="single"
         >
           {PER_PAGE_OPTIONS.map((option) => (
             <SelectItem key={option} textValue={option.toString()}>
@@ -283,36 +283,36 @@ export default function RepoTable({
         {/* ACTION BUTTONS */}
         <ButtonGroup>
           <Button
-            size="lg"
             color={selectedRepoAction.has("delete") ? "danger" : "warning"}
             isDisabled={
               selectedRepoKeys !== "all" && selectedRepoKeys.size === 0
             }
             onPress={handleRepoActionClick}
+            size="lg"
           >
             {REPO_ACTIONS.find((action) => selectedRepoAction.has(action.key))
               ?.label ?? "Select Action"}
           </Button>
-          <Dropdown size="lg" placement="bottom-end">
+          <Dropdown placement="bottom-end" size="lg">
             <DropdownTrigger>
               <Button
-                size="lg"
                 color={selectedRepoAction.has("delete") ? "danger" : "warning"}
                 isIconOnly
+                size="lg"
               >
                 <ChevronDownIcon className="h-4 w-4" />
               </Button>
             </DropdownTrigger>
             <DropdownMenu
               aria-label="Repo actions"
-              disallowEmptySelection
-              selectionMode="single"
-              selectedKeys={selectedRepoAction}
-              onSelectionChange={handleRepoActionChange}
               className="max-w-[300px]"
+              disallowEmptySelection
+              onSelectionChange={handleRepoActionChange}
+              selectedKeys={selectedRepoAction}
+              selectionMode="single"
             >
               {REPO_ACTIONS.map((action) => (
-                <DropdownItem key={action.key} description={action.description}>
+                <DropdownItem description={action.description} key={action.key}>
                   {action.label}
                 </DropdownItem>
               ))}
@@ -323,21 +323,21 @@ export default function RepoTable({
 
       {/* TABLE HEADERS */}
       <Table
-        selectionMode="multiple"
-        removeWrapper
         aria-label="Repos table"
-        sortDescriptor={sortDescriptor}
-        onSortChange={setSortDescritor}
-        selectedKeys={selectedRepoKeys}
-        onSelectionChange={setSelectedRepoKeys}
         className="mb-5"
+        onSelectionChange={setSelectedRepoKeys}
+        onSortChange={setSortDescritor}
+        removeWrapper
+        selectedKeys={selectedRepoKeys}
+        selectionMode="multiple"
+        sortDescriptor={sortDescriptor}
       >
         <TableHeader>
           {COLUMN_ORDER.map((column) => (
             <TableColumn
-              key={column.key}
               allowsSorting
               className={column.className}
+              key={column.key}
             >
               {column.label}
             </TableColumn>
@@ -346,9 +346,9 @@ export default function RepoTable({
 
         {/* TABLE BODY */}
         <TableBody
-          items={paginatedRepos}
           emptyContent={"No repos to display."}
           isLoading={isLoading}
+          items={paginatedRepos}
           loadingContent={<Spinner label="Loading..." />}
         >
           {(repo: RepositoryWithkey) => (
@@ -357,13 +357,13 @@ export default function RepoTable({
                 <div>
                   <div className="mb-2">
                     <Link
-                      href={repo.url as string}
-                      isExternal
-                      showAnchorIcon
                       anchorIcon={
                         <ArrowTopRightOnSquareIcon className="h-5 w-5 mx-1" />
                       }
                       className="font-semibold text-xl"
+                      href={repo.url as string}
+                      isExternal
+                      showAnchorIcon
                     >
                       {repo.name}
                     </Link>
@@ -384,8 +384,8 @@ export default function RepoTable({
                   title={new Date(repo.updatedAt as string).toLocaleString(
                     navigator.language,
                     {
-                      month: "short",
                       day: "numeric",
+                      month: "short",
                       year: "numeric",
                     },
                   )}
@@ -400,10 +400,10 @@ export default function RepoTable({
 
       {/* PAGINATION */}
       <Pagination
+        onChange={setCurrentPage}
+        page={currentPage}
         showControls
         total={Math.max(1, Math.ceil(filteredRepos.length / perPage))}
-        page={currentPage}
-        onChange={setCurrentPage}
       />
 
       {/* CONFIRMATION MODAL */}
@@ -412,11 +412,11 @@ export default function RepoTable({
           action={
             selectedRepoAction.values().next().value as "archive" | "delete"
           }
-          repos={selectedRepos}
-          login={login}
           isOpen={isOpen}
-          onConfirm={handleConfirm}
+          login={login}
           onClose={onClose}
+          onConfirm={handleConfirm}
+          repos={selectedRepos}
         />
       )}
     </div>

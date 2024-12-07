@@ -1,13 +1,13 @@
-import { Link } from "@nextui-org/react";
-import clsx from "clsx";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  faBluesky,
   faGithub,
   faLinkedin,
-  faBluesky,
-  faXTwitter,
   faReddit,
+  faXTwitter,
 } from "@fortawesome/free-brands-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Link } from "@nextui-org/react";
+import clsx from "clsx";
 
 export default function Footer({ className = "" }) {
   return (
@@ -17,9 +17,9 @@ export default function Footer({ className = "" }) {
           <h3 className="text-lg font-semibold mb-2">
             Mady by{" "}
             <Link
+              className="text-lg font-semibold mb-2"
               href="https://zaahir.ca"
               isExternal
-              className="text-lg font-semibold mb-2"
             >
               Zaahir Moolla
             </Link>
@@ -29,12 +29,12 @@ export default function Footer({ className = "" }) {
         <div className="flex flex-col items-center">
           <h3 className="text-lg font-semibold mb-2">Contribute</h3>
           <Link
+            aria-label="GitHub"
+            color="foreground"
             href="https://github.com/moollaza/repo-remover"
             isExternal
-            color="foreground"
-            aria-label="GitHub"
           >
-            <FontAwesomeIcon icon={faGithub} className="fa-fw text-xl" />
+            <FontAwesomeIcon className="fa-fw text-xl" icon={faGithub} />
             {""}
             GitHub
           </Link>
@@ -43,36 +43,36 @@ export default function Footer({ className = "" }) {
           <h3 className="text-lg font-semibold mb-2">Share</h3>
           <div className="flex space-x-4 ">
             <Link
+              aria-label="Bluesky"
+              color="foreground"
               href="https://bsky.app"
               isExternal
-              color="foreground"
-              aria-label="Bluesky"
             >
-              <FontAwesomeIcon icon={faBluesky} className="fa-fw text-xl" />
+              <FontAwesomeIcon className="fa-fw text-xl" icon={faBluesky} />
             </Link>
             <Link
+              aria-label="Reddit"
+              color="foreground"
               href="https://reddit.com"
               isExternal
-              color="foreground"
-              aria-label="Reddit"
             >
-              <FontAwesomeIcon icon={faReddit} className="fa-fw text-xl" />
+              <FontAwesomeIcon className="fa-fw text-xl" icon={faReddit} />
             </Link>
             <Link
+              aria-label="X"
+              color="foreground"
               href="https://x.com"
               isExternal
-              color="foreground"
-              aria-label="X"
             >
-              <FontAwesomeIcon icon={faXTwitter} className="fa-fw text-xl" />
+              <FontAwesomeIcon className="fa-fw text-xl" icon={faXTwitter} />
             </Link>
             <Link
+              aria-label="LinkedIn"
+              color="foreground"
               href="https://linkedin.com"
               isExternal
-              color="foreground"
-              aria-label="LinkedIn"
             >
-              <FontAwesomeIcon icon={faLinkedin} className="fa-fw text-xl" />
+              <FontAwesomeIcon className="fa-fw text-xl" icon={faLinkedin} />
             </Link>
           </div>
         </div>

@@ -1,9 +1,9 @@
-import { useGitHub } from "@/providers/github-provider";
 import { Button } from "@nextui-org/react";
 import { useState } from "react";
 import { useSWRConfig } from "swr";
 
 import { GET_REPOS } from "@/hooks/use-github-data";
+import { useGitHub } from "@/providers/github-provider";
 import { generateRepos } from "@utils/github-utils";
 
 export function GenerateReposButton() {
@@ -19,8 +19,6 @@ export function GenerateReposButton() {
   return (
     <Button
       color="secondary"
-      size="md"
-      variant="ghost"
       isLoading={isLoading}
       onClick={() => {
         void generateRepos(octokit, setIsLoading)
@@ -31,6 +29,8 @@ export function GenerateReposButton() {
             setIsLoading(false);
           });
       }}
+      size="md"
+      variant="ghost"
     >
       Generate Random Repos
     </Button>

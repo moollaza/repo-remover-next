@@ -1,15 +1,16 @@
 import type { Dispatch, SetStateAction } from "react";
+
 import { createContext } from "react";
 
 interface GitHubContextProps {
-  pat: string | null;
-  login: string | null;
-  setPat: Dispatch<SetStateAction<string | null>>;
+  login: null | string;
+  pat: null | string;
+  setPat: Dispatch<SetStateAction<null | string>>;
 }
 
 const GitHubContext = createContext<GitHubContextProps>({
-  pat: null,
   login: null,
+  pat: null,
   setPat: () => {
     // do nothing
   },

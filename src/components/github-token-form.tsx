@@ -7,22 +7,11 @@ import { useEffect, useReducer, useState } from "react";
 
 import { useGitHub } from "@/providers/github-provider";
 
+type Action = { isValid: boolean; type: "validate"; } | { type: "reset" };
 type State = "idle" | "invalid" | "validated";
-type Action = { type: "validate"; isValid: boolean } | { type: "reset" };
-
-function reducer(state: State, action: Action): State {
-  switch (action.type) {
-    case "validate":
-      return action.isValid ? "validated" : "invalid";
-    case "reset":
-      return "idle";
-    default:
-      throw new Error();
-  }
-}
 
 export default function GitHubTokenForm({ className }: { className?: string }) {
-  const { setPat, remember, setRemember } = useGitHub();
+  const { remember, setPat, setRemember } = useGitHub();
   const [value, setValue] = useState("");
   const [state, dispatch] = useReducer(reducer, "idle");
   const router = useRouter();
@@ -45,32 +34,32 @@ export default function GitHubTokenForm({ className }: { className?: string }) {
       dispatch({ type: "reset" });
     } else {
       const isValid = checkTokenFormat(value);
-      dispatch({ type: "validate", isValid });
+      dispatch({ isValid, type: "validate" });
     }
   }, [value]);
 
   return (
     <form
-      onSubmit={onSubmit}
       className={clsx("flex flex-col gap-10", className)}
+      onSubmit={onSubmit}
     >
       <div className="flex flex-col gap-4">
         <Input
-          required
+          autoComplete="off"
+          className={"w-1/2"}
+          color={state === "validated" ? "success" : undefined}
+          errorMessage={state === "invalid" ? "Invalid token format" : ""}
           isClearable
-          name="personal-access-token"
-          type="text"
+          isInvalid={state === "invalid"}
           label="Please enter your Personal Access Token"
           maxLength={40}
           minLength={40}
-          autoComplete="off"
-          value={value}
-          color={state === "validated" ? "success" : undefined}
-          isInvalid={state === "invalid"}
-          errorMessage={state === "invalid" ? "Invalid token format" : ""}
-          onClear={() => setValue("")}
-          className={"w-1/2"}
+          name="personal-access-token"
           onChange={(e) => setValue(e.target.value)}
+          onClear={() => setValue("")}
+          required
+          type="text"
+          value={value}
         />
 
         <Checkbox isSelected={remember} onValueChange={setRemember}>
@@ -79,13 +68,24 @@ export default function GitHubTokenForm({ className }: { className?: string }) {
       </div>
 
       <Button
-        type="submit"
-        isDisabled={state !== "validated" || value === ""}
-        color="primary"
         className="w-20"
+        color="primary"
+        isDisabled={state !== "validated" || value === ""}
+        type="submit"
       >
         Submit
       </Button>
     </form>
   );
+}
+
+function reducer(state: State, action: Action): State {
+  switch (action.type) {
+    case "reset":
+      return "idle";
+    case "validate":
+      return action.isValid ? "validated" : "invalid";
+    default:
+      throw new Error();
+  }
 }

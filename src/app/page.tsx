@@ -39,17 +39,17 @@ export default function HomePage() {
             <div className="inline-flex gap-5 pt-10">
               <Button
                 color="primary"
-                variant="solid"
-                size="lg"
                 onPress={scrollToForm}
+                size="lg"
+                variant="solid"
               >
                 Get Started
               </Button>
               <Button
                 color="primary"
-                variant="ghost"
-                size="lg"
                 onPress={() => scrollToID("features")}
+                size="lg"
+                variant="ghost"
               >
                 Learn More
               </Button>
@@ -59,8 +59,8 @@ export default function HomePage() {
 
         {/* FEATURES */}
         <div
-          id="features"
           className="container mx-auto max-w-7xl pt-16 px-6 flex-grow"
+          id="features"
         >
           <section className="mb-16">
             <h2 className="text-5xl font-bold mb-8">Features</h2>
@@ -108,10 +108,10 @@ export default function HomePage() {
             </p>
 
             <Button
-              color="secondary"
-              size="lg"
-              onPress={scrollToForm}
               className="mt-10 bg-secondary"
+              color="secondary"
+              onPress={scrollToForm}
+              size="lg"
             >
               Get Started It&apos;s Free!
             </Button>
@@ -129,10 +129,10 @@ export default function HomePage() {
               saved hours of time thanks to Repo Remover.
             </p>
             <Button
-              color="primary"
-              size="lg"
-              onPress={scrollToForm}
               className="mt-10 bg-success"
+              color="primary"
+              onPress={scrollToForm}
+              size="lg"
             >
               Get Started It&apos;s Free!
             </Button>
@@ -146,7 +146,7 @@ export default function HomePage() {
 
         {/* GET STARTED */}
         <div className="container mx-auto max-w-7xl py-16 px-6 flex-grow ">
-          <section id="get-started" className="mb-16">
+          <section className="mb-16" id="get-started">
             <h2 className="text-5xl font-bold mb-8">Get Started</h2>
             <p className="text-3xl">
               Cleaning up repos has never been quicker, or easier!
@@ -160,12 +160,12 @@ export default function HomePage() {
               <div className="mt-2">
                 <Button
                   as={Link}
+                  className="text-primary"
                   color="primary"
-                  variant="ghost"
                   href="https://github.com/settings/tokens/new?scopes=repo,delete_repo,user"
                   isExternal
                   showAnchorIcon
-                  className="text-primary"
+                  variant="ghost"
                 >
                   Get my token
                 </Button>
@@ -179,7 +179,7 @@ export default function HomePage() {
               </li>
             </ol>
 
-            <div id="github-token-form" className="pt-10">
+            <div className="pt-10" id="github-token-form">
               <GitHubTokenForm />
             </div>
           </section>

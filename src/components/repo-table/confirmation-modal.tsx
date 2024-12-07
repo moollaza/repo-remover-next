@@ -19,20 +19,43 @@ import { processRepo } from "@utils/github-utils";
 
 interface ConfirmationModalProps {
   action: "archive" | "delete";
-  repos: Repository[];
-  login: string;
   isOpen: boolean;
+  login: string;
   onClose: () => void;
   onConfirm: () => void;
+  repos: Repository[];
+}
+
+interface RepoActionConfirmationProps
+  extends Pick<ConfirmationModalProps, "action" | "onClose" | "repos"> {
+  count: number;
+  handleConfirm: () => void;
+  isCorrectUsername: boolean;
+  setUsername: React.Dispatch<React.SetStateAction<string>>;
+  username: string;
+}
+
+interface RepoActionProgressProps {
+  action: "archive" | "delete";
+  count: number;
+  currentRepo: string;
+  progress: number;
+}
+
+interface RepoActionResultProps {
+  action: "archive" | "delete";
+  count: number;
+  errors?: { error: Error; repository?: Repository; }[];
+  onClose: () => void;
 }
 
 export default function ConfirmationModal({
   action,
-  login,
-  repos,
   isOpen,
+  login,
   onClose,
   onConfirm,
+  repos,
 }: ConfirmationModalProps) {
   const count = repos.length;
 
@@ -40,7 +63,7 @@ export default function ConfirmationModal({
   const [actionInProgress, setActionInProgress] = useState(false);
   const [actionCompleted, setActionCompleted] = useState(false);
   const [errors, setErrors] = useState<
-    { repository?: Repository; error: Error }[]
+    { error: Error; repository?: Repository; }[]
   >([]);
   const [username, setUsername] = useState("");
   const [isCorrectUsername, setIsCorrectUsername] = useState(false);
@@ -69,7 +92,7 @@ export default function ConfirmationModal({
       } catch (error) {
         if (error instanceof Error) {
           console.error(`Failed to ${action} the repo:`, error);
-          setErrors([...errors, { repository: repo, error }]);
+          setErrors([...errors, { error, repository: repo }]);
         } else {
           console.error("An unknown error occurred");
         }
@@ -99,20 +122,20 @@ export default function ConfirmationModal({
 
   return (
     <Modal
+      backdrop="blur"
       isOpen={isOpen}
       onClose={onClose}
-      size="xl"
       scrollBehavior="inside"
-      backdrop="blur"
+      size="xl"
     >
       <ModalContent>
         <>
           {actionInProgress && (
             <RepoActionProgress
               action={action}
-              progress={progress}
               count={count}
               currentRepo={currentRepo}
+              progress={progress}
             />
           )}
 
@@ -128,13 +151,13 @@ export default function ConfirmationModal({
           {!actionInProgress && !actionCompleted && (
             <RepoActionConfirmation
               action={action}
-              repos={repos}
               count={count}
-              username={username}
-              setUsername={setUsername}
-              isCorrectUsername={isCorrectUsername}
               handleConfirm={() => void handleConfirm()}
+              isCorrectUsername={isCorrectUsername}
               onClose={handleOnClose}
+              repos={repos}
+              setUsername={setUsername}
+              username={username}
             />
           )}
         </>
@@ -143,18 +166,69 @@ export default function ConfirmationModal({
   );
 }
 
-interface RepoActionProgressProps {
-  action: "archive" | "delete";
-  progress: number;
-  count: number;
-  currentRepo: string;
+function RepoActionConfirmation({
+  action,
+  count,
+  handleConfirm,
+  isCorrectUsername,
+  onClose,
+  repos,
+  setUsername,
+  username,
+}: RepoActionConfirmationProps) {
+  return (
+    <>
+      <ModalHeader>
+        <h3>Confirm {action === "archive" ? "Archival" : "Deletion"}</h3>
+      </ModalHeader>
+      <ModalBody>
+        <p>
+          Are you sure you want to <b>{action}</b> the following {count}{" "}
+          repositor{count > 1 ? "ies" : "y"}?
+        </p>
+        <ol className="list-disc list-inside">
+          {repos.map((repo, index) => (
+            <li key={index}>{repo.name}</li>
+          ))}
+        </ol>
+        <Spacer y={1} />
+        <strong>Please type your GitHub username to confirm:</strong>
+        <Input
+          autoCapitalize="none"
+          autoComplete="off"
+          autoCorrect="off"
+          autoFocus
+          fullWidth
+          onChange={(e) => setUsername(e.target.value)}
+          placeholder="GitHub Username"
+          type="text"
+          value={username}
+        />
+      </ModalBody>
+      <ModalFooter>
+        <Button onPress={onClose} variant="bordered">
+          Cancel
+        </Button>
+        <Button
+          color={action === "archive" ? "warning" : "danger"}
+          isDisabled={!isCorrectUsername}
+          onPress={() => {
+            void handleConfirm();
+          }}
+        >
+          I understand the consequences, {action} the repositor
+          {count > 1 ? "ies" : "y"}
+        </Button>
+      </ModalFooter>
+    </>
+  );
 }
 
 function RepoActionProgress({
   action,
-  progress,
   count,
   currentRepo,
+  progress,
 }: RepoActionProgressProps) {
   return (
     <>
@@ -165,22 +239,15 @@ function RepoActionProgress({
         <p>Current Repo: {currentRepo}</p>
         <p>Progress: {progress}</p>
         <Progress
-          label={`${action === "archive" ? "Archiving" : "Deleting"} repositories...`}
-          value={progress}
-          minValue={0}
-          maxValue={count}
           color="success"
+          label={`${action === "archive" ? "Archiving" : "Deleting"} repositories...`}
+          maxValue={count}
+          minValue={0}
+          value={progress}
         />
       </ModalBody>
     </>
   );
-}
-
-interface RepoActionResultProps {
-  action: "archive" | "delete";
-  count: number;
-  errors?: { repository?: Repository; error: Error }[];
-  onClose: () => void;
 }
 
 function RepoActionResult({
@@ -213,7 +280,7 @@ function RepoActionResult({
               repositor{errorCount > 1 ? "ies" : "y"}:
             </p>
             <ol className="list-disc list-inside">
-              {errors?.map(({ repository, error }, index) => (
+              {errors?.map(({ error, repository }, index) => (
                 <li key={index}>
                   {repository ? repository.name : "Unknown Repository"}:{" "}
                   {error.message}
@@ -224,75 +291,8 @@ function RepoActionResult({
         )}
       </ModalBody>
       <ModalFooter>
-        <Button variant="bordered" onPress={onClose}>
+        <Button onPress={onClose} variant="bordered">
           Close
-        </Button>
-      </ModalFooter>
-    </>
-  );
-}
-
-interface RepoActionConfirmationProps
-  extends Pick<ConfirmationModalProps, "action" | "repos" | "onClose"> {
-  count: number;
-  username: string;
-  setUsername: React.Dispatch<React.SetStateAction<string>>;
-  isCorrectUsername: boolean;
-  handleConfirm: () => void;
-}
-
-function RepoActionConfirmation({
-  action,
-  repos,
-  onClose,
-  count,
-  username,
-  setUsername,
-  isCorrectUsername,
-  handleConfirm,
-}: RepoActionConfirmationProps) {
-  return (
-    <>
-      <ModalHeader>
-        <h3>Confirm {action === "archive" ? "Archival" : "Deletion"}</h3>
-      </ModalHeader>
-      <ModalBody>
-        <p>
-          Are you sure you want to <b>{action}</b> the following {count}{" "}
-          repositor{count > 1 ? "ies" : "y"}?
-        </p>
-        <ol className="list-disc list-inside">
-          {repos.map((repo, index) => (
-            <li key={index}>{repo.name}</li>
-          ))}
-        </ol>
-        <Spacer y={1} />
-        <strong>Please type your GitHub username to confirm:</strong>
-        <Input
-          type="text"
-          autoFocus
-          autoCapitalize="none"
-          autoCorrect="off"
-          autoComplete="off"
-          fullWidth
-          placeholder="GitHub Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-        />
-      </ModalBody>
-      <ModalFooter>
-        <Button variant="bordered" onPress={onClose}>
-          Cancel
-        </Button>
-        <Button
-          color={action === "archive" ? "warning" : "danger"}
-          isDisabled={!isCorrectUsername}
-          onPress={() => {
-            void handleConfirm();
-          }}
-        >
-          I understand the consequences, {action} the repositor
-          {count > 1 ? "ies" : "y"}
         </Button>
       </ModalFooter>
     </>

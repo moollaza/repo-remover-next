@@ -1,12 +1,12 @@
-import { User, type Repository } from "@octokit/graphql-schema";
+import { type Repository, User } from "@octokit/graphql-schema";
 import { Octokit } from "@octokit/rest";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { archiveRepo, deleteRepo, generateRepos } from "../github-utils";
 
 const testUser: User = {
-  login: "test-user",
   avatarUrl: "",
+  login: "test-user",
   resourcePath: "",
   url: "",
 } as User;
@@ -87,9 +87,9 @@ describe("GitHub Repository Management", () => {
       await archiveRepo(octokit, testRepo);
 
       expect(update).toHaveBeenCalledWith({
+        archived: true,
         owner: testRepo.owner.login,
         repo: testRepo.name,
-        archived: true,
       });
     });
 

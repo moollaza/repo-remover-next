@@ -1,7 +1,7 @@
 "use client";
 
-import { Octokit } from "@octokit/rest";
 import { throttling } from "@octokit/plugin-throttling";
+import { Octokit } from "@octokit/rest";
 import {
   createContext,
   ReactNode,
@@ -14,34 +14,16 @@ const MyOctokit = Octokit.plugin(throttling);
 export type MyOctokitType = InstanceType<typeof MyOctokit>;
 
 interface GitHubContextType {
-  pat: string | null;
-  setPat: (pat: string | null) => void;
-  remember: boolean;
-  setRemember: (remember: boolean) => void;
-  login: string | null;
   isLoading: boolean;
+  login: null | string;
   octokit: MyOctokitType | null;
+  pat: null | string;
+  remember: boolean;
+  setPat: (pat: null | string) => void;
+  setRemember: (remember: boolean) => void;
 }
 
 const GitHubContext = createContext<GitHubContextType | undefined>(undefined);
-
-/**
- * Hook to access the GitHub context. Provides access to the PAT, login, and Octokit instance.
- *
- * @example
- * const { pat, login, isLoading } = useGitHub();
- *
- * @returns {GitHubContextType} The GitHub context value.
- * @throws {Error} If the hook is used outside of a `GitHubProvider`.
- * @note This hook must be used within a `GitHubProvider`.
- */
-export function useGitHub() {
-  const context = useContext(GitHubContext);
-  if (!context) {
-    throw new Error("useGitHub must be used within a GitHubProvider");
-  }
-  return context;
-}
 
 /**
  * Provides GitHub authentication and context
@@ -53,9 +35,9 @@ export function useGitHub() {
  * - Persisting the PAT and login to localStorage based on the `remember` state.
  */
 export default function GitHubProvider({ children }: { children: ReactNode }) {
-  const [pat, setPat] = useState<string | null>(null);
+  const [pat, setPat] = useState<null | string>(null);
   const [remember, setRemember] = useState<boolean>(true);
-  const [login, setLogin] = useState<string | null>(null);
+  const [login, setLogin] = useState<null | string>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [octokit, setOctokit] = useState<MyOctokitType | null>(null);
 
@@ -145,9 +127,27 @@ export default function GitHubProvider({ children }: { children: ReactNode }) {
 
   return (
     <GitHubContext.Provider
-      value={{ pat, setPat, remember, setRemember, login, isLoading, octokit }}
+      value={{ isLoading, login, octokit, pat, remember, setPat, setRemember }}
     >
       {children}
     </GitHubContext.Provider>
   );
+}
+
+/**
+ * Hook to access the GitHub context. Provides access to the PAT, login, and Octokit instance.
+ *
+ * @example
+ * const { pat, login, isLoading } = useGitHub();
+ *
+ * @returns {GitHubContextType} The GitHub context value.
+ * @throws {Error} If the hook is used outside of a `GitHubProvider`.
+ * @note This hook must be used within a `GitHubProvider`.
+ */
+export function useGitHub() {
+  const context = useContext(GitHubContext);
+  if (!context) {
+    throw new Error("useGitHub must be used within a GitHubProvider");
+  }
+  return context;
 }

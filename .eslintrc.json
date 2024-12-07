@@ -11,5 +11,22 @@
   "parserOptions": {
     "project": "./tsconfig.json"
   },
-  "ignorePatterns": ["node_modules/", ".next/", ".vscode/", "out/"]
+  "ignorePatterns": ["node_modules/", ".next/", ".vscode/", "out/"],
+  "rules": {
+    "perfectionist/sort-imports": [
+      "error",
+      {
+        // Keep in sync with tsconfig.json path aliases
+        "internalPattern": [
+          "@/.+",
+          "@components/.+",
+          "@contexts/.+",
+          "@graphql/.+",
+          "@hooks/.+",
+          "@providers/.+",
+          "@utils/.+"
+        ]
+      }
+    ]
+  }
 }

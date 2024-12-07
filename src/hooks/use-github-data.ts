@@ -60,20 +60,20 @@ export const GET_REPOS = gql`
   }
 `;
 
+interface GitHubData {
+  isError: boolean;
+  isLoading: boolean;
+  repos: null | Repository[];
+  user: null | User;
+}
+
 interface RepositoriesResponse {
-  user: User & {
+  user: {
     repositories: {
       nodes: Repository[];
       pageInfo: PageInfo;
     };
-  };
-}
-
-interface GitHubData {
-  user: User | null;
-  repos: Repository[] | null;
-  isLoading: boolean;
-  isError: boolean;
+  } & User;
 }
 
 /**
@@ -85,9 +85,9 @@ interface GitHubData {
  * const { user, repos, isLoading, isError, mutate } = useGitHubData();
  */
 export default function useGitHubData(): GitHubData {
-  const { pat, login } = useGitHub();
+  const { login, pat } = useGitHub();
 
-  const fetcher = async (): Promise<RepositoriesResponse | null> => {
+  const fetcher = async (): Promise<null | RepositoriesResponse> => {
     if (!pat || !login) {
       return null;
     }
@@ -106,18 +106,18 @@ export default function useGitHubData(): GitHubData {
 
   const {
     data,
-    mutate,
     error,
-  }: SWRResponse<RepositoriesResponse | null, Error> = useSWR(
+    mutate,
+  }: SWRResponse<null | RepositoriesResponse, Error> = useSWR(
     GET_REPOS,
     fetcher,
   );
 
   return {
-    user: data?.user ?? null,
-    repos: data?.user?.repositories?.nodes ?? null,
-    isLoading: pat && login && !error && !data,
     isError: pat && login && typeof error !== "undefined",
+    isLoading: pat && login && !error && !data,
     mutate,
+    repos: data?.user?.repositories?.nodes ?? null,
+    user: data?.user ?? null,
   } as GitHubData;
 }

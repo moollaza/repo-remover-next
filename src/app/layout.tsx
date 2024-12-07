@@ -1,30 +1,28 @@
+import { config } from "@fortawesome/fontawesome-svg-core";
 import clsx from "clsx";
 import { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
+import "@fortawesome/fontawesome-svg-core/styles.css";
 
-import { Providers } from "./providers";
+import { Providers } from "@/providers/providers";
 import { Header } from "@components/header";
-
 import "@/globals.css";
 
-// Font Awesome
-import { config } from "@fortawesome/fontawesome-svg-core";
-import "@fortawesome/fontawesome-svg-core/styles.css";
 config.autoAddCss = false;
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "white" },
-    { media: "(prefers-color-scheme: dark)", color: "black" },
+    { color: "white", media: "(prefers-color-scheme: light)" },
+    { color: "black", media: "(prefers-color-scheme: dark)" },
   ],
 };
 
 export const metadata: Metadata = {
-  title: "Repo Remover | Cleanup your GitHub repos with ease.",
   description:
     "Repo Remover makes it easy to archive and delete multiple GitHub repos at the same time. Free to use, and 100% open source.",
+  title: "Repo Remover | Cleanup your GitHub repos with ease.",
 };
 
 export default function RootLayout({
@@ -33,7 +31,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html suppressHydrationWarning lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={clsx(
           inter.className,

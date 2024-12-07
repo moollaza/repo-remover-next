@@ -1,12 +1,12 @@
 "use client";
 
-import { type ReactNode } from "react";
 import { NextUIProvider } from "@nextui-org/system";
-import { useRouter } from "next/navigation";
 import {
   ThemeProvider as NextThemesProvider,
   ThemeProviderProps,
 } from "next-themes";
+import { useRouter } from "next/navigation";
+import { type ReactNode } from "react";
 
 import GitHubProvider from "@/providers/github-provider";
 

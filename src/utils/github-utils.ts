@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { type Repository } from "@octokit/graphql-schema";
+
 import { type MyOctokitType } from "@providers/github-provider";
 
 const DEBUG = false;
@@ -16,9 +17,9 @@ export async function generateRepos(
     for (let i = 0; i < numberOfRepos; i++) {
       DEBUG && console.log(`Creating repo ${i + 1}...`);
       await octokit.rest.repos.createForAuthenticatedUser({
-        name: faker.company.name(),
         description: faker.company.catchPhrase(),
         homepage: faker.internet.url(),
+        name: faker.company.name(),
         private: faker.datatype.boolean(),
       });
       await new Promise((resolve) => setTimeout(resolve, 500));
@@ -38,9 +39,9 @@ export const archiveRepo = async (
 ): Promise<void> => {
   try {
     await octokit.rest.repos.update({
+      archived: true,
       owner: repo.owner.login,
       repo: repo.name,
-      archived: true,
     });
   } catch (error) {
     const errorMessage = (error as Error).message;

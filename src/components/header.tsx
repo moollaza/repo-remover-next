@@ -27,7 +27,7 @@ const homeLinks = [
 
 export function Header() {
   const pathname = usePathname();
-  const { pat, login } = useGitHub();
+  const { login, pat } = useGitHub();
   const { user } = useGitHubData();
 
   const isDashboard = pathname === "/dashboard";
@@ -43,9 +43,9 @@ export function Header() {
   }
 
   return (
-    <Navbar isBordered position="static" maxWidth="xl">
+    <Navbar isBordered maxWidth="xl" position="static">
       <NavbarBrand>
-        <Link href="/" className="font-extrabold text-inherit text-xl">
+        <Link className="font-extrabold text-inherit text-xl" href="/">
           Repo Remover
         </Link>
       </NavbarBrand>
@@ -55,9 +55,9 @@ export function Header() {
           {homeLinks.map((link) => (
             <NavbarItem key={link.href}>
               <Link
+                className="hover:text-primary"
                 color="foreground"
                 href={link.href}
-                className="hover:text-primary"
                 onClick={(e) => {
                   e.preventDefault();
                   const target = document.querySelector(link.href);
@@ -80,30 +80,30 @@ export function Header() {
             <Dropdown placement="bottom-end">
               <DropdownTrigger>
                 <User
-                  name={user?.name}
+                  avatarProps={{
+                    showFallback: true,
+                    src: user?.avatarUrl as string,
+                  }}
                   description={
                     <Link
                       href={`https://github.com/${user?.login}`}
-                      size="sm"
                       isExternal
+                      size="sm"
                     >
                       {user?.login}
                     </Link>
                   }
-                  avatarProps={{
-                    src: user?.avatarUrl as string,
-                    showFallback: true,
-                  }}
+                  name={user?.name}
                 />
               </DropdownTrigger>
               <DropdownMenu aria-label="Profile Actions" variant="flat">
-                <DropdownItem key="profile" className="h-14 gap-2">
+                <DropdownItem className="h-14 gap-2" key="profile">
                   <p className="font-semibold">Signed in as</p>
                   <p className="font-semibold">{user?.name}</p>
                 </DropdownItem>
                 <DropdownItem
-                  key="logout"
                   color="danger"
+                  key="logout"
                   onClick={handleLogout}
                 >
                   Log Out

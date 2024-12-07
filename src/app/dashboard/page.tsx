@@ -8,7 +8,7 @@ import { useGitHub } from "@/providers/github-provider";
 import Dashboard from "@components/dashboard";
 
 export default function DashboardPage() {
-  const { pat, login } = useGitHub();
+  const { login, pat } = useGitHub();
   const { isLoading } = useGitHubData();
   const router = useRouter();
 
