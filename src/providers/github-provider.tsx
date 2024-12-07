@@ -7,6 +7,7 @@ import {
   ReactNode,
   useContext,
   useEffect,
+  useLayoutEffect,
   useState,
 } from "react";
 
@@ -36,13 +37,13 @@ const GitHubContext = createContext<GitHubContextType | undefined>(undefined);
  */
 export default function GitHubProvider({ children }: { children: ReactNode }) {
   const [pat, setPat] = useState<null | string>(null);
-  const [remember, setRemember] = useState<boolean>(true);
+  const [remember, setRemember] = useState(true);
   const [login, setLogin] = useState<null | string>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [octokit, setOctokit] = useState<MyOctokitType | null>(null);
 
   // Load PAT and login from localStorage on client mount
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (typeof localStorage !== "undefined") {
       const storedPat = localStorage.getItem("pat");
       const storedLogin = localStorage.getItem("login");
@@ -87,18 +88,28 @@ export default function GitHubProvider({ children }: { children: ReactNode }) {
       setOctokit(newOctokit);
 
       const fetchLogin = async (): Promise<void> => {
+        setIsLoading(true);
         try {
           const response = await newOctokit.rest.users.getAuthenticated();
 
           if (response.data.login) {
             setLogin(response.data.login);
+            setIsLoading(false);
           } else {
             console.error("No login found in response:", response.data);
             setLogin(null);
+            setIsLoading(false);
+
+            try {
+              localStorage?.removeItem("pat");
+            } catch (error) {
+              console.error("Error removing PAT from localStorage:", error);
+            }
           }
         } catch (error) {
-          console.error("Error fetching login:", error);
+          console.error("Error fetching GitHub login:", error);
           setLogin(null);
+          setIsLoading(false);
         }
       };
 
@@ -111,16 +122,20 @@ export default function GitHubProvider({ children }: { children: ReactNode }) {
   // Persist PAT and login to localStorage
   useEffect(() => {
     if (remember && typeof localStorage !== "undefined") {
-      if (pat) {
-        localStorage.setItem("pat", pat);
-      } else {
-        localStorage.removeItem("pat");
-      }
+      try {
+        if (pat) {
+          localStorage.setItem("pat", pat);
+        } else {
+          localStorage.removeItem("pat");
+        }
 
-      if (login) {
-        localStorage.setItem("login", login);
-      } else {
-        localStorage.removeItem("login");
+        if (login) {
+          localStorage.setItem("login", login);
+        } else {
+          localStorage.removeItem("login");
+        }
+      } catch (error) {
+        console.error("Error persisting PAT and login to localStorage:", error);
       }
     }
   }, [pat, login, remember]);

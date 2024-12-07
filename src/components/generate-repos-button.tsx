@@ -6,6 +6,11 @@ import { GET_REPOS } from "@/hooks/use-github-data";
 import { useGitHub } from "@/providers/github-provider";
 import { generateRepos } from "@utils/github-utils";
 
+/**
+ * This component generates random repositories for the user
+ * This is only available in development mode, to test archiving and deleting repositories
+ * @returns void
+ */
 export function GenerateReposButton() {
   const { mutate } = useSWRConfig();
 
