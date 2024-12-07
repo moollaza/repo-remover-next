@@ -37,7 +37,7 @@ const GitHubContext = createContext<GitHubContextType | undefined>(undefined);
  */
 export default function GitHubProvider({ children }: { children: ReactNode }) {
   const [pat, setPat] = useState<null | string>(null);
-  const [remember, setRemember] = useState(true);
+  const [remember, setRemember] = useState(false);
   const [login, setLogin] = useState<null | string>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [octokit, setOctokit] = useState<MyOctokitType | null>(null);
