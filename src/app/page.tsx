@@ -139,7 +139,7 @@ export default function HomePage() {
           </div>
 
           {/* QUOTES */}
-          <div className="pt-16">
+          <div className="pt-16 overflow-x-hidden">
             <ScrollingQuotes />
           </div>
         </section>
