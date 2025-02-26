@@ -66,3 +66,53 @@ Before any changes are made, you will be asked to review the list of selected re
 ## Author
 
 Zaahir Moolla ([@zmoolla](https://bsky.app/profile/zmoolla.bsky.social), [zaahir.ca](https://zaahir.ca))
+
+## Development
+
+### Testing Setup
+
+The project uses different types of tests:
+
+1. **Unit Tests**: Using Vitest and React Testing Library with MSW for API mocking
+2. **E2E Tests**: Using Playwright with real API calls
+
+#### Setting up the test environment
+
+1. Create a `.env.test` file in the root directory:
+
+```env
+# Required for E2E tests
+GITHUB_TEST_TOKEN=your_valid_github_token
+```
+
+2. Install dependencies:
+
+```bash
+npm install
+```
+
+3. Run tests:
+
+- Unit tests: `npm test`
+- E2E tests: `npm run test:e2e`
+
+#### Test Structure
+
+- Unit tests mock the GitHub API using MSW (Mock Service Worker) to test the application's behavior with both valid and invalid tokens
+- E2E tests use a real GitHub token to verify the complete flow works as expected
+- The token validation follows GitHub's format requirements and verifies tokens by making an API call
+
+#### Writing Tests
+
+When writing tests that involve the GitHub API:
+
+1. **Unit Tests**:
+
+   - Use MSW handlers in `src/mocks/handlers.ts`
+   - Test both success and failure scenarios
+   - Mock API responses appropriately
+
+2. **E2E Tests**:
+   - Require a valid GitHub token in the environment
+   - Test real API interactions
+   - Handle rate limiting and other API constraints

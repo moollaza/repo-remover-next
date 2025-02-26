@@ -7,39 +7,74 @@ import { useEffect, useReducer, useState } from "react";
 
 import { useGitHub } from "@/providers/github-provider";
 
-type Action = { isValid: boolean; type: "validate" } | { type: "reset" };
-type State = "idle" | "invalid" | "validated";
+type Action =
+  | { error: string; type: "validate_error" }
+  | { type: "reset" }
+  | { type: "validate_start" }
+  | { type: "validate_success" };
+
+interface State {
+  error: null | string;
+  isValidated: boolean;
+  isValidating: boolean;
+}
 
 export default function GitHubTokenForm({ className }: { className?: string }) {
-  const { remember, setPat, setRemember } = useGitHub();
+  const {
+    error: providerError,
+    isValidating: isProviderValidating,
+    remember,
+    setPat,
+    setRemember,
+    validateToken,
+  } = useGitHub();
   const [value, setValue] = useState("");
-  const [state, dispatch] = useReducer(reducer, "idle");
+  const [state, dispatch] = useReducer(reducer, {
+    error: null,
+    isValidated: false,
+    isValidating: false,
+  });
   const router = useRouter();
 
-  function checkTokenFormat(token: string) {
-    return token?.length >= 40 && /^[a-z0-9_]+$/i.test(token);
-  }
-
-  function onSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (state === "validated") {
+    if (state.isValidated) {
       setPat(value);
       void router.push("/dashboard");
-      return;
     }
-
-    return false;
   }
 
   useEffect(() => {
-    if (value === "") {
-      dispatch({ type: "reset" });
-    } else {
-      const isValid = checkTokenFormat(value);
-      dispatch({ isValid, type: "validate" });
+    let isSubscribed = true;
+
+    async function validate() {
+      if (value === "") {
+        dispatch({ type: "reset" });
+        return;
+      }
+
+      dispatch({ type: "validate_start" });
+      const isValid = await validateToken(value);
+
+      if (!isSubscribed) return;
+
+      if (isValid) {
+        dispatch({ type: "validate_success" });
+      } else {
+        dispatch({
+          error: providerError || "Failed to validate token",
+          type: "validate_error",
+        });
+      }
     }
-  }, [value]);
+
+    void validate();
+
+    return () => {
+      isSubscribed = false;
+    };
+  }, [value, validateToken, providerError]);
 
   return (
     <form
@@ -50,13 +85,11 @@ export default function GitHubTokenForm({ className }: { className?: string }) {
         <Input
           autoComplete="off"
           className={"w-1/2"}
-          color={state === "validated" ? "success" : undefined}
-          errorMessage={state === "invalid" ? "Invalid token format" : ""}
+          color={state.isValidated ? "success" : undefined}
+          errorMessage={state.error}
           isClearable
-          isInvalid={state === "invalid"}
+          isInvalid={Boolean(state.error)}
           label="Please enter your Personal Access Token"
-          maxLength={40}
-          minLength={40}
           name="personal-access-token"
           onChange={(e) => setValue(e.target.value)}
           onClear={() => setValue("")}
@@ -73,7 +106,8 @@ export default function GitHubTokenForm({ className }: { className?: string }) {
       <Button
         className="w-20"
         color="primary"
-        isDisabled={state !== "validated" || value === ""}
+        isDisabled={!state.isValidated || value === ""}
+        isLoading={state.isValidating || isProviderValidating}
         type="submit"
       >
         Submit
@@ -82,33 +116,21 @@ export default function GitHubTokenForm({ className }: { className?: string }) {
   );
 }
 
-/**
- * Reducer function to manage the state transitions for the form validation process
- *
- * @param {State} state - The current state of the form
- * @param {Action} action - The action dispatched to change the state
- * @returns {State} The new state after applying the action
- *
- * @throws {Error} If the action type is not recognized
- *
- * The state can be one of the following:
- * - "idle": The initial state or after a reset
- * - "validated": The state when the form is successfully validated
- * - "invalid": The state when the form validation fails
- *
- * The action can be one of the following:
- * - { type: "reset" }: Resets the state to "idle"
- * - { type: "validate", isValid: boolean }: Sets the state to "validated" if isValid is true, otherwise sets it to "invalid"
- */
 function reducer(state: State, action: Action): State {
   switch (action.type) {
     case "reset":
-      return "idle";
-    case "validate":
-      return action.isValid ? "validated" : "invalid";
+      return { error: null, isValidated: false, isValidating: false };
+    case "validate_error":
+      return {
+        error: action.error,
+        isValidated: false,
+        isValidating: false,
+      };
+    case "validate_start":
+      return { ...state, error: null, isValidating: true };
+    case "validate_success":
+      return { error: null, isValidated: true, isValidating: false };
     default:
-      throw new Error(
-        "Unknown action type. Please provide a valid action type.",
-      );
+      throw new Error("Unknown action type");
   }
 }

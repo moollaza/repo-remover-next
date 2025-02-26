@@ -21,6 +21,7 @@
       "@/*": ["./src/*"],
       "@components/*": ["./src/components/*"],
       "@contexts/*": ["./src/contexts/*"],
+      "@fixtures/*": ["./src/tests/fixtures/*"],
       "@graphql/*": ["./src/graphql/*"],
       "@hooks/*": ["./src/hooks/*"],
       "@providers/*": ["./src/providers/*"],
@@ -34,7 +35,13 @@
     "next-env.d.ts",
     "next.config.mjs",
     "postcss.config.js",
-    "tsconfig.json"
+    "tsconfig.json",
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx",
+    "src/**/__tests__/**/*.ts",
+    "src/**/__tests__/**/*.tsx",
+    "src/**/__mocks__/**/*.ts",
+    "src/**/__mocks__/**/*.tsx"
   ],
   "exclude": ["node_modules"]
 }

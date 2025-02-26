@@ -15,13 +15,16 @@ const MyOctokit = Octokit.plugin(throttling);
 export type MyOctokitType = InstanceType<typeof MyOctokit>;
 
 interface GitHubContextType {
+  error: null | string;
   isLoading: boolean;
+  isValidating: boolean;
   login: null | string;
   octokit: MyOctokitType | null;
   pat: null | string;
   remember: boolean;
   setPat: (pat: null | string) => void;
   setRemember: (remember: boolean) => void;
+  validateToken: (token: string) => Promise<boolean>;
 }
 
 const GitHubContext = createContext<GitHubContextType | undefined>(undefined);
@@ -40,6 +43,8 @@ export default function GitHubProvider({ children }: { children: ReactNode }) {
   const [remember, setRemember] = useState(false);
   const [login, setLogin] = useState<null | string>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isValidating, setIsValidating] = useState(false);
+  const [error, setError] = useState<null | string>(null);
   const [octokit, setOctokit] = useState<MyOctokitType | null>(null);
 
   // Load PAT and login from localStorage on client mount
@@ -60,63 +65,113 @@ export default function GitHubProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  // Create and set the Octokit instance when the PAT changes
-  useEffect(() => {
-    if (pat) {
-      const newOctokit = new MyOctokit({
-        auth: pat,
+  /**
+   * Validates a GitHub token by checking its format and making an API call
+   * @param token The token to validate
+   * @returns Promise<boolean> indicating if the token is valid
+   */
+  const validateToken = async (token: string): Promise<boolean> => {
+    setError(null);
+
+    if (!isValidTokenFormat(token)) {
+      setError("Invalid token format");
+      return false;
+    }
+
+    setIsValidating(true);
+
+    try {
+      const tempOctokit = new MyOctokit({
+        auth: token,
         throttle: {
           onRateLimit: (retryAfter, options, octokit, retryCount) => {
-            octokit.log.warn(
-              `Request quota exhausted for request ${options.method} ${options.url}`,
-            );
-
-            if (retryCount < 3) {
-              // retries a request three times
-              octokit.log.info(`Retrying after ${retryAfter} seconds!`);
-              return true;
-            }
+            if (retryCount < 3) return true;
+            return false;
           },
-          onSecondaryRateLimit: (retryAfter, options, octokit) => {
-            // does not retry, only logs a warning
-            octokit.log.warn(
-              `SecondaryRateLimit detected for request ${options.method} ${options.url}`,
-            );
-          },
+          onSecondaryRateLimit: () => false,
         },
       });
-      setOctokit(newOctokit);
 
-      const fetchLogin = async (): Promise<void> => {
-        setIsLoading(true);
-        try {
-          const response = await newOctokit.rest.users.getAuthenticated();
+      const response = await tempOctokit.rest.users.getAuthenticated();
+      setIsValidating(false);
 
-          if (response.data.login) {
-            setLogin(response.data.login);
-            setIsLoading(false);
-          } else {
-            console.error("No login found in response:", response.data);
-            setLogin(null);
-            setIsLoading(false);
+      if (response.data.login) {
+        return true;
+      }
 
-            try {
-              localStorage?.removeItem("pat");
-            } catch (error) {
-              console.error("Error removing PAT from localStorage:", error);
-            }
-          }
-        } catch (error) {
-          console.error("Error fetching GitHub login:", error);
-          setLogin(null);
-          setIsLoading(false);
-        }
-      };
-
-      void fetchLogin();
-    } else {
-      setOctokit(null);
+      setError("Failed to validate token");
+      return false;
+    } catch (error) {
+      setIsValidating(false);
+      setError("Failed to validate token");
+      return false;
     }
+  };
+
+  // Create and set the Octokit instance when the PAT changes
+  useEffect(() => {
+    if (!pat) {
+      setOctokit(null);
+      setLogin(null);
+      setError(null);
+      return;
+    }
+
+    const newOctokit = new MyOctokit({
+      auth: pat,
+      throttle: {
+        onRateLimit: (retryAfter, options, octokit, retryCount) => {
+          octokit.log.warn(
+            `Request quota exhausted for request ${options.method} ${options.url}`,
+          );
+
+          if (retryCount < 3) {
+            octokit.log.info(`Retrying after ${retryAfter} seconds!`);
+            return true;
+          }
+          return false;
+        },
+        onSecondaryRateLimit: (retryAfter, options, octokit) => {
+          octokit.log.warn(
+            `SecondaryRateLimit detected for request ${options.method} ${options.url}`,
+          );
+          return false;
+        },
+      },
+    });
+    setOctokit(newOctokit);
+
+    const fetchLogin = async (): Promise<void> => {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const response = await newOctokit.rest.users.getAuthenticated();
+
+        if (response.data.login) {
+          setLogin(response.data.login);
+          setIsLoading(false);
+        } else {
+          console.error("No login found in response:", response.data);
+          setLogin(null);
+          setError("Invalid token");
+          setIsLoading(false);
+
+          try {
+            localStorage?.removeItem("pat");
+          } catch (error) {
+            console.error("Error removing PAT from localStorage:", error);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching GitHub login:", error);
+        setLogin(null);
+        setError("Failed to authenticate");
+        setIsLoading(false);
+      }
+    };
+
+    void fetchLogin();
   }, [pat]);
 
   // Persist PAT and login to localStorage
@@ -142,7 +197,18 @@ export default function GitHubProvider({ children }: { children: ReactNode }) {
 
   return (
     <GitHubContext.Provider
-      value={{ isLoading, login, octokit, pat, remember, setPat, setRemember }}
+      value={{
+        error,
+        isLoading,
+        isValidating,
+        login,
+        octokit,
+        pat,
+        remember,
+        setPat,
+        setRemember,
+        validateToken,
+      }}
     >
       {children}
     </GitHubContext.Provider>
@@ -165,4 +231,13 @@ export function useGitHub() {
     throw new Error("useGitHub must be used within a GitHubProvider");
   }
   return context;
+}
+
+/**
+ * Validates a GitHub token format
+ * @param token The token to validate
+ * @returns boolean indicating if the token format is valid
+ */
+function isValidTokenFormat(token: string): boolean {
+  return token?.length >= 40 && /^gh[ps]_[A-Za-z0-9_]+$/.test(token);
 }
