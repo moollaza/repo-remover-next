@@ -12,7 +12,7 @@ import {
   NavbarContent,
   NavbarItem,
   User,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { usePathname } from "next/navigation";
 
 import { GenerateReposButton } from "@/components/generate-repos-button";

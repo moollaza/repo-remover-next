@@ -8,7 +8,7 @@ import {
   ModalHeader,
   Progress,
   Spacer,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { Repository } from "@octokit/graphql-schema";
 import { useEffect, useState } from "react";
 import { useSWRConfig } from "swr";

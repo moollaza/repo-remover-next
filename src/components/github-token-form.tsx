@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Checkbox, Input } from "@nextui-org/react";
+import { Button, Checkbox, Input } from "@heroui/react";
 import clsx from "clsx";
 import { useRouter } from "next/navigation";
 import { useEffect, useReducer, useState } from "react";

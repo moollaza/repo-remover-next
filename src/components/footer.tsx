@@ -6,7 +6,7 @@ import {
   faXTwitter,
 } from "@fortawesome/free-brands-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Link } from "@nextui-org/react";
+import { Link } from "@heroui/react";
 import clsx from "clsx";
 
 export default function Footer({ className = "" }) {

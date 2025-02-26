@@ -1,6 +1,6 @@
 "use client";
 
-import { NextUIProvider } from "@nextui-org/system";
+import { HeroUIProvider } from "@heroui/system";
 import {
   ThemeProvider as NextThemesProvider,
   ThemeProviderProps,
@@ -19,10 +19,10 @@ export function Providers({ children, themeProps }: ProvidersProps) {
   const router = useRouter();
 
   return (
-    <NextUIProvider navigate={(url) => router.push(url)}>
+    <HeroUIProvider navigate={(url) => router.push(url)}>
       <NextThemesProvider {...themeProps}>
         <GitHubProvider>{children}</GitHubProvider>
       </NextThemesProvider>
-    </NextUIProvider>
+    </HeroUIProvider>
   );
 }
