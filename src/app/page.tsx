@@ -59,7 +59,7 @@ export default function HomePage() {
 
         {/* FEATURES */}
         <div
-          className="container mx-auto max-w-7xl pt-16 px-6 flex-grow"
+          className="container mx-auto max-w-6xl pt-16 px-6 flex-grow"
           id="features"
         >
           <section className="mb-16">
@@ -98,7 +98,7 @@ export default function HomePage() {
 
         {/* SEE IT IN ACTION */}
         <section className="bg-secondary-100 py-16">
-          <div className="container mx-auto max-w-7xl px-6">
+          <div className="container mx-auto max-w-6xl px-6">
             <h2 className="text-5xl font-bold mb-8 text-secondary-900">
               See It In Action!
             </h2>
@@ -120,7 +120,7 @@ export default function HomePage() {
 
         {/* IMPACT */}
         <section className="bg-success-100 py-16">
-          <div className="container mx-auto max-w-7xl px-6">
+          <div className="container mx-auto max-w-6xl px-6">
             <h2 className="text-5xl font-bold mb-8 text-success-900">
               Over 235,000 repositories archived and deleted!
             </h2>
@@ -145,7 +145,7 @@ export default function HomePage() {
         </section>
 
         {/* GET STARTED */}
-        <div className="container mx-auto max-w-7xl py-16 px-6 flex-grow ">
+        <div className="container mx-auto max-w-6xl py-16 px-6 flex-grow ">
           <section className="mb-16" id="get-started">
             <h2 className="text-5xl font-bold mb-8">Get Started</h2>
             <p className="text-3xl">

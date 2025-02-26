@@ -12,7 +12,7 @@ import clsx from "clsx";
 export default function Footer({ className = "" }) {
   return (
     <footer className={clsx("w-full py-8 px-6 bg-gray-100", className)}>
-      <div className="container mx-auto max-w-7xl grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="container mx-auto max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="flex flex-col">
           <h3 className="text-lg font-semibold mb-2">
             Mady by{" "}

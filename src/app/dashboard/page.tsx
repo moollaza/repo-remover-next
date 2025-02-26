@@ -19,7 +19,7 @@ export default function DashboardPage() {
   }, [pat, login, router]);
 
   return (
-    <main className="container mx-auto max-w-7xl pt-16 px-6 flex-grow">
+    <main className="container mx-auto max-w-6xl pt-16 px-6 flex-grow">
       <Dashboard />
     </main>
   );
