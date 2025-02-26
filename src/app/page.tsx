@@ -19,17 +19,10 @@ export default function HomePage() {
   return (
     <>
       <main>
-        <section className="bg-primary-50">
-          <div className="container mx-auto max-w-7xl py-10 px-6 text-center text-pretty justify-center">
-            <h1 className="text-7xl font-bold leading-snug text-pretty">
-              <span className="underline underline-offset-4 decoration-warning">
-                Archive
-              </span>{" "}
-              or{" "}
-              <span className="underline underline-offset-4 decoration-danger">
-                Delete
-              </span>{" "}
-              multiple GitHub repos, <i>instantly</i>.
+        <section>
+          <div className="container mx-auto max-w-6xl py-10 px-6 text-center text-pretty justify-center">
+            <h1 className="font-extrabold tracking-tight text-[84px] leading-none">
+              Archive or Delete Multiple GitHub Repos, Instantly.
             </h1>
 
             <p className="text-3xl mt-16 mx-auto text-default-800">
