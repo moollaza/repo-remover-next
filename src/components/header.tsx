@@ -58,8 +58,8 @@ export function Header() {
                 className="hover:text-primary"
                 color="foreground"
                 href={link.href}
-                onClick={(e) => {
-                  e.preventDefault();
+                onClick={(e) => e.preventDefault()}
+                onPress={() => {
                   const target = document.querySelector(link.href);
                   if (target) {
                     target.scrollIntoView({ behavior: "smooth" });
@@ -104,7 +104,7 @@ export function Header() {
                 <DropdownItem
                   color="danger"
                   key="logout"
-                  onClick={handleLogout}
+                  onPress={handleLogout}
                 >
                   Log Out
                 </DropdownItem>

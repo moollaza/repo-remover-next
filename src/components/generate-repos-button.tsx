@@ -25,7 +25,7 @@ export function GenerateReposButton() {
     <Button
       color="secondary"
       isLoading={isLoading}
-      onClick={() => {
+      onPress={() => {
         void generateRepos(octokit, setIsLoading)
           .then(() => {
             void mutate(GET_REPOS);
