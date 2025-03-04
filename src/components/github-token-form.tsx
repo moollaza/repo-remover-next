@@ -39,6 +39,13 @@ export default function GitHubTokenForm({ className }: { className?: string }) {
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
+    // If not validated, trigger validation
+    if (!state.isValidated) {
+      await validateToken(value);
+      return;
+    }
+
+    // If validated, set PAT and navigate
     if (state.isValidated) {
       setPat(value);
       void router.push("/dashboard");
@@ -63,7 +70,7 @@ export default function GitHubTokenForm({ className }: { className?: string }) {
         dispatch({ type: "validate_success" });
       } else {
         dispatch({
-          error: providerError || "Failed to validate token",
+          error: providerError ?? "Failed to validate token",
           type: "validate_error",
         });
       }
@@ -79,7 +86,9 @@ export default function GitHubTokenForm({ className }: { className?: string }) {
   return (
     <form
       className={clsx("flex flex-col gap-10", className)}
-      onSubmit={onSubmit}
+      onSubmit={(e) => {
+        void onSubmit(e);
+      }}
     >
       <div className="flex flex-col gap-4">
         <Input

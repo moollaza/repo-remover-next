@@ -176,17 +176,23 @@ export default function GitHubProvider({ children }: { children: ReactNode }) {
 
   // Persist PAT and login to localStorage
   useEffect(() => {
-    if (remember && typeof localStorage !== "undefined") {
+    if (typeof localStorage !== "undefined") {
       try {
-        if (pat) {
-          localStorage.setItem("pat", pat);
-        } else {
-          localStorage.removeItem("pat");
-        }
+        if (remember) {
+          if (pat) {
+            localStorage.setItem("pat", pat);
+          } else {
+            localStorage.removeItem("pat");
+          }
 
-        if (login) {
-          localStorage.setItem("login", login);
+          if (login) {
+            localStorage.setItem("login", login);
+          } else {
+            localStorage.removeItem("login");
+          }
         } else {
+          // Remove values when remember is toggled off
+          localStorage.removeItem("pat");
           localStorage.removeItem("login");
         }
       } catch (error) {
