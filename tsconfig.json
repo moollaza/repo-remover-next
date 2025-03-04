@@ -34,7 +34,7 @@
     "**/*.tsx",
     "next-env.d.ts",
     "next.config.mjs",
-    "postcss.config.js",
+    "postcss.config.cjs",
     "tsconfig.json",
     "src/**/*.test.ts",
     "src/**/*.test.tsx",
