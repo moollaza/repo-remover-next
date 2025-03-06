@@ -7,7 +7,6 @@ import React from "react";
 
 import Dashboard from "../components/dashboard";
 import { GitHubDataProvider } from "../providers/github-data-provider";
-// Using GitHubDataProvider directly now instead of mock provider
 
 // Helper function to create a mock repository
 function createMockRepository(overrides: Partial<Repository> = {}): Repository {
@@ -39,27 +38,18 @@ function createMockRepository(overrides: Partial<Repository> = {}): Repository {
 }
 
 // Create a wrapper component that provides GitHub context with MSW
-const DashboardStory = ({
-  isError = false,
-  isLoading = false,
-  repos = null,
-  user = null,
-}: {
-  isError?: boolean;
-  isLoading?: boolean;
-  repos?: null | Repository[];
-  user?: null | User;
-}) => {
-  // Setup MSW handlers based on props
+const DashboardStory = () => {
+  // Setup localStorage for authentication
   React.useEffect(() => {
-    // This would be handled by MSW in a real implementation
-    // The component props would configure the mock responses
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('pat', 'ghp_validtoken123456789012345678901234567890');
-      localStorage.setItem('login', 'testuser');
+    if (typeof window !== "undefined") {
+      localStorage.setItem(
+        "pat",
+        "ghp_validtoken123456789012345678901234567890",
+      );
+      localStorage.setItem("login", "testuser");
     }
   }, []);
-  
+
   return (
     <GitHubDataProvider>
       <Dashboard />
@@ -178,8 +168,17 @@ export const WithError: Story = {
   },
 };
 
-// Create a meta for the MSW approach
-const mswMeta: Meta<typeof DashboardWithMSW> = {
+// Define the DashboardWithMSW component
+const DashboardWithMSW: React.FC = () => {
+  return (
+    <GitHubDataProvider>
+      <Dashboard />
+    </GitHubDataProvider>
+  );
+};
+
+// Create a meta for the MSW approach - export it to avoid unused variable warning
+export const mswMeta: Meta<typeof DashboardWithMSW> = {
   component: DashboardWithMSW,
   parameters: {
     // This is where we'd configure MSW to intercept API calls
@@ -197,9 +196,12 @@ const mswMeta: Meta<typeof DashboardWithMSW> = {
         }),
         // Mock the GraphQL API for repository data
         http.post("https://api.github.com/graphql", async ({ request }) => {
-          const body = await request.json();
-          // Check if this is a repositories query
-          if (body.query?.includes("repositories")) {
+          const body = (await request.json()) as { query?: string };
+          // Check if this is a repositories query - safely check for string
+          if (
+            typeof body.query === "string" &&
+            body.query.includes("repositories")
+          ) {
             return HttpResponse.json({
               data: {
                 user: {
