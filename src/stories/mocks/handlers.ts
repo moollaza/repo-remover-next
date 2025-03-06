@@ -100,3 +100,6 @@ export const handlers = [
     });
   }),
 ];
+
+// Export mock data for reuse in stories
+export { mockUser, mockRepos };
