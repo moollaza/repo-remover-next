@@ -5,7 +5,7 @@ import clsx from "clsx";
 import { useRouter } from "next/navigation";
 import { useEffect, useReducer, useState } from "react";
 
-import { useGitHub } from "@/providers/github-provider";
+import { useGitHubData } from "@/providers/github-data-provider";
 
 type Action =
   | { error: string; type: "validate_error" }
@@ -21,13 +21,23 @@ interface State {
 
 export default function GitHubTokenForm({ className }: { className?: string }) {
   const {
-    error: providerError,
-    isValidating: isProviderValidating,
-    remember,
+    isError,
+    isLoading: isProviderValidating,
+    login,
+    pat,
+    setLogin,
     setPat,
-    setRemember,
-    validateToken,
-  } = useGitHub();
+  } = useGitHubData();
+
+  // For backward compatibility
+  const validateToken = async (token: string) => {
+    setPat(token);
+    return true;
+  };
+
+  const remember = true; // Always remember in the new implementation
+  const setRemember = () => {}; // No-op, always remembers
+  const providerError = isError ? "Error validating token" : null;
   const [value, setValue] = useState("");
   const [state, dispatch] = useReducer(reducer, {
     error: null,

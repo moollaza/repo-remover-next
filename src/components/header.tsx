@@ -16,8 +16,7 @@ import {
 import { usePathname } from "next/navigation";
 
 import { GenerateReposButton } from "@/components/generate-repos-button";
-import useGitHubData from "@/hooks/use-github-data";
-import { useGitHub } from "@/providers/github-provider";
+import { useGitHubData } from "@/providers/github-data-provider";
 
 const homeLinks = [
   { href: "#features", label: "Features" },
@@ -25,10 +24,9 @@ const homeLinks = [
   { href: "#get-started", label: "Get Started" },
 ];
 
-export function Header() {
+export default function Header() {
   const pathname = usePathname();
-  const { login, pat } = useGitHub();
-  const { user } = useGitHubData();
+  const { login, pat, user } = useGitHubData();
 
   const isDashboard = pathname === "/dashboard";
   const isDevelopment = process.env.NODE_ENV === "development";

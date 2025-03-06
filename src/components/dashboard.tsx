@@ -1,5 +1,5 @@
+import { useGitHubData } from "@/providers/github-data-provider";
 import RepoTable from "@components/repo-table/repo-table";
-import useGitHubData from "@hooks/use-github-data";
 
 export default function DashboardPage() {
   const { isError, isLoading, repos } = useGitHubData();

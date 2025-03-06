@@ -25,7 +25,7 @@ import { Repository } from "@octokit/graphql-schema";
 import { formatDistanceToNow } from "date-fns";
 import { useCallback, useMemo, useState } from "react";
 
-import { useGitHub } from "@/providers/github-provider";
+import { useGitHubData } from "@/providers/github-data-provider";
 
 import ConfirmationModal from "./confirmation-modal";
 
@@ -73,7 +73,7 @@ export default function RepoTable({
   isLoading,
   repos,
 }: RepoTableProps): JSX.Element {
-  const { login } = useGitHub();
+  const { login } = useGitHubData();
   const [repoTypesFilter, setRepoTypesFilter] = useState<SelectionSet>(
     new Set(REPO_TYPES.map((type) => type.key)),
   );

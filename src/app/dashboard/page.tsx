@@ -3,11 +3,11 @@
 import { useRouter } from "next/navigation";
 import { useLayoutEffect } from "react";
 
-import { useGitHub } from "@/providers/github-provider";
+import { useGitHubData } from "@/providers/github-data-provider";
 import Dashboard from "@components/dashboard";
 
 export default function DashboardPage() {
-  const { login, pat } = useGitHub();
+  const { login, pat } = useGitHubData();
 
   const router = useRouter();
 

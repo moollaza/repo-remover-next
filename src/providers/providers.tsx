@@ -8,7 +8,7 @@ import {
 import { useRouter } from "next/navigation";
 import { type ReactNode } from "react";
 
-import GitHubProvider from "@/providers/github-provider";
+import { GitHubDataProvider } from "@/providers/github-data-provider";
 
 export interface ProvidersProps {
   children: ReactNode;
@@ -21,7 +21,7 @@ export function Providers({ children, themeProps }: ProvidersProps) {
   return (
     <HeroUIProvider navigate={(url) => router.push(url)}>
       <NextThemesProvider {...themeProps}>
-        <GitHubProvider>{children}</GitHubProvider>
+        <GitHubDataProvider>{children}</GitHubDataProvider>
       </NextThemesProvider>
     </HeroUIProvider>
   );

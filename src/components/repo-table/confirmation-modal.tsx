@@ -10,11 +10,11 @@ import {
   Spacer,
 } from "@heroui/react";
 import { Repository } from "@octokit/graphql-schema";
+import { Octokit } from "@octokit/rest";
 import { useEffect, useState } from "react";
 import { useSWRConfig } from "swr";
 
-import { GET_REPOS } from "@/hooks/use-github-data";
-import { useGitHub } from "@/providers/github-provider";
+import { useGitHubData } from "@/providers/github-data-provider";
 import { processRepo } from "@/utils/github-utils";
 
 interface ConfirmationModalProps {
@@ -59,7 +59,11 @@ export default function ConfirmationModal({
 }: ConfirmationModalProps) {
   const count = repos.length;
 
-  const { octokit } = useGitHub();
+  // Get the PAT from the new provider
+  const { pat } = useGitHubData();
+
+  // Create an Octokit instance with the PAT
+  const octokit = pat ? new Octokit({ auth: pat }) : null;
   const [actionInProgress, setActionInProgress] = useState(false);
   const [actionCompleted, setActionCompleted] = useState(false);
   const [errors, setErrors] = useState<
@@ -117,7 +121,8 @@ export default function ConfirmationModal({
   function handleOnClose() {
     resetState();
     onClose();
-    void mutate(GET_REPOS);
+    // Refetch all GitHub data after operations are complete
+    void mutate();
   }
 
   return (

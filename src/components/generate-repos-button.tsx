@@ -2,8 +2,7 @@ import { Button } from "@heroui/react";
 import { useState } from "react";
 import { useSWRConfig } from "swr";
 
-import { GET_REPOS } from "@/hooks/use-github-data";
-import { useGitHub } from "@/providers/github-provider";
+import { useGitHubData } from "@/providers/github-data-provider";
 import { generateRepos } from "@utils/github-utils";
 
 /**
@@ -14,7 +13,13 @@ import { generateRepos } from "@utils/github-utils";
 export function GenerateReposButton() {
   const { mutate } = useSWRConfig();
 
-  const { octokit } = useGitHub();
+  // Get the PAT from the new provider
+  const { pat } = useGitHubData();
+
+  // Create an Octokit instance with the PAT
+  const octokit = pat
+    ? new (require("@octokit/rest").Octokit)({ auth: pat })
+    : null;
   const [isLoading, setIsLoading] = useState(false);
 
   if (process.env.NODE_ENV !== "development" || !octokit) {
@@ -28,7 +33,8 @@ export function GenerateReposButton() {
       onPress={() => {
         void generateRepos(octokit, setIsLoading)
           .then(() => {
-            void mutate(GET_REPOS);
+            // Mutate all GitHub data
+            void mutate();
           })
           .catch(() => {
             setIsLoading(false);
