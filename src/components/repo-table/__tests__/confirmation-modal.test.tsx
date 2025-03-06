@@ -26,14 +26,8 @@ describe("ConfirmationModal", () => {
   const mockOnClose = vi.fn();
   const mockOnConfirm = vi.fn();
   const mockMutate = vi.fn();
-  const mockOctokit = {
-    rest: {
-      repos: {
-        delete: vi.fn().mockResolvedValue({}),
-        update: vi.fn().mockResolvedValue({}),
-      },
-    },
-  };
+  // We'll use this in future tests or remove if truly unused
+  // Removed mockOctokit as it's flagged as unused
 
   beforeEach(() => {
     vi.clearAllMocks();

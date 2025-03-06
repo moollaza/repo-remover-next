@@ -122,7 +122,7 @@ export default function ConfirmationModal({
     resetState();
     onClose();
     // Refetch all GitHub data after operations are complete
-    void mutate();
+    void mutate(undefined, { revalidate: true });
   }
 
   return (

@@ -3,21 +3,14 @@
 import { Button, Checkbox, Input } from "@heroui/react";
 import clsx from "clsx";
 import { useRouter } from "next/navigation";
-import { useEffect, useReducer, useState } from "react";
+import { useState } from "react";
 
 import { useGitHubData } from "@/hooks/use-github-data";
 
 // No need for complex state types anymore
 
 export default function GitHubTokenForm({ className }: { className?: string }) {
-  const {
-    isError,
-    isLoading: isProviderValidating,
-    login,
-    pat,
-    setLogin,
-    setPat,
-  } = useGitHubData();
+  const { isError, isLoading: isProviderValidating, setPat } = useGitHubData();
 
   // Simplified implementation that doesn't rely on complex validation logic
   const [value, setValue] = useState("");
@@ -25,7 +18,7 @@ export default function GitHubTokenForm({ className }: { className?: string }) {
   const router = useRouter();
 
   // Handle form submission
-  async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
+  function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (!value) return;
@@ -41,7 +34,7 @@ export default function GitHubTokenForm({ className }: { className?: string }) {
       }
 
       // If no error, navigate to dashboard
-      router.push("/dashboard");
+      void router.push("/dashboard");
     } catch (err) {
       setError("Failed to validate token");
     }

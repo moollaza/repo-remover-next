@@ -14,49 +14,47 @@ import {
 
 // Mock Octokit before importing the provider
 vi.mock("@octokit/rest", () => {
-  const graphqlPaginateMock = vi
-    .fn()
-    .mockImplementation(async (query, variables) => {
-      return {
-        user: {
-          avatarUrl: `https://example.com/${variables.login}.jpg`,
-          bioHTML: "<p>Bio</p>",
-          id: "user123",
-          login: variables.login,
-          name: `${variables.login} Name`,
-          repositories: {
-            nodes: [
-              {
-                description: "Test repository",
-                id: "repo123",
-                isArchived: false,
-                isDisabled: false,
-                isEmpty: false,
-                isFork: false,
-                isInOrganization: false,
-                isLocked: false,
-                isMirror: false,
-                isPrivate: false,
-                isTemplate: false,
-                name: "test-repo",
-                owner: {
-                  id: "user123",
-                  login: variables.login,
-                  url: `https://github.com/${variables.login}`,
-                },
-                updatedAt: "2023-01-01T00:00:00Z",
-                url: `https://github.com/${variables.login}/test-repo`,
-                viewerCanAdminister: true,
+  const graphqlPaginateMock = vi.fn().mockImplementation((query, variables) => {
+    return {
+      user: {
+        avatarUrl: `https://example.com/${variables.login}.jpg`,
+        bioHTML: "<p>Bio</p>",
+        id: "user123",
+        login: variables.login,
+        name: `${variables.login} Name`,
+        repositories: {
+          nodes: [
+            {
+              description: "Test repository",
+              id: "repo123",
+              isArchived: false,
+              isDisabled: false,
+              isEmpty: false,
+              isFork: false,
+              isInOrganization: false,
+              isLocked: false,
+              isMirror: false,
+              isPrivate: false,
+              isTemplate: false,
+              name: "test-repo",
+              owner: {
+                id: "user123",
+                login: variables.login,
+                url: `https://github.com/${variables.login}`,
               },
-            ],
-            pageInfo: {
-              endCursor: null,
-              hasNextPage: false,
+              updatedAt: "2023-01-01T00:00:00Z",
+              url: `https://github.com/${variables.login}/test-repo`,
+              viewerCanAdminister: true,
             },
+          ],
+          pageInfo: {
+            endCursor: null,
+            hasNextPage: false,
           },
         },
-      };
-    });
+      },
+    };
+  });
 
   return {
     Octokit: vi.fn().mockImplementation(() => ({
@@ -79,11 +77,11 @@ vi.mock("@octokit/rest", () => {
   };
 });
 
-import { GitHubDataProvider } from "../github-data-provider";
 import { useGitHubData } from "@/hooks/use-github-data";
 
+import { GitHubDataProvider } from "../github-data-provider";
+
 const validToken = "ghp_validtoken123456789012345678901234567890";
-const invalidToken = "invalid-token";
 
 // Setup MSW
 const server = setupServer(
@@ -104,6 +102,15 @@ const server = setupServer(
   // Handler for specific user endpoint
   http.get("https://api.github.com/users/:username", ({ params }) => {
     const { username } = params;
+
+    // Ensure username is a string
+    if (typeof username !== "string") {
+      return HttpResponse.json(
+        { message: "Invalid username" },
+        { status: 400 },
+      );
+    }
+
     return HttpResponse.json({
       avatar_url: `https://example.com/${username}.jpg`,
       id: "user123",
@@ -140,7 +147,7 @@ describe("GitHubDataProvider", () => {
 
     it("loads token from localStorage if available", async () => {
       // Setup localStorage before rendering
-      await act(async () => {
+      act(() => {
         localStorage.setItem("pat", validToken);
         localStorage.setItem("login", "testuser");
       });
@@ -169,7 +176,7 @@ describe("GitHubDataProvider", () => {
       expect(result.current.login).toBeNull();
 
       // Set token and login
-      await act(async () => {
+      act(() => {
         result.current.setPat(validToken);
         result.current.setLogin("testuser");
       });
@@ -199,7 +206,7 @@ describe("GitHubDataProvider", () => {
       expect(result.current.isAuthenticated).toBe(true);
 
       // Logout
-      await act(async () => {
+      act(() => {
         result.current.logout();
       });
 
@@ -220,7 +227,7 @@ describe("GitHubDataProvider", () => {
     it("fetches data when authenticated", async () => {
       // Clear any previous localStorage state
       localStorage.clear();
-      
+
       // Mock the GraphQL response
       server.use(
         http.post("https://api.github.com/graphql", () => {
@@ -269,26 +276,27 @@ describe("GitHubDataProvider", () => {
       );
 
       // Setup initial authenticated state within act
-      await act(async () => {
+      act(() => {
         localStorage.setItem("pat", validToken);
         localStorage.setItem("login", "testuser");
       });
 
-      let renderResult;
-      await act(async () => {
-        renderResult = renderHook(() => useGitHubData(), {
-          wrapper: GitHubDataProvider,
-        });
+      // Render the hook
+      const renderResult = renderHook(() => useGitHubData(), {
+        wrapper: GitHubDataProvider,
       });
-      
+
       const { result } = renderResult;
 
       // First verify authentication state is correct
-      await waitFor(() => {
-        expect(result.current.isAuthenticated).toBe(true);
-        expect(result.current.pat).toBe(validToken);
-        expect(result.current.login).toBe("testuser");
-      }, { timeout: 1000 });
+      await waitFor(
+        () => {
+          expect(result.current.isAuthenticated).toBe(true);
+          expect(result.current.pat).toBe(validToken);
+          expect(result.current.login).toBe("testuser");
+        },
+        { timeout: 1000 },
+      );
 
       // Then wait for data to be fetched
       await waitFor(
