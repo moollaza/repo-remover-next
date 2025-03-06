@@ -5,12 +5,12 @@ import { useSWRConfig } from "swr";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
 // Mock dependencies
-import { useGitHub } from "@/providers/github-provider";
+import { useGitHubData } from "@/providers/github-data-provider";
 
 import ConfirmationModal from "../confirmation-modal";
 
-vi.mock("@/providers/github-provider", () => ({
-  useGitHub: vi.fn(),
+vi.mock("@/providers/github-data-provider", () => ({
+  useGitHubData: vi.fn(),
 }));
 
 vi.mock("swr", () => ({
@@ -19,22 +19,28 @@ vi.mock("swr", () => ({
 
 describe("ConfirmationModal", () => {
   const mockRepos: Repository[] = [
-    { id: "1", name: "repo1" } as Repository,
-    { id: "2", name: "repo2" } as Repository,
+    { id: "1", name: "repo1", owner: { login: "testuser" } } as Repository,
+    { id: "2", name: "repo2", owner: { login: "testuser" } } as Repository,
   ];
 
   const mockOnClose = vi.fn();
   const mockOnConfirm = vi.fn();
   const mockMutate = vi.fn();
   const mockOctokit = {
-    // Add mock methods as needed
+    rest: {
+      repos: {
+        delete: vi.fn().mockResolvedValue({}),
+        update: vi.fn().mockResolvedValue({}),
+      },
+    },
   };
 
   beforeEach(() => {
     vi.clearAllMocks();
 
-    (useGitHub as jest.Mock).mockReturnValue({
-      octokit: mockOctokit,
+    (useGitHubData as jest.Mock).mockReturnValue({
+      login: "testuser",
+      pat: "test-pat",
     });
 
     (useSWRConfig as jest.Mock).mockReturnValue({

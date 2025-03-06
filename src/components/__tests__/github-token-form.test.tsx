@@ -4,13 +4,13 @@ import { useRouter } from "next/navigation";
 import { beforeEach, describe, expect, test } from "vitest";
 import { type Mock, vi } from "vitest";
 
-import { useGitHub } from "@/providers/github-provider";
+import { useGitHubData } from "@/providers/github-data-provider";
 
 import GitHubTokenForm from "../github-token-form";
 
 // Mock dependencies
-vi.mock("@/providers/github-provider", () => ({
-  useGitHub: vi.fn(),
+vi.mock("@/providers/github-data-provider", () => ({
+  useGitHubData: vi.fn(),
 }));
 
 vi.mock("next/navigation", () => ({
@@ -34,13 +34,13 @@ describe("GitHubTokenForm", () => {
     // Reset mocks before each test
     vi.clearAllMocks();
 
-    (useGitHub as Mock).mockReturnValue({
-      error: null,
-      isValidating: false,
-      remember: false,
+    (useGitHubData as Mock).mockReturnValue({
+      isError: false,
+      isLoading: false,
+      login: null,
+      pat: null,
+      setLogin: vi.fn(),
       setPat: mockSetPat,
-      setRemember: vi.fn(),
-      validateToken: mockValidateToken,
     });
 
     (useRouter as Mock).mockReturnValue({

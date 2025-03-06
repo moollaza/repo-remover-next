@@ -7,7 +7,7 @@ import React, { ReactNode } from "react";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
 // Mock dependencies
-import { useGitHub } from "@/providers/github-provider";
+import { useGitHubData } from "@/providers/github-data-provider";
 
 import RepoTable from "../repo-table";
 
@@ -23,9 +23,11 @@ vi.mock("@heroui/react", async () => {
   };
 });
 
-vi.mock("@/providers/github-provider", () => ({
-  default: ({ children }: { children: ReactNode }) => <>{children}</>,
-  useGitHub: vi.fn(),
+vi.mock("@/providers/github-data-provider", () => ({
+  GitHubDataProvider: ({ children }: { children: ReactNode }) => (
+    <>{children}</>
+  ),
+  useGitHubData: vi.fn(),
 }));
 
 // Mock ConfirmationModal
@@ -87,24 +89,19 @@ describe("RepoTable", () => {
     vi.clearAllMocks();
 
     // Mock useDisclosure to return an open modal
-    (useDisclosure as jest.Mock).mockReturnValue({
+    (useDisclosure as ReturnType<typeof vi.fn>).mockReturnValue({
       isOpen: true,
       onClose: vi.fn(),
       onOpen: vi.fn(),
     });
 
     // Mock GitHub context with all required properties
-    (useGitHub as jest.Mock).mockReturnValue({
-      error: null,
+    (useGitHubData as ReturnType<typeof vi.fn>).mockReturnValue({
+      isError: false,
       isLoading: false,
-      isValidating: false,
       login: faker.internet.userName(),
-      octokit: {},
       pat: "mock-pat",
-      remember: true,
       setPat: vi.fn(),
-      setRemember: vi.fn(),
-      validateToken: vi.fn().mockResolvedValue(true),
     });
   });
 
@@ -225,17 +222,12 @@ describe("RepoTable", () => {
   test("opens confirmation modal when action button is clicked", async () => {
     // Mock the GitHub context
     const mockLogin = faker.internet.userName();
-    (useGitHub as jest.Mock).mockReturnValue({
-      error: null,
+    (useGitHubData as ReturnType<typeof vi.fn>).mockReturnValue({
+      isError: false,
       isLoading: false,
-      isValidating: false,
       login: mockLogin,
-      octokit: {},
       pat: "mock-pat",
-      remember: true,
       setPat: vi.fn(),
-      setRemember: vi.fn(),
-      validateToken: vi.fn().mockResolvedValue(true),
     });
 
     // Set up the test
@@ -266,17 +258,12 @@ describe("RepoTable", () => {
   test("enables action button when repos are selected", () => {
     // Mock the GitHub context
     const mockLogin = faker.internet.userName();
-    (useGitHub as jest.Mock).mockReturnValue({
-      error: null,
+    (useGitHubData as ReturnType<typeof vi.fn>).mockReturnValue({
+      isError: false,
       isLoading: false,
-      isValidating: false,
       login: mockLogin,
-      octokit: {},
       pat: "mock-pat",
-      remember: true,
       setPat: vi.fn(),
-      setRemember: vi.fn(),
-      validateToken: vi.fn().mockResolvedValue(true),
     });
 
     // Mock React.useState to make selectedRepoKeys non-empty
