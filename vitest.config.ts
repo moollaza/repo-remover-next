@@ -7,6 +7,13 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      "@components/*": path.resolve(__dirname, "./src/components/*"),
+      "@contexts/*": path.resolve(__dirname, "./src/contexts/*"),
+      "@fixtures/*": path.resolve(__dirname, "./src/tests/fixtures/*"),
+      "@graphql/*": path.resolve(__dirname, "./src/graphql/*"),
+      "@hooks/*": path.resolve(__dirname, "./src/hooks/*"),
+      "@providers/*": path.resolve(__dirname, "./src/providers/*"),
+      "@utils/*": path.resolve(__dirname, "./src/utils/*"),
     },
   },
   test: {

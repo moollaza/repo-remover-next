@@ -14,8 +14,8 @@ import { useEffect, useState } from "react";
 import { useSWRConfig } from "swr";
 
 import { GET_REPOS } from "@/hooks/use-github-data";
-import { useGitHub } from "@providers/github-provider";
-import { processRepo } from "@utils/github-utils";
+import { useGitHub } from "@/providers/github-provider";
+import { processRepo } from "@/utils/github-utils";
 
 interface ConfirmationModalProps {
   action: "archive" | "delete";
@@ -45,7 +45,7 @@ interface RepoActionProgressProps {
 interface RepoActionResultProps {
   action: "archive" | "delete";
   count: number;
-  errors?: { error: Error; repository?: Repository; }[];
+  errors?: { error: Error; repository?: Repository }[];
   onClose: () => void;
 }
 
@@ -63,7 +63,7 @@ export default function ConfirmationModal({
   const [actionInProgress, setActionInProgress] = useState(false);
   const [actionCompleted, setActionCompleted] = useState(false);
   const [errors, setErrors] = useState<
-    { error: Error; repository?: Repository; }[]
+    { error: Error; repository?: Repository }[]
   >([]);
   const [username, setUsername] = useState("");
   const [isCorrectUsername, setIsCorrectUsername] = useState(false);
@@ -123,6 +123,7 @@ export default function ConfirmationModal({
   return (
     <Modal
       backdrop="blur"
+      data-testid="repo-confirmation-modal"
       isOpen={isOpen}
       onClose={onClose}
       scrollBehavior="inside"
