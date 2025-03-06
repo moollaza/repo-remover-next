@@ -4,12 +4,20 @@ import useSWR from "swr";
 import { GitHubContext, GitHubContextType } from "../contexts/github-context";
 import { fetchGitHubData } from "../utils/github-api";
 
+/**
+ * Props for the GitHubDataProvider component.
+ */
 interface GitHubProviderProps {
   children: React.ReactNode;
 }
 
 /**
  * A comprehensive GitHub provider that handles both authentication and data fetching.
+ * This provider manages:
+ * 1. Authentication state (login, PAT)
+ * 2. Data fetching with SWR for caching and revalidation
+ * 3. Local storage persistence
+ * 4. Actions for login, logout, and data refetching
  */
 export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
   children,

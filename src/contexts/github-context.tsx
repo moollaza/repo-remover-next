@@ -1,7 +1,10 @@
 import { Repository, User } from "@octokit/graphql-schema";
 import { createContext } from "react";
 
-// Unified GitHub context type
+/**
+ * Unified GitHub context type that provides authentication state, GitHub data, and actions.
+ * This context is used by the GitHubDataProvider and consumed by components via the useGitHubData hook.
+ */
 export interface GitHubContextType {
   // Auth state
   isAuthenticated: boolean;
@@ -21,7 +24,10 @@ export interface GitHubContextType {
   user: null | User;
 }
 
-// Create the context with default values
+/**
+ * React context for GitHub data and authentication.
+ * Initialized with default values that will be overridden by the GitHubDataProvider.
+ */
 export const GitHubContext = createContext<GitHubContextType>({
   // Auth defaults
   isAuthenticated: false,

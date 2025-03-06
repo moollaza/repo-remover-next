@@ -65,7 +65,14 @@ export interface RepositoriesResponse {
   };
 }
 
-// Function to fetch GitHub data
+/**
+ * Fetches GitHub user data and repositories using the GitHub API.
+ * Uses both REST API for user data and GraphQL for repositories to optimize performance.
+ *
+ * @param {[string, string]} [login, pat] - Array containing GitHub username and personal access token
+ * @returns {Promise<{ repos: Repository[], user: User }>} Object containing repositories and user data
+ * @throws {Error} If login or PAT is missing, or if API requests fail
+ */
 export async function fetchGitHubData([login, pat]: [string, string]) {
   if (!login || !pat) {
     throw new Error("Login and PAT are required");
