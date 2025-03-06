@@ -2,7 +2,7 @@ import { Button } from "@heroui/react";
 import { useState } from "react";
 import { useSWRConfig } from "swr";
 
-import { useGitHubData } from "@/providers/github-data-provider";
+import { useGitHubData } from "@/hooks/use-github-data";
 import { generateRepos } from "@utils/github-utils";
 
 /**

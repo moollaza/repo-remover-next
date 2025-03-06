@@ -25,7 +25,7 @@ import { Repository } from "@octokit/graphql-schema";
 import { formatDistanceToNow } from "date-fns";
 import { useCallback, useMemo, useState } from "react";
 
-import { useGitHubData } from "@/providers/github-data-provider";
+import { useGitHubData } from "@/hooks/use-github-data";
 
 import ConfirmationModal from "./confirmation-modal";
 

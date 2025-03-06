@@ -1,4 +1,4 @@
-import { useGitHubData } from "@/providers/github-data-provider";
+import { useGitHubData } from "@/hooks/use-github-data";
 import RepoTable from "@components/repo-table/repo-table";
 
 export default function DashboardPage() {

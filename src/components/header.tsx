@@ -16,7 +16,7 @@ import {
 import { usePathname } from "next/navigation";
 
 import { GenerateReposButton } from "@/components/generate-repos-button";
-import { useGitHubData } from "@/providers/github-data-provider";
+import { useGitHubData } from "@/hooks/use-github-data";
 
 const homeLinks = [
   { href: "#features", label: "Features" },

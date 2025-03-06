@@ -14,7 +14,7 @@ import { Octokit } from "@octokit/rest";
 import { useEffect, useState } from "react";
 import { useSWRConfig } from "swr";
 
-import { useGitHubData } from "@/providers/github-data-provider";
+import { useGitHubData } from "@/hooks/use-github-data";
 import { processRepo } from "@/utils/github-utils";
 
 interface ConfirmationModalProps {
