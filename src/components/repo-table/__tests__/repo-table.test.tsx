@@ -7,7 +7,7 @@ import React, { ReactNode } from "react";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
 // Mock dependencies
-import { useGitHubData } from "@/providers/github-data-provider";
+import { useGitHubData } from "@/hooks/use-github-data";
 
 import RepoTable from "../repo-table";
 
@@ -23,11 +23,14 @@ vi.mock("@heroui/react", async () => {
   };
 });
 
+vi.mock("@/hooks/use-github-data", () => ({
+  useGitHubData: vi.fn(),
+}));
+
 vi.mock("@/providers/github-data-provider", () => ({
   GitHubDataProvider: ({ children }: { children: ReactNode }) => (
     <>{children}</>
   ),
-  useGitHubData: vi.fn(),
 }));
 
 // Mock ConfirmationModal

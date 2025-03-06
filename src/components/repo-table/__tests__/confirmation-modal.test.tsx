@@ -5,11 +5,11 @@ import { useSWRConfig } from "swr";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
 // Mock dependencies
-import { useGitHubData } from "@/providers/github-data-provider";
+import { useGitHubData } from "@/hooks/use-github-data";
 
 import ConfirmationModal from "../confirmation-modal";
 
-vi.mock("@/providers/github-data-provider", () => ({
+vi.mock("@/hooks/use-github-data", () => ({
   useGitHubData: vi.fn(),
 }));
 
