@@ -4,12 +4,12 @@ import { useRouter } from "next/navigation";
 import { beforeEach, describe, expect, test } from "vitest";
 import { type Mock, vi } from "vitest";
 
-import { useGitHubData } from "@/providers/github-data-provider";
+import { useGitHubData } from "@/hooks/use-github-data";
 
 import GitHubTokenForm from "../github-token-form";
 
 // Mock dependencies
-vi.mock("@/providers/github-data-provider", () => ({
+vi.mock("@/hooks/use-github-data", () => ({
   useGitHubData: vi.fn(),
 }));
 
@@ -18,7 +18,6 @@ vi.mock("next/navigation", () => ({
 }));
 
 describe("GitHubTokenForm", () => {
-  const mockValidateToken = vi.fn();
   const mockSetPat = vi.fn();
   const mockRouterPush = vi.fn();
 
@@ -68,24 +67,19 @@ describe("GitHubTokenForm", () => {
     expect(submitButton).toBeDisabled();
   });
 
-  test("validates token on first submission", async () => {
-    mockValidateToken.mockResolvedValue(true);
-
+  test("sets PAT on form submission", async () => {
     const { input, submitButton } = setupForm();
 
     await userEvent.type(input, "valid-token");
     await userEvent.click(submitButton);
 
-    expect(mockValidateToken).toHaveBeenCalledWith("valid-token");
+    expect(mockSetPat).toHaveBeenCalledWith("valid-token");
   });
 
   test("navigates to dashboard after successful token validation", async () => {
-    mockValidateToken.mockResolvedValue(true);
-
     const { input, submitButton } = setupForm();
 
     await userEvent.type(input, "valid-token");
-    await userEvent.click(submitButton);
     await userEvent.click(submitButton);
 
     expect(mockSetPat).toHaveBeenCalledWith("valid-token");
@@ -93,13 +87,23 @@ describe("GitHubTokenForm", () => {
   });
 
   test("shows error for invalid token", async () => {
-    mockValidateToken.mockResolvedValue(false);
+    // Set isError to true to simulate validation failure
+    (useGitHubData as Mock).mockReturnValue({
+      isError: true,
+      isLoading: false,
+      login: null,
+      pat: null,
+      setLogin: vi.fn(),
+      setPat: mockSetPat,
+    });
 
     const { input, submitButton } = setupForm();
 
     await userEvent.type(input, "invalid-token");
     await userEvent.click(submitButton);
 
+    // Since we're setting error state directly in the component now,
+    // we need to wait for the error message to appear
     await waitFor(() => {
       expect(screen.getByText(/Failed to validate token/i)).toBeInTheDocument();
     });

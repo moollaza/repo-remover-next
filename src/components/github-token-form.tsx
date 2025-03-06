@@ -5,19 +5,9 @@ import clsx from "clsx";
 import { useRouter } from "next/navigation";
 import { useEffect, useReducer, useState } from "react";
 
-import { useGitHubData } from "@/providers/github-data-provider";
+import { useGitHubData } from "@/hooks/use-github-data";
 
-type Action =
-  | { error: string; type: "validate_error" }
-  | { type: "reset" }
-  | { type: "validate_start" }
-  | { type: "validate_success" };
-
-interface State {
-  error: null | string;
-  isValidated: boolean;
-  isValidating: boolean;
-}
+// No need for complex state types anymore
 
 export default function GitHubTokenForm({ className }: { className?: string }) {
   const {
@@ -29,69 +19,33 @@ export default function GitHubTokenForm({ className }: { className?: string }) {
     setPat,
   } = useGitHubData();
 
-  // For backward compatibility
-  const validateToken = async (token: string) => {
-    setPat(token);
-    return true;
-  };
-
-  const remember = true; // Always remember in the new implementation
-  const setRemember = () => {}; // No-op, always remembers
-  const providerError = isError ? "Error validating token" : null;
+  // Simplified implementation that doesn't rely on complex validation logic
   const [value, setValue] = useState("");
-  const [state, dispatch] = useReducer(reducer, {
-    error: null,
-    isValidated: false,
-    isValidating: false,
-  });
+  const [error, setError] = useState<null | string>(null);
   const router = useRouter();
 
+  // Handle form submission
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    // If not validated, trigger validation
-    if (!state.isValidated) {
-      await validateToken(value);
-      return;
-    }
+    if (!value) return;
 
-    // If validated, set PAT and navigate
-    if (state.isValidated) {
+    try {
+      // Set the PAT which will trigger validation in the provider
       setPat(value);
-      void router.push("/dashboard");
-    }
-  }
 
-  useEffect(() => {
-    let isSubscribed = true;
-
-    async function validate() {
-      if (value === "") {
-        dispatch({ type: "reset" });
+      // If there's an error, it will be set in the provider
+      if (isError) {
+        setError("Failed to validate token");
         return;
       }
 
-      dispatch({ type: "validate_start" });
-      const isValid = await validateToken(value);
-
-      if (!isSubscribed) return;
-
-      if (isValid) {
-        dispatch({ type: "validate_success" });
-      } else {
-        dispatch({
-          error: providerError ?? "Failed to validate token",
-          type: "validate_error",
-        });
-      }
+      // If no error, navigate to dashboard
+      router.push("/dashboard");
+    } catch (err) {
+      setError("Failed to validate token");
     }
-
-    void validate();
-
-    return () => {
-      isSubscribed = false;
-    };
-  }, [value, validateToken, providerError]);
+  }
 
   return (
     <form
@@ -104,10 +58,9 @@ export default function GitHubTokenForm({ className }: { className?: string }) {
         <Input
           autoComplete="off"
           className={"w-1/2"}
-          color={state.isValidated ? "success" : undefined}
-          errorMessage={state.error}
+          errorMessage={error}
           isClearable
-          isInvalid={Boolean(state.error)}
+          isInvalid={Boolean(error)}
           label="Please enter your Personal Access Token"
           name="personal-access-token"
           onChange={(e) => setValue(e.target.value)}
@@ -117,7 +70,7 @@ export default function GitHubTokenForm({ className }: { className?: string }) {
           value={value}
         />
 
-        <Checkbox isSelected={remember} onValueChange={setRemember}>
+        <Checkbox isSelected={true}>
           Remember me (token is stored locally, on your device)
         </Checkbox>
       </div>
@@ -125,31 +78,12 @@ export default function GitHubTokenForm({ className }: { className?: string }) {
       <Button
         className="w-20"
         color="primary"
-        isDisabled={!state.isValidated || value === ""}
-        isLoading={state.isValidating || isProviderValidating}
+        isDisabled={value === ""}
+        isLoading={isProviderValidating}
         type="submit"
       >
         Submit
       </Button>
     </form>
   );
-}
-
-function reducer(state: State, action: Action): State {
-  switch (action.type) {
-    case "reset":
-      return { error: null, isValidated: false, isValidating: false };
-    case "validate_error":
-      return {
-        error: action.error,
-        isValidated: false,
-        isValidating: false,
-      };
-    case "validate_start":
-      return { ...state, error: null, isValidating: true };
-    case "validate_success":
-      return { error: null, isValidated: true, isValidating: false };
-    default:
-      throw new Error("Unknown action type");
-  }
 }
