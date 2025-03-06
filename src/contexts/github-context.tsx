@@ -36,13 +36,21 @@ export const GitHubContext = createContext<GitHubContextType>({
   isLoading: false,
 
   login: null,
-  logout: () => {},
+  logout: () => {
+    // no-op
+  },
   pat: null,
-  refetchData: () => {},
+  refetchData: () => {
+    // no-op
+  },
 
   repos: null,
   // No-op actions
-  setLogin: () => {},
-  setPat: () => {},
+  setLogin: () => {
+    // no-op
+  },
+  setPat: () => {
+    // no-op
+  },
   user: null,
 });

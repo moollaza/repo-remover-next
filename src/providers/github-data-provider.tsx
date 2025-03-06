@@ -1,8 +1,9 @@
+import { Repository, User } from "@octokit/graphql-schema";
 import React, { useEffect, useState } from "react";
 import useSWR from "swr";
 
-import { GitHubContext, GitHubContextType } from "../contexts/github-context";
-import { fetchGitHubData } from "../utils/github-api";
+import { GitHubContext, GitHubContextType } from "@/contexts/github-context";
+import { fetchGitHubData } from "@/utils/github-api";
 
 /**
  * Props for the GitHubDataProvider component.
@@ -41,9 +42,23 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
   const isAuthenticated = Boolean(login && pat);
 
   // Data fetching with SWR
-  const { data, error, mutate } = useSWR(
-    isAuthenticated ? [login, pat] : null,
-    fetchGitHubData,
+  // Define the correct interface for our fetcher function
+  interface GitHubFetcherResult {
+    repos: Repository[];
+    user: User;
+  }
+  // We can still use type for simple type aliases - updated to handle null values
+  type GitHubFetcherKey = [string, string];
+
+  // Now we can properly type our SWR hook
+  const { data, error, mutate } = useSWR<
+    GitHubFetcherResult,
+    Error,
+    GitHubFetcherKey | null
+  >(
+    // Ensure we only pass non-null values to the fetcher
+    isAuthenticated && login && pat ? [login, pat] as GitHubFetcherKey : null,
+    fetchGitHubData as (key: GitHubFetcherKey) => Promise<GitHubFetcherResult>,
     {
       dedupingInterval: 60000, // 1 minute
       revalidateOnFocus: false,
@@ -87,11 +102,15 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
     login,
     logout,
     pat,
-    refetchData: () => mutate(),
-    repos: data?.repos || null,
+    // Define refetchData to match the void return type in the context
+    refetchData: () => {
+      // Use void operator to explicitly discard the Promise
+      void mutate();
+    },
+    repos: data?.repos ?? null,
     setLogin,
     setPat,
-    user: data?.user || null,
+    user: data?.user ?? null,
   };
 
   return (

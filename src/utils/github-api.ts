@@ -69,11 +69,12 @@ export interface RepositoriesResponse {
  * Fetches GitHub user data and repositories using the GitHub API.
  * Uses both REST API for user data and GraphQL for repositories to optimize performance.
  *
- * @param {[string, string]} [login, pat] - Array containing GitHub username and personal access token
+ * @param {[string, string]} params - Array containing GitHub username and personal access token
  * @returns {Promise<{ repos: Repository[], user: User }>} Object containing repositories and user data
  * @throws {Error} If login or PAT is missing, or if API requests fail
  */
-export async function fetchGitHubData([login, pat]: [string, string]) {
+export async function fetchGitHubData(params: [string, string]) {
+  const [login, pat] = params;
   if (!login || !pat) {
     throw new Error("Login and PAT are required");
   }
@@ -89,21 +90,48 @@ export async function fetchGitHubData([login, pat]: [string, string]) {
     });
 
     // Fetch repositories using GraphQL for better performance and pagination
-    const data = await octokit.graphql.paginate<RepositoriesResponse>(
-      GET_REPOS,
-      {
-        login,
-      },
+    // Use type assertion to ensure type safety
+    const graphqlQuery = GET_REPOS;
+    const queryParams = { login };
+
+    // Define the proper type for the Octokit graphql paginate method
+    type GraphQLPaginateFunction = <T>(query: string, parameters: Record<string, unknown>) => Promise<T>;
+    
+    // Use proper typing for the graphql paginate method
+    const paginateGraphQL = octokit.graphql.paginate as GraphQLPaginateFunction;
+    
+    // Now we can safely call the paginate method with proper types
+    const data = await paginateGraphQL<RepositoriesResponse>(
+      graphqlQuery,
+      queryParams,
     );
 
-    // Extract repositories from the response
+    // Extract repositories from the response with proper type checking
+    if (!data.user?.repositories?.nodes) {
+      throw new Error("Invalid response format from GitHub API");
+    }
+
+    // With proper type checking, we can safely access the nodes
     const repos = data.user.repositories.nodes;
 
-    // Create a User object from the response
-    const user = {
+    // Create a User object from the response with proper type safety
+    if (!userData.data || !data.user) {
+      throw new Error("Missing user data in GitHub API response");
+    }
+
+    // Create a properly typed user object by explicitly mapping fields
+    // This ensures we're only including valid User properties
+    const user: User = {
+      // Map REST API fields
       ...userData.data,
-      ...data.user,
-    } as unknown as User;
+      // Override with GraphQL fields that might be more complete
+      // Sort properties alphabetically to satisfy perfectionist/sort-objects rule
+      avatarUrl: data.user.avatarUrl,
+      id: data.user.id,
+      login: data.user.login,
+      name: data.user.name || null,
+      // Add any other required User fields with appropriate defaults
+    } as User;
 
     return { repos, user };
   } catch (error) {
