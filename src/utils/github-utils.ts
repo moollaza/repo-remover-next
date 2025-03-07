@@ -32,6 +32,26 @@ export async function generateRepos(
   }
 }
 
+export function isValidGitHubToken(token: string): boolean {
+  if (!token) return false;
+
+  // Special case for github_pat_ tokens
+  if (token.startsWith("github_pat_")) {
+    return token.length >= 40 && /^[a-zA-Z0-9_]+$/.test(token.slice(11));
+  }
+
+  // All other tokens start with 3-letter prefix + underscore and are exactly 40 chars
+  const standardPrefixes = ["ghp_", "gho_", "ghu_", "ghs_", "ghr_"];
+  const matchedPrefix = standardPrefixes.find((prefix) =>
+    token.startsWith(prefix),
+  );
+
+  if (!matchedPrefix) return false;
+  if (token.length !== 40) return false;
+
+  return /^[a-zA-Z0-9]+$/.test(token.slice(matchedPrefix.length));
+}
+
 export const archiveRepo = async (
   octokit: Octokit,
   repo: Repository,

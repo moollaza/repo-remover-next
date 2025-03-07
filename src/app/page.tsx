@@ -1,8 +1,11 @@
 "use client";
 
 import { Button, Link } from "@heroui/react";
+import { useRouter } from "next/navigation";
+import React from "react";
 
 import { ScrollingQuotes } from "@/components/scrolling-quotes";
+import { useGitHubData } from "@/hooks/use-github-data";
 import Footer from "@components/footer";
 import GitHubTokenForm from "@components/github-token-form";
 
@@ -172,14 +175,35 @@ export default function HomePage() {
               </li>
             </ol>
 
-            <div className="pt-10" id="github-token-form">
-              <GitHubTokenForm />
-            </div>
+            <TokenFormSection />
           </section>
         </div>
       </main>
 
       <Footer className="mt-auto" />
     </>
+  );
+}
+
+// TODO: Move this to a client component so this is a server component
+
+function TokenFormSection() {
+  const [value, setValue] = React.useState("");
+  const { setPat } = useGitHubData();
+  const router = useRouter();
+
+  const handleSubmit = (token: string) => {
+    setPat(token);
+    router.push("/dashboard");
+  };
+
+  return (
+    <div className="pt-10" id="github-token-form">
+      <GitHubTokenForm
+        onSubmit={handleSubmit}
+        onValueChange={setValue}
+        value={value}
+      />
+    </div>
   );
 }

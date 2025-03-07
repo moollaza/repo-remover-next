@@ -1,29 +1,37 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { useRouter } from "next/navigation";
-import { beforeEach, describe, expect, test } from "vitest";
-import { type Mock, vi } from "vitest";
+import { beforeEach, describe, expect, test, vi } from "vitest";
 
-import { useGitHubData } from "@/hooks/use-github-data";
+import { isValidGitHubToken } from "@/utils/github-utils";
 
 import GitHubTokenForm from "../github-token-form";
 
 // Mock dependencies
-vi.mock("@/hooks/use-github-data", () => ({
-  useGitHubData: vi.fn(),
+vi.mock("@octokit/rest", () => ({
+  Octokit: vi.fn().mockImplementation(() => ({
+    users: {
+      getAuthenticated: vi.fn().mockResolvedValue({
+        data: { login: "testuser" },
+      }),
+    },
+  })),
 }));
-
-vi.mock("next/navigation", () => ({
-  useRouter: vi.fn(),
-}));
+vi.mock("@/utils/github-utils");
 
 describe("GitHubTokenForm", () => {
-  const mockSetPat = vi.fn();
-  const mockRouterPush = vi.fn();
+  const mockOnValueChange = vi.fn();
+  const mockOnSubmit = vi.fn();
+  const user = userEvent.setup();
 
   // Helper function to render the form and get input and submit button
-  const setupForm = () => {
-    render(<GitHubTokenForm />);
+  const setupForm = (props = {}) => {
+    const defaultProps = {
+      onSubmit: mockOnSubmit,
+      onValueChange: mockOnValueChange,
+      value: "",
+    };
+
+    render(<GitHubTokenForm {...defaultProps} {...props} />);
     const input = screen.getByLabelText(/Personal Access Token/i);
     const submitButton = screen.getByRole("button", { name: /submit/i });
     return { input, submitButton };
@@ -33,18 +41,8 @@ describe("GitHubTokenForm", () => {
     // Reset mocks before each test
     vi.clearAllMocks();
 
-    (useGitHubData as Mock).mockReturnValue({
-      isError: false,
-      isLoading: false,
-      login: null,
-      pat: null,
-      setLogin: vi.fn(),
-      setPat: mockSetPat,
-    });
-
-    (useRouter as Mock).mockReturnValue({
-      push: mockRouterPush,
-    });
+    // Mock token validation to return true by default
+    vi.mocked(isValidGitHubToken).mockReturnValue(true);
   });
 
   test("renders input field and submit button", () => {
@@ -54,58 +52,68 @@ describe("GitHubTokenForm", () => {
     expect(submitButton).toBeInTheDocument();
   });
 
-  test("input changes update value", async () => {
+  test("calls onValueChange when input changes", async () => {
     const { input } = setupForm();
 
-    await userEvent.type(input, "test-token");
-    expect(input).toHaveValue("test-token");
+    await user.type(input, "t");
+    expect(mockOnValueChange).toHaveBeenCalledWith("t");
   });
 
-  test("submit button is disabled when input is empty", () => {
-    const { submitButton } = setupForm();
+  test("calls onValueChange with empty string when cleared", async () => {
+    setupForm({ value: "test-token" });
 
+    // Find and click the clear button
+    const clearButton = screen.getByRole("button", { name: /clear/i });
+    await user.click(clearButton);
+
+    expect(mockOnValueChange).toHaveBeenCalledWith("");
+  });
+
+  test("shows error for invalid token format", () => {
+    // Mock validation to return false
+    vi.mocked(isValidGitHubToken).mockReturnValue(false);
+
+    setupForm({ value: "invalid-token" });
+
+    expect(
+      screen.getByText(/Invalid GitHub token format/i),
+    ).toBeInTheDocument();
+  });
+
+  test("calls onSubmit when form is submitted with valid token", async () => {
+    const { submitButton } = setupForm({
+      value: "ghp_validtoken123456789012345678901234567890",
+    });
+
+    // Wait for API validation to complete and button to become enabled
+    await waitFor(() => expect(submitButton).not.toBeDisabled(), {
+      timeout: 2000,
+    });
+
+    // Submit the form
+    await user.click(submitButton);
+
+    // onSubmit should be called with the token
+    expect(mockOnSubmit).toHaveBeenCalledWith(
+      "ghp_validtoken123456789012345678901234567890",
+    );
+  });
+
+  test("doesn't call onSubmit when token is invalid", async () => {
+    // Mock validation to return false
+    vi.mocked(isValidGitHubToken).mockReturnValue(false);
+
+    const { submitButton } = setupForm({
+      value: "invalid-token",
+    });
+
+    // Button should be disabled
     expect(submitButton).toBeDisabled();
-  });
 
-  test("sets PAT on form submission", async () => {
-    const { input, submitButton } = setupForm();
+    // Try to submit the form
+    await user.click(submitButton);
 
-    await userEvent.type(input, "valid-token");
-    await userEvent.click(submitButton);
-
-    expect(mockSetPat).toHaveBeenCalledWith("valid-token");
-  });
-
-  test("navigates to dashboard after successful token validation", async () => {
-    const { input, submitButton } = setupForm();
-
-    await userEvent.type(input, "valid-token");
-    await userEvent.click(submitButton);
-
-    expect(mockSetPat).toHaveBeenCalledWith("valid-token");
-    expect(mockRouterPush).toHaveBeenCalledWith("/dashboard");
-  });
-
-  test("shows error for invalid token", async () => {
-    // Set isError to true to simulate validation failure
-    (useGitHubData as Mock).mockReturnValue({
-      isError: true,
-      isLoading: false,
-      login: null,
-      pat: null,
-      setLogin: vi.fn(),
-      setPat: mockSetPat,
-    });
-
-    const { input, submitButton } = setupForm();
-
-    await userEvent.type(input, "invalid-token");
-    await userEvent.click(submitButton);
-
-    // Since we're setting error state directly in the component now,
-    // we need to wait for the error message to appear
-    await waitFor(() => {
-      expect(screen.getByText(/Failed to validate token/i)).toBeInTheDocument();
-    });
+    // onSubmit should not be called
+    expect(mockOnSubmit).not.toHaveBeenCalled();
   });
 });

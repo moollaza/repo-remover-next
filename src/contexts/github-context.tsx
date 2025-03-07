@@ -2,25 +2,52 @@ import { Repository, User } from "@octokit/graphql-schema";
 import { createContext } from "react";
 
 /**
- * Unified GitHub context type that provides authentication state, GitHub data, and actions.
- * This context is used by the GitHubDataProvider and consumed by components via the useGitHubData hook.
+ * Context type for GitHub data and authentication
  */
 export interface GitHubContextType {
-  // Auth state
+  /**
+   * Whether the user is authenticated.
+   */
   isAuthenticated: boolean;
+  /**
+   * Whether there is an error with the authentication.
+   */
   isError: boolean;
-  // Data state
+  /**
+   * Whether the data is loading.
+   */
   isLoading: boolean;
-
+  /**
+   * The login of the user.
+   */
   login: null | string;
+  /**
+   * Logs out the user.
+   */
   logout: () => void;
+  /**
+   * The personal access token of the user.
+   */
   pat: null | string;
+  /**
+   * Refetches the data.
+   */
   refetchData: () => void;
-
+  /**
+   * The repositories of the user.
+   */
   repos: null | Repository[];
-  // Actions
+  /**
+   * Sets the login of the user.
+   */
   setLogin: (login: string) => void;
+  /**
+   * Sets the personal access token of the user.
+   */
   setPat: (pat: string) => void;
+  /**
+   * The user.
+   */
   user: null | User;
 }
 
@@ -29,12 +56,9 @@ export interface GitHubContextType {
  * Initialized with default values that will be overridden by the GitHubDataProvider.
  */
 export const GitHubContext = createContext<GitHubContextType>({
-  // Auth defaults
   isAuthenticated: false,
   isError: false,
-  // Data defaults
   isLoading: false,
-
   login: null,
   logout: () => {
     // no-op
@@ -43,9 +67,7 @@ export const GitHubContext = createContext<GitHubContextType>({
   refetchData: () => {
     // no-op
   },
-
   repos: null,
-  // No-op actions
   setLogin: () => {
     // no-op
   },
