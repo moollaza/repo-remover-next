@@ -1,5 +1,6 @@
 import { expect, Locator, Page } from "@playwright/test";
 
+import { mockOctokitInit } from "../utils/github-api-mocks";
 import { HomePage } from "./home";
 
 export class DashboardPage extends HomePage {
@@ -104,6 +105,27 @@ export class DashboardPage extends HomePage {
   }
 
   async setupMocks() {
-    await this.setupAuth();
+    await this.page.route("https://api.github.com/graphql", async (route) => {
+      const body = JSON.parse(route.request().postData() ?? "{}");
+      // We'll skip actual implementation here for brevity
+      await route.fulfill({
+        body: JSON.stringify({ data: { viewer: { login: "testuser" } } }),
+        status: 200,
+      });
+    });
+
+    // Set up mock for throttled Octokit initialization
+    await mockOctokitInit(this.page);
+
+    // Set authentication via route instead of localStorage
+    await this.page.route("**/api/auth/session", async (route) => {
+      await route.fulfill({
+        body: JSON.stringify({
+          accessToken: "ghp_validtoken123456789012345678901234567890",
+          user: { login: "testuser" },
+        }),
+        status: 200,
+      });
+    });
   }
 }

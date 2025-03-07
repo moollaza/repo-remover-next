@@ -1,10 +1,11 @@
 import { faker } from "@faker-js/faker";
 import { type Repository } from "@octokit/graphql-schema";
+import { paginateGraphQL } from "@octokit/plugin-paginate-graphql";
 import { throttling } from "@octokit/plugin-throttling";
 import { Octokit } from "@octokit/rest";
 
-// Create a custom Octokit class with the throttling plugin
-export const ThrottledOctokit = Octokit.plugin(throttling);
+// Create a custom Octokit class with the throttling plugin and pagination
+export const ThrottledOctokit = Octokit.plugin(throttling, paginateGraphQL);
 
 const DEBUG = false;
 
@@ -106,30 +107,31 @@ export const processRepo = async (
 };
 
 /**
- * Creates a throttled Octokit instance with standardized rate limiting options
+ * Creates a throttled Octokit instance with pagination support
  * @param token GitHub Personal Access Token
- * @returns Throttled Octokit instance
+ * @returns Octokit instance with throttling and pagination
  */
-export function createThrottledOctokit(token: string): Octokit {
+export function createThrottledOctokit(
+  token: string,
+): InstanceType<typeof ThrottledOctokit> {
+  // Create a custom Octokit instance with the token and throttling
   return new ThrottledOctokit({
     auth: token,
     throttle: {
-      onRateLimit: (retryAfter, options, octokitInstance, retryCount) => {
-        // Retry once, then give up
+      onRateLimit: (_retryAfter, _options, _octokitInstance, retryCount) => {
+        // Otherwise retry once, then give up
         if (retryCount < 1) {
-          DEBUG &&
-            console.log(`Rate limited, retrying after ${retryAfter} seconds`);
+          if (DEBUG) console.log("[Throttle] Rate limited - retrying once");
           return true;
         }
-        DEBUG &&
-          console.log(`Rate limited, giving up after ${retryCount} retries`);
+        if (DEBUG) console.log("[Throttle] Rate limited - giving up");
         return false;
       },
-      onSecondaryRateLimit: (retryAfter, options) => {
+      onSecondaryRateLimit: () => {
         // Don't retry secondary rate limits (abuse detection)
-        DEBUG &&
+        if (DEBUG)
           console.log(
-            `Secondary rate limit detected for ${options.method} ${options.url}`,
+            "[Throttle] Secondary rate limit detected - not retrying",
           );
         return false;
       },

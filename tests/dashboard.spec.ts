@@ -14,6 +14,7 @@ test.describe("Dashboard Page", () => {
 
   test.beforeEach(async ({ page }) => {
     dashboard = new DashboardPage(page);
+    // Setup mocks for Octokit and GitHub API
     await dashboard.setupMocks();
     await mockGraphQLRepos(page);
     await dashboard.goto();

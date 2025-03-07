@@ -7,16 +7,16 @@ import { isValidGitHubToken } from "@/utils/github-utils";
 import GitHubTokenForm from "../github-token-form";
 
 // Mock dependencies
-vi.mock("@octokit/rest", () => ({
-  Octokit: vi.fn().mockImplementation(() => ({
+vi.mock("@/utils/github-utils", () => ({
+  createThrottledOctokit: vi.fn().mockImplementation(() => ({
     users: {
       getAuthenticated: vi.fn().mockResolvedValue({
         data: { login: "testuser" },
       }),
     },
   })),
+  isValidGitHubToken: vi.fn(),
 }));
-vi.mock("@/utils/github-utils");
 
 describe("GitHubTokenForm", () => {
   const mockOnValueChange = vi.fn();

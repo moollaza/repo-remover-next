@@ -44,8 +44,9 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
   // Data fetching with SWR
   // Define the correct interface for our fetcher function
   interface GitHubFetcherResult {
-    repos: Repository[];
-    user: User;
+    error: Error | null;
+    repos: null | Repository[];
+    user: null | User;
   }
   // We can still use type for simple type aliases - updated to handle null values
   type GitHubFetcherKey = [string, string];
@@ -58,7 +59,10 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
   >(
     // We only need the PAT to be set for authentication, login can be determined from the API
     pat ? ([login ?? "", pat] as GitHubFetcherKey) : null,
-    fetchGitHubData as (key: GitHubFetcherKey) => Promise<GitHubFetcherResult>,
+    // Cast to expected return type
+    fetchGitHubData as unknown as (
+      key: GitHubFetcherKey,
+    ) => Promise<GitHubFetcherResult>,
     {
       dedupingInterval: 60000, // 1 minute
       onError: () => {
@@ -77,7 +81,11 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
 
   // Derived data state
   const isLoading = isAuthenticated && !data && !error;
-  const isError = Boolean(error);
+  const isError = Boolean(error ?? data?.error);
+
+  // Handle data loading and errors
+  const repos = isError ? null : (data?.repos ?? null);
+  const user = isError ? null : (data?.user ?? null);
 
   // Actions with localStorage persistence
   const setLogin = (newLogin: string) => {
@@ -116,10 +124,10 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
       // Use void operator to explicitly discard the Promise
       void mutate();
     },
-    repos: data?.repos ?? null,
+    repos,
     setLogin,
     setPat,
-    user: data?.user ?? null,
+    user,
   };
 
   return (

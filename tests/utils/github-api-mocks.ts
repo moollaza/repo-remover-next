@@ -87,3 +87,13 @@ export async function mockGraphQLRepos(page: Page) {
     }
   });
 }
+
+// Add support for throttled Octokit instance in mocks
+export async function mockOctokitInit(page: Page) {
+  await page.route("https://api.github.com/user", async (route) => {
+    void route.fulfill({
+      body: JSON.stringify(mockUser),
+      status: 200,
+    });
+  });
+}
