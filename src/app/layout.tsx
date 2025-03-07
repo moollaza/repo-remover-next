@@ -5,7 +5,7 @@ import { Inter } from "next/font/google";
 import "@fortawesome/fontawesome-svg-core/styles.css";
 
 import { Providers } from "@/providers/providers";
-import { Header } from "@components/header";
+import Header from "@components/header";
 import "@/globals.css";
 
 config.autoAddCss = false;
