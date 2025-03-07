@@ -1,6 +1,5 @@
 import { expect, Locator, Page } from "@playwright/test";
 
-import { mockUser } from "../fixtures/github-mocks";
 import { HomePage } from "./home";
 
 export class DashboardPage extends HomePage {

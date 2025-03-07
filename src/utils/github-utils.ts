@@ -1,6 +1,10 @@
 import { faker } from "@faker-js/faker";
 import { type Repository } from "@octokit/graphql-schema";
+import { throttling } from "@octokit/plugin-throttling";
 import { Octokit } from "@octokit/rest";
+
+// Create a custom Octokit class with the throttling plugin
+export const ThrottledOctokit = Octokit.plugin(throttling);
 
 const DEBUG = false;
 
@@ -100,3 +104,35 @@ export const processRepo = async (
     await deleteRepo(octokit, repo);
   }
 };
+
+/**
+ * Creates a throttled Octokit instance with standardized rate limiting options
+ * @param token GitHub Personal Access Token
+ * @returns Throttled Octokit instance
+ */
+export function createThrottledOctokit(token: string): Octokit {
+  return new ThrottledOctokit({
+    auth: token,
+    throttle: {
+      onRateLimit: (retryAfter, options, octokitInstance, retryCount) => {
+        // Retry once, then give up
+        if (retryCount < 1) {
+          DEBUG &&
+            console.log(`Rate limited, retrying after ${retryAfter} seconds`);
+          return true;
+        }
+        DEBUG &&
+          console.log(`Rate limited, giving up after ${retryCount} retries`);
+        return false;
+      },
+      onSecondaryRateLimit: (retryAfter, options) => {
+        // Don't retry secondary rate limits (abuse detection)
+        DEBUG &&
+          console.log(
+            `Secondary rate limit detected for ${options.method} ${options.url}`,
+          );
+        return false;
+      },
+    },
+  });
+}

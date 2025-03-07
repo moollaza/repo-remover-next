@@ -1,11 +1,13 @@
 "use client";
 
 import { Button, Checkbox, Input, type InputProps } from "@heroui/react";
-import { Octokit } from "@octokit/rest";
 import clsx from "clsx";
 import { useEffect, useState } from "react";
 
-import { isValidGitHubToken } from "@/utils/github-utils";
+import {
+  createThrottledOctokit,
+  isValidGitHubToken,
+} from "@/utils/github-utils";
 
 interface GitHubTokenFormProps {
   className?: string;
@@ -51,7 +53,7 @@ export default function GitHubTokenForm({
       setError(null);
 
       try {
-        const octokit = new Octokit({ auth: value });
+        const octokit = createThrottledOctokit(value);
         const { data: userData } = await octokit.users.getAuthenticated();
 
         if (isMounted) {

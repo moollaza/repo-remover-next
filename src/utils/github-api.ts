@@ -1,5 +1,6 @@
 import { Repository, User } from "@octokit/graphql-schema";
-import { Octokit } from "@octokit/rest";
+
+import { createThrottledOctokit } from "./github-utils";
 
 // GraphQL query to get repositories
 export const GET_REPOS = `
@@ -98,10 +99,8 @@ export async function fetchGitHubData(params: [string, string]) {
     throw new Error("PAT is required");
   }
 
-  // Create Octokit instance with the token
-  const octokit = new Octokit({
-    auth: pat,
-  });
+  // Create Octokit instance with the token and throttling
+  const octokit = createThrottledOctokit(pat);
 
   // First, we need to get the authenticated user's login if it's not provided
   let userLogin = login;

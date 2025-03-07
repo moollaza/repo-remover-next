@@ -10,12 +10,11 @@ import {
   Spacer,
 } from "@heroui/react";
 import { Repository } from "@octokit/graphql-schema";
-import { Octokit } from "@octokit/rest";
 import { useEffect, useState } from "react";
 import { useSWRConfig } from "swr";
 
 import { useGitHubData } from "@/hooks/use-github-data";
-import { processRepo } from "@/utils/github-utils";
+import { createThrottledOctokit, processRepo } from "@/utils/github-utils";
 
 interface ConfirmationModalProps {
   action: "archive" | "delete";
@@ -63,7 +62,7 @@ export default function ConfirmationModal({
   const { pat } = useGitHubData();
 
   // Create an Octokit instance with the PAT
-  const octokit = pat ? new Octokit({ auth: pat }) : null;
+  const octokit = pat ? createThrottledOctokit(pat) : null;
   const [actionInProgress, setActionInProgress] = useState(false);
   const [actionCompleted, setActionCompleted] = useState(false);
   const [errors, setErrors] = useState<

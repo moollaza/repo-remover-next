@@ -1,10 +1,9 @@
 import { Button } from "@heroui/react";
-import { Octokit } from "@octokit/rest";
 import { useState } from "react";
 import { useSWRConfig } from "swr";
 
 import { useGitHubData } from "@/hooks/use-github-data";
-import { generateRepos } from "@utils/github-utils";
+import { createThrottledOctokit, generateRepos } from "@/utils/github-utils";
 
 /**
  * This component generates random repositories for the user
@@ -18,7 +17,7 @@ export function GenerateReposButton() {
   const { pat } = useGitHubData();
 
   // Create an Octokit instance with the PAT
-  const octokit = pat ? new Octokit({ auth: pat }) : null;
+  const octokit = pat ? createThrottledOctokit(pat) : null;
   const [isLoading, setIsLoading] = useState(false);
 
   if (process.env.NODE_ENV !== "development" || !octokit) {
