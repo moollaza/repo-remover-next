@@ -39,7 +39,7 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
   }, []);
 
   // Derived authentication state
-  const isAuthenticated = Boolean(login && pat);
+  const isAuthenticated = Boolean(pat);
 
   // Data fetching with SWR
   // Define the correct interface for our fetcher function
@@ -56,11 +56,20 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
     Error,
     GitHubFetcherKey | null
   >(
-    // Ensure we only pass non-null values to the fetcher
-    isAuthenticated && login && pat ? [login, pat] as GitHubFetcherKey : null,
+    // We only need the PAT to be set for authentication, login can be determined from the API
+    pat ? ([login ?? "", pat] as GitHubFetcherKey) : null,
     fetchGitHubData as (key: GitHubFetcherKey) => Promise<GitHubFetcherResult>,
     {
       dedupingInterval: 60000, // 1 minute
+      onError: () => {
+        // TODO: Handle error
+      },
+      onSuccess: (data) => {
+        // Set the login from the API response if it wasn't provided
+        if (data?.user?.login && !login) {
+          setLogin(data.user.login);
+        }
+      },
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
     },

@@ -19,27 +19,22 @@ export const GET_REPOS = `
           id
           name
           description
-          url
           isPrivate
           isArchived
-          isDisabled
-          isEmpty
           isFork
           isTemplate
-          isLocked
+          isDisabled
           isMirror
+          isEmpty
+          isLocked
           isInOrganization
-          parent {
-            id
-            name
-            url
-          }
           owner {
             id
             login
             url
           }
           updatedAt
+          url
           viewerCanAdminister
         }
       }
@@ -47,7 +42,31 @@ export const GET_REPOS = `
   }
 `;
 
-// Response type for the GraphQL query
+// GraphQL query to get current user
+export const GET_CURRENT_USER = `
+  query GetCurrentUser {
+    viewer {
+      id
+      login
+      name
+      avatarUrl
+      bioHTML
+    }
+  }
+`;
+
+// Define the response type for the current user query
+export interface CurrentUserResponse {
+  viewer: {
+    avatarUrl: string;
+    bioHTML: string;
+    id: string;
+    login: string;
+    name: string;
+  };
+}
+
+// Define the response type for the GraphQL query
 export interface RepositoriesResponse {
   user: {
     avatarUrl: string;
@@ -66,76 +85,82 @@ export interface RepositoriesResponse {
 }
 
 /**
- * Fetches GitHub user data and repositories using the GitHub API.
- * Uses both REST API for user data and GraphQL for repositories to optimize performance.
+ * Fetches GitHub data for a user, including repositories.
  *
  * @param {[string, string]} params - Array containing GitHub username and personal access token
  * @returns {Promise<{ repos: Repository[], user: User }>} Object containing repositories and user data
- * @throws {Error} If login or PAT is missing, or if API requests fail
+ * @throws {Error} If PAT is missing, or if API requests fail
  */
 export async function fetchGitHubData(params: [string, string]) {
   const [login, pat] = params;
-  if (!login || !pat) {
-    throw new Error("Login and PAT are required");
+
+  if (!pat) {
+    throw new Error("PAT is required");
   }
 
+  // Create Octokit instance with the token
   const octokit = new Octokit({
     auth: pat,
   });
 
-  try {
-    // Fetch user data
-    const userData = await octokit.rest.users.getByUsername({
-      username: login,
+  // First, we need to get the authenticated user's login if it's not provided
+  let userLogin = login;
+  let userData;
+
+  if (!userLogin) {
+    // Get the authenticated user's login using REST API
+    const userResponse = await octokit.rest.users.getAuthenticated();
+    userLogin = userResponse.data.login;
+    userData = userResponse.data;
+  } else {
+    // If login is provided, fetch that user's data
+    const userResponse = await octokit.rest.users.getByUsername({
+      username: userLogin,
     });
-
-    // Fetch repositories using GraphQL for better performance and pagination
-    // Use type assertion to ensure type safety
-    const graphqlQuery = GET_REPOS;
-    const queryParams = { login };
-
-    // Define the proper type for the Octokit graphql paginate method
-    type GraphQLPaginateFunction = <T>(query: string, parameters: Record<string, unknown>) => Promise<T>;
-    
-    // Use proper typing for the graphql paginate method
-    const paginateGraphQL = octokit.graphql.paginate as GraphQLPaginateFunction;
-    
-    // Now we can safely call the paginate method with proper types
-    const data = await paginateGraphQL<RepositoriesResponse>(
-      graphqlQuery,
-      queryParams,
-    );
-
-    // Extract repositories from the response with proper type checking
-    if (!data.user?.repositories?.nodes) {
-      throw new Error("Invalid response format from GitHub API");
-    }
-
-    // With proper type checking, we can safely access the nodes
-    const repos = data.user.repositories.nodes;
-
-    // Create a User object from the response with proper type safety
-    if (!userData.data || !data.user) {
-      throw new Error("Missing user data in GitHub API response");
-    }
-
-    // Create a properly typed user object by explicitly mapping fields
-    // This ensures we're only including valid User properties
-    const user: User = {
-      // Map REST API fields
-      ...userData.data,
-      // Override with GraphQL fields that might be more complete
-      // Sort properties alphabetically to satisfy perfectionist/sort-objects rule
-      avatarUrl: data.user.avatarUrl,
-      id: data.user.id,
-      login: data.user.login,
-      name: data.user.name || null,
-      // Add any other required User fields with appropriate defaults
-    } as User;
-
-    return { repos, user };
-  } catch (error) {
-    console.error("Error fetching GitHub data:", error);
-    throw error;
+    userData = userResponse.data;
   }
+
+  // Now fetch repositories for the user
+  // Use REST API for repositories as it's more reliable
+  const reposResponse = await octokit.rest.repos.listForAuthenticatedUser({
+    per_page: 100,
+  });
+
+  // Convert the REST API response to Repository objects
+  const repos = reposResponse.data.map(
+    (repo) =>
+      ({
+        description: repo.description,
+        id: repo.id.toString(),
+        isArchived: repo.archived,
+        isDisabled: repo.disabled ?? false,
+        isEmpty: repo.size === 0,
+        isFork: repo.fork,
+        isInOrganization: repo.owner?.type === "Organization",
+        isLocked: false, // Default to false as we can't reliably determine this
+        isMirror: Boolean(repo.mirror_url),
+        isPrivate: repo.private,
+        isTemplate: repo.is_template ?? false,
+        name: repo.name,
+        owner: {
+          id: repo.owner.id.toString(),
+          login: repo.owner.login,
+          url: repo.owner.html_url,
+        },
+        updatedAt: repo.updated_at,
+        url: repo.html_url,
+        viewerCanAdminister: repo.permissions?.admin ?? true,
+      }) as Repository,
+  );
+
+  // Create a User object
+  const user = {
+    avatarUrl: userData.avatar_url,
+    id: userData.id.toString(),
+    login: userData.login,
+    name: userData.name ?? userData.login,
+    url: userData.html_url,
+  } as User;
+
+  return { repos, user };
 }
