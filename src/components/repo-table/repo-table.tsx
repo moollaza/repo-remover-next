@@ -1,6 +1,11 @@
-import { ArrowTopRightOnSquareIcon } from "@heroicons/react/16/solid";
+import {
+  ArrowTopRightOnSquareIcon,
+  ChevronDownIcon,
+} from "@heroicons/react/16/solid";
 import {
   Button,
+  ButtonGroup,
+  Chip,
   Dropdown,
   DropdownItem,
   DropdownMenu,
@@ -23,7 +28,7 @@ import {
 } from "@heroui/react";
 import { Repository } from "@octokit/graphql-schema";
 import { formatDistanceToNow } from "date-fns";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useGitHubData } from "@/hooks/use-github-data";
 
@@ -87,12 +92,22 @@ export default function RepoTable({
   const [selectedRepoKeys, setSelectedRepoKeys] = useState<Selection>(
     new Set(),
   );
-  const [selectedRepoAction] = useState<SelectionSet>(
+  const [selectedRepoAction, setSelectedRepoAction] = useState<SelectionSet>(
     new Set([REPO_ACTIONS[0].key]),
   );
 
   // For the confirmation modal
   const { isOpen, onClose, onOpen } = useDisclosure();
+
+  // For debugging purposes
+  useEffect(() => {
+    if (repos?.length) {
+      (window as unknown as { repos: typeof repos } & Window).repos = repos;
+      console.group("Repos");
+      console.table(repos);
+      console.groupEnd();
+    }
+  }, [repos]);
 
   // Build the list of selected repos based on the keys
   const selectedRepos = useMemo(() => {
@@ -180,9 +195,23 @@ export default function RepoTable({
     setCurrentPage(1);
   }, []);
 
-  const handleRepoActionClick = useCallback(() => {
+  const handleRepoActionClick = () => {
+    if (selectedRepoAction.has("delete")) {
+      console.log("Deleting selected repos:", Array.from(selectedRepoKeys));
+    } else if (selectedRepoAction.has("archive")) {
+      console.log("Archiving selected repos:", Array.from(selectedRepoKeys));
+    }
+
+    // Open the confirmation modal
     onOpen();
-  }, [onOpen]);
+  };
+
+  const handleRepoActionChange = useCallback(
+    (keys: Selection) => {
+      setSelectedRepoAction(keys as SelectionSet);
+    },
+    [setSelectedRepoAction],
+  );
 
   const handleConfirm = useCallback(() => {
     // Placeholder for actual confirmation logic
@@ -207,40 +236,38 @@ export default function RepoTable({
       </h1>
 
       <div className="space-x-10 flex">
+        {/* SEARCH INPUT */}
         <Input
           data-testid="repo-search-input"
+          label="Search"
           onValueChange={setSearchQuery}
           placeholder="Search by name or description"
           value={searchQuery}
         />
 
-        <Dropdown>
-          <DropdownTrigger data-testid="repo-types-select">
-            <Button variant="bordered">Repo Types</Button>
-          </DropdownTrigger>
-          <DropdownMenu
-            aria-label="Repo Types"
-            onSelectionChange={handleRepoTypesFilterChange}
-            selectedKeys={repoTypesFilter}
-            selectionMode="multiple"
-          >
-            {REPO_TYPES.map((type) => (
-              <DropdownItem
-                data-testid={`repo-type-${type.key}`}
-                key={type.key}
-                textValue={type.label}
-              >
-                {type.label}
-              </DropdownItem>
-            ))}
-          </DropdownMenu>
-        </Dropdown>
+        {/* REPO TYPE SELECTOR */}
+        <Select
+          defaultSelectedKeys={new Set(REPO_TYPES.map((type) => type.key))}
+          items={REPO_TYPES}
+          label="Repo types to show"
+          onSelectionChange={handleRepoTypesFilterChange}
+          placeholder="Filter by type"
+          selectedKeys={repoTypesFilter}
+          selectionMode="multiple"
+        >
+          {(repoType) => (
+            <SelectItem key={repoType.key}>{repoType.label}</SelectItem>
+          )}
+        </Select>
 
+        {/* PER PAGE SELECTOR */}
         <Select
           data-testid="per-page-select"
           label="Repos per page"
           onSelectionChange={handlePerPageChange}
+          placeholder="Per page"
           selectedKeys={new Set([perPage.toString()])}
+          selectionMode="single"
         >
           {PER_PAGE_OPTIONS.map((option) => (
             <SelectItem
@@ -254,72 +281,140 @@ export default function RepoTable({
         </Select>
       </div>
 
+      <div className="flex">
+        {/* ACTION BUTTONS */}
+        <ButtonGroup>
+          <Button
+            color={selectedRepoAction.has("delete") ? "danger" : "warning"}
+            isDisabled={
+              selectedRepoKeys !== "all" && selectedRepoKeys.size === 0
+            }
+            onPress={handleRepoActionClick}
+            size="lg"
+          >
+            {REPO_ACTIONS.find((action) => selectedRepoAction.has(action.key))
+              ?.label ?? "Select Action"}
+          </Button>
+          <Dropdown placement="bottom-end" size="lg">
+            <DropdownTrigger>
+              <Button
+                color={selectedRepoAction.has("delete") ? "danger" : "warning"}
+                isIconOnly
+                size="lg"
+              >
+                <ChevronDownIcon className="h-4 w-4" />
+              </Button>
+            </DropdownTrigger>
+            <DropdownMenu
+              aria-label="Repo actions"
+              className="max-w-[300px]"
+              disallowEmptySelection
+              onSelectionChange={handleRepoActionChange}
+              selectedKeys={selectedRepoAction}
+              selectionMode="single"
+            >
+              {REPO_ACTIONS.map((action) => (
+                <DropdownItem description={action.description} key={action.key}>
+                  {action.label}
+                </DropdownItem>
+              ))}
+            </DropdownMenu>
+          </Dropdown>
+        </ButtonGroup>
+      </div>
+
+      {/* TABLE */}
       <Table
-        aria-label="Repositories table"
+        aria-label="GitHub repositories table"
+        bottomContent={
+          <div className="flex w-full justify-center">
+            {/* PAGINATION */}
+            <Pagination
+              onChange={setCurrentPage}
+              page={currentPage}
+              showControls
+              showShadow
+              total={Math.max(1, Math.ceil(filteredRepos.length / perPage))}
+            />
+          </div>
+        }
+        className="mb-5"
+        isStriped
         onSelectionChange={setSelectedRepoKeys}
         onSortChange={setSortDescriptor}
+        removeWrapper
         selectedKeys={selectedRepoKeys}
         selectionMode="multiple"
         sortDescriptor={sortDescriptor}
       >
         <TableHeader columns={COLUMN_ORDER}>
           {(column) => (
-            <TableColumn allowsSorting key={column.key}>
+            <TableColumn
+              allowsSorting
+              className={column.className}
+              key={column.key}
+            >
               {column.label}
             </TableColumn>
           )}
         </TableHeader>
-        <TableBody items={paginatedRepos}>
+
+        {/* TABLE BODY */}
+        <TableBody
+          emptyContent={"No repos to display."}
+          isLoading={isLoading}
+          items={paginatedRepos}
+          loadingContent={<Spinner label="Loading..." />}
+        >
           {(repo) => (
             <TableRow key={repo.id}>
               <TableCell>
-                <Link
-                  data-testid="repo-link"
-                  href={repo.url as string}
-                  rel="noopener noreferrer"
-                  target="_blank"
-                >
-                  {repo.name}
-                  <ArrowTopRightOnSquareIcon className="h-5 w-5 mx-1" />
-                </Link>
+                <div>
+                  <div className="mb-2">
+                    <Link
+                      anchorIcon={
+                        <ArrowTopRightOnSquareIcon className="h-5 w-5 mx-1" />
+                      }
+                      className="font-semibold text-xl"
+                      href={repo.url as string}
+                      isExternal
+                      showAnchorIcon
+                    >
+                      {repo.name}
+                    </Link>
+                  </div>
+                  <div className="flex gap-2 mb-5">
+                    {repo.isPrivate && <Chip size="sm">Private</Chip>}
+                    {repo.isInOrganization && (
+                      <Chip size="sm">Organization</Chip>
+                    )}
+                    {repo.isFork && <Chip size="sm">Fork</Chip>}
+                    {repo.isArchived && <Chip size="sm">Archived</Chip>}
+                  </div>
+                  <div>{repo.description ?? "No description"}</div>
+                </div>
               </TableCell>
               <TableCell>
-                {repo.updatedAt
-                  ? formatDistanceToNow(new Date(repo.updatedAt as string), {
-                      addSuffix: true,
-                    })
-                  : "No update date"}
+                <span
+                  title={new Date(repo.updatedAt as string).toLocaleString(
+                    navigator.language,
+                    {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    },
+                  )}
+                >
+                  {formatDistanceToNow(new Date(repo.updatedAt as string))}
+                </span>
               </TableCell>
             </TableRow>
           )}
         </TableBody>
       </Table>
 
-      <div className="flex justify-between items-center">
-        <Pagination
-          onChange={setCurrentPage}
-          page={currentPage}
-          showControls
-          total={Math.ceil(sortedRepos.length / perPage)}
-        />
-
-        <Button
-          color="warning"
-          data-testid="repo-action-button"
-          isDisabled={
-            selectedRepoKeys === "all" ? false : selectedRepoKeys.size === 0
-          }
-          onPress={handleRepoActionClick}
-        >
-          {
-            REPO_ACTIONS.find(
-              (action) => action.key === Array.from(selectedRepoAction)[0],
-            )?.label
-          }
-        </Button>
-      </div>
-
-      {login && (
+      {/* CONFIRMATION MODAL */}
+      {repos && selectedRepos && login && (
         <ConfirmationModal
           action={Array.from(selectedRepoAction)[0] as "archive" | "delete"}
           data-testid="repo-confirmation-modal"
