@@ -41,7 +41,7 @@ export default function Header() {
   }
 
   return (
-    <Navbar isBordered maxWidth="xl" position="static">
+    <Navbar maxWidth="full" position="static">
       <NavbarBrand>
         <Link className="font-extrabold text-inherit text-xl" href="/">
           Repo Remover

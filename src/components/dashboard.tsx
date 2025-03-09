@@ -7,7 +7,7 @@ export default function Dashboard() {
   const { isError, isLoading, repos } = useGitHubData();
 
   return (
-    <div className="mt-6">
+    <div>
       {isError && (
         <Alert className="mb-4" color="danger">
           Error loading repositories. Please check your token and try again.

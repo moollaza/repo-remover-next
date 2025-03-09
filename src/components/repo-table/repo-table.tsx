@@ -1,6 +1,6 @@
 import {
-  ArrowTopRightOnSquareIcon,
   ChevronDownIcon,
+  MagnifyingGlassIcon,
 } from "@heroicons/react/16/solid";
 import {
   Button,
@@ -11,6 +11,7 @@ import {
   DropdownMenu,
   DropdownTrigger,
   Input,
+  Kbd,
   Link,
   Pagination,
   Select,
@@ -229,98 +230,112 @@ export default function RepoTable({
   return (
     <div className="space-y-5" data-testid="repo-table">
       <h1
-        className="text-2xl font-semibold mb-5"
+        className="text-3xl font-semibold mb-10"
         data-testid="repo-table-header"
       >
         Select Repos to Modify
       </h1>
+      <hr />
 
-      <div className="space-x-10 flex">
-        {/* SEARCH INPUT */}
-        <Input
-          data-testid="repo-search-input"
-          label="Search"
-          onValueChange={setSearchQuery}
-          placeholder="Search by name or description"
-          value={searchQuery}
-        />
+      <div className="grid grid-cols-12 gap-4">
+        {/* PER PAGE SELECTOR */}
+        <div className="col-span-2">
+          <Select
+            data-testid="per-page-select"
+            label="Repos per page"
+            onSelectionChange={handlePerPageChange}
+            placeholder="Per page"
+            selectedKeys={new Set([perPage.toString()])}
+            selectionMode="single"
+          >
+            {PER_PAGE_OPTIONS.map((option) => (
+              <SelectItem
+                data-testid={`per-page-option-${option}`}
+                key={option}
+                textValue={option.toString()}
+              >
+                {option}
+              </SelectItem>
+            ))}
+          </Select>
+        </div>
 
         {/* REPO TYPE SELECTOR */}
-        <Select
-          defaultSelectedKeys={new Set(REPO_TYPES.map((type) => type.key))}
-          items={REPO_TYPES}
-          label="Repo types to show"
-          onSelectionChange={handleRepoTypesFilterChange}
-          placeholder="Filter by type"
-          selectedKeys={repoTypesFilter}
-          selectionMode="multiple"
-        >
-          {(repoType) => (
-            <SelectItem key={repoType.key}>{repoType.label}</SelectItem>
-          )}
-        </Select>
-
-        {/* PER PAGE SELECTOR */}
-        <Select
-          data-testid="per-page-select"
-          label="Repos per page"
-          onSelectionChange={handlePerPageChange}
-          placeholder="Per page"
-          selectedKeys={new Set([perPage.toString()])}
-          selectionMode="single"
-        >
-          {PER_PAGE_OPTIONS.map((option) => (
-            <SelectItem
-              data-testid={`per-page-option-${option}`}
-              key={option}
-              textValue={option.toString()}
-            >
-              {option}
-            </SelectItem>
-          ))}
-        </Select>
-      </div>
-
-      <div className="flex">
-        {/* ACTION BUTTONS */}
-        <ButtonGroup>
-          <Button
-            color={selectedRepoAction.has("delete") ? "danger" : "warning"}
-            isDisabled={
-              selectedRepoKeys !== "all" && selectedRepoKeys.size === 0
-            }
-            onPress={handleRepoActionClick}
-            size="lg"
+        <div className="col-span-6">
+          <Select
+            defaultSelectedKeys={new Set(REPO_TYPES.map((type) => type.key))}
+            items={REPO_TYPES}
+            label="Repo types to show"
+            onSelectionChange={handleRepoTypesFilterChange}
+            placeholder="Filter by type"
+            selectedKeys={repoTypesFilter}
+            selectionMode="multiple"
           >
-            {REPO_ACTIONS.find((action) => selectedRepoAction.has(action.key))
-              ?.label ?? "Select Action"}
-          </Button>
-          <Dropdown placement="bottom-end" size="lg">
-            <DropdownTrigger>
-              <Button
-                color={selectedRepoAction.has("delete") ? "danger" : "warning"}
-                isIconOnly
-                size="lg"
-              >
-                <ChevronDownIcon className="h-4 w-4" />
-              </Button>
-            </DropdownTrigger>
-            <DropdownMenu
-              aria-label="Repo actions"
-              className="max-w-[300px]"
-              disallowEmptySelection
-              onSelectionChange={handleRepoActionChange}
-              selectedKeys={selectedRepoAction}
-              selectionMode="single"
+            {(repoType) => (
+              <SelectItem key={repoType.key}>{repoType.label}</SelectItem>
+            )}
+          </Select>
+        </div>
+
+        {/* SEARCH INPUT */}
+        <div className="col-span-4">
+          <Input
+            data-testid="repo-search-input"
+            endContent={<Kbd keys={["command"]}>K</Kbd>}
+            label="Search"
+            onValueChange={setSearchQuery}
+            placeholder="Search by name or description"
+            startContent={<MagnifyingGlassIcon className="h-5 w-5" />}
+            value={searchQuery}
+          />
+        </div>
+
+        {/* ACTION BUTTONS */}
+        <div className="col-span-3">
+          <ButtonGroup>
+            <Button
+              color={selectedRepoAction.has("delete") ? "danger" : "warning"}
+              isDisabled={
+                selectedRepoKeys !== "all" && selectedRepoKeys.size === 0
+              }
+              onPress={handleRepoActionClick}
+              size="lg"
             >
-              {REPO_ACTIONS.map((action) => (
-                <DropdownItem description={action.description} key={action.key}>
-                  {action.label}
-                </DropdownItem>
-              ))}
-            </DropdownMenu>
-          </Dropdown>
-        </ButtonGroup>
+              {REPO_ACTIONS.find((action) => selectedRepoAction.has(action.key))
+                ?.label ?? "Select Action"}
+            </Button>
+            <Dropdown placement="bottom-end" size="lg">
+              <DropdownTrigger>
+                <Button
+                  color={
+                    selectedRepoAction.has("delete") ? "danger" : "warning"
+                  }
+                  isIconOnly
+                  size="lg"
+                >
+                  <ChevronDownIcon className="h-4 w-4" />
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu
+                aria-label="Repo actions"
+                className="max-w-[300px]"
+                disallowEmptySelection
+                onSelectionChange={handleRepoActionChange}
+                selectedKeys={selectedRepoAction}
+                selectionMode="single"
+              >
+                {REPO_ACTIONS.map((action) => (
+                  <DropdownItem
+                    description={action.description}
+                    key={action.key}
+                  >
+                    {action.label}
+                  </DropdownItem>
+                ))}
+              </DropdownMenu>
+            </Dropdown>
+          </ButtonGroup>
+        </div>
       </div>
 
       {/* TABLE */}
@@ -372,13 +387,9 @@ export default function RepoTable({
                 <div>
                   <div className="mb-2">
                     <Link
-                      anchorIcon={
-                        <ArrowTopRightOnSquareIcon className="h-5 w-5 mx-1" />
-                      }
                       className="font-semibold text-xl"
                       href={repo.url as string}
                       isExternal
-                      showAnchorIcon
                     >
                       {repo.name}
                     </Link>

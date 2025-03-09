@@ -38,15 +38,15 @@ export default function DashboardPage() {
   // Show a loading spinner while data is being fetched
   if (isLoading) {
     return (
-      <main className="container mx-auto max-w-6xl pt-16 px-6 flex-grow flex justify-center items-center">
+      <section className="container mx-auto max-w-6xl pt-16 px-6 flex-grow flex justify-center items-center">
         <Spinner label="Loading repositories..." size="lg" />
-      </main>
+      </section>
     );
   }
 
   return (
-    <main className="container mx-auto max-w-6xl pt-16 px-6 flex-grow">
+    <section className="container mx-auto max-w-6xl pt-16 px-6 flex-grow">
       <Dashboard />
-    </main>
+    </section>
   );
 }
