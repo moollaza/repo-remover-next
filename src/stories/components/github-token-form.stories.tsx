@@ -6,7 +6,7 @@ import React, { useState } from "react";
 
 import { GitHubDataProvider } from "@/providers/github-data-provider";
 
-import GitHubTokenForm from "../components/github-token-form";
+import GitHubTokenForm from "../../components/github-token-form";
 
 const VALID_TOKEN = "ghp_1234567890abcdef1234567890abcdef1234";
 const INVALID_TOKEN = "invalid-token-value";

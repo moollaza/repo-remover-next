@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 
 import { GitHubDataProvider } from "@/providers/github-data-provider";
 
-import Header from "../components/header";
+import Header from "../../components/header";
 
 const meta: Meta<typeof Header> = {
   component: Header,

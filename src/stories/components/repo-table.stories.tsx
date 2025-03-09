@@ -5,7 +5,7 @@ import { Repository } from "@octokit/graphql-schema";
 
 import { GitHubDataProvider } from "@/providers/github-data-provider";
 
-import RepoTable from "../components/repo-table/repo-table";
+import RepoTable from "../../components/repo-table/repo-table";
 
 // Helper function to create a mock repository
 function createMockRepository(overrides: Partial<Repository> = {}): Repository {
