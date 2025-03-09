@@ -3,6 +3,19 @@ import { createContext } from "react";
 
 /**
  * Context type for GitHub data and authentication
+ * Used to share the data and authentication state across the app
+ * Use with the <GitHubDataProvider> component to provide the data and authentication state
+ * Use with the <useGitHubData> hook to access the data and authentication state
+ *
+ * @example
+ * <GitHubDataProvider>
+ *   <GitHubContext.Provider value={contextValue}>
+ *     <App />
+ *   </GitHubContext.Provider>
+ * </GitHubDataProvider>
+ *
+ * @see {@link GitHubDataProvider}
+ * @see {@link useGitHubData}
  */
 export interface GitHubContextType {
   /**
@@ -13,6 +26,10 @@ export interface GitHubContextType {
    * Whether there is an error with the authentication.
    */
   isError: boolean;
+  /**
+   * Whether the data is initialized.
+   */
+  isInitialized: boolean;
   /**
    * Whether the data is loading.
    */
@@ -58,6 +75,7 @@ export interface GitHubContextType {
 export const GitHubContext = createContext<GitHubContextType>({
   isAuthenticated: false,
   isError: false,
+  isInitialized: false,
   isLoading: false,
   login: null,
   logout: () => {

@@ -219,14 +219,6 @@ export default function RepoTable({
     onClose();
   }, [onClose]);
 
-  if (isLoading) {
-    return <Spinner aria-label="Loading..." />;
-  }
-
-  if (!repos?.length) {
-    return <div>No repositories found</div>;
-  }
-
   return (
     <div className="space-y-5" data-testid="repo-table">
       <h1
