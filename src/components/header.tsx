@@ -41,7 +41,13 @@ export default function Header() {
   }
 
   return (
-    <Navbar maxWidth="full" position="static">
+    <Navbar
+      classNames={{
+        wrapper: "px-0",
+      }}
+      maxWidth="full"
+      position="static"
+    >
       <NavbarBrand>
         <Link className="font-extrabold text-inherit text-xl" href="/">
           Repo Remover
