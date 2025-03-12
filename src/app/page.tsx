@@ -4,10 +4,9 @@ import { Button, Link } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import React from "react";
 
+import GitHubTokenForm from "@/components/github-token-form";
 import { ScrollingQuotes } from "@/components/scrolling-quotes";
 import { useGitHubData } from "@/hooks/use-github-data";
-import Footer from "@components/footer";
-import GitHubTokenForm from "@components/github-token-form";
 
 const scrollToID = (id: string) => {
   const form = document.getElementById(id);
