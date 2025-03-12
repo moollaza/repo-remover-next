@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
 import { http, HttpResponse } from "msw";
-import { initialize, mswDecorator } from "msw-storybook-addon";
 import React, { useState } from "react";
 
 import { GitHubDataProvider } from "@/providers/github-data-provider";
@@ -10,11 +9,6 @@ import GitHubTokenForm from "../../components/github-token-form";
 
 const VALID_TOKEN = "ghp_1234567890abcdef1234567890abcdef1234";
 const INVALID_TOKEN = "invalid-token-value";
-
-// Initialize MSW
-initialize({
-  onUnhandledRequest: "bypass", // Don't warn about unhandled requests
-});
 
 // Props for the wrapper component
 interface WrapperProps {
@@ -40,7 +34,6 @@ const GitHubTokenFormWrapper: React.FC<WrapperProps> = ({
 const meta: Meta<typeof GitHubTokenFormWrapper> = {
   component: GitHubTokenFormWrapper,
   decorators: [
-    mswDecorator,
     (Story) => (
       <GitHubDataProvider>
         <Story />

@@ -20,11 +20,9 @@ export const GET_REPOS = `
           isArchived
           isFork
           isTemplate
-          isDisabled
           isMirror
-          isEmpty
           isLocked
-          isInOrganization: owner { __typename }
+          isInOrganization
           owner {
             id
             login
@@ -38,7 +36,6 @@ export const GET_REPOS = `
           }
           updatedAt
           url
-          viewerCanAdminister
         }
         pageInfo {
           hasNextPage

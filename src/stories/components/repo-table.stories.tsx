@@ -3,9 +3,8 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { faker } from "@faker-js/faker";
 import { Repository } from "@octokit/graphql-schema";
 
+import RepoTable from "@/components/repo-table/repo-table";
 import { GitHubDataProvider } from "@/providers/github-data-provider";
-
-import RepoTable from "../../components/repo-table/repo-table";
 
 // Helper function to create a mock repository
 function createMockRepository(overrides: Partial<Repository> = {}): Repository {
@@ -64,13 +63,6 @@ const mockRepos: Repository[] = [
 
 const meta: Meta<typeof RepoTable> = {
   component: RepoTable,
-  decorators: [
-    (Story) => (
-      <GitHubDataProvider>
-        <Story />
-      </GitHubDataProvider>
-    ),
-  ],
   title: "Components/RepoTable",
 };
 

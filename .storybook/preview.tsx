@@ -1,6 +1,12 @@
-import React from 'react';
-import type { Preview } from '@storybook/react';
-import '../src/globals.css';
+import React from "react";
+import type { Preview } from "@storybook/react";
+import { initialize, mswLoader } from "msw-storybook-addon";
+
+import "../src/globals.css";
+
+initialize({
+  // onUnhandledRequest: "bypass"
+});
 
 const preview: Preview = {
   parameters: {
@@ -13,8 +19,9 @@ const preview: Preview = {
     nextjs: {
       appDirectory: true,
     },
-    layout: 'fullscreen',
+    layout: "fullscreen",
   },
+  loaders: [mswLoader],
   decorators: [
     (Story) => (
       <div className="p-4">

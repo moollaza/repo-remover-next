@@ -1,8 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
+import Header from "@/components/header";
 import { GitHubDataProvider } from "@/providers/github-data-provider";
-
-import Header from "../../components/header";
 
 const meta: Meta<typeof Header> = {
   component: Header,
@@ -13,9 +12,6 @@ const meta: Meta<typeof Header> = {
       </GitHubDataProvider>
     ),
   ],
-  parameters: {
-    layout: "fullscreen",
-  },
   title: "Components/Header",
 };
 
