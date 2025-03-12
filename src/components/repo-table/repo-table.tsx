@@ -1,22 +1,8 @@
 import {
-  ChevronDownIcon,
-  MagnifyingGlassIcon,
-} from "@heroicons/react/16/solid";
-import {
-  Button,
-  ButtonGroup,
   Chip,
-  Dropdown,
-  DropdownItem,
-  DropdownMenu,
-  DropdownTrigger,
-  Input,
-  Kbd,
   Link,
   Pagination,
-  Select,
   type Selection,
-  SelectItem,
   type SortDescriptor,
   Spinner,
   Table,
@@ -31,12 +17,12 @@ import { Repository } from "@octokit/graphql-schema";
 import { formatDistanceToNow } from "date-fns";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { useGitHubData } from "@/hooks/use-github-data";
-
 import ConfirmationModal from "./confirmation-modal";
+import RepoFilters from "./repo-filters";
 
 interface RepoTableProps {
   isLoading: boolean;
+  login: null | string;
   repos: null | Repository[];
 }
 
@@ -77,9 +63,9 @@ type SelectionSet = Exclude<Selection, "all">;
 
 export default function RepoTable({
   isLoading,
+  login,
   repos,
 }: RepoTableProps): JSX.Element {
-  const { login } = useGitHubData();
   const [repoTypesFilter, setRepoTypesFilter] = useState<SelectionSet>(
     new Set(REPO_TYPES.map((type) => type.key)),
   );
@@ -104,7 +90,7 @@ export default function RepoTable({
   useEffect(() => {
     if (repos?.length) {
       (window as unknown as { repos: typeof repos } & Window).repos = repos;
-      console.group("Repos");
+      console.groupCollapsed("Repos");
       console.table(repos);
       console.groupEnd();
     }
@@ -172,10 +158,11 @@ export default function RepoTable({
     });
   }, [filteredRepos, sortDescriptor]);
 
-  // Then we paginate the sorted repos
+  const pages = Math.ceil(sortedRepos.length / perPage);
+
   const paginatedRepos = useMemo(() => {
-    const start = (currentPage - 1) * perPage;
-    const end = start + perPage;
+    const start = Number((currentPage - 1) * perPage);
+    const end = start + Number(perPage);
 
     return sortedRepos.slice(start, end);
   }, [sortedRepos, currentPage, perPage]);
@@ -189,10 +176,9 @@ export default function RepoTable({
   );
 
   const handlePerPageChange = useCallback((keys: Selection) => {
-    // We know that the keys will always have a single value
-    // because we disallow empty selection
-    // so we can safely cast the first value to a number
-    setPerPage(Array.from(keys)[0] as number);
+    const newPerPage = Number(Array.from(keys)[0]);
+
+    setPerPage(newPerPage);
     setCurrentPage(1);
   }, []);
 
@@ -221,114 +207,18 @@ export default function RepoTable({
 
   return (
     <div className="space-y-5" data-testid="repo-table">
-      <h1
-        className="text-3xl font-semibold mb-10"
-        data-testid="repo-table-header"
-      >
-        Select Repos to Modify
-      </h1>
-      <hr />
-
-      <div className="grid grid-cols-12 gap-4">
-        {/* PER PAGE SELECTOR */}
-        <div className="col-span-2">
-          <Select
-            data-testid="per-page-select"
-            label="Repos per page"
-            onSelectionChange={handlePerPageChange}
-            placeholder="Per page"
-            selectedKeys={new Set([perPage.toString()])}
-            selectionMode="single"
-          >
-            {PER_PAGE_OPTIONS.map((option) => (
-              <SelectItem
-                data-testid={`per-page-option-${option}`}
-                key={option}
-                textValue={option.toString()}
-              >
-                {option}
-              </SelectItem>
-            ))}
-          </Select>
-        </div>
-
-        {/* REPO TYPE SELECTOR */}
-        <div className="col-span-6">
-          <Select
-            defaultSelectedKeys={new Set(REPO_TYPES.map((type) => type.key))}
-            items={REPO_TYPES}
-            label="Repo types to show"
-            onSelectionChange={handleRepoTypesFilterChange}
-            placeholder="Filter by type"
-            selectedKeys={repoTypesFilter}
-            selectionMode="multiple"
-          >
-            {(repoType) => (
-              <SelectItem key={repoType.key}>{repoType.label}</SelectItem>
-            )}
-          </Select>
-        </div>
-
-        {/* SEARCH INPUT */}
-        <div className="col-span-4">
-          <Input
-            data-testid="repo-search-input"
-            endContent={<Kbd keys={["command"]}>K</Kbd>}
-            label="Search"
-            onValueChange={setSearchQuery}
-            placeholder="Search by name or description"
-            startContent={<MagnifyingGlassIcon className="h-5 w-5" />}
-            value={searchQuery}
-          />
-        </div>
-
-        {/* ACTION BUTTONS */}
-        <div className="col-span-3">
-          <ButtonGroup>
-            <Button
-              color={selectedRepoAction.has("delete") ? "danger" : "warning"}
-              isDisabled={
-                selectedRepoKeys !== "all" && selectedRepoKeys.size === 0
-              }
-              onPress={handleRepoActionClick}
-              size="lg"
-            >
-              {REPO_ACTIONS.find((action) => selectedRepoAction.has(action.key))
-                ?.label ?? "Select Action"}
-            </Button>
-            <Dropdown placement="bottom-end" size="lg">
-              <DropdownTrigger>
-                <Button
-                  color={
-                    selectedRepoAction.has("delete") ? "danger" : "warning"
-                  }
-                  isIconOnly
-                  size="lg"
-                >
-                  <ChevronDownIcon className="h-4 w-4" />
-                </Button>
-              </DropdownTrigger>
-              <DropdownMenu
-                aria-label="Repo actions"
-                className="max-w-[300px]"
-                disallowEmptySelection
-                onSelectionChange={handleRepoActionChange}
-                selectedKeys={selectedRepoAction}
-                selectionMode="single"
-              >
-                {REPO_ACTIONS.map((action) => (
-                  <DropdownItem
-                    description={action.description}
-                    key={action.key}
-                  >
-                    {action.label}
-                  </DropdownItem>
-                ))}
-              </DropdownMenu>
-            </Dropdown>
-          </ButtonGroup>
-        </div>
-      </div>
+      <RepoFilters
+        onPerPageChange={handlePerPageChange}
+        onRepoActionChange={handleRepoActionChange}
+        onRepoActionClick={handleRepoActionClick}
+        onRepoTypesFilterChange={handleRepoTypesFilterChange}
+        onSearchChange={setSearchQuery}
+        perPage={perPage}
+        repoTypesFilter={repoTypesFilter}
+        searchQuery={searchQuery}
+        selectedRepoAction={selectedRepoAction}
+        selectedRepoKeys={selectedRepoKeys}
+      />
 
       {/* TABLE */}
       <Table
@@ -341,7 +231,7 @@ export default function RepoTable({
               page={currentPage}
               showControls
               showShadow
-              total={Math.max(1, Math.ceil(filteredRepos.length / perPage))}
+              total={pages}
             />
           </div>
         }

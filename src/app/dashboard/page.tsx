@@ -8,7 +8,7 @@ import RepoTable from "@/components/repo-table/repo-table";
 import { useGitHubData } from "@/hooks/use-github-data";
 
 export default function DashboardPage() {
-  const { isError, isInitialized, isLoading, pat, refetchData, repos } =
+  const { isError, isInitialized, isLoading, login, pat, refetchData, repos } =
     useGitHubData();
 
   const router = useRouter();
@@ -24,15 +24,22 @@ export default function DashboardPage() {
   }, [pat, router, refetchData, isInitialized]);
 
   return (
-    <section className="pt-16 flex-grow">
+    <section className="py-16 flex-grow ">
+      <h1
+        className="text-3xl font-semibold mb-10"
+        data-testid="repo-table-header"
+      >
+        Select Repos to Modify
+      </h1>
+
       {isError && (
         <Alert className="mb-4" color="danger">
           Error loading repositories. Please check your token and try again.
         </Alert>
       )}
-      {(isLoading || repos) && (
-        // TODO: Lift page title and table filters to this component
-        <RepoTable isLoading={isLoading} repos={repos} />
+
+      {(isLoading || (repos && login !== null)) && (
+        <RepoTable isLoading={isLoading} login={login} repos={repos} />
       )}
     </section>
   );
