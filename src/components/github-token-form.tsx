@@ -37,7 +37,6 @@ export default function GitHubTokenForm({
   };
 
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
     let isMounted = true;
 
     const validateToken = async () => {
@@ -75,7 +74,7 @@ export default function GitHubTokenForm({
       }
     };
 
-    timeoutId = setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       void validateToken();
     }, 500);
 
