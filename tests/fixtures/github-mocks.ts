@@ -26,7 +26,6 @@ export const mockRepos = [
     },
     updatedAt: "2024-02-26T00:00:00Z",
     url: "https://github.com/testuser/test-repo-1",
-    viewerCanAdminister: true,
   },
   {
     description: "Test repository 2",
@@ -43,8 +42,8 @@ export const mockRepos = [
       login: "testuser",
       url: "https://github.com/testuser",
     },
+
     updatedAt: "2024-02-25T00:00:00Z",
     url: "https://github.com/testuser/test-repo-2",
-    viewerCanAdminister: true,
   },
 ] as Repository[];
