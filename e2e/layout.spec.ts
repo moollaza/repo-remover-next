@@ -1,7 +1,7 @@
+import { HomePage } from "@e2e/pages/home";
 import { test } from "@playwright/test";
 
-import { mockUser } from "./fixtures/github-mocks";
-import { HomePage } from "./pages/home";
+import { mockUser } from "@/mocks/fixtures";
 
 test.describe("Layout Components", () => {
   test.describe("Footer", () => {

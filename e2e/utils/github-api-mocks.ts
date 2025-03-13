@@ -1,6 +1,6 @@
 import { Page } from "@playwright/test";
 
-import { mockRepos, mockUser } from "../fixtures/github-mocks";
+import { mockRepos, mockUser } from "@/mocks/fixtures";
 
 export async function mockArchiveRepo(
   page: Page,
@@ -61,7 +61,7 @@ export async function mockDeleteRepo(
 }
 
 export async function mockGraphQLRepos(page: Page) {
-  await page.route("https://api.github.com/graphql", async (route) => {
+  await page.route("https://api.github.com/graphql", (route) => {
     const body = JSON.parse(route.request().postData() ?? "{}") as {
       query: string;
     };
@@ -90,7 +90,7 @@ export async function mockGraphQLRepos(page: Page) {
 
 // Add support for throttled Octokit instance in mocks
 export async function mockOctokitInit(page: Page) {
-  await page.route("https://api.github.com/user", async (route) => {
+  await page.route("https://api.github.com/user", (route) => {
     void route.fulfill({
       body: JSON.stringify(mockUser),
       status: 200,

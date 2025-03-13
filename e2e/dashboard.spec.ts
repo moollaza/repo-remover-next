@@ -1,13 +1,13 @@
-import { test } from "@playwright/test";
-
-import { mockRepos } from "./fixtures/github-mocks";
-import { DashboardPage } from "./pages/dashboard";
+import { DashboardPage } from "@e2e/pages/dashboard";
 import {
   mockArchiveRepo,
   mockBulkActions,
   mockDeleteRepo,
   mockGraphQLRepos,
-} from "./utils/github-api-mocks";
+} from "@e2e/utils/github-api-mocks";
+import { test } from "@playwright/test";
+
+import { mockRepos } from "@/mocks/fixtures";
 
 test.describe("Dashboard Page", () => {
   let dashboard: DashboardPage;

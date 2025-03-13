@@ -1,6 +1,6 @@
 import { expect, type Locator, type Page } from "@playwright/test";
 
-import { mockUser } from "../fixtures/github-mocks";
+import { mockUser } from "@/mocks/fixtures";
 
 export class HomePage {
   readonly page: Page;

@@ -22,13 +22,13 @@
       "@/*": ["./src/*"],
       "@components/*": ["./src/components/*"],
       "@contexts/*": ["./src/contexts/*"],
-      "@fixtures/*": ["./src/tests/fixtures/*"],
       "@graphql/*": ["./src/graphql/*"],
       "@hooks/*": ["./src/hooks/*"],
       "@providers/*": ["./src/providers/*"],
       "@utils/*": ["./src/utils/*"],
       "@storybook/*": ["./.storybook/*"],
-      "@tests/*": ["./tests/*"]
+      "@e2e/*": ["./e2e/*"],
+      "@mocks/*": ["./src/mocks/*"]
     }
   },
   "include": [
