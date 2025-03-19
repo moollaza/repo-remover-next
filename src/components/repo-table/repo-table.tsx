@@ -201,9 +201,8 @@ export default function RepoTable({
   );
 
   const handleConfirm = useCallback(() => {
-    // Placeholder for actual confirmation logic
-    onClose();
-  }, [onClose]);
+    // TODO: Record # of repos deleted/archived?
+  }, []);
 
   return (
     <div className="space-y-5" data-testid="repo-table">

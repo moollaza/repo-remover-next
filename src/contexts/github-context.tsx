@@ -1,5 +1,8 @@
 import { Repository, User } from "@octokit/graphql-schema";
 import { createContext } from "react";
+import { type KeyedMutator } from "swr";
+
+import { type GitHubFetcherResult } from "@/providers/github-data-provider";
 
 /**
  * Context type for GitHub data and authentication
@@ -43,6 +46,10 @@ export interface GitHubContextType {
    */
   logout: () => void;
   /**
+   * SWR mutate function to manually trigger revalidation
+   */
+  mutate: KeyedMutator<GitHubFetcherResult>;
+  /**
    * The personal access token of the user.
    */
   pat: null | string;
@@ -81,6 +88,8 @@ export const GitHubContext = createContext<GitHubContextType>({
   logout: () => {
     // no-op
   },
+  mutate: async () =>
+    await Promise.resolve({ error: null, repos: null, user: null }),
   pat: null,
   refetchData: () => {
     // no-op

@@ -59,7 +59,7 @@ export default function ConfirmationModal({
   const count = repos.length;
 
   // Get the PAT from the new provider
-  const { pat } = useGitHubData();
+  const { mutate, pat } = useGitHubData();
 
   // Create an Octokit instance with the PAT
   const octokit = pat ? createThrottledOctokit(pat) : null;
@@ -73,16 +73,12 @@ export default function ConfirmationModal({
   const [progress, setProgress] = useState(0);
   const [currentRepo, setCurrentRepo] = useState("");
 
-  const { mutate } = useSWRConfig();
-
   useEffect(() => {
     setIsCorrectUsername(username === login);
   }, [login, username]);
 
   async function handleConfirm() {
     if (!octokit) return;
-
-    onConfirm();
 
     setActionInProgress(true);
     setProgress(0);
@@ -107,6 +103,12 @@ export default function ConfirmationModal({
 
     setActionInProgress(false);
     setActionCompleted(true);
+
+    // Call the onConfirm callback
+    onConfirm();
+
+    // Refetch all GitHub data after operations are complete
+    void mutate();
   }
 
   function resetState() {
@@ -118,10 +120,11 @@ export default function ConfirmationModal({
   }
 
   function handleOnClose() {
-    resetState();
+    // Close the modal
     onClose();
-    // Refetch all GitHub data after operations are complete
-    void mutate(undefined, { revalidate: true });
+
+    // Reset the state
+    resetState();
   }
 
   return (

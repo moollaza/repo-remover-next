@@ -13,6 +13,15 @@ import { fetchGitHubData } from "@/utils/github-api";
 
 const IS_DEV = process.env.NODE_ENV === "development";
 
+// Interface for SWR fetcher function
+export interface GitHubFetcherResult {
+  error: Error | null;
+  repos: null | Repository[];
+  user: null | User;
+}
+
+type GitHubFetcherKey = [string, string];
+
 /**
  * Props for the GitHubDataProvider component.
  */
@@ -60,16 +69,6 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
 
   // Derived authentication state
   const isAuthenticated = Boolean(isInitialized && Boolean(pat));
-
-  // Data fetching with SWR
-  // Define the correct interface for our fetcher function
-  interface GitHubFetcherResult {
-    error: Error | null;
-    repos: null | Repository[];
-    user: null | User;
-  }
-  // We can still use type for simple type aliases - updated to handle null values
-  type GitHubFetcherKey = [string, string];
 
   // Now we can properly type our SWR hook
   const { data, error, mutate } = useSWR<
@@ -190,6 +189,7 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
     isLoading,
     login,
     logout,
+    mutate,
     pat,
     refetchData,
     repos,
