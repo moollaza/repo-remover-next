@@ -21,6 +21,14 @@ export const handlers = [
     });
   }),
 
+  http.patch("https://api.github.com/repos/:owner/:repo", () => {
+    return HttpResponse.json({ status: 200 });
+  }),
+
+  http.delete("https://api.github.com/repos/:owner/:repo", () => {
+    return HttpResponse.json({ status: 200 });
+  }),
+
   // Handle requests to the GitHub API
   http.get("https://api.github.com/user", () => {
     return HttpResponse.json({

@@ -1,11 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
+import { expect, fn, userEvent, waitFor, within } from "@storybook/test";
 import { http, HttpResponse } from "msw";
 import React, { useState } from "react";
 
+import GitHubTokenForm from "@/components/github-token-form";
 import { GitHubDataProvider } from "@/providers/github-data-provider";
-
-import GitHubTokenForm from "../../components/github-token-form";
 
 const VALID_TOKEN = "ghp_1234567890abcdef1234567890abcdef1234";
 const INVALID_TOKEN = "invalid-token-value";
@@ -19,7 +19,7 @@ interface WrapperProps {
 // Create a wrapper component to handle state for the controlled component
 const GitHubTokenFormWrapper: React.FC<WrapperProps> = ({
   initialValue = "",
-  onSubmit = () => console.log("Form submitted"),
+  onSubmit = fn<(token: string) => void>(),
 }) => {
   const [value, setValue] = useState(initialValue);
   return (
@@ -50,41 +50,41 @@ type Story = StoryObj<typeof GitHubTokenFormWrapper>;
 export const EmptyForm: Story = {
   args: {
     initialValue: "",
-    onSubmit: () => console.log("Form submitted"),
+    onSubmit: fn<(token: string) => void>(),
   },
 };
 
 export const InvalidInput: Story = {
   args: {
     initialValue: "invalid-token-value",
-    onSubmit: () => console.log("Form submitted"),
+    onSubmit: fn<(token: string) => void>(),
   },
 };
 
 export const ValidToken: Story = {
   args: {
     initialValue: VALID_TOKEN,
-    onSubmit: () => console.log("Valid token submitted"),
+    onSubmit: fn<(token: string) => void>(),
   },
-  parameters: {
-    msw: {
-      handlers: [
-        http.get("https://api.github.com/user", () => {
-          return HttpResponse.json({
-            avatar_url: "https://avatars.githubusercontent.com/u/12345?v=4",
-            login: "testuser",
-            name: "Test User",
-          });
-        }),
-      ],
-    },
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    const submitButton = canvas.getByRole("button", { name: "Submit" });
+
+    await waitFor(() => expect(submitButton).toBeEnabled());
+
+    await userEvent.click(submitButton);
+
+    // Wait for and then verify the onSubmit was called with the correct token
+    await expect(args.onSubmit).toHaveBeenCalled();
+    await expect(args.onSubmit).toHaveBeenCalledWith(VALID_TOKEN);
   },
 };
 
 export const InvalidToken: Story = {
   args: {
     initialValue: INVALID_TOKEN,
-    onSubmit: () => console.log("Invalid token submitted"),
+    onSubmit: fn<(token: string) => void>(),
   },
   parameters: {
     msw: {

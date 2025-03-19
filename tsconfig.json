@@ -26,7 +26,6 @@
       "@hooks/*": ["./src/hooks/*"],
       "@providers/*": ["./src/providers/*"],
       "@utils/*": ["./src/utils/*"],
-      "@storybook/*": ["./.storybook/*"],
       "@e2e/*": ["./e2e/*"],
       "@mocks/*": ["./src/mocks/*"]
     }

@@ -7,7 +7,7 @@ export function createMockRepo(
 ): Repository {
   const owner = overrides.owner ?? {
     id: faker.string.uuid(),
-    login: faker.internet.userName().toLowerCase(),
+    login: "testuser",
     updatedAt: faker.date.recent().toISOString(),
     url: `https://github.com/${faker.internet.userName().toLowerCase()}`,
   };

@@ -1,8 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { manyMockRepos, mockRepos } from "@/mocks/fixtures";
-
 import RepoTable from "@/components/repo-table/repo-table";
+import { manyMockRepos, mockRepos } from "@/mocks/fixtures";
 
 const meta: Meta<typeof RepoTable> = {
   component: RepoTable,

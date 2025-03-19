@@ -7,7 +7,7 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 // Mock dependencies
 import { useGitHubData } from "@/hooks/use-github-data";
 
-import ConfirmationModal from "../confirmation-modal";
+import ConfirmationModal from "./confirmation-modal";
 
 vi.mock("@/hooks/use-github-data", () => ({
   useGitHubData: vi.fn(),

@@ -2,6 +2,10 @@ import React from "react";
 import type { Preview } from "@storybook/react";
 import { initialize, mswLoader } from "msw-storybook-addon";
 
+import { GitHubDataDecorator } from "./decorators";
+
+import { handlers } from "../src/mocks/handlers";
+
 import "../src/globals.css";
 
 initialize({
@@ -20,9 +24,13 @@ const preview: Preview = {
       appDirectory: true,
     },
     layout: "fullscreen",
+    msw: {
+      handlers: [handlers],
+    },
   },
   loaders: [mswLoader],
   decorators: [
+    GitHubDataDecorator,
     (Story) => (
       <div className="p-4">
         <Story />
