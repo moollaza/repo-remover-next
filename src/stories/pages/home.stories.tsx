@@ -6,6 +6,9 @@ import HomePage from "@/app/page";
 const meta: Meta<typeof HomePage> = {
   component: HomePage,
   decorators: [PageDecorator, GitHubDataDecorator],
+  parameters: {
+    layout: "fullscreen",
+  },
   title: "Pages/Home",
 };
 

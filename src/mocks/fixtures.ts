@@ -1,6 +1,9 @@
 import { faker } from "@faker-js/faker";
 import { Repository } from "@octokit/graphql-schema";
 
+// Seed Faker for consistent results
+faker.seed(123456789);
+
 // Factory function to create a mock repository
 export function createMockRepo(
   overrides: Partial<Repository> = {},
@@ -55,7 +58,7 @@ export function createMockUser(overrides = {}) {
 }
 
 // Generate a set of mock repositories
-export function generateMockRepos(count = 10): Repository[] {
+export function generateMockRepos(count = 5): Repository[] {
   return Array.from({ length: count }, () => createMockRepo());
 }
 

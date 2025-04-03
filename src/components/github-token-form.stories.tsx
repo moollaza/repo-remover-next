@@ -4,8 +4,8 @@ import { expect, fn, userEvent, waitFor, within } from "@storybook/test";
 import { http, HttpResponse } from "msw";
 import React, { useState } from "react";
 
+import { GitHubDataDecorator } from "@/../.storybook/decorators";
 import GitHubTokenForm from "@/components/github-token-form";
-import { GitHubDataProvider } from "@/providers/github-data-provider";
 
 const VALID_TOKEN = "ghp_1234567890abcdef1234567890abcdef1234";
 const INVALID_TOKEN = "invalid-token-value";
@@ -33,13 +33,7 @@ const GitHubTokenFormWrapper: React.FC<WrapperProps> = ({
 
 const meta: Meta<typeof GitHubTokenFormWrapper> = {
   component: GitHubTokenFormWrapper,
-  decorators: [
-    (Story) => (
-      <GitHubDataProvider>
-        <Story />
-      </GitHubDataProvider>
-    ),
-  ],
+  decorators: [GitHubDataDecorator],
   title: "Components/GitHubTokenForm",
 };
 

@@ -6,6 +6,9 @@ import DashboardPage from "@/app/dashboard/page";
 const meta: Meta<typeof DashboardPage> = {
   component: DashboardPage,
   decorators: [PageDecorator, GitHubDataDecorator],
+  parameters: {
+    layout: "fullscreen",
+  },
   title: "Pages/Dashboard",
 };
 

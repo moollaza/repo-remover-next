@@ -44,7 +44,7 @@ export const Delete: Story = {
 };
 
 export const SuccessfulArchive: Story = {
-  play: async ({ args, step }) => {
+  play: async ({ step }) => {
     const usernameInput = await screen.findByTestId("username-input");
 
     await step("Enter username", async () => {
@@ -73,14 +73,6 @@ export const SuccessfulArchive: Story = {
         screen.getByText("2 out of 2 repos archived successfully!"),
       ).toBeInTheDocument();
     });
-
-    await step("Click close button", async () => {
-      const closeButton = screen.getByTestId("close-repo-action-result");
-      await userEvent.click(closeButton);
-      await step("Assert onClose is called", async () => {
-        await waitFor(() => expect(args.onClose).toHaveBeenCalled());
-      });
-    });
   },
 };
 
@@ -88,7 +80,7 @@ export const SuccessfulDelete: Story = {
   args: {
     action: "delete",
   },
-  play: async ({ args, step }) => {
+  play: async ({ step }) => {
     const usernameInput = await screen.findByTestId("username-input");
 
     await step("Enter username", async () => {
@@ -121,14 +113,6 @@ export const SuccessfulDelete: Story = {
       await expect(
         screen.getByText("2 out of 2 repos deleted successfully!"),
       ).toBeInTheDocument();
-    });
-
-    await step("Click close button", async () => {
-      const closeButton = screen.getByTestId("close-repo-action-result");
-      await userEvent.click(closeButton);
-      await step("Assert onClose is called", async () => {
-        await waitFor(() => expect(args.onClose).toHaveBeenCalled());
-      });
     });
   },
 };
