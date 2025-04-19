@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 
 import { isValidGitHubToken } from "@/utils/github-utils";
 
-import GitHubTokenForm from "../github-token-form";
+import GitHubTokenForm from "./github-token-form";
 
 // Mock dependencies
 vi.mock("@/utils/github-utils", () => ({

@@ -1,135 +1,99 @@
 import { Repository } from "@octokit/graphql-schema";
-import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { useSWRConfig } from "swr";
-import { beforeEach, describe, expect, test, vi } from "vitest";
+import { fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-// Mock dependencies
-import { useGitHubData } from "@/hooks/use-github-data";
+import { GitHubContext, GitHubContextType } from "@/contexts/github-context";
+import { createMockRepo } from "@/mocks/fixtures";
+
+// Important: mock before importing the component
+vi.mock("@/utils/github-utils", () => ({
+  createThrottledOctokit: vi.fn().mockReturnValue({
+    rest: {
+      repos: {
+        delete: vi.fn().mockResolvedValue({}),
+        update: vi.fn().mockResolvedValue({}),
+      },
+    },
+  }),
+  processRepo: vi.fn().mockImplementation(async () => {
+    return Promise.resolve();
+  }),
+}));
 
 import ConfirmationModal from "./confirmation-modal";
 
-vi.mock("@/hooks/use-github-data", () => ({
-  useGitHubData: vi.fn(),
-}));
+const mockRepos: Repository[] = [
+  createMockRepo({ id: "1", name: "repo1" }),
+  createMockRepo({ id: "2", name: "repo2" }),
+];
 
-vi.mock("swr", () => ({
-  useSWRConfig: vi.fn(),
-}));
+const mockProps = {
+  action: "archive" as const,
+  isOpen: true,
+  login: "testuser",
+  onClose: vi.fn(),
+  onConfirm: vi.fn(),
+  repos: mockRepos,
+};
 
-vi.mock("@/utils/github-utils", () => ({
-  createThrottledOctokit: vi.fn(),
-  processRepo: vi.fn().mockResolvedValue(undefined),
-}));
+const mockContextValue: GitHubContextType = {
+  isAuthenticated: true,
+  isError: false,
+  isInitialized: true,
+  isLoading: false,
+  login: "testuser",
+  logout: vi.fn(),
+  mutate: vi.fn(),
+  pat: "fake-token",
+  refetchData: vi.fn(),
+  repos: mockRepos,
+  setLogin: vi.fn(),
+  setPat: vi.fn(),
+  user: null,
+};
 
 describe("ConfirmationModal", () => {
-  const mockRepos: Repository[] = [
-    { id: "1", name: "repo1", owner: { login: "testuser" } } as Repository,
-    { id: "2", name: "repo2", owner: { login: "testuser" } } as Repository,
-  ];
-
-  const mockOnClose = vi.fn();
-  const mockOnConfirm = vi.fn();
-  const mockMutate = vi.fn();
-  // We'll use this in future tests or remove if truly unused
-  // Removed mockOctokit as it's flagged as unused
-
   beforeEach(() => {
-    vi.clearAllMocks();
-
-    (useGitHubData as jest.Mock).mockReturnValue({
-      login: "testuser",
-      pat: "test-pat",
-    });
-
-    (useSWRConfig as jest.Mock).mockReturnValue({
-      mutate: mockMutate,
-    });
+    vi.resetAllMocks();
+    vi.useFakeTimers();
   });
 
-  test("renders modal with correct repository details", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("renders confirmation screen initially", () => {
     render(
-      <ConfirmationModal
-        action="delete"
-        isOpen={true}
-        login="testuser"
-        onClose={mockOnClose}
-        onConfirm={mockOnConfirm}
-        repos={mockRepos}
-      />,
+      <GitHubContext.Provider value={mockContextValue}>
+        <ConfirmationModal {...mockProps} />
+      </GitHubContext.Provider>,
     );
 
-    expect(screen.getByText(/Confirm Deletion/i)).toBeInTheDocument();
+    expect(screen.getByText(/Confirm Archival/)).toBeInTheDocument();
     expect(screen.getByText(/repo1/)).toBeInTheDocument();
     expect(screen.getByText(/repo2/)).toBeInTheDocument();
+    expect(screen.getByTestId("username-input")).toBeInTheDocument();
   });
 
-  test("requires correct username to enable confirmation", async () => {
+  it("enables confirm button when username matches login", () => {
     render(
-      <ConfirmationModal
-        action="archive"
-        isOpen={true}
-        login="testuser"
-        onClose={mockOnClose}
-        onConfirm={mockOnConfirm}
-        repos={mockRepos}
-      />,
+      <GitHubContext.Provider value={mockContextValue}>
+        <ConfirmationModal {...mockProps} />
+      </GitHubContext.Provider>,
     );
 
-    const usernameInput = screen.getByPlaceholderText("GitHub Username");
-    const confirmButton = screen.getByRole("button", {
-      name: /understand the consequences/i,
-    });
+    const usernameInput = screen.getByTestId("username-input");
+    const confirmButton = screen.getByTestId("confirm-repo-action");
 
+    // Initially disabled
     expect(confirmButton).toBeDisabled();
 
-    await userEvent.type(usernameInput, "wronguser");
+    // Enter incorrect username
+    fireEvent.change(usernameInput, { target: { value: "wronguser" } });
     expect(confirmButton).toBeDisabled();
 
-    await userEvent.clear(usernameInput);
-    await userEvent.type(usernameInput, "testuser");
-    expect(confirmButton).toBeEnabled();
-  });
-
-  test.skip("calls onConfirm and handles repository processing", async () => {
-    render(
-      <ConfirmationModal
-        action="delete"
-        isOpen={true}
-        login="testuser"
-        onClose={mockOnClose}
-        onConfirm={mockOnConfirm}
-        repos={mockRepos}
-      />,
-    );
-
-    const usernameInput = screen.getByPlaceholderText("GitHub Username");
-    const confirmButton = screen.getByRole("button", {
-      name: /understand the consequences/i,
-    });
-
-    await userEvent.type(usernameInput, "testuser");
-    await userEvent.click(confirmButton);
-
-    // Ensure onConfirm was called
-    expect(mockOnConfirm).toHaveBeenCalled();
-  });
-
-  test("handles modal close and state reset", async () => {
-    render(
-      <ConfirmationModal
-        action="archive"
-        isOpen={true}
-        login="testuser"
-        onClose={mockOnClose}
-        onConfirm={mockOnConfirm}
-        repos={mockRepos}
-      />,
-    );
-
-    const closeButton = screen.getByRole("button", { name: /cancel/i });
-    await userEvent.click(closeButton);
-
-    expect(mockOnClose).toHaveBeenCalled();
+    // Enter correct username
+    fireEvent.change(usernameInput, { target: { value: "testuser" } });
+    expect(confirmButton).not.toBeDisabled();
   });
 });

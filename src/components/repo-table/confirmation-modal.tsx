@@ -391,10 +391,10 @@ function RepoActionResult({
 
   return (
     <>
-      <ModalHeader>
+      <ModalHeader data-testid="repo-action-result-modal">
         <h3>{action === "archive" ? "Archival" : "Deletion"} Complete</h3>
       </ModalHeader>
-      <ModalBody>
+      <ModalBody data-testid="repo-action-result-modal-body">
         <p>
           {count - errorCount} out of {count} repos{" "}
           {action === "archive" ? "archived" : "deleted"} successfully!
@@ -421,7 +421,7 @@ function RepoActionResult({
           </>
         )}
       </ModalBody>
-      <ModalFooter>
+      <ModalFooter data-testid="repo-action-result-modal-footer">
         <Button
           data-testid="close-repo-action-result"
           onPress={onClose}

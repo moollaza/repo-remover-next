@@ -79,7 +79,7 @@ vi.mock("@octokit/rest", () => {
 
 import { useGitHubData } from "@/hooks/use-github-data";
 
-import { GitHubDataProvider } from "../github-data-provider";
+import { GitHubDataProvider } from "./github-data-provider";
 
 const validToken = "ghp_validtoken123456789012345678901234567890";
 
