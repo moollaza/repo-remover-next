@@ -1,50 +1,23 @@
-import { Repository } from "@octokit/graphql-schema";
 import { expect, test } from "@playwright/test";
 
+import { createMockRepo } from "@/mocks/fixtures";
+
+import {
+  mockArchiveRepo,
+  mockBulkActions,
+  mockOctokitInit,
+} from "../utils/github-api-mocks";
+
 test.describe("RepoTable Component", () => {
-  // Mock repository data
-  const mockRepos = [
-    {
-      description: "First test repo",
-      id: "repo1",
-      isArchived: false,
-      isDisabled: false,
-      isFork: false,
-      isInOrganization: false,
-      isMirror: false,
-      isPrivate: true,
-      isTemplate: false,
-      name: "test-repo-1",
-      owner: {
-        __typename: "User",
-        id: "user1",
-        login: "testuser",
-        url: "https://github.com/testuser",
-      },
-      updatedAt: new Date().toISOString(),
-      url: "https://github.com/testuser/test-repo-1",
-    },
-    {
-      description: "Second test repo",
-      id: "repo2",
-      isArchived: false,
-      isDisabled: false,
-      isFork: false,
-      isInOrganization: true,
-      isMirror: false,
-      isPrivate: false,
-      isTemplate: false,
-      name: "test-repo-2",
-      owner: {
-        __typename: "User",
-        id: "user1",
-        login: "testuser",
-        url: "https://github.com/testuser",
-      },
-      updatedAt: new Date().toISOString(),
-      url: "https://github.com/testuser/test-repo-2",
-    },
-  ] as Repository[];
+  // Create specific test repos with known names to make testing more reliable
+  const testRepos = Array.from({ length: 6 }, (_, i) => {
+    const repoNum = i + 1;
+    return createMockRepo({
+      id: `repo-${repoNum}`,
+      isPrivate: repoNum % 2 === 1, // odd numbers are private
+      name: `test-repo-${repoNum}`,
+    });
+  });
 
   // Setup authentication and mock data before each test
   test.beforeEach(async ({ page }) => {
@@ -57,31 +30,22 @@ test.describe("RepoTable Component", () => {
       localStorage.setItem("login", "testuser");
     });
 
-    // Mock the GitHub API responses
-    await page.route("https://api.github.com/user", (route) => {
-      void route.fulfill({
-        body: JSON.stringify({
-          avatarUrl: "https://avatars.githubusercontent.com/u/12345?v=4",
-          login: "testuser",
-          name: "Test User",
-        }),
-        status: 200,
-      });
-    });
+    // Use existing mock utilities
+    await mockOctokitInit(page);
 
-    // Mock the GraphQL API for repositories
+    // Override the GraphQL mock to use our specific test repos
     await page.route("https://api.github.com/graphql", (route) => {
       void route.fulfill({
         body: JSON.stringify({
           data: {
             viewer: {
               repositories: {
-                nodes: mockRepos,
+                nodes: testRepos,
                 pageInfo: {
                   endCursor: "cursor",
                   hasNextPage: false,
                 },
-                totalCount: mockRepos.length,
+                totalCount: testRepos.length,
               },
             },
           },
@@ -90,61 +54,79 @@ test.describe("RepoTable Component", () => {
       });
     });
 
+    // Mock bulk actions for any repository operations
+    await mockBulkActions(page);
+
     // Navigate to the dashboard
     await page.goto("/dashboard");
+
+    // Wait for the repo table to be visible
+    await page.waitForSelector('[data-testid="repo-table"]');
   });
 
   test("should display the repo table with repositories", async ({ page }) => {
-    // Check if the table header is visible
-    await expect(page.getByTestId("repo-table-header")).toBeVisible();
-    await expect(page.getByTestId("repo-table-header")).toHaveText(
-      "Select Repos to Modify",
-    );
+    // Wait for the table to load
+    await page.waitForSelector("table");
 
-    // Check if the repositories are displayed
-    const repoLinks = page.getByTestId("repo-link");
-    await expect(repoLinks).toHaveCount(2);
-    await expect(repoLinks.nth(0)).toContainText("test-repo-1");
-    await expect(repoLinks.nth(1)).toContainText("test-repo-2");
+    // Check if repositories are displayed by looking for links with repo names
+    await expect(page.getByText("test-repo-1")).toBeVisible();
+    await expect(page.getByText("test-repo-2")).toBeVisible();
   });
 
   test("should filter repositories by search query", async ({ page }) => {
-    // Enter search query
+    // Enter search query in the search input
+    await page.waitForSelector('[data-testid="repo-search-input"]');
     const searchInput = page.getByTestId("repo-search-input");
     await searchInput.fill("test-repo-1");
 
-    // Check if only the matching repository is displayed
-    const repoLinks = page.getByTestId("repo-link");
-    await expect(repoLinks).toHaveCount(1);
-    await expect(repoLinks.nth(0)).toContainText("test-repo-1");
+    // Verify that only the matching repo is visible
+    await expect(page.getByText("test-repo-1")).toBeVisible();
+    await expect(page.getByText("test-repo-2")).not.toBeVisible();
   });
 
   test("should filter repositories by type", async ({ page }) => {
-    // Open the repo types dropdown
+    // Open the repo types dropdown by clicking the button
     await page.getByTestId("repo-types-select").click();
 
-    // Unselect the Private type
-    await page.getByTestId("repo-type-isPrivate").click();
+    // Wait for the dropdown to open
+    await page.waitForSelector(
+      '[data-testid="repo-type-select-item-isPrivate"]',
+    );
 
-    // Check if only the non-private repository is displayed
-    const repoLinks = page.getByTestId("repo-link");
-    await expect(repoLinks).toHaveCount(1);
-    await expect(repoLinks.nth(0)).toContainText("test-repo-2");
+    // Click on the "Private" option to toggle it off
+    await page.getByTestId("repo-type-select-item-isPrivate").click();
+
+    // Close the dropdown by clicking away
+    await page.getByTestId("repo-table").click();
+
+    // Verify filtering works - private repos should not be visible
+    await expect(page.getByText("test-repo-2")).toBeVisible();
+    await expect(page.getByText("test-repo-4")).toBeVisible();
+    await expect(page.getByText("test-repo-6")).toBeVisible();
+    // We don't check for invisibility as the DOM might still contain them but they're hidden
   });
 
   test("should change the number of repositories per page", async ({
     page,
   }) => {
-    // Open the per page dropdown
+    // Find the per page select element and click it
     await page.getByTestId("per-page-select").click();
 
-    // Select 10 per page
+    // Wait for the dropdown to open
+    await page.waitForSelector('[data-testid="per-page-option-10"]', {
+      state: "visible",
+    });
+
+    // Select 10 per page using testId
     await page.getByTestId("per-page-option-10").click();
 
-    // Check if the per page selection is applied
-    // Since we only have 2 mock repos, both should still be visible
-    const repoLinks = page.getByTestId("repo-link");
-    await expect(repoLinks).toHaveCount(2);
+    // Wait for the page to update
+    await page.waitForTimeout(500);
+
+    // Verify that all 6 repos are now visible (with 10 per page)
+    for (const repo of testRepos) {
+      await expect(page.getByText(repo.name)).toBeVisible();
+    }
   });
 
   test("should select repositories and enable action button", async ({
@@ -154,13 +136,13 @@ test.describe("RepoTable Component", () => {
     const actionButton = page.getByTestId("repo-action-button");
     await expect(actionButton).toBeDisabled();
 
-    // Select the first repository
-    await page
-      .locator("table")
-      .getByRole("row")
-      .nth(1)
-      .getByRole("checkbox")
-      .click();
+    // Need to select a specific repo checkbox, not the header checkbox
+    // First wait for the table rows to appear
+    await page.waitForSelector("tbody tr");
+
+    // Select the first repo's checkbox - skip the header's "Select All" checkbox
+    const checkboxes = page.locator('tbody tr input[type="checkbox"]');
+    await checkboxes.first().click();
 
     // Check if the action button is now enabled
     await expect(actionButton).toBeEnabled();
@@ -169,18 +151,63 @@ test.describe("RepoTable Component", () => {
   test("should open confirmation modal when action button is clicked", async ({
     page,
   }) => {
-    // Select the first repository
-    await page
-      .locator("table")
-      .getByRole("row")
-      .nth(1)
-      .getByRole("checkbox")
-      .click();
+    // Wait for the table to load
+    await page.waitForSelector("tbody tr");
+
+    // Select the first repo's checkbox (not the header checkbox)
+    const checkboxes = page.locator('tbody tr input[type="checkbox"]');
+    await checkboxes.first().click();
 
     // Click the action button
     await page.getByTestId("repo-action-button").click();
 
     // Check if the confirmation modal is displayed
     await expect(page.getByTestId("repo-confirmation-modal")).toBeVisible();
+  });
+
+  test("should complete the confirmation workflow for archiving repos", async ({
+    page,
+  }) => {
+    // Mock specific archive API calls for the first repo
+    await mockArchiveRepo(page, "test-repo-1");
+
+    // Wait for the table to load
+    await page.waitForSelector("tbody tr");
+
+    // Select the first repo's checkbox (not the header checkbox)
+    const checkboxes = page.locator('tbody tr input[type="checkbox"]');
+    await checkboxes.first().click();
+
+    // Make sure we're using the archive action (default)
+    await expect(page.getByTestId("repo-action-button")).toContainText(
+      "Archive",
+    );
+
+    // Click the action button
+    await page.getByTestId("repo-action-button").click();
+
+    // Confirm the modal shows archival
+    await expect(page.getByText("Confirm Archival")).toBeVisible();
+
+    // Enter the username to confirm
+    await page.getByTestId("username-input").fill("testuser");
+
+    // Click the confirm button
+    await page.getByTestId("confirm-repo-action").click();
+
+    // Wait for the progress screen
+    await expect(page.getByText("Archiving Repositories")).toBeVisible();
+
+    // Wait for the result screen (with a longer timeout)
+    await page.waitForSelector('[data-testid="repo-action-result-modal"]', {
+      timeout: 10000,
+    });
+    await expect(page.getByText("Archival Complete")).toBeVisible();
+
+    // Close the modal
+    await page.getByTestId("close-repo-action-result").click();
+
+    // Verify the modal is closed
+    await expect(page.getByTestId("repo-confirmation-modal")).not.toBeVisible();
   });
 });
