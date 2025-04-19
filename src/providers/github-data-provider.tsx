@@ -76,7 +76,7 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
     Error,
     GitHubFetcherKey | null
   >(
-    // We only need the PAT to be set for authentication, login can be determined from the API
+    // We only fetch when we have a PAT, login is optional and will be determined from the API if not provided
     pat ? ([login ?? "", pat] as GitHubFetcherKey) : null,
     // Cast to expected return type
     fetchGitHubData as unknown as (
@@ -102,13 +102,18 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
     },
   );
 
-  // Derived data state
+  // Derived data state - handle partial data cases
   const isLoading = isAuthenticated && !data && !error;
-  const isError = Boolean(error ?? data?.error);
 
-  // Handle data loading and errors
-  const repos = isError ? null : (data?.repos ?? null);
-  const user = isError ? null : (data?.user ?? null);
+  // We have an error state if there's an SWR error OR if data.error exists but we have no partial data
+  const isError = Boolean(error || (data?.error && !data.repos && !data.user));
+
+  // Handle data loading and errors - use partial data if available
+  const repos = data?.repos ?? null;
+  const user = data?.user ?? null;
+
+  // Track if we have partial data with an error
+  const hasPartialData = Boolean(data?.error && (data.repos || data.user));
 
   // Actions with localStorage persistence
   const setLogin = useCallback((newLogin: string) => {
@@ -174,15 +179,20 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
     if (IS_DEV) {
       console.debug("GitHub Provider state:", {
         hasLogin: !!login,
+        hasPartialData,
         hasRepos: repos?.length ?? 0,
         isAuthenticated,
+        isError,
         isInitialized,
       });
     }
-  }, [isAuthenticated, isInitialized, login, repos]);
+  }, [hasPartialData, isAuthenticated, isError, isInitialized, login, repos]);
 
   // Context value
   const value: GitHubContextType = {
+    // Include the actual error for consumers to inspect if needed
+    error: data?.error || error || null,
+    hasPartialData,
     isAuthenticated,
     isError,
     isInitialized,
