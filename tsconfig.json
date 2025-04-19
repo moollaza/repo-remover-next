@@ -20,14 +20,7 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
-      "@components/*": ["./src/components/*"],
-      "@contexts/*": ["./src/contexts/*"],
-      "@graphql/*": ["./src/graphql/*"],
-      "@hooks/*": ["./src/hooks/*"],
-      "@providers/*": ["./src/providers/*"],
-      "@utils/*": ["./src/utils/*"],
-      "@e2e/*": ["./e2e/*"],
-      "@mocks/*": ["./src/mocks/*"]
+      "@e2e/*": ["./e2e/*"]
     }
   },
   "include": [

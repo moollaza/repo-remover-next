@@ -18,12 +18,12 @@
       {
         "internalPattern": [
           "@/.+",
-          "@components/.+",
-          "@contexts/.+",
-          "@graphql/.+",
-          "@hooks/.+",
-          "@providers/.+",
-          "@utils/.+"
+          "@/components/.+",
+          "@/contexts/.+",
+          "@/graphql/.+",
+          "@/hooks/.+",
+          "@/providers/.+",
+          "@/utils/.+"
         ]
       }
     ]
