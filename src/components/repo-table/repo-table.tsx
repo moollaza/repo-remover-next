@@ -114,11 +114,18 @@ export default function RepoTable({
     }));
   }, [repos]);
 
-  // First we filter the repos based on the search query and selected types
+  // First we filter the repos based on the search query, selected types, and admin permissions
   const filteredRepos = useMemo(() => {
     if (!reposWithKeys) return [];
 
     return reposWithKeys.filter((repo) => {
+      // Check if user can administer this repo (either they own it or have admin rights)
+      const canAdminister =
+        repo.owner.login === login || repo.viewerCanAdminister === true;
+
+      // If user can't administer this repo, filter it out
+      if (!canAdminister) return false;
+
       const matchesSearchQuery =
         repo.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         repo.description?.toLowerCase().includes(searchQuery.toLowerCase());
@@ -138,7 +145,7 @@ export default function RepoTable({
 
       return matchesSearchQuery && matchesType;
     });
-  }, [reposWithKeys, searchQuery, repoTypesFilter]);
+  }, [reposWithKeys, searchQuery, repoTypesFilter, login]);
 
   // Then we sort the filtered repos
   const sortedRepos = useMemo(() => {
@@ -283,7 +290,21 @@ export default function RepoTable({
                     {repo.isFork && <Chip size="sm">Fork</Chip>}
                     {repo.isArchived && <Chip size="sm">Archived</Chip>}
                   </div>
-                  <div>{repo.description ?? "No description"}</div>
+
+                  {(repo.isInOrganization || repo.owner.login !== login) && (
+                    <div className="mb-2 text-default-500 text-sm">
+                      Owned by{" "}
+                      <Link
+                        className="text-sm"
+                        href={repo.owner.url as string}
+                        isExternal
+                      >
+                        {repo.owner.login}
+                      </Link>
+                    </div>
+                  )}
+
+                  <div>{repo.description ?? <i>No description</i>}</div>
                 </div>
               </TableCell>
               <TableCell>
