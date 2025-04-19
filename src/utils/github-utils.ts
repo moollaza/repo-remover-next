@@ -7,6 +7,8 @@ import { Octokit } from "@octokit/rest";
 // Create a custom Octokit class with the throttling plugin and pagination
 export const ThrottledOctokit = Octokit.plugin(throttling, paginateGraphQL);
 
+export type ThrottledOctokitType = InstanceType<typeof ThrottledOctokit>;
+
 const DEBUG = false;
 
 export async function generateRepos(
@@ -37,6 +39,8 @@ export async function generateRepos(
   }
 }
 
+// Reference: https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/about-authentication-to-github#githubs-token-formats
+// Reference: https://github.blog/changelog/2021-03-31-authentication-token-format-updates-are-generally-available/
 export function isValidGitHubToken(token: string): boolean {
   if (!token) return false;
 
@@ -45,15 +49,18 @@ export function isValidGitHubToken(token: string): boolean {
     return token.length >= 40 && /^[a-zA-Z0-9_]+$/.test(token.slice(11));
   }
 
-  // All other tokens start with 3-letter prefix + underscore and are exactly 40 chars
+  // All other tokens start with 3-letter prefix + underscore
   const standardPrefixes = ["ghp_", "gho_", "ghu_", "ghs_", "ghr_"];
   const matchedPrefix = standardPrefixes.find((prefix) =>
     token.startsWith(prefix),
   );
 
   if (!matchedPrefix) return false;
+
+  // Standard tokens should be exactly 40 characters in total
   if (token.length !== 40) return false;
 
+  // Check that characters after the prefix are alphanumeric
   return /^[a-zA-Z0-9]+$/.test(token.slice(matchedPrefix.length));
 }
 
@@ -99,6 +106,20 @@ export const processRepo = async (
   repo: Repository,
   action: "archive" | "delete",
 ): Promise<void> => {
+  if (!octokit) {
+    throw new Error("Octokit instance is required");
+  }
+
+  if (!repo) {
+    throw new Error("Repository is required");
+  }
+
+  if (!action) {
+    throw new Error("Action is required");
+  }
+
+  console.log(`Processing ${action} for ${repo.name}...`);
+
   if (action === "archive") {
     await archiveRepo(octokit, repo);
   } else if (action === "delete") {

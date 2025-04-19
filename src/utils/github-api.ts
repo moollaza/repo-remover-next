@@ -1,8 +1,12 @@
+import { GraphqlResponseError } from "@octokit/graphql";
 import { Repository } from "@octokit/graphql-schema";
 
-import { createThrottledOctokit } from "./github-utils";
+import {
+  createThrottledOctokit,
+  type ThrottledOctokitType,
+} from "@/utils/github-utils";
 
-// GraphQL query to get repositories with pagination
+// GraphQL queries remain the same
 export const GET_REPOS = `
   query getRepositories($login: String!, $cursor: String) {
     user(login: $login) {
@@ -11,7 +15,7 @@ export const GET_REPOS = `
       name
       avatarUrl
       bioHTML
-      repositories(first: 100, after: $cursor, ownerAffiliations: OWNER) {
+      repositories(first: 100, after: $cursor) {
         nodes {
           id
           name
@@ -23,6 +27,7 @@ export const GET_REPOS = `
           isMirror
           isLocked
           isInOrganization
+          viewerCanAdminister
           owner {
             id
             login
@@ -46,7 +51,6 @@ export const GET_REPOS = `
   }
 `;
 
-// GraphQL query to get current user
 export const GET_CURRENT_USER = `
   query getCurrentUser {
     viewer {
@@ -59,7 +63,7 @@ export const GET_CURRENT_USER = `
   }
 `;
 
-// Define the response type for the current user query
+// Types remain the same
 export interface CurrentUserResponse {
   viewer: {
     avatarUrl: string;
@@ -70,7 +74,6 @@ export interface CurrentUserResponse {
   };
 }
 
-// Define the response type for the GraphQL query
 export interface RepositoriesResponse {
   user: {
     avatarUrl: string;
@@ -96,83 +99,145 @@ export interface User {
   url: string;
 }
 
+interface FetchResult {
+  error: Error | null;
+  repos: null | Repository[];
+  user: null | User;
+}
+
 /**
  * Fetches GitHub data for the specified user using GraphQL with pagination
  * @param params A tuple of [login, pat] where login is the GitHub username and pat is the personal access token
  * @returns An object containing the repositories and user data
  */
-export async function fetchGitHubData(params: [string, string]): Promise<{
-  error: Error | null;
-  repos: null | Repository[];
-  user: null | User;
-}> {
+export async function fetchGitHubData(
+  params: [string, string],
+): Promise<FetchResult> {
   const [login, pat] = params;
 
   if (!pat) {
     throw new Error("PAT is required");
   }
 
-  try {
-    // Create Octokit instance with the token and throttling + pagination
-    const octokit = createThrottledOctokit(pat);
+  const octokit = createThrottledOctokit(pat);
 
-    // Initialize variables
-    let userLogin = login;
-    let userData: null | User = null;
+  // If login is provided, use it directly
+  if (login) {
+    // Fetch repositories with the provided login
+    const repoResult = await fetchRepositories(octokit, login);
 
-    // If no login provided, get authenticated user info
-    if (!userLogin) {
-      // Use GraphQL to get authenticated user (viewer)
+    return {
+      error: repoResult.error,
+      repos: repoResult.repos,
+      user: repoResult.userData,
+    };
+  }
+  // Otherwise, get current user's login first
+  else {
+    try {
       const userResponse =
         await octokit.graphql<CurrentUserResponse>(GET_CURRENT_USER);
-      userLogin = userResponse.viewer.login;
+      const userLogin = userResponse.viewer.login;
 
-      // Transform to User object
-      userData = {
-        avatarUrl: userResponse.viewer.avatarUrl,
-        id: userResponse.viewer.id,
-        login: userResponse.viewer.login,
-        name: userResponse.viewer.name || userResponse.viewer.login,
-        url: `https://github.com/${userResponse.viewer.login}`,
+      // Now fetch repositories with the obtained login
+      const repoResult = await fetchRepositories(octokit, userLogin);
+
+      return {
+        error: repoResult.error,
+        repos: repoResult.repos,
+        user: repoResult.userData,
+      };
+    } catch (error) {
+      console.error("Error fetching GitHub user data:", error);
+
+      return {
+        error:
+          error instanceof Error
+            ? error
+            : new Error("Unknown error fetching user data"),
+        repos: null,
+        user: null,
       };
     }
+  }
+}
 
-    // Fetch repositories using the enhanced octokit instance with pagination
-    // Note: We need to use type assertion here since TypeScript doesn't fully
-    // understand the plugin's modifications to the Octokit type
-    const ocktokitWithPagination = octokit as unknown as {
-      graphql: {
-        paginate: <T>(query: string, variables: object) => Promise<T>;
-      };
-    };
-
-    // Fetch all repositories with pagination
-    const result = await ocktokitWithPagination.graphql.paginate<{
+/**
+ * Fetches repository data from GitHub
+ */
+async function fetchRepositories(
+  octokit: ThrottledOctokitType,
+  userLogin: string,
+): Promise<{
+  error: Error | null;
+  repos: null | Repository[];
+  userData: null | User; // Keep user data since it comes with the repo query
+}> {
+  try {
+    const result = await octokit.graphql.paginate<{
       user: RepositoriesResponse["user"];
     }>(GET_REPOS, { login: userLogin });
 
-    // Extract user data from result
     const { user } = result;
 
-    // If userData wasn't set (when login was provided), set it now
-    if (!userData) {
-      userData = {
-        avatarUrl: user.avatarUrl,
-        id: user.id,
-        login: user.login,
-        name: user.name || user.login,
-        url: `https://github.com/${user.login}`,
-      };
-    }
+    const userData: User = {
+      avatarUrl: user.avatarUrl,
+      id: user.id,
+      login: user.login,
+      name: user.name || user.login,
+      url: `https://github.com/${user.login}`,
+    };
 
-    // Return all data
     return {
       error: null,
       repos: user.repositories.nodes,
-      user: userData,
+      userData,
     };
   } catch (error) {
-    console.error("Error fetching GitHub data:", error);
-    return { error: error as Error, repos: null, user: null };
+    console.error("Error fetching GitHub repositories:", error);
+
+    if (error instanceof GraphqlResponseError) {
+      console.log("GraphQL error:", error.message);
+      // Check if we have partial data from the error
+      const partialRepos =
+        (error.data as { user?: { repositories?: { nodes?: Repository[] } } })
+          ?.user?.repositories?.nodes ?? null;
+
+      // If we have partial user data from the error, extract it
+      let userData = null;
+      type PartialUserData = { name?: string } & Pick<
+        User,
+        "avatarUrl" | "id" | "login"
+      >;
+      interface ErrorData {
+        user?: PartialUserData;
+      }
+
+      if ((error.data as ErrorData)?.user) {
+        const user = (error.data as { user: PartialUserData }).user;
+        userData = {
+          avatarUrl: user.avatarUrl,
+          id: user.id,
+          login: user.login,
+          name: user.name ?? user.login,
+          url: `https://github.com/${user.login}`,
+        };
+      }
+
+      return {
+        error: error,
+        repos: partialRepos,
+        userData,
+      };
+    }
+
+    return {
+      error:
+        error instanceof Error
+          ? error
+          : new Error("Unknown error fetching repositories"),
+      repos: null,
+      userData: null,
+    };
   }
 }
