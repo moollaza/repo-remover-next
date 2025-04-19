@@ -3,9 +3,9 @@ import "@fortawesome/fontawesome-svg-core/styles.css";
 import clsx from "clsx";
 import { Inter } from "next/font/google";
 
+import Footer from "@/components/footer";
+import Header from "@/components/header";
 import { Providers } from "@/providers/providers";
-import Footer from "@components/footer";
-import Header from "@components/header";
 import "@/globals.css";
 
 config.autoAddCss = false;

@@ -1,6 +1,6 @@
 import { useContext } from "react";
 
-import { GitHubContext } from "../contexts/github-context";
+import { GitHubContext } from "@/contexts/github-context";
 
 /**
  * Hook to use the GitHub context
