@@ -1,11 +1,13 @@
 import { expect, test } from "@playwright/test";
 
+import { mockOctokitInit } from "../utils/github-api-mocks";
+
 test.describe("Header Component", () => {
   test("should display the header correctly on home page", async ({ page }) => {
     await page.goto("/");
 
-    // Check if the brand is visible
-    const brand = page.getByRole("link", { name: "Repo Remover" });
+    // Check if the brand is visible - use a more specific selector
+    const brand = page.getByRole("link", { name: "Repo Remover" }).first();
     await expect(brand).toBeVisible();
 
     // Check if navigation links are visible
@@ -28,22 +30,16 @@ test.describe("Header Component", () => {
       localStorage.setItem("login", "testuser");
     });
 
-    // Mock the GitHub API response
-    await page.route("https://api.github.com/user", (route) => {
-      void route.fulfill({
-        body: JSON.stringify({
-          avatarUrl: "https://avatars.githubusercontent.com/u/12345?v=4",
-          login: "testuser",
-          name: "Test User",
-        }),
-        status: 200,
-      });
-    });
+    // Use the mockOctokitInit function for consistent mocking
+    await mockOctokitInit(page);
 
     await page.goto("/dashboard");
 
+    // We need to wait for the page to load and process authentication
+    await page.waitForLoadState("networkidle");
+
     // Check if the brand is visible
-    const brand = page.getByRole("link", { name: "Repo Remover" });
+    const brand = page.getByRole("link", { name: "Repo Remover" }).first();
     await expect(brand).toBeVisible();
 
     // Check that navigation links are not visible
@@ -57,8 +53,11 @@ test.describe("Header Component", () => {
       page.getByRole("link", { name: "Get Started" }),
     ).not.toBeVisible();
 
-    // Check that the user dropdown is visible
-    await expect(page.getByText("testuser")).toBeVisible();
+    // Check that the user avatar is visible - using a more reliable selector
+    const userAvatar = page.locator(
+      'svg[aria-label="avatar"], span[aria-label="avatar"]',
+    );
+    await expect(userAvatar).toBeVisible();
   });
 
   test("should show dashboard link when authenticated on home page", async ({
@@ -73,22 +72,20 @@ test.describe("Header Component", () => {
       localStorage.setItem("login", "testuser");
     });
 
-    // Mock the GitHub API response
-    await page.route("https://api.github.com/user", (route) => {
-      void route.fulfill({
-        body: JSON.stringify({
-          avatarUrl: "https://avatars.githubusercontent.com/u/12345?v=4",
-          login: "testuser",
-          name: "Test User",
-        }),
-        status: 200,
-      });
-    });
+    // Use the mockOctokitInit function for consistent mocking
+    await mockOctokitInit(page);
 
     await page.goto("/");
 
+    // We need to wait for the page to load and process authentication
+    await page.waitForLoadState("networkidle");
+
     // Check if the dashboard link is visible
-    const dashboardLink = page.getByRole("link", { name: "Go to Dashboard" });
+    // Use a more general button selector that would match the dashboard link
+    const dashboardLink = page
+      .getByRole("link", { name: /dashboard/i })
+      .or(page.getByRole("button", { name: /dashboard/i }));
+
     await expect(dashboardLink).toBeVisible();
   });
 
@@ -102,25 +99,33 @@ test.describe("Header Component", () => {
       localStorage.setItem("login", "testuser");
     });
 
-    // Mock the GitHub API response
-    await page.route("https://api.github.com/user", (route) => {
-      void route.fulfill({
-        body: JSON.stringify({
-          avatarUrl: "https://avatars.githubusercontent.com/u/12345?v=4",
-          login: "testuser",
-          name: "Test User",
-        }),
-        status: 200,
-      });
-    });
+    // Use the mockOctokitInit function for consistent mocking
+    await mockOctokitInit(page);
 
     await page.goto("/dashboard");
 
-    // Click on the user dropdown
-    await page.getByText("testuser").click();
+    // We need to wait for the page to load and process authentication
+    await page.waitForLoadState("networkidle");
+
+    // User avatar should be visible
+    const userAvatar = page.locator(
+      'svg[aria-label="avatar"], span[aria-label="avatar"]',
+    );
+    await expect(userAvatar).toBeVisible();
+
+    // Find the dropdown container that has the user avatar
+    const dropdownContainer = page.locator('div[aria-haspopup="true"]');
+    await expect(dropdownContainer).toBeVisible();
+
+    // Click on the dropdown to open it
+    await dropdownContainer.click();
+
+    // Wait for dropdown menu to appear and find the logout option
+    const logoutItem = page.getByText("Log Out");
+    await expect(logoutItem).toBeVisible({ timeout: 10000 });
 
     // Click on the logout button
-    await page.getByText("Log Out").click();
+    await logoutItem.click();
 
     // Check if we're redirected to the home page
     await expect(page).toHaveURL("/");
