@@ -88,6 +88,30 @@ export async function mockGraphQLRepos(page: Page) {
   });
 }
 
+/**
+ * Mock GitHub API for token validation failure
+ * @param page Playwright page
+ * @param errorMessage Optional error message (defaults to "Bad credentials")
+ */
+export async function mockInvalidToken(
+  page: Page,
+  errorMessage = "Bad credentials",
+) {
+  await page.route("https://api.github.com/user", (route) => {
+    if (route.request().method() === "GET") {
+      void route.fulfill({
+        body: JSON.stringify({
+          documentation_url: "https://docs.github.com/rest",
+          message: errorMessage,
+        }),
+        status: 401,
+      });
+    } else {
+      void route.continue();
+    }
+  });
+}
+
 // Add support for throttled Octokit instance in mocks
 export async function mockOctokitInit(page: Page) {
   await page.route("https://api.github.com/user", (route) => {
