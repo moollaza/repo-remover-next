@@ -5,9 +5,12 @@
 - Encrypt localstorage or remove
 - Improve Homepage Content
 - Dark Theme
-- Unit tests (Vitest)
-- E2E tests (Playwright)
-- Regression Tests (Storybook)
+- Handle partial data when API has errors + data
+  e.g. { type: "FORBIDDEN", message: "Resource protected by organization SAML enforcement. You must grant your Personal Access token access to this organization.", path: (5)[…], … }
+
+  Happens when requesting data from org that requires SSO.
+
+  We should flag errors to user.
 
 ## Try it now at https://next.reporemover.xyz
 
