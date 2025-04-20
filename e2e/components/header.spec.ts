@@ -6,8 +6,13 @@ test.describe("Header Component", () => {
   test("should display the header correctly on home page", async ({ page }) => {
     await page.goto("/");
 
-    // Check if the brand is visible - use a more specific selector
-    const brand = page.getByRole("link", { name: "Repo Remover" }).first();
+    // Look for the Navbar containing the brand
+    const navbar = page.locator("nav").first();
+    await expect(navbar).toBeVisible();
+
+    // Check if the brand link containing "Repo Remover" text is visible
+    // Use a more flexible approach to find the brand
+    const brand = navbar.getByText("Repo Remover");
     await expect(brand).toBeVisible();
 
     // Check if navigation links are visible
@@ -39,7 +44,10 @@ test.describe("Header Component", () => {
     await page.waitForLoadState("networkidle");
 
     // Check if the brand is visible
-    const brand = page.getByRole("link", { name: "Repo Remover" }).first();
+    const navbar = page.locator("nav").first();
+    await expect(navbar).toBeVisible();
+
+    const brand = navbar.getByText("Repo Remover");
     await expect(brand).toBeVisible();
 
     // Check that navigation links are not visible
