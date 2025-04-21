@@ -41,6 +41,7 @@ export function createMockRepo(
       : null,
     updatedAt: faker.date.recent().toISOString(),
     url: `https://github.com/${owner.login}/${repoName}`,
+    viewerCanAdminister: true,
     ...overrides,
   } as Repository;
 }
@@ -58,8 +59,16 @@ export function createMockUser(overrides = {}) {
 }
 
 // Generate a set of mock repositories
-export function generateMockRepos(count = 5): Repository[] {
-  return Array.from({ length: count }, () => createMockRepo());
+export function generateMockRepos(
+  count = 5,
+  overrides: Partial<Repository> = {},
+): Repository[] {
+  return Array.from({ length: count }, (_, index) =>
+    createMockRepo({
+      ...overrides,
+      name: `test-repo-${index + 1}`,
+    }),
+  );
 }
 
 export const mockUser = createMockUser();

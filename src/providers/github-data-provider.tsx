@@ -106,7 +106,7 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
   const isLoading = isAuthenticated && !data && !error;
 
   // We have an error state if there's an SWR error OR if data.error exists but we have no partial data
-  const isError = Boolean(error || (data?.error && !data.repos && !data.user));
+  const isError = Boolean(error ?? (data?.error && !data.repos && !data.user));
 
   // Handle data loading and errors - use partial data if available
   const repos = data?.repos ?? null;
@@ -191,7 +191,7 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
   // Context value
   const value: GitHubContextType = {
     // Include the actual error for consumers to inspect if needed
-    error: data?.error || error || null,
+    error: data?.error ?? error ?? null,
     hasPartialData,
     isAuthenticated,
     isError,

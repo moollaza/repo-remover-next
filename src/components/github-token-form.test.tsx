@@ -82,7 +82,7 @@ describe("GitHubTokenForm", () => {
 
   test("calls onSubmit when form is submitted with valid token", async () => {
     const { submitButton } = setupForm({
-      value: "ghp_validtoken123456789012345678901234567890",
+      value: "ghp_abcdefghijklmnopqrstuvwxyz1234567890",
     });
 
     // Wait for API validation to complete and button to become enabled
@@ -95,7 +95,7 @@ describe("GitHubTokenForm", () => {
 
     // onSubmit should be called with the token
     expect(mockOnSubmit).toHaveBeenCalledWith(
-      "ghp_validtoken123456789012345678901234567890",
+      "ghp_abcdefghijklmnopqrstuvwxyz1234567890",
     );
   });
 
