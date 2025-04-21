@@ -12,6 +12,7 @@ export const GET_REPOS = `
     user(login: $login) {
       id
       login
+      url
       name
       avatarUrl
       bioHTML

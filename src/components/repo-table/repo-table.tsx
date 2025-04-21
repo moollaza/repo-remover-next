@@ -233,6 +233,7 @@ export default function RepoTable({
           <div className="flex w-full justify-center">
             {/* PAGINATION */}
             <Pagination
+              data-testid="repo-pagination"
               onChange={setCurrentPage}
               page={currentPage}
               showControls
@@ -270,10 +271,10 @@ export default function RepoTable({
           loadingContent={<Spinner label="Loading..." />}
         >
           {(repo) => (
-            <TableRow key={repo.id}>
+            <TableRow data-testid="repo-row" key={repo.id}>
               <TableCell>
-                <div>
-                  <div className="mb-2">
+                <div data-testid="repo-details">
+                  <div className="mb-2" data-testid="repo-name">
                     <Link
                       className="font-semibold text-xl"
                       href={repo.url as string}
@@ -282,7 +283,7 @@ export default function RepoTable({
                       {repo.name}
                     </Link>
                   </div>
-                  <div className="flex gap-2 mb-5">
+                  <div className="flex gap-2 mb-5" data-testid="repo-tags">
                     {repo.isPrivate && <Chip size="sm">Private</Chip>}
                     {repo.isInOrganization && (
                       <Chip size="sm">Organization</Chip>
@@ -291,8 +292,11 @@ export default function RepoTable({
                     {repo.isArchived && <Chip size="sm">Archived</Chip>}
                   </div>
 
-                  {(repo.isInOrganization || repo.owner.login !== login) && (
-                    <div className="mb-2 text-default-500 text-sm">
+                  {repo.owner.login !== login && (
+                    <div
+                      className="mb-2 text-default-500 text-sm"
+                      data-testid="repo-owner"
+                    >
                       Owned by{" "}
                       <Link
                         className="text-sm"
@@ -304,11 +308,14 @@ export default function RepoTable({
                     </div>
                   )}
 
-                  <div>{repo.description ?? <i>No description</i>}</div>
+                  <div data-testid="repo-description">
+                    {repo.description ?? <i>No description</i>}
+                  </div>
                 </div>
               </TableCell>
               <TableCell>
                 <span
+                  data-testid="repo-updated-at"
                   title={new Date(repo.updatedAt as string).toLocaleString(
                     navigator.language,
                     {

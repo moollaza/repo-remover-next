@@ -1,6 +1,7 @@
+import { mockGraphQLRepos } from "@e2e/utils/github-api-mocks";
 import { expect, Locator, Page } from "@playwright/test";
 
-import { mockOctokitInit } from "../utils/github-api-mocks";
+import { mockLocalStorage, mockOctokitInit } from "../utils/github-api-mocks";
 import { HomePage } from "./home";
 
 export class DashboardPage extends HomePage {
@@ -109,6 +110,8 @@ export class DashboardPage extends HomePage {
   }
 
   async setupMocks() {
+    await mockLocalStorage(this.page);
     await mockOctokitInit(this.page);
+    await mockGraphQLRepos(this.page);
   }
 }

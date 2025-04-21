@@ -12,6 +12,7 @@
     "test": "vitest",
     "test:unit": "vitest run",
     "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
     "debug:e2e": "playwright test --debug",
     "test:all": "npm run test:unit && npm run test:e2e",
     "storybook": "storybook dev -p 6006",

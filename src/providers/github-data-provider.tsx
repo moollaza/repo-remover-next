@@ -177,7 +177,7 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
   // Use useEffect for logging to avoid excessive console output
   useEffect(() => {
     if (IS_DEV) {
-      console.debug("GitHub Provider state:", {
+      console.debug("GitHub Provider state updated:", {
         hasLogin: !!login,
         hasPartialData,
         hasRepos: repos?.length ?? 0,

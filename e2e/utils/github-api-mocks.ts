@@ -1,6 +1,11 @@
+import { GraphQlQueryResponseData } from "@octokit/graphql";
 import { Page } from "@playwright/test";
 
-import { mockRepos, mockUser } from "@/mocks/fixtures";
+import {
+  getValidPersonalAccessToken,
+  mockRepos,
+  mockUser,
+} from "@/mocks/fixtures";
 
 export async function mockArchiveRepo(
   page: Page,
@@ -60,31 +65,26 @@ export async function mockDeleteRepo(
   });
 }
 
-export async function mockGraphQLRepos(page: Page) {
+// Use it in your mock function
+export async function mockGraphQLRepos(page: Page): Promise<void> {
   await page.route("https://api.github.com/graphql", (route) => {
-    const body = JSON.parse(route.request().postData() ?? "{}") as {
-      query: string;
-    };
-    if (body.query.includes("GetRepos")) {
-      void route.fulfill({
-        body: JSON.stringify({
-          data: {
-            user: {
-              ...mockUser,
-              repositories: {
-                nodes: mockRepos,
-                pageInfo: {
-                  endCursor: null,
-                  hasNextPage: false,
-                },
-                totalCount: mockRepos.length,
-              },
+    const json: GraphQlQueryResponseData = {
+      data: {
+        user: {
+          ...mockUser,
+          repositories: {
+            nodes: mockRepos,
+            pageInfo: {
+              endCursor: "blah",
+              hasNextPage: false,
             },
           },
-        }),
-        status: 200,
-      });
-    }
+        },
+      },
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    void route.fulfill({ json });
   });
 }
 
@@ -112,7 +112,15 @@ export async function mockInvalidToken(
   });
 }
 
-// Add support for throttled Octokit instance in mocks
+export async function mockLocalStorage(page: Page) {
+  const validToken = getValidPersonalAccessToken();
+
+  await page.addInitScript((token) => {
+    window.localStorage.setItem("pat", token);
+    window.localStorage.setItem("login", "moollaza");
+  }, validToken);
+}
+
 export async function mockOctokitInit(page: Page) {
   await page.route("https://api.github.com/user", (route) => {
     void route.fulfill({

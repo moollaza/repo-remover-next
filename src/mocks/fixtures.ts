@@ -1,6 +1,12 @@
 import { faker } from "@faker-js/faker";
 import { Repository } from "@octokit/graphql-schema";
 
+import {
+  createMockUser,
+  createRepoFromTemplate,
+  MOCK_REPO_TEMPLATES,
+} from "./fixture-utils";
+
 // Seed Faker for consistent results
 faker.seed(123456789);
 
@@ -8,67 +14,30 @@ faker.seed(123456789);
 export function createMockRepo(
   overrides: Partial<Repository> = {},
 ): Repository {
-  const owner = overrides.owner ?? {
-    id: faker.string.uuid(),
-    login: "testuser",
-    updatedAt: faker.date.recent().toISOString(),
-    url: `https://github.com/${faker.internet.userName().toLowerCase()}`,
-  };
+  const randomTemplateIndex = faker.number.int(MOCK_REPO_TEMPLATES.length - 1);
+  const template = MOCK_REPO_TEMPLATES[randomTemplateIndex];
 
-  const repoName = faker.word.words(2).toLowerCase().replace(/\s+/g, "-");
-  const isFork =
-    overrides.isFork ?? faker.datatype.boolean({ probability: 0.2 });
-
-  return {
-    description: faker.lorem.sentence(),
-    id: faker.string.uuid(),
-    isArchived: faker.datatype.boolean({ probability: 0.1 }),
-    isDisabled: faker.datatype.boolean({ probability: 0.05 }),
-    isFork,
-    isInOrganization: faker.datatype.boolean({ probability: 0.3 }),
-    isMirror: faker.datatype.boolean({ probability: 0.05 }),
-    isPrivate: faker.datatype.boolean(),
-    isTemplate: faker.datatype.boolean({ probability: 0.05 }),
-    name: repoName,
-    owner,
-    parent: isFork
-      ? {
-          name: faker.word.words(2).toLowerCase().replace(/\s+/g, "-"),
-          owner: {
-            login: faker.internet.userName().toLowerCase(),
-          },
-        }
-      : null,
-    updatedAt: faker.date.recent().toISOString(),
-    url: `https://github.com/${owner.login}/${repoName}`,
-    viewerCanAdminister: true,
-    ...overrides,
-  } as Repository;
+  return createRepoFromTemplate(template, 0, overrides);
 }
 
-// Factory function to create a mock user with Faker
-export function createMockUser(overrides = {}) {
-  return {
-    avatarUrl: faker.image.avatar(),
-    bioHTML: `<p>${faker.person.bio()}</p>`,
-    id: faker.string.uuid(),
-    login: faker.internet.userName().toLowerCase(),
-    name: faker.person.fullName(),
-    ...overrides,
-  };
-}
-
-// Generate a set of mock repositories
+// Generate a set of mock repositories based on predefined templates
 export function generateMockRepos(
-  count = 5,
+  count = 10,
   overrides: Partial<Repository> = {},
 ): Repository[] {
-  return Array.from({ length: count }, (_, index) =>
-    createMockRepo({
-      ...overrides,
-      name: `test-repo-${index + 1}`,
-    }),
-  );
+  const repos: Repository[] = [];
+  for (let i = 0; i < count; i++) {
+    // Use modulo to cycle through templates when count > templates length
+    const templateIndex = i % MOCK_REPO_TEMPLATES.length;
+    repos.push(
+      createRepoFromTemplate(MOCK_REPO_TEMPLATES[templateIndex], i, overrides),
+    );
+  }
+  return repos;
+}
+
+export function getValidPersonalAccessToken() {
+  return "ghp_abcdefghijklmnopqrstuvwxyz1234567890";
 }
 
 export const mockUser = createMockUser();
