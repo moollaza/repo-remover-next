@@ -9,7 +9,16 @@ export class DashboardPage extends HomePage {
   readonly archiveButton: Locator;
   readonly cancelButton: Locator;
   readonly confirmationInput: Locator;
+  // Confirmation modal specific locators
+  readonly confirmationModal: Locator;
+  readonly confirmationModalBody: Locator;
+  readonly confirmationModalCancel: Locator;
+  readonly confirmationModalConfirm: Locator;
+  readonly confirmationModalHeader: Locator;
+  readonly confirmationModalInput: Locator;
+  readonly confirmationModalResultClose: Locator;
   readonly confirmButton: Locator;
+
   readonly deleteButton: Locator;
   readonly page: Page;
   readonly progressBar: Locator;
@@ -24,43 +33,81 @@ export class DashboardPage extends HomePage {
     this.searchInput = page.getByLabel("Search");
     this.typeFilter = page.getByLabel("Repo types to show");
     this.selectAllCheckbox = page.getByRole("checkbox", { name: "Select all" });
-    this.archiveButton = page.getByRole("button", { name: /archive/i });
+    this.archiveButton = page.getByTestId("repo-action-button-archive");
     this.deleteButton = page.getByTestId("repo-action-button-delete");
-    this.actionDropdown = page.getByRole("button", { name: /chevron/i });
-    this.confirmButton = page.getByRole("button", { name: /confirm/i });
-    this.cancelButton = page.getByRole("button", { name: /cancel/i });
-    this.confirmationInput = page.getByPlaceholder(
-      /enter your github username/i,
-    );
+    this.actionDropdown = page.getByTestId("repo-action-dropdown-trigger");
+    this.confirmButton = page.getByTestId("confirmation-modal-confirm");
+    this.cancelButton = page.getByTestId("confirmation-modal-cancel");
+    this.confirmationInput = page.getByTestId("confirmation-modal-input");
     this.progressBar = page.getByRole("progressbar");
     this.repoPagination = page.getByTestId("repo-pagination");
+
+    // Initialize confirmation modal locators
+    this.confirmationModal = page.getByTestId("repo-confirmation-modal");
+    this.confirmationModalHeader = page.getByTestId(
+      "confirmation-modal-header",
+    );
+    this.confirmationModalBody = page.getByTestId("confirmation-modal-body");
+    this.confirmationModalInput = page.getByTestId("confirmation-modal-input");
+    this.confirmationModalCancel = page.getByTestId(
+      "confirmation-modal-cancel",
+    );
+    this.confirmationModalConfirm = page.getByTestId(
+      "confirmation-modal-confirm",
+    );
+    this.confirmationModalResultClose = page.getByTestId(
+      "repo-action-result-close",
+    );
   }
 
   async archiveSelectedRepos(username: string) {
     await this.archiveButton.click();
     await this.fillConfirmationInput(username);
-    await this.confirmButton.click();
+    await this.confirmationModalConfirm.click();
+  }
+
+  /**
+   * Cancels the confirmation dialog
+   */
+  async cancelConfirmation() {
+    await this.confirmationModalCancel.click();
   }
 
   async clearSearch() {
     await this.searchInput.clear();
   }
 
+  /**
+   * Closes the confirmation modal result by clicking the close button
+   */
+  async closeModalResult() {
+    await this.confirmationModalResultClose.click();
+  }
+
+  /**
+   * Confirms the action in the confirmation dialog after entering username
+   * @param username The GitHub username to enter for confirmation
+   */
+  async confirmAction(username: string) {
+    await this.fillConfirmationInput(username);
+    await this.confirmationModalConfirm.click();
+  }
+
   async deleteSelectedRepos(username: string) {
-    await this.page.getByRole("button", { name: /delete/i }).click();
+    await this.deleteButton.click();
     await this.fillConfirmationInput(username);
   }
 
   async expectConfirmationInputEmpty() {
-    await expect(this.confirmationInput).toHaveValue("");
+    await expect(this.confirmationModalInput).toHaveValue("");
   }
 
   async expectConfirmButtonDisabled() {
-    await expect(this.confirmButton).toBeDisabled();
+    await expect(this.confirmationModalConfirm).toBeDisabled();
   }
 
   async expectConfirmButtonEnabled() {
-    await expect(this.confirmButton).toBeEnabled();
+    await expect(this.confirmationModalConfirm).toBeEnabled();
   }
 
   async expectCurrentPage(pageNumber: number | string) {
@@ -73,14 +120,22 @@ export class DashboardPage extends HomePage {
     await expect(this.page.getByText(text)).toBeVisible();
   }
 
+  /**
+   * Checks if the confirmation modal is in a specific mode
+   * @param mode The expected mode of the modal: "confirmation", "progress", or "result"
+   */
+  async expectModalInMode(mode: "confirmation" | "progress" | "result") {
+    await expect(
+      this.page.getByTestId(`confirmation-modal-${mode}`),
+    ).toBeVisible();
+  }
+
   async expectModalNotVisible() {
-    await expect(this.page.getByRole("dialog")).not.toBeVisible();
+    await expect(this.confirmationModal).not.toBeVisible();
   }
 
   async expectModalTitle(text: RegExp | string) {
-    await expect(this.page.getByRole("heading", { level: 2 })).toContainText(
-      text,
-    );
+    await expect(this.confirmationModalHeader).toContainText(text);
   }
 
   async expectProgressVisible(count: number) {
@@ -159,7 +214,7 @@ export class DashboardPage extends HomePage {
   }
 
   async fillConfirmationInput(username: string) {
-    await this.confirmationInput.fill(username);
+    await this.confirmationModalInput.fill(username);
   }
 
   async filterByType(type: string) {

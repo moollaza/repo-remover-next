@@ -195,7 +195,7 @@ export default function ConfirmationModal({
       scrollBehavior="inside"
       size="xl"
     >
-      <ModalContent>
+      <ModalContent data-testid={`confirmation-modal-${state.mode}`}>
         <>
           {state.mode === "confirmation" && (
             <RepoActionConfirmation
@@ -300,10 +300,10 @@ function RepoActionConfirmation({
 }: RepoActionConfirmationProps) {
   return (
     <>
-      <ModalHeader>
+      <ModalHeader data-testid="confirmation-modal-header">
         <h3>Confirm {action === "archive" ? "Archival" : "Deletion"}</h3>
       </ModalHeader>
-      <ModalBody>
+      <ModalBody data-testid="confirmation-modal-body">
         <p>
           Are you sure you want to <b>{action}</b> the following {count}{" "}
           repositor{count > 1 ? "ies" : "y"}?
@@ -391,10 +391,10 @@ function RepoActionResult({
 
   return (
     <>
-      <ModalHeader data-testid="repo-action-result-modal">
+      <ModalHeader>
         <h3>{action === "archive" ? "Archival" : "Deletion"} Complete</h3>
       </ModalHeader>
-      <ModalBody data-testid="repo-action-result-modal-body">
+      <ModalBody>
         <p>
           {count - errorCount} out of {count} repos{" "}
           {action === "archive" ? "archived" : "deleted"} successfully!
@@ -421,9 +421,9 @@ function RepoActionResult({
           </>
         )}
       </ModalBody>
-      <ModalFooter data-testid="repo-action-result-modal-footer">
+      <ModalFooter>
         <Button
-          data-testid="close-repo-action-result"
+          data-testid="repo-action-result-close"
           onPress={onClose}
           variant="bordered"
         >
