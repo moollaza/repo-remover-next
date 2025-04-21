@@ -77,6 +77,10 @@ export class DashboardPage extends HomePage {
     await this.confirmationModalCancel.click();
   }
 
+  async clearConfirmationInput() {
+    await this.confirmationModalInput.fill("");
+  }
+
   async clearSearch() {
     await this.searchInput.clear();
   }
@@ -232,7 +236,7 @@ export class DashboardPage extends HomePage {
   }
 
   async fillConfirmationInput(username: string) {
-    await this.confirmationModalInput.fill(username);
+    await this.confirmationModalInput.pressSequentially(username);
   }
 
   async filterByType(type: string) {

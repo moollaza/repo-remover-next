@@ -159,10 +159,10 @@ test.describe("Dashboard Page", () => {
       // Select a repository and open archive modal
       await dashboard.selectRepository("repo-1");
       await dashboard.archiveButton.click();
+      await dashboard.expectModalInMode("confirmation");
     });
 
     test("renders confirmation dialog with repository list", async () => {
-      await dashboard.expectModalInMode("confirmation");
       await dashboard.expectModalTitle(/Confirm Archival/i);
       await dashboard.expectRepoInConfirmationModal("repo-1");
       await dashboard.expectConfirmButtonDisabled();
@@ -172,6 +172,8 @@ test.describe("Dashboard Page", () => {
       // Enter incorrect username
       await dashboard.fillConfirmationInput("wronguser");
       await dashboard.expectConfirmButtonDisabled();
+
+      await dashboard.clearConfirmationInput();
 
       // Enter correct username
       await dashboard.fillConfirmationInput("testuser");
