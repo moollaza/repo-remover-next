@@ -164,7 +164,7 @@ test.describe("Dashboard Page", () => {
     test("renders confirmation dialog with repository list", async () => {
       await dashboard.expectModalInMode("confirmation");
       await dashboard.expectModalTitle(/Confirm Archival/i);
-      await dashboard.expectRepoVisible("repo-1");
+      await dashboard.expectRepoInConfirmationModal("repo-1");
       await dashboard.expectConfirmButtonDisabled();
     });
 

@@ -16,6 +16,7 @@ export class DashboardPage extends HomePage {
   readonly confirmationModalConfirm: Locator;
   readonly confirmationModalHeader: Locator;
   readonly confirmationModalInput: Locator;
+  readonly confirmationModalRepoList: Locator;
   readonly confirmationModalResultClose: Locator;
   readonly confirmButton: Locator;
 
@@ -48,6 +49,9 @@ export class DashboardPage extends HomePage {
       "confirmation-modal-header",
     );
     this.confirmationModalBody = page.getByTestId("confirmation-modal-body");
+    this.confirmationModalRepoList = page
+      .getByTestId("confirmation-modal-body")
+      .locator("ol");
     this.confirmationModalInput = page.getByTestId("confirmation-modal-input");
     this.confirmationModalCancel = page.getByTestId(
       "confirmation-modal-cancel",
@@ -187,12 +191,26 @@ export class DashboardPage extends HomePage {
     await expect(tagLocator).toBeVisible();
   }
 
+  async expectRepoInConfirmationModal(repoName: string) {
+    // Find the list item in the ordered list within the modal body
+    await expect(
+      this.confirmationModalRepoList.locator("li", { hasText: repoName }),
+    ).toBeVisible();
+  }
+
   async expectRepoNameVisible(name: string) {
     // Use more specific testid selector for repo name
     const repoNameLocator = this.page.getByTestId("repo-name").filter({
       hasText: name,
     });
     await expect(repoNameLocator).toBeVisible();
+  }
+
+  async expectRepoNotInConfirmationModal(repoName: string) {
+    // Make sure the repo is not in the confirmation modal list
+    await expect(
+      this.confirmationModalRepoList.locator("li", { hasText: repoName }),
+    ).not.toBeVisible();
   }
 
   async expectRepoNotVisible(name: string) {
