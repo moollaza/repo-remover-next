@@ -90,7 +90,7 @@ export default function Header() {
                   }}
                   description={
                     <Link
-                      href={`https://github.com/${user?.login}`}
+                      href={(user?.url as string) ?? "https://github.com"}
                       isExternal
                       size="sm"
                     >

@@ -3,7 +3,6 @@ import {
   mockArchiveRepo,
   mockBulkActions,
   mockDeleteRepo,
-  mockGraphQLRepos,
 } from "@e2e/utils/github-api-mocks";
 import { test } from "@playwright/test";
 
@@ -16,7 +15,7 @@ test.describe("Dashboard Page", () => {
     dashboard = new DashboardPage(page);
     // Setup mocks for Octokit and GitHub API
     await dashboard.setupMocks();
-    await mockGraphQLRepos(page);
+
     await dashboard.goto();
   });
 
