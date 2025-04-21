@@ -114,10 +114,7 @@ export class HomePage {
     });
 
     await this.page.addInitScript(() => {
-      localStorage.setItem(
-        "pat",
-        "ghp_validtoken123456789012345678901234567890",
-      );
+      localStorage.setItem("pat", "ghp_abcdefghijklmnopqrstuvwxyz1234567890");
       localStorage.setItem("login", "testuser");
     });
   }

@@ -47,7 +47,7 @@ test.describe("Home Page", () => {
   });
 
   test("should handle successful token validation", async () => {
-    const validToken = "ghp_validtoken123456789012345678901234567890";
+    const validToken = "ghp_abcdefghijklmnopqrstuvwxyz1234567890";
     await home.mockValidToken(validToken);
     await home.fillToken(validToken);
 
