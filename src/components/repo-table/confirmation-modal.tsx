@@ -320,7 +320,7 @@ function RepoActionConfirmation({
           autoComplete="off"
           autoCorrect="off"
           autoFocus
-          data-testid="username-input"
+          data-testid="confirmation-modal-input"
           fullWidth
           id="username"
           name="username"
@@ -332,7 +332,7 @@ function RepoActionConfirmation({
       </ModalBody>
       <ModalFooter>
         <Button
-          data-testid="close-repo-confirmation-modal"
+          data-testid="confirmation-modal-cancel"
           onPress={onClose}
           variant="bordered"
         >
@@ -340,7 +340,7 @@ function RepoActionConfirmation({
         </Button>
         <Button
           color={action === "archive" ? "warning" : "danger"}
-          data-testid="confirm-repo-action"
+          data-testid="confirmation-modal-confirm"
           isDisabled={!isCorrectUsername}
           name="confirm"
           onPress={() => {

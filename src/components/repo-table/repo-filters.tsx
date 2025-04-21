@@ -132,7 +132,7 @@ export default function RepoFilters({
         <ButtonGroup>
           <Button
             color={selectedRepoAction.has("delete") ? "danger" : "warning"}
-            data-testid="repo-action-button"
+            data-testid={`repo-action-button-${selectedRepoAction.has("delete") ? "delete" : "archive"}`}
             isDisabled={
               selectedRepoKeys !== "all" && selectedRepoKeys.size === 0
             }
