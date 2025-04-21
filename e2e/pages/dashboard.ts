@@ -92,6 +92,10 @@ export class DashboardPage extends HomePage {
     await this.page.getByRole("option", { name: type }).click();
   }
 
+  async goto() {
+    await this.page.goto("/dashboard");
+  }
+
   async searchFor(query: string) {
     await this.searchInput.fill(query);
   }
@@ -105,18 +109,6 @@ export class DashboardPage extends HomePage {
   }
 
   async setupMocks() {
-    // Set up mock for throttled Octokit initialization
     await mockOctokitInit(this.page);
-
-    // Set authentication via route instead of localStorage
-    await this.page.route("**/api/auth/session", async (route) => {
-      await route.fulfill({
-        body: JSON.stringify({
-          accessToken: "ghp_validtoken123456789012345678901234567890",
-          user: { login: "testuser" },
-        }),
-        status: 200,
-      });
-    });
   }
 }
