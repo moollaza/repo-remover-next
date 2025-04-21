@@ -114,11 +114,11 @@ test.describe("Dashboard Page", () => {
     await dashboard.expectRepoVisible("repo-1");
 
     // Change items per page
-    await dashboard.repoPagination.click();
+    await dashboard.paginationFilter.click();
     await dashboard.page.getByTestId("per-page-option-10").click();
 
     // Verify pagination controls
-    await dashboard.page.getByRole("button", { name: /next/i }).isDisabled();
+    await dashboard.nextPageButton.isDisabled();
     await dashboard.page.getByText("1 of 1").isVisible();
   });
 
@@ -149,21 +149,67 @@ test.describe("Dashboard Page", () => {
     await dashboard.expectRepoAtPosition(1, "repo-1");
   });
 
+  test("should change action button when selecting different actions", async () => {
+    // First select a repository so the action buttons are enabled
+    await dashboard.selectRepository("repo-1");
+
+    // By default, archive action should be selected
+    await dashboard.expectRepoActionButton("archive");
+
+    // When opening the dropdown, we should see both options
+    await dashboard.openRepoActionDropdown();
+    await expect(dashboard.repoActionDropdownItemArchive).toBeVisible();
+    await expect(dashboard.repoActionDropdownItemDelete).toBeVisible();
+
+    // When selecting delete action, the button should change
+    await dashboard.selectDeleteAction();
+    await dashboard.expectRepoActionButton("delete");
+
+    // And we should be able to change back to archive
+    await dashboard.selectArchiveAction();
+    await dashboard.expectRepoActionButton("archive");
+  });
+
   test.describe("Confirmation Modal", () => {
     test.beforeEach(async () => {
-      // Select a repository and open archive modal
+      // Select a repository
       await dashboard.selectRepository("repo-1");
+    });
+
+    test("should show different modals for archive and delete actions", async () => {
+      // Open archive confirmation modal
       await dashboard.archiveButton.click();
       await dashboard.expectModalInMode("confirmation");
+      await dashboard.expectModalTitle(/Confirm Archival/i);
+      await dashboard.expectRepoInConfirmationModal("repo-1");
+
+      // Close the modal
+      await dashboard.cancelConfirmation();
+
+      // Select delete action and open delete confirmation modal
+      await dashboard.selectDeleteAction();
+      await dashboard.deleteButton.click();
+
+      // Should have different title and messaging
+      await dashboard.expectModalInMode("confirmation");
+      await dashboard.expectModalTitle(/Confirm Deletion/i);
+      await dashboard.expectRepoInConfirmationModal("repo-1");
+      await dashboard.expectText(/I understand the consequences, delete/i);
     });
 
     test("renders confirmation dialog with repository list", async () => {
+      // Open the archive modal for this test
+      await dashboard.archiveButton.click();
+
       await dashboard.expectModalTitle(/Confirm Archival/i);
       await dashboard.expectRepoInConfirmationModal("repo-1");
       await dashboard.expectConfirmButtonDisabled();
     });
 
     test("requires correct username for confirmation", async () => {
+      // Open the archive modal for this test
+      await dashboard.archiveButton.click();
+
       // Enter incorrect username
       await dashboard.fillConfirmationInput("wronguser");
       await dashboard.expectConfirmButtonDisabled();
@@ -176,6 +222,9 @@ test.describe("Dashboard Page", () => {
     });
 
     test("shows progress during repository processing", async () => {
+      // Open the archive modal for this test
+      await dashboard.archiveButton.click();
+
       // Mock slow processing
       await mockArchiveRepo(dashboard.page, "repo-1");
 
@@ -191,6 +240,9 @@ test.describe("Dashboard Page", () => {
     });
 
     test("handles successful repository processing", async () => {
+      // Open the archive modal for this test
+      await dashboard.archiveButton.click();
+
       await mockArchiveRepo(dashboard.page, "repo-1");
       await dashboard.confirmAction("testuser");
       await dashboard.expectModalInMode("result");
@@ -201,31 +253,47 @@ test.describe("Dashboard Page", () => {
     });
 
     test("handles repository processing errors", async () => {
+      // Open the archive modal for this test
+      await dashboard.archiveButton.click();
+
       await mockArchiveRepo(dashboard.page, "repo-1", {
         error: "Processing failed",
         success: false,
       });
       await dashboard.confirmAction("testuser");
       await dashboard.expectModalInMode("result");
-      await dashboard.expectErrorMessage(/Failed to process/i);
+      await dashboard.page
+        .getByText("1 error occurred while archiving the following repository:")
+        .isVisible();
+
+      await dashboard.page
+        .getByText(
+          'repo-1: Failed to archive repo-1:  {"message":"Processing failed"}',
+        )
+        .isVisible();
     });
 
     test("handles modal close", async () => {
+      // Open the archive modal for this test
+      await dashboard.archiveButton.click();
+
       await dashboard.cancelConfirmation();
       await dashboard.expectModalNotVisible();
     });
 
     test("shows different text for delete action", async () => {
-      // Close archive modal and open delete modal
-      await dashboard.cancelConfirmation();
       await dashboard.selectRepository("repo-1");
+      await dashboard.selectDeleteAction();
       await dashboard.deleteButton.click();
       await dashboard.expectModalInMode("confirmation");
-      await dashboard.expectModalTitle(/Are you sure you want to delete/i);
+      await dashboard.expectModalBody(/Are you sure you want to delete/i);
       await dashboard.expectText(/I understand the consequences, delete/i);
     });
 
     test("resets state when closed and reopened", async () => {
+      // Open the archive modal for this test
+      await dashboard.archiveButton.click();
+
       // Fill username
       await dashboard.fillConfirmationInput("testuser");
 
@@ -238,8 +306,11 @@ test.describe("Dashboard Page", () => {
     });
 
     test("shows singular/plural text correctly", async () => {
+      // Open the archive modal for this test
+      await dashboard.archiveButton.click();
+
       // Test with single repo
-      await dashboard.expectModalTitle(
+      await dashboard.expectModalBody(
         /Are you sure you want to archive the following 1 repository/i,
       );
 
@@ -247,12 +318,15 @@ test.describe("Dashboard Page", () => {
       await dashboard.cancelConfirmation();
       await dashboard.selectRepository("repo-2");
       await dashboard.archiveButton.click();
-      await dashboard.expectModalTitle(
+      await dashboard.expectModalBody(
         /Are you sure you want to archive the following 2 repositories/i,
       );
     });
 
     test("can close the result modal", async () => {
+      // Open the archive modal for this test
+      await dashboard.archiveButton.click();
+
       // Complete the archiving process
       await mockArchiveRepo(dashboard.page, "repo-1");
       await dashboard.confirmAction("testuser");

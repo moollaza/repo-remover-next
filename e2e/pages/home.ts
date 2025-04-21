@@ -29,10 +29,6 @@ export class HomePage {
     await expect(this.page).toHaveURL(new RegExp(path.replace("/", "\\/")));
   }
 
-  async expectErrorMessage(message: string) {
-    await expect(this.page.getByText(message)).toBeVisible();
-  }
-
   async expectFooterLink(text: string, href: string) {
     const link = this.page.getByRole("link", { name: text });
     await expect(link).toBeVisible();

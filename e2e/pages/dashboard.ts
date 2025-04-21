@@ -9,6 +9,7 @@ export class DashboardPage extends HomePage {
   readonly archiveButton: Locator;
   readonly cancelButton: Locator;
   readonly confirmationInput: Locator;
+
   // Confirmation modal specific locators
   readonly confirmationModal: Locator;
   readonly confirmationModalBody: Locator;
@@ -20,13 +21,20 @@ export class DashboardPage extends HomePage {
   readonly confirmationModalResultClose: Locator;
   readonly confirmButton: Locator;
   readonly deleteButton: Locator;
+  readonly nextPageButton: Locator;
   readonly page: Page;
-
+  readonly paginationFilter: Locator;
+  readonly prevPageButton: Locator;
   readonly progressBar: Locator;
   readonly progressModalHeader: Locator;
+
+  // Repo action dropdown items
+  readonly repoActionDropdownItemArchive: Locator;
+  readonly repoActionDropdownItemDelete: Locator;
   readonly repoPagination: Locator;
   readonly resultModalHeader: Locator;
   readonly searchInput: Locator;
+
   readonly selectAllCheckbox: Locator;
   readonly typeFilter: Locator;
 
@@ -34,7 +42,7 @@ export class DashboardPage extends HomePage {
     super(page);
     this.page = page;
     this.searchInput = page.getByLabel("Search");
-    this.typeFilter = page.getByLabel("Repo types to show");
+    this.typeFilter = page.getByTestId("repo-type-select");
     this.selectAllCheckbox = page.getByRole("checkbox", { name: "Select all" });
     this.archiveButton = page.getByTestId("repo-action-button-archive");
     this.deleteButton = page.getByTestId("repo-action-button-delete");
@@ -43,7 +51,18 @@ export class DashboardPage extends HomePage {
     this.cancelButton = page.getByTestId("confirmation-modal-cancel");
     this.confirmationInput = page.getByTestId("confirmation-modal-input");
     this.progressBar = page.getByRole("progressbar");
+    this.paginationFilter = page.getByTestId("per-page-select");
     this.repoPagination = page.getByTestId("repo-pagination");
+    this.nextPageButton = this.repoPagination.getByLabel("next");
+    this.prevPageButton = this.repoPagination.getByLabel("prev");
+
+    // Initialize repo action dropdown items
+    this.repoActionDropdownItemArchive = page.getByTestId(
+      "repo-action-dropdown-item-archive",
+    );
+    this.repoActionDropdownItemDelete = page.getByTestId(
+      "repo-action-dropdown-item-delete",
+    );
 
     // Initialize confirmation modal locators
     this.confirmationModal = page.getByTestId("repo-confirmation-modal");
@@ -69,6 +88,7 @@ export class DashboardPage extends HomePage {
   }
 
   async archiveSelectedRepos(username: string) {
+    await this.selectArchiveAction();
     await this.archiveButton.click();
     await this.fillConfirmationInput(username);
     await this.confirmationModalConfirm.click();
@@ -106,6 +126,7 @@ export class DashboardPage extends HomePage {
   }
 
   async deleteSelectedRepos(username: string) {
+    await this.selectDeleteAction();
     await this.deleteButton.click();
     await this.fillConfirmationInput(username);
   }
@@ -128,8 +149,8 @@ export class DashboardPage extends HomePage {
     ).toHaveText(pageNumber.toString());
   }
 
-  async expectErrorMessage(text: RegExp | string) {
-    await expect(this.page.getByText(text)).toBeVisible();
+  async expectModalBody(text: RegExp | string) {
+    await expect(this.confirmationModalBody).toContainText(text);
   }
 
   /**
@@ -152,7 +173,21 @@ export class DashboardPage extends HomePage {
 
   async expectProgressVisible(count: number) {
     await expect(this.progressBar).toBeVisible();
-    await expect(this.page.getByText(`${count} of ${count}`)).toBeVisible();
+    await expect(this.page.getByText(`Progress: ${count}`)).toBeVisible();
+  }
+
+  /**
+   * Verifies the repo action button shows the correct text
+   * @param action The expected action (archive or delete)
+   */
+  async expectRepoActionButton(action: "archive" | "delete") {
+    if (action === "archive") {
+      await expect(this.archiveButton).toBeVisible();
+      await expect(this.deleteButton).not.toBeVisible();
+    } else {
+      await expect(this.deleteButton).toBeVisible();
+      await expect(this.archiveButton).not.toBeVisible();
+    }
   }
 
   /**
@@ -231,7 +266,7 @@ export class DashboardPage extends HomePage {
 
   async expectSuccessMessage(action: string) {
     await expect(
-      this.page.getByText(new RegExp(`successfully ${action}`, "i")),
+      this.page.getByText(new RegExp(`${action} successfully`, "i")),
     ).toBeVisible();
   }
 
@@ -286,12 +321,39 @@ export class DashboardPage extends HomePage {
     await this.repoPagination.getByLabel("prev").click();
   }
 
+  /**
+   * Opens the repo action dropdown menu
+   */
+  async openRepoActionDropdown() {
+    await this.actionDropdown.click();
+  }
+
   async searchFor(query: string) {
     await this.searchInput.fill(query);
   }
 
   async selectAll() {
     await this.selectAllCheckbox.check();
+  }
+
+  /**
+   * Selects the "Archive" action from the dropdown menu
+   */
+  async selectArchiveAction() {
+    await this.openRepoActionDropdown();
+    await this.repoActionDropdownItemArchive.click();
+    // Wait for archive button to be visible
+    await expect(this.archiveButton).toBeVisible();
+  }
+
+  /**
+   * Selects the "Delete" action from the dropdown menu
+   */
+  async selectDeleteAction() {
+    await this.openRepoActionDropdown();
+    await this.repoActionDropdownItemDelete.click();
+    // Wait for delete button to be visible
+    await expect(this.deleteButton).toBeVisible();
   }
 
   async selectRepository(name: string) {
