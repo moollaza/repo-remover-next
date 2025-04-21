@@ -19,11 +19,13 @@ export class DashboardPage extends HomePage {
   readonly confirmationModalRepoList: Locator;
   readonly confirmationModalResultClose: Locator;
   readonly confirmButton: Locator;
-
   readonly deleteButton: Locator;
   readonly page: Page;
+
   readonly progressBar: Locator;
+  readonly progressModalHeader: Locator;
   readonly repoPagination: Locator;
+  readonly resultModalHeader: Locator;
   readonly searchInput: Locator;
   readonly selectAllCheckbox: Locator;
   readonly typeFilter: Locator;
@@ -62,6 +64,8 @@ export class DashboardPage extends HomePage {
     this.confirmationModalResultClose = page.getByTestId(
       "repo-action-result-close",
     );
+    this.progressModalHeader = page.getByTestId("progress-modal-header");
+    this.resultModalHeader = page.getByTestId("result-modal-header");
   }
 
   async archiveSelectedRepos(username: string) {

@@ -363,7 +363,7 @@ function RepoActionProgress({
 }: RepoActionProgressProps) {
   return (
     <>
-      <ModalHeader>
+      <ModalHeader data-testid="progress-modal-header">
         <h3>{action === "archive" ? "Archiving" : "Deleting"} Repositories</h3>
       </ModalHeader>
       <ModalBody>
@@ -391,7 +391,7 @@ function RepoActionResult({
 
   return (
     <>
-      <ModalHeader>
+      <ModalHeader data-testid="result-modal-header">
         <h3>{action === "archive" ? "Archival" : "Deletion"} Complete</h3>
       </ModalHeader>
       <ModalBody>

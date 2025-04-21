@@ -117,7 +117,7 @@ export async function mockLocalStorage(page: Page) {
 
   await page.addInitScript((token) => {
     window.localStorage.setItem("pat", token);
-    window.localStorage.setItem("login", "moollaza");
+    window.localStorage.setItem("login", "testuser");
   }, validToken);
 }
 

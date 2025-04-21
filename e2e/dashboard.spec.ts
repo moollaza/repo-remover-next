@@ -1,13 +1,8 @@
 import { DashboardPage } from "@e2e/pages/dashboard";
-import {
-  mockArchiveRepo,
-  mockBulkActions,
-  mockDeleteRepo,
-} from "@e2e/utils/github-api-mocks";
+import { mockArchiveRepo } from "@e2e/utils/github-api-mocks";
 import { expect, test } from "@playwright/test";
 
 import { MOCK_REPO_TEMPLATES } from "@/mocks/fixture-utils";
-import { mockRepos } from "@/mocks/fixtures";
 
 test.describe("Dashboard Page", () => {
   let dashboard: DashboardPage;
@@ -189,7 +184,9 @@ test.describe("Dashboard Page", () => {
 
       // Check progress display
       await dashboard.expectModalInMode("progress");
-      await dashboard.expectText(/Archiving Repositories/i);
+      await expect(dashboard.progressModalHeader).toContainText(
+        /Archiving Repositories/i,
+      );
       await dashboard.expectProgressVisible(1);
     });
 
@@ -197,6 +194,9 @@ test.describe("Dashboard Page", () => {
       await mockArchiveRepo(dashboard.page, "repo-1");
       await dashboard.confirmAction("testuser");
       await dashboard.expectModalInMode("result");
+      await expect(dashboard.resultModalHeader).toContainText(
+        /Archival Complete/i,
+      );
       await dashboard.expectSuccessMessage("archived");
     });
 
