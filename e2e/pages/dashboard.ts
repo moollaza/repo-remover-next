@@ -8,9 +8,8 @@ export class DashboardPage extends HomePage {
   readonly actionDropdown: Locator;
   readonly archiveButton: Locator;
   readonly cancelButton: Locator;
+  readonly checkboxes: Locator;
   readonly confirmationInput: Locator;
-
-  // Confirmation modal specific locators
   readonly confirmationModal: Locator;
   readonly confirmationModalBody: Locator;
   readonly confirmationModalCancel: Locator;
@@ -23,19 +22,18 @@ export class DashboardPage extends HomePage {
   readonly deleteButton: Locator;
   readonly nextPageButton: Locator;
   readonly page: Page;
+  readonly pagination: Locator;
   readonly paginationFilter: Locator;
   readonly prevPageButton: Locator;
   readonly progressBar: Locator;
   readonly progressModalHeader: Locator;
-
-  // Repo action dropdown items
   readonly repoActionDropdownItemArchive: Locator;
   readonly repoActionDropdownItemDelete: Locator;
-  readonly repoPagination: Locator;
   readonly resultModalHeader: Locator;
   readonly searchInput: Locator;
-
   readonly selectAllCheckbox: Locator;
+  readonly table: Locator;
+  readonly tableRows: Locator;
   readonly typeFilter: Locator;
 
   constructor(page: Page) {
@@ -52,19 +50,18 @@ export class DashboardPage extends HomePage {
     this.confirmationInput = page.getByTestId("confirmation-modal-input");
     this.progressBar = page.getByRole("progressbar");
     this.paginationFilter = page.getByTestId("per-page-select");
-    this.repoPagination = page.getByTestId("repo-pagination");
-    this.nextPageButton = this.repoPagination.getByLabel("next");
-    this.prevPageButton = this.repoPagination.getByLabel("prev");
-
-    // Initialize repo action dropdown items
+    this.pagination = page.getByTestId("table-pagination");
+    this.nextPageButton = this.pagination.getByLabel("next");
+    this.prevPageButton = this.pagination.getByLabel("prev");
+    this.table = page.getByTestId("repo-table");
+    this.tableRows = this.table.locator("tbody tr");
+    this.checkboxes = this.table.locator("tbody tr input[type='checkbox']");
     this.repoActionDropdownItemArchive = page.getByTestId(
       "repo-action-dropdown-item-archive",
     );
     this.repoActionDropdownItemDelete = page.getByTestId(
       "repo-action-dropdown-item-delete",
     );
-
-    // Initialize confirmation modal locators
     this.confirmationModal = page.getByTestId("repo-confirmation-modal");
     this.confirmationModalHeader = page.getByTestId(
       "confirmation-modal-header",
@@ -144,9 +141,9 @@ export class DashboardPage extends HomePage {
   }
 
   async expectCurrentPage(pageNumber: number | string) {
-    await expect(
-      this.repoPagination.locator('[aria-current="true"]'),
-    ).toHaveText(pageNumber.toString());
+    await expect(this.pagination.locator('[aria-current="true"]')).toHaveText(
+      pageNumber.toString(),
+    );
   }
 
   async expectModalBody(text: RegExp | string) {
@@ -284,9 +281,7 @@ export class DashboardPage extends HomePage {
   }
 
   async getCurrentPage() {
-    return await this.repoPagination
-      .locator('[aria-current="true"]')
-      .textContent();
+    return await this.pagination.locator('[aria-current="true"]').textContent();
   }
 
   /**
@@ -314,11 +309,11 @@ export class DashboardPage extends HomePage {
   }
 
   async goToNextPage() {
-    await this.repoPagination.getByLabel("next").click();
+    await this.pagination.getByLabel("next").click();
   }
 
   async goToPrevPage() {
-    await this.repoPagination.getByLabel("prev").click();
+    await this.pagination.getByLabel("prev").click();
   }
 
   /**
@@ -342,8 +337,14 @@ export class DashboardPage extends HomePage {
   async selectArchiveAction() {
     await this.openRepoActionDropdown();
     await this.repoActionDropdownItemArchive.click();
-    // Wait for archive button to be visible
-    await expect(this.archiveButton).toBeVisible();
+
+    await Promise.all([
+      // Wait for the archive button to be visible
+      expect(this.archiveButton).toBeVisible(),
+      // Wait for the delete button to be not visible
+      expect(this.deleteButton).not.toBeVisible(),
+      expect(this.repoActionDropdownItemDelete).not.toBeVisible(),
+    ]);
   }
 
   /**
@@ -352,8 +353,14 @@ export class DashboardPage extends HomePage {
   async selectDeleteAction() {
     await this.openRepoActionDropdown();
     await this.repoActionDropdownItemDelete.click();
-    // Wait for delete button to be visible
-    await expect(this.deleteButton).toBeVisible();
+
+    await Promise.all([
+      // Wait for the delete button to be visible
+      expect(this.deleteButton).toBeVisible(),
+      // Wait for the archive button to be not visible
+      expect(this.archiveButton).not.toBeVisible(),
+      expect(this.repoActionDropdownItemArchive).not.toBeVisible(),
+    ]);
   }
 
   async selectRepository(name: string) {

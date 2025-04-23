@@ -3,6 +3,7 @@ import { expect, type Locator, type Page } from "@playwright/test";
 import { mockUser } from "@/mocks/fixtures";
 
 export class HomePage {
+  readonly navbar: Locator;
   readonly page: Page;
   readonly rememberCheckbox: Locator;
   readonly submitButton: Locator;
@@ -15,6 +16,7 @@ export class HomePage {
     );
     this.submitButton = page.getByRole("button", { name: /submit/i });
     this.rememberCheckbox = page.getByLabel(/remember me/i);
+    this.navbar = page.getByTestId("navbar");
   }
 
   async clearToken() {

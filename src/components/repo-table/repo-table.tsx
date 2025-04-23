@@ -212,7 +212,7 @@ export default function RepoTable({
   }, []);
 
   return (
-    <div className="space-y-5" data-testid="repo-table">
+    <div className="space-y-5" data-testid="repo-table-container">
       <RepoFilters
         onPerPageChange={handlePerPageChange}
         onRepoActionChange={handleRepoActionChange}
@@ -233,7 +233,7 @@ export default function RepoTable({
           <div className="flex w-full justify-center">
             {/* PAGINATION */}
             <Pagination
-              data-testid="repo-pagination"
+              data-testid="table-pagination"
               onChange={setCurrentPage}
               page={currentPage}
               showControls
@@ -243,6 +243,7 @@ export default function RepoTable({
           </div>
         }
         className="mb-5"
+        data-testid="repo-table"
         isStriped
         onSelectionChange={setSelectedRepoKeys}
         onSortChange={setSortDescriptor}

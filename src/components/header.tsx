@@ -45,6 +45,7 @@ export default function Header() {
       classNames={{
         wrapper: "px-0",
       }}
+      data-testid="navbar"
       maxWidth="full"
       position="static"
     >
@@ -81,6 +82,7 @@ export default function Header() {
         {isDashboard ? (
           <>
             {isDevelopment && <GenerateReposButton />}
+
             <Dropdown placement="bottom-end">
               <DropdownTrigger>
                 <User

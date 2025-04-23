@@ -11,18 +11,64 @@ test.describe("Dashboard Page", () => {
     dashboard = new DashboardPage(page);
     // Setup mocks for Octokit and GitHub API
     await dashboard.setupMocks();
-
     await dashboard.goto();
   });
 
-  test("should display administerable repositories on first page", async ({
-    page,
-  }) => {
-    // Get all repo rows
-    const repoRows = page.locator('[data-testid="repo-row"]');
+  test("should have correct initial state", async () => {
+    // Check that navigation is visible
+    await expect(dashboard.navbar).toBeVisible();
+    await expect(dashboard.navbar.getByText("Repo Remover")).toBeVisible();
+    await expect(dashboard.navbar.getByText("Test User")).toBeVisible();
 
+    // Check for the page header
+    await expect(
+      dashboard.page.getByText("Select Repos to Modify"),
+    ).toBeVisible();
+
+    // Check if the repository table is visible
+    await expect(dashboard.table).toBeVisible();
+
+    // Check if the search input is visible and empty
+    await expect(dashboard.searchInput).toBeVisible();
+    await expect(dashboard.searchInput).toHaveValue("");
+
+    // Check that repo type filter is visible
+    await expect(dashboard.typeFilter).toBeVisible();
+
+    // Check that repo action button is visible and disabled
+    await expect(dashboard.archiveButton).toBeVisible();
+    await expect(dashboard.archiveButton).toBeDisabled();
+    await expect(dashboard.deleteButton).not.toBeVisible();
+
+    // Check if the select all checkbox is visible and unchecked
+    await expect(dashboard.selectAllCheckbox).toBeVisible();
+    await expect(dashboard.selectAllCheckbox).not.toBeChecked();
+
+    // Check that the "Name" header is visible and sortable and not sorted
+    const nameHeader = dashboard.page.getByRole("columnheader", {
+      name: "Name",
+    });
+    await expect(nameHeader).toBeVisible();
+    await expect(nameHeader).toHaveAttribute("data-sortable", "true");
+
+    // Check that "Last Updated" header is visible and sortable and sorted descending
+    const lastUpdatedHeader = dashboard.page.getByRole("columnheader", {
+      name: "Last updated",
+    });
+    await expect(lastUpdatedHeader).toBeVisible();
+    await expect(lastUpdatedHeader).toHaveAttribute("data-sortable", "true");
+    await expect(lastUpdatedHeader).toHaveAttribute("aria-sort", "descending");
+
+    // Check if the repository rows are visible
+    await expect(dashboard.tableRows.first()).toBeVisible();
+
+    // Check if the pagination controls are visible
+    await expect(dashboard.pagination).toBeVisible();
+  });
+
+  test("should display administerable repositories on first page", async () => {
     // We should have 5 repos per page
-    await expect(repoRows).toHaveCount(5);
+    await expect(dashboard.tableRows).toHaveCount(5);
 
     // Check repos 1-5 are displayed (all have viewerCanAdminister: true)
     for (let i = 0; i < 5; i++) {
@@ -63,12 +109,11 @@ test.describe("Dashboard Page", () => {
     }
   });
 
-  test("should properly paginate repositories", async ({ page }) => {
+  test("should properly paginate repositories", async () => {
     await dashboard.expectRepoVisible("repo-1");
 
-    // Get all repo rows on first page
-    const repoRows = page.locator('[data-testid="repo-row"]');
-    await expect(repoRows).toHaveCount(5);
+    // Get all repo rows on first page;
+    await expect(dashboard.tableRows).toHaveCount(5);
 
     // Test pagination - go to page 2 using our new helper method
     await dashboard.goToNextPage();
@@ -156,11 +201,6 @@ test.describe("Dashboard Page", () => {
     // By default, archive action should be selected
     await dashboard.expectRepoActionButton("archive");
 
-    // When opening the dropdown, we should see both options
-    await dashboard.openRepoActionDropdown();
-    await expect(dashboard.repoActionDropdownItemArchive).toBeVisible();
-    await expect(dashboard.repoActionDropdownItemDelete).toBeVisible();
-
     // When selecting delete action, the button should change
     await dashboard.selectDeleteAction();
     await dashboard.expectRepoActionButton("delete");
@@ -168,6 +208,47 @@ test.describe("Dashboard Page", () => {
     // And we should be able to change back to archive
     await dashboard.selectArchiveAction();
     await dashboard.expectRepoActionButton("archive");
+  });
+
+  test("should select all repositories when select all is clicked", async () => {
+    // Select all repositories
+    await dashboard.selectAllCheckbox.click();
+
+    // Confirm that we have 5 checkboxes
+    await expect(dashboard.checkboxes).toHaveCount(5);
+
+    // Check if all checkboxes are checked
+    for (const checkbox of await dashboard.checkboxes.all()) {
+      await expect(checkbox).toBeChecked();
+    }
+
+    // Go to the next page
+    await dashboard.goToNextPage();
+    await dashboard.expectCurrentPage(2);
+    await dashboard.expectRepoVisible("repo-7");
+
+    // Check if all checkboxes are still checked
+    await expect(dashboard.checkboxes).toHaveCount(3);
+    for (const checkbox of await dashboard.checkboxes.all()) {
+      await expect(checkbox).toBeChecked();
+    }
+
+    // Uncheck all checkboxes
+    await dashboard.selectAllCheckbox.click();
+    for (const checkbox of await dashboard.checkboxes.all()) {
+      await expect(checkbox).not.toBeChecked();
+    }
+
+    // Go back to the first page
+    await dashboard.goToPrevPage();
+    await dashboard.expectCurrentPage(1);
+    await dashboard.expectRepoVisible("repo-1");
+
+    // Check if all checkboxes are still unchecked
+    await expect(dashboard.checkboxes).toHaveCount(5);
+    for (const checkbox of await dashboard.checkboxes.all()) {
+      await expect(checkbox).not.toBeChecked();
+    }
   });
 
   test.describe("Confirmation Modal", () => {
