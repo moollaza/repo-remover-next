@@ -118,6 +118,7 @@ export default function GitHubTokenForm({
   return (
     <form
       className={clsx("flex flex-col gap-10", className)}
+      data-testid="github-token-form"
       onSubmit={(e) => {
         handleSubmit(e);
       }}
@@ -127,6 +128,7 @@ export default function GitHubTokenForm({
           autoComplete="off"
           className={"w-1/2"}
           color={inputColor}
+          data-testid="github-token-input"
           description={inputDescription}
           errorMessage={validationMessage}
           isClearable
@@ -145,7 +147,7 @@ export default function GitHubTokenForm({
         />
 
         {/* TODO: Set to false */}
-        <Checkbox isSelected={true}>
+        <Checkbox data-testid="github-token-remember" isSelected={true}>
           Remember me (token is stored locally, on your device)
         </Checkbox>
       </div>
@@ -153,6 +155,7 @@ export default function GitHubTokenForm({
       <Button
         className="w-20"
         color="primary"
+        data-testid="github-token-submit"
         isDisabled={!isTokenValid || isValidating}
         isLoading={isValidating}
         type="submit"

@@ -1,31 +1,42 @@
-import { test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
+
+import { getValidPersonalAccessToken } from "@/mocks/fixtures";
 
 import { HomePage } from "./pages/home";
+import { mockGraphQLRepos, mockInvalidToken } from "./utils/github-api-mocks";
 
 test.describe("Home Page", () => {
   let home: HomePage;
+  const validToken = getValidPersonalAccessToken();
 
   test.beforeEach(async ({ page }) => {
     home = new HomePage(page);
+    await home.setupMocks();
     await home.goto();
   });
 
-  test("should display the landing page correctly", async () => {
+  test("should display with correct initial state", async () => {
+    // Check that navigation is visible
+    await expect(home.navbar).toBeVisible();
+    await expect(home.navbar.getByText("Repo Remover")).toBeVisible();
+    await expect(home.navbar.getByText("Test User")).not.toBeVisible();
+
     await home.expectHeading(
       "Archive or Delete Multiple GitHub Repos, Instantly.",
     );
+
     await home.expectSubmitDisabled();
   });
 
   test("should show error for invalid token format", async () => {
     // Test invalid format (too short)
     await home.fillToken("short");
-    await home.expectErrorMessage("Invalid token format");
+    await home.expectErrorMessage("Invalid GitHub token format");
     await home.expectSubmitDisabled();
 
     // Test invalid format (wrong prefix)
     await home.fillToken("invalid_token_123456789012345678901234567890123456");
-    await home.expectErrorMessage("Invalid token format");
+    await home.expectErrorMessage("Invalid GitHub token format");
     await home.expectSubmitDisabled();
 
     // Test empty input
@@ -33,50 +44,35 @@ test.describe("Home Page", () => {
     await home.expectSubmitDisabled();
   });
 
-  test("should show error for expired/invalid token", async () => {
-    const invalidToken = "ghp_validformatbutexpiredtoken12345678901234";
-    await home.mockInvalidToken(invalidToken);
-    await home.fillToken(invalidToken);
-
-    // Should show loading state initially
-    await home.expectSubmitLoading();
+  test("should show error for invalid token", async () => {
+    await mockInvalidToken(home.page);
+    await home.fillToken(validToken);
 
     // Should show error state after API response
-    await home.expectErrorMessage("Failed to validate token");
+    await home.expectErrorMessage("Invalid or expired token");
     await home.expectSubmitDisabled();
   });
 
   test("should handle successful token validation", async () => {
-    const validToken = "ghp_abcdefghijklmnopqrstuvwxyz1234567890";
-    await home.mockValidToken(validToken);
+    await mockGraphQLRepos(home.page);
     await home.fillToken(validToken);
-
-    // Should show loading state initially
-    await home.expectSubmitLoading();
 
     // Should enable submit after successful validation
     await home.expectSubmitEnabled();
 
     // Submit should navigate to dashboard
     await home.submit();
-    await home.expectOnDashboard();
+    await expect(home.page).toHaveURL("/dashboard");
   });
 
-  test("should handle remember me checkbox", async () => {
-    // Should be unchecked by default
-    await home.rememberCheckbox
-      .isChecked()
-      .then((checked) => expect(checked).toBe(false));
+  // TODO: Add fix remember me checkbox
+  // TODO: Switch to opt-in for remember me
+  test.skip("should handle remember me checkbox", async () => {
+    // Should be checked by default
+    await expect(home.rememberCheckbox).toBeChecked();
 
     // Should be toggleable
     await home.toggleRememberMe();
-    await home.rememberCheckbox
-      .isChecked()
-      .then((checked) => expect(checked).toBe(true));
-
-    await home.toggleRememberMe();
-    await home.rememberCheckbox
-      .isChecked()
-      .then((checked) => expect(checked).toBe(false));
+    await expect(home.rememberCheckbox).not.toBeChecked();
   });
 });

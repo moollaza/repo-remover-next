@@ -5,9 +5,9 @@ import {
 import { expect, Locator, Page } from "@playwright/test";
 
 import { mockLocalStorage, mockOctokitInit } from "../utils/github-api-mocks";
-import { HomePage } from "./home";
+import { BasePage } from "./base-page";
 
-export class DashboardPage extends HomePage {
+export class DashboardPage extends BasePage {
   readonly actionDropdown: Locator;
   readonly archiveButton: Locator;
   readonly cancelButton: Locator;
@@ -24,7 +24,6 @@ export class DashboardPage extends HomePage {
   readonly confirmButton: Locator;
   readonly deleteButton: Locator;
   readonly nextPageButton: Locator;
-  readonly page: Page;
   readonly pagination: Locator;
   readonly paginationFilter: Locator;
   readonly prevPageButton: Locator;
@@ -41,7 +40,6 @@ export class DashboardPage extends HomePage {
 
   constructor(page: Page) {
     super(page);
-    this.page = page;
     this.searchInput = page.getByLabel("Search");
     this.typeFilter = page.getByTestId("repo-type-select");
     this.selectAllCheckbox = page.getByRole("checkbox", { name: "Select all" });
@@ -307,6 +305,7 @@ export class DashboardPage extends HomePage {
     return null;
   }
 
+  // Override the base method to use the dashboard path
   async goto() {
     await this.page.goto("/dashboard");
   }

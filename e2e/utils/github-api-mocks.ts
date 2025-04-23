@@ -20,14 +20,14 @@ export async function mockArchiveRepo(
         return setTimeout(() => {
           if (options.success === false) {
             void route.fulfill({
-              body: JSON.stringify({
+              json: {
                 message: options.error ?? "Repository archiving failed",
-              }),
+              },
               status: 403,
             });
           } else {
             void route.fulfill({
-              body: JSON.stringify({ archived: true }),
+              json: { archived: true },
               status: 200,
             });
           }
@@ -36,14 +36,14 @@ export async function mockArchiveRepo(
 
       if (options.success === false) {
         void route.fulfill({
-          body: JSON.stringify({
+          json: {
             message: options.error ?? "Repository archiving failed",
-          }),
+          },
           status: 403,
         });
       } else {
         void route.fulfill({
-          body: JSON.stringify({ archived: true }),
+          json: { archived: true },
           status: 200,
         });
       }
@@ -61,9 +61,9 @@ export async function mockBulkActions(
   await page.route("**/repos/testuser/**", (route) => {
     if (options.success === false) {
       void route.fulfill({
-        body: JSON.stringify({
+        json: {
           message: options.error ?? "Bulk action failed",
-        }),
+        },
         status: 403,
       });
     } else {
@@ -81,9 +81,9 @@ export async function mockDeleteRepo(
     if (route.request().method() === "DELETE") {
       if (options.success === false) {
         void route.fulfill({
-          body: JSON.stringify({
+          json: {
             message: options.error ?? "Repository deletion failed",
-          }),
+          },
           status: 403,
         });
       } else {
@@ -148,10 +148,10 @@ export async function mockInvalidToken(
   await page.route("https://api.github.com/user", (route) => {
     if (route.request().method() === "GET") {
       void route.fulfill({
-        body: JSON.stringify({
+        json: {
           documentation_url: "https://docs.github.com/rest",
           message: errorMessage,
-        }),
+        },
         status: 401,
       });
     } else {
@@ -172,7 +172,7 @@ export async function mockLocalStorage(page: Page) {
 export async function mockOctokitInit(page: Page) {
   await page.route("https://api.github.com/user", (route) => {
     void route.fulfill({
-      body: JSON.stringify(mockUser),
+      json: mockUser,
       status: 200,
     });
   });
