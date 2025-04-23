@@ -66,6 +66,17 @@ test.describe("Dashboard Page", () => {
     await expect(dashboard.pagination).toBeVisible();
   });
 
+  test("should display no repositories message when no repos are available", async () => {
+    // Mock the API response to return no repositories
+    await dashboard.mockEmptyReposResponse();
+    await dashboard.goto();
+    await expect(dashboard.table).toBeVisible();
+    await expect(
+      dashboard.table.getByText("No repos to display"),
+    ).toBeVisible();
+    await expect(dashboard.pagination).not.toBeVisible();
+  });
+
   test("should display administerable repositories on first page", async () => {
     // We should have 5 repos per page
     await expect(dashboard.tableRows).toHaveCount(5);
@@ -250,6 +261,10 @@ test.describe("Dashboard Page", () => {
       await expect(checkbox).not.toBeChecked();
     }
   });
+
+  /**
+   * CONFIRMATION MODAL
+   */
 
   test.describe("Confirmation Modal", () => {
     test.beforeEach(async () => {

@@ -234,6 +234,7 @@ export default function RepoTable({
             {/* PAGINATION */}
             <Pagination
               data-testid="table-pagination"
+              hidden={pages <= 1}
               onChange={setCurrentPage}
               page={currentPage}
               showControls

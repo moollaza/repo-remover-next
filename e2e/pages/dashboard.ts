@@ -1,4 +1,7 @@
-import { mockGraphQLRepos } from "@e2e/utils/github-api-mocks";
+import {
+  mockGraphQLRepos,
+  mockGraphQLReposEmpty,
+} from "@e2e/utils/github-api-mocks";
 import { expect, Locator, Page } from "@playwright/test";
 
 import { mockLocalStorage, mockOctokitInit } from "../utils/github-api-mocks";
@@ -314,6 +317,10 @@ export class DashboardPage extends HomePage {
 
   async goToPrevPage() {
     await this.pagination.getByLabel("prev").click();
+  }
+
+  async mockEmptyReposResponse() {
+    await mockGraphQLReposEmpty(this.page);
   }
 
   /**

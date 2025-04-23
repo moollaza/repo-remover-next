@@ -93,7 +93,6 @@ export async function mockDeleteRepo(
   });
 }
 
-// Use it in your mock function
 export async function mockGraphQLRepos(page: Page): Promise<void> {
   await page.route("https://api.github.com/graphql", (route) => {
     const json: GraphQlQueryResponseData = {
@@ -111,6 +110,27 @@ export async function mockGraphQLRepos(page: Page): Promise<void> {
       },
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    void route.fulfill({ json });
+  });
+}
+
+export async function mockGraphQLReposEmpty(page: Page): Promise<void> {
+  await page.route("https://api.github.com/graphql", (route) => {
+    const json: GraphQlQueryResponseData = {
+      data: {
+        user: {
+          ...mockUser,
+          repositories: {
+            nodes: [],
+            pageInfo: {
+              endCursor: null,
+              hasNextPage: false,
+            },
+          },
+        },
+      },
+    };
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     void route.fulfill({ json });
   });
