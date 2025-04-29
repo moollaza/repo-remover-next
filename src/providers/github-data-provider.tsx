@@ -113,7 +113,7 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
   const user = data?.user ?? null;
 
   // Track if we have partial data with an error
-  const hasPartialData = Boolean(data?.error && (data.repos || data.user));
+  const hasPartialData = Boolean(data?.error && (data.repos ?? data.user));
 
   // Actions with localStorage persistence
   const setLogin = useCallback((newLogin: string) => {

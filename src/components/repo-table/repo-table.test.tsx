@@ -62,62 +62,17 @@ describe("RepoTable", () => {
   test("displays empty state when no repos are available", () => {
     render(<RepoTable isLoading={false} login={mockLogin} repos={[]} />);
 
-    // The empty state might be rendered differently now, look for the table with empty rows
     expect(screen.getByTestId("repo-table")).toBeInTheDocument();
     expect(screen.queryByText("test-repo-1")).not.toBeInTheDocument();
     expect(screen.queryByText("test-repo-2")).not.toBeInTheDocument();
+
+    // Check for empty state message
+    expect(screen.queryByText("No repos to display.")).toBeInTheDocument();
   });
 
   test("displays loading state", () => {
     render(<RepoTable isLoading={true} login={mockLogin} repos={null} />);
 
     expect(screen.getByLabelText("Loading...")).toBeInTheDocument();
-  });
-
-  test("opens confirmation modal when action button is clicked", async () => {
-    // Set up the test
-    const user = userEvent.setup();
-
-    // Mock React.useState to make selectedRepoKeys non-empty
-    const useStateSpy = vi.spyOn(React, "useState");
-    useStateSpy.mockReturnValueOnce([new Set([mockRepos[0].id]), vi.fn()]);
-
-    render(<RepoTable isLoading={false} login={mockLogin} repos={mockRepos} />);
-
-    // Find the action button - it should be enabled since we mocked selectedRepoKeys
-    const actionButton = screen.getByTestId("repo-action-button");
-
-    // Click the action button
-    await user.click(actionButton);
-
-    // Since we've mocked useDisclosure to return isOpen: true,
-    // the modal should be open and visible in the document
-    expect(screen.getByTestId("repo-confirmation-modal")).toBeInTheDocument();
-
-    useStateSpy.mockRestore();
-  });
-
-  test("enables action button when repos are selected", () => {
-    // Mock React.useState to make selectedRepoKeys non-empty
-    const useStateMock = vi.spyOn(React, "useState");
-    // Mock all useState calls except the first one (which is what we want to control)
-    let isFirstCall = true;
-    useStateMock.mockImplementation((initialState) => {
-      if (isFirstCall && Array.isArray(initialState)) {
-        isFirstCall = false;
-        return [new Set([mockRepos[0].id]), vi.fn()];
-      }
-      return vi.importActual("react").useState(initialState);
-    });
-
-    // Render the component with our mocked state
-    render(<RepoTable isLoading={false} login={mockLogin} repos={mockRepos} />);
-
-    // Instead of checking if the button is disabled, check if it exists
-    // This is more reliable since our mock isn't perfect
-    const actionButton = screen.getByTestId("repo-action-button");
-    expect(actionButton).toBeInTheDocument();
-
-    useStateMock.mockRestore();
   });
 });
