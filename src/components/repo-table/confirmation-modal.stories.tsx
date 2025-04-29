@@ -45,14 +45,14 @@ export const Delete: Story = {
 
 export const SuccessfulArchive: Story = {
   play: async ({ step }) => {
-    const usernameInput = await screen.findByTestId("username-input");
+    const usernameInput = await screen.findByTestId("confirmation-modal-input");
 
     await step("Enter username", async () => {
       await userEvent.type(usernameInput, "testuser", { delay: 100 });
     });
 
     await step("Click confirm button", async () => {
-      const confirmButton = screen.getByTestId("confirm-repo-action");
+      const confirmButton = screen.getByTestId("confirmation-modal-confirm");
       await userEvent.click(confirmButton);
     });
 
@@ -81,14 +81,14 @@ export const SuccessfulDelete: Story = {
     action: "delete",
   },
   play: async ({ step }) => {
-    const usernameInput = await screen.findByTestId("username-input");
+    const usernameInput = await screen.findByTestId("confirmation-modal-input");
 
     await step("Enter username", async () => {
       await userEvent.type(usernameInput, "testuser", { delay: 100 });
     });
 
     await step("Click confirm button", async () => {
-      const confirmButton = screen.getByTestId("confirm-repo-action");
+      const confirmButton = screen.getByTestId("confirmation-modal-confirm");
 
       // Assert that the confirm button is enabled
       await expect(confirmButton).toBeEnabled();

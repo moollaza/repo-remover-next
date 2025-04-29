@@ -37,6 +37,8 @@ const mockProps = {
 };
 
 const mockContextValue: GitHubContextType = {
+  error: null,
+  hasPartialData: false,
   isAuthenticated: true,
   isError: false,
   isInitialized: true,
@@ -72,7 +74,7 @@ describe("ConfirmationModal", () => {
     expect(screen.getByText(/Confirm Archival/)).toBeInTheDocument();
     expect(screen.getByText(/repo1/)).toBeInTheDocument();
     expect(screen.getByText(/repo2/)).toBeInTheDocument();
-    expect(screen.getByTestId("username-input")).toBeInTheDocument();
+    expect(screen.getByTestId("confirmation-modal-input")).toBeInTheDocument();
   });
 
   it("enables confirm button when username matches login", () => {
@@ -82,8 +84,8 @@ describe("ConfirmationModal", () => {
       </GitHubContext.Provider>,
     );
 
-    const usernameInput = screen.getByTestId("username-input");
-    const confirmButton = screen.getByTestId("confirm-repo-action");
+    const usernameInput = screen.getByTestId("confirmation-modal-input");
+    const confirmButton = screen.getByTestId("confirmation-modal-confirm");
 
     // Initially disabled
     expect(confirmButton).toBeDisabled();
