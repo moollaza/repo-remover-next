@@ -8,14 +8,12 @@ import {
   ModalHeader,
   Progress,
   Spacer,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { Repository } from "@octokit/graphql-schema";
-import { useEffect, useState } from "react";
-import { useSWRConfig } from "swr";
+import { useReducer } from "react";
 
-import { GET_REPOS } from "@/hooks/use-github-data";
-import { useGitHub } from "@providers/github-provider";
-import { processRepo } from "@utils/github-utils";
+import { useGitHubData } from "@/hooks/use-github-data";
+import { createThrottledOctokit, processRepo } from "@/utils/github-utils";
 
 interface ConfirmationModalProps {
   action: "archive" | "delete";
@@ -24,6 +22,25 @@ interface ConfirmationModalProps {
   onClose: () => void;
   onConfirm: () => void;
   repos: Repository[];
+}
+
+type ModalAction =
+  | { payload: { error: Error; repository?: Repository }; type: "ADD_ERROR" }
+  | { payload: { increment: number; repo: string }; type: "UPDATE_PROGRESS" }
+  | { payload: { login: string; username: string }; type: "SET_USERNAME" }
+  | { type: "COMPLETE_PROCESSING" }
+  | { type: "RESET" }
+  | { type: "START_PROCESSING" };
+
+// Define the state machine types
+interface ModalState {
+  confirming: boolean;
+  currentRepo: string;
+  errors: { error: Error; repository?: Repository }[];
+  isCorrectUsername: boolean;
+  mode: "confirmation" | "progress" | "result";
+  progress: number;
+  username: string;
 }
 
 interface RepoActionConfirmationProps
@@ -45,9 +62,19 @@ interface RepoActionProgressProps {
 interface RepoActionResultProps {
   action: "archive" | "delete";
   count: number;
-  errors?: { error: Error; repository?: Repository; }[];
+  errors?: { error: Error; repository?: Repository }[];
   onClose: () => void;
 }
+
+const initialState: ModalState = {
+  confirming: false,
+  currentRepo: "",
+  errors: [],
+  isCorrectUsername: false,
+  mode: "confirmation",
+  progress: 0,
+  username: "",
+};
 
 export default function ConfirmationModal({
   action,
@@ -59,111 +86,206 @@ export default function ConfirmationModal({
 }: ConfirmationModalProps) {
   const count = repos.length;
 
-  const { octokit } = useGitHub();
-  const [actionInProgress, setActionInProgress] = useState(false);
-  const [actionCompleted, setActionCompleted] = useState(false);
-  const [errors, setErrors] = useState<
-    { error: Error; repository?: Repository; }[]
-  >([]);
-  const [username, setUsername] = useState("");
-  const [isCorrectUsername, setIsCorrectUsername] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [currentRepo, setCurrentRepo] = useState("");
+  // Get the PAT from the new provider
+  const { mutate, pat } = useGitHubData();
 
-  const { mutate } = useSWRConfig();
+  // Create an Octokit instance with the PAT
+  const octokit = pat ? createThrottledOctokit(pat) : null;
 
-  useEffect(() => {
-    setIsCorrectUsername(username === login);
-  }, [login, username]);
+  // Use reducer for state management
+  const [state, dispatch] = useReducer(modalReducer, initialState);
 
   async function handleConfirm() {
-    if (!octokit) return;
+    if (!octokit || state.confirming) return;
 
-    onConfirm();
+    // Single dispatch to handle the full state transition
+    dispatch({ type: "START_PROCESSING" });
 
-    setActionInProgress(true);
-    setProgress(0);
+    // Record the start time to ensure minimum progress display time
+    const startTime = Date.now();
 
     for (const repo of repos) {
-      setCurrentRepo(repo.name);
-
       try {
         await processRepo(octokit, repo, action);
       } catch (error) {
         if (error instanceof Error) {
           console.error(`Failed to ${action} the repo:`, error);
-          setErrors([...errors, { error, repository: repo }]);
+          dispatch({
+            payload: { error, repository: repo },
+            type: "ADD_ERROR",
+          });
         } else {
           console.error("An unknown error occurred");
         }
       } finally {
-        setProgress((prevProgress) => prevProgress + 1);
+        dispatch({
+          payload: { increment: 1, repo: repo.name },
+          type: "UPDATE_PROGRESS",
+        });
+        // Ensure each repo takes at least 1 second to process (for visual feedback)
         await new Promise((resolve) => setTimeout(resolve, 1000));
       }
     }
 
-    setActionInProgress(false);
-    setActionCompleted(true);
+    // Ensure we show the progress screen for at least 3 seconds total
+    // This helps with testing and provides better UX
+    const elapsedTime = Date.now() - startTime;
+    const minimumProgressTime = 3000; // 3 seconds
+
+    if (elapsedTime < minimumProgressTime) {
+      await new Promise((resolve) =>
+        setTimeout(resolve, minimumProgressTime - elapsedTime),
+      );
+    }
+
+    // Now complete the processing
+    dispatch({ type: "COMPLETE_PROCESSING" });
+
+    // Call the onConfirm callback after state is updated and with a slight delay
+    setTimeout(() => {
+      onConfirm();
+    }, 100);
   }
 
   function resetState() {
-    setActionInProgress(false);
-    setActionCompleted(false);
-    setErrors([]);
-    setProgress(0);
-    setCurrentRepo("");
+    dispatch({ type: "RESET" });
   }
 
   function handleOnClose() {
-    resetState();
+    // Refetch all GitHub data after operations are complete
+    void mutate();
+
+    // Close the modal
     onClose();
-    void mutate(GET_REPOS);
+
+    // Reset the state
+    resetState();
   }
+
+  function handleSetUsername(value: React.SetStateAction<string>) {
+    if (typeof value === "function") {
+      // If it's a function that updates based on previous state
+      const updater = value as (prevState: string) => string;
+      const newValue = updater(state.username);
+      dispatch({
+        payload: { login, username: newValue },
+        type: "SET_USERNAME",
+      });
+    } else {
+      // If it's a direct value
+      dispatch({ payload: { login, username: value }, type: "SET_USERNAME" });
+    }
+  }
+
+  const isDismissable = state.mode === "confirmation";
 
   return (
     <Modal
       backdrop="blur"
+      data-testid="repo-confirmation-modal"
+      isDismissable={isDismissable}
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={
+        isDismissable
+          ? handleOnClose
+          : () => {
+              /* noop*/
+            }
+      }
       scrollBehavior="inside"
       size="xl"
     >
-      <ModalContent>
+      <ModalContent data-testid={`confirmation-modal-${state.mode}`}>
         <>
-          {actionInProgress && (
-            <RepoActionProgress
-              action={action}
-              count={count}
-              currentRepo={currentRepo}
-              progress={progress}
-            />
-          )}
-
-          {actionCompleted && (
-            <RepoActionResult
-              action={action}
-              count={count}
-              errors={errors}
-              onClose={handleOnClose}
-            />
-          )}
-
-          {!actionInProgress && !actionCompleted && (
+          {state.mode === "confirmation" && (
             <RepoActionConfirmation
               action={action}
               count={count}
               handleConfirm={() => void handleConfirm()}
-              isCorrectUsername={isCorrectUsername}
+              isCorrectUsername={state.isCorrectUsername}
               onClose={handleOnClose}
               repos={repos}
-              setUsername={setUsername}
-              username={username}
+              setUsername={handleSetUsername}
+              username={state.username}
+            />
+          )}
+
+          {state.mode === "progress" && (
+            <RepoActionProgress
+              action={action}
+              count={count}
+              currentRepo={state.currentRepo}
+              progress={state.progress}
+            />
+          )}
+
+          {state.mode === "result" && (
+            <RepoActionResult
+              action={action}
+              count={count}
+              errors={state.errors}
+              onClose={handleOnClose}
             />
           )}
         </>
       </ModalContent>
     </Modal>
   );
+}
+
+/**
+ * Reducer function for managing modal state transitions.
+ * Handles the following state transitions:
+ * - ADD_ERROR: Adds an error to the errors array
+ * - COMPLETE_PROCESSING: Changes mode to result when processing is complete
+ * - RESET: Returns to initial state
+ * - SET_USERNAME: Updates username and validates against login
+ * - START_PROCESSING: Initializes the progress mode with empty errors
+ * - UPDATE_PROGRESS: Updates progress counter and current repo
+ *
+ * @param state - Current modal state
+ * @param action - Action to perform on the state
+ * @returns Updated modal state
+ */
+
+function modalReducer(state: ModalState, action: ModalAction): ModalState {
+  switch (action.type) {
+    case "ADD_ERROR":
+      return {
+        ...state,
+        errors: [...state.errors, action.payload],
+      };
+    case "COMPLETE_PROCESSING":
+      return {
+        ...state,
+        confirming: false,
+        mode: "result",
+      };
+    case "RESET":
+      return initialState;
+    case "SET_USERNAME":
+      return {
+        ...state,
+        isCorrectUsername: action.payload.username === action.payload.login,
+        username: action.payload.username,
+      };
+    case "START_PROCESSING":
+      return {
+        ...state,
+        confirming: true, // Already includes the confirming flag
+        errors: [],
+        mode: "progress",
+        progress: 0,
+      };
+    case "UPDATE_PROGRESS":
+      return {
+        ...state,
+        currentRepo: action.payload.repo,
+        progress: state.progress + action.payload.increment,
+      };
+    default:
+      return state;
+  }
 }
 
 function RepoActionConfirmation({
@@ -178,10 +300,10 @@ function RepoActionConfirmation({
 }: RepoActionConfirmationProps) {
   return (
     <>
-      <ModalHeader>
+      <ModalHeader data-testid="confirmation-modal-header">
         <h3>Confirm {action === "archive" ? "Archival" : "Deletion"}</h3>
       </ModalHeader>
-      <ModalBody>
+      <ModalBody data-testid="confirmation-modal-body">
         <p>
           Are you sure you want to <b>{action}</b> the following {count}{" "}
           repositor{count > 1 ? "ies" : "y"}?
@@ -198,7 +320,10 @@ function RepoActionConfirmation({
           autoComplete="off"
           autoCorrect="off"
           autoFocus
+          data-testid="confirmation-modal-input"
           fullWidth
+          id="username"
+          name="username"
           onChange={(e) => setUsername(e.target.value)}
           placeholder="GitHub Username"
           type="text"
@@ -206,12 +331,18 @@ function RepoActionConfirmation({
         />
       </ModalBody>
       <ModalFooter>
-        <Button onPress={onClose} variant="bordered">
+        <Button
+          data-testid="confirmation-modal-cancel"
+          onPress={onClose}
+          variant="bordered"
+        >
           Cancel
         </Button>
         <Button
           color={action === "archive" ? "warning" : "danger"}
+          data-testid="confirmation-modal-confirm"
           isDisabled={!isCorrectUsername}
+          name="confirm"
           onPress={() => {
             void handleConfirm();
           }}
@@ -232,7 +363,7 @@ function RepoActionProgress({
 }: RepoActionProgressProps) {
   return (
     <>
-      <ModalHeader>
+      <ModalHeader data-testid="progress-modal-header">
         <h3>{action === "archive" ? "Archiving" : "Deleting"} Repositories</h3>
       </ModalHeader>
       <ModalBody>
@@ -260,7 +391,7 @@ function RepoActionResult({
 
   return (
     <>
-      <ModalHeader>
+      <ModalHeader data-testid="result-modal-header">
         <h3>{action === "archive" ? "Archival" : "Deletion"} Complete</h3>
       </ModalHeader>
       <ModalBody>
@@ -291,7 +422,11 @@ function RepoActionResult({
         )}
       </ModalBody>
       <ModalFooter>
-        <Button onPress={onClose} variant="bordered">
+        <Button
+          data-testid="repo-action-result-close"
+          onPress={onClose}
+          variant="bordered"
+        >
           Close
         </Button>
       </ModalFooter>

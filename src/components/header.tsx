@@ -12,12 +12,11 @@ import {
   NavbarContent,
   NavbarItem,
   User,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { usePathname } from "next/navigation";
 
 import { GenerateReposButton } from "@/components/generate-repos-button";
-import useGitHubData from "@/hooks/use-github-data";
-import { useGitHub } from "@/providers/github-provider";
+import { useGitHubData } from "@/hooks/use-github-data";
 
 const homeLinks = [
   { href: "#features", label: "Features" },
@@ -25,10 +24,9 @@ const homeLinks = [
   { href: "#get-started", label: "Get Started" },
 ];
 
-export function Header() {
+export default function Header() {
   const pathname = usePathname();
-  const { login, pat } = useGitHub();
-  const { user } = useGitHubData();
+  const { login, pat, user } = useGitHubData();
 
   const isDashboard = pathname === "/dashboard";
   const isDevelopment = process.env.NODE_ENV === "development";
@@ -43,7 +41,14 @@ export function Header() {
   }
 
   return (
-    <Navbar isBordered maxWidth="xl" position="static">
+    <Navbar
+      classNames={{
+        wrapper: "px-0",
+      }}
+      data-testid="navbar"
+      maxWidth="full"
+      position="static"
+    >
       <NavbarBrand>
         <Link className="font-extrabold text-inherit text-xl" href="/">
           Repo Remover
@@ -58,8 +63,8 @@ export function Header() {
                 className="hover:text-primary"
                 color="foreground"
                 href={link.href}
-                onClick={(e) => {
-                  e.preventDefault();
+                onClick={(e) => e.preventDefault()}
+                onPress={() => {
                   const target = document.querySelector(link.href);
                   if (target) {
                     target.scrollIntoView({ behavior: "smooth" });
@@ -77,6 +82,7 @@ export function Header() {
         {isDashboard ? (
           <>
             {isDevelopment && <GenerateReposButton />}
+
             <Dropdown placement="bottom-end">
               <DropdownTrigger>
                 <User
@@ -86,7 +92,7 @@ export function Header() {
                   }}
                   description={
                     <Link
-                      href={`https://github.com/${user?.login}`}
+                      href={(user?.url as string) ?? "https://github.com"}
                       isExternal
                       size="sm"
                     >
@@ -104,7 +110,7 @@ export function Header() {
                 <DropdownItem
                   color="danger"
                   key="logout"
-                  onClick={handleLogout}
+                  onPress={handleLogout}
                 >
                   Log Out
                 </DropdownItem>

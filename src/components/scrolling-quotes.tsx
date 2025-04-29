@@ -1,4 +1,4 @@
-import { Card, CardBody, CardFooter } from "@nextui-org/react";
+import { Card, CardBody, CardFooter } from "@heroui/react";
 import clsx from "clsx";
 import Link from "next/link";
 import { useEffect, useState } from "react";

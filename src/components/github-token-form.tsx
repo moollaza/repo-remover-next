@@ -1,71 +1,153 @@
 "use client";
 
-import { Button, Checkbox, Input } from "@nextui-org/react";
+import { Button, Checkbox, Input, type InputProps } from "@heroui/react";
 import clsx from "clsx";
-import { useRouter } from "next/navigation";
-import { useEffect, useReducer, useState } from "react";
+import { useEffect, useState } from "react";
 
-import { useGitHub } from "@/providers/github-provider";
+import {
+  createThrottledOctokit,
+  isValidGitHubToken,
+} from "@/utils/github-utils";
 
-type Action = { isValid: boolean; type: "validate" } | { type: "reset" };
-type State = "idle" | "invalid" | "validated";
+interface GitHubTokenFormProps {
+  className?: string;
+  onSubmit: (token: string) => void;
+  onValueChange: (value: string) => void;
+  value: string;
+}
 
-export default function GitHubTokenForm({ className }: { className?: string }) {
-  const { remember, setPat, setRemember } = useGitHub();
-  const [value, setValue] = useState("");
-  const [state, dispatch] = useReducer(reducer, "idle");
-  const router = useRouter();
+export default function GitHubTokenForm({
+  className,
+  onSubmit,
+  onValueChange,
+  value,
+}: GitHubTokenFormProps) {
+  const [error, setError] = useState<null | string>(null);
+  const [isValidating, setIsValidating] = useState(false);
+  const [isTokenValid, setIsTokenValid] = useState(false);
+  const [username, setUsername] = useState<null | string>(null);
+  const [lastValidatedToken, setLastValidatedToken] = useState<null | string>(
+    null,
+  );
 
-  function checkTokenFormat(token: string) {
-    return token?.length >= 40 && /^[a-z0-9_]+$/i.test(token);
-  }
-
-  function onSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    if (state === "validated") {
-      setPat(value);
-      void router.push("/dashboard");
-      return;
-    }
-
-    return false;
-  }
+  // Handle value change
+  const handleChange = (newValue: string) => {
+    onValueChange(newValue);
+    if (error) setError(null);
+  };
 
   useEffect(() => {
-    if (value === "") {
-      dispatch({ type: "reset" });
-    } else {
-      const isValid = checkTokenFormat(value);
-      dispatch({ isValid, type: "validate" });
-    }
-  }, [value]);
+    let isMounted = true;
+
+    const validateToken = async () => {
+      if (
+        !value ||
+        !isValidGitHubToken(value) ||
+        value === lastValidatedToken
+      ) {
+        return;
+      }
+
+      setIsValidating(true);
+      setError(null);
+
+      try {
+        const octokit = createThrottledOctokit(value);
+        const { data: userData } = await octokit.users.getAuthenticated();
+
+        if (isMounted) {
+          setIsTokenValid(true);
+          setUsername(userData.login);
+          setLastValidatedToken(value);
+        }
+      } catch (err) {
+        if (isMounted) {
+          setIsTokenValid(false);
+          setUsername(null);
+          setError("Invalid or expired token");
+          setLastValidatedToken(value);
+        }
+      } finally {
+        if (isMounted) {
+          setIsValidating(false);
+        }
+      }
+    };
+
+    const timeoutId = setTimeout(() => {
+      void validateToken();
+    }, 500);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timeoutId);
+    };
+  }, [value, lastValidatedToken]);
+
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!value || !isTokenValid) return;
+
+    onSubmit(value);
+  }
+
+  // Input state based on validation
+  const showValidationError =
+    Boolean(error) || (Boolean(value) && !isValidGitHubToken(value));
+  const validationMessage =
+    error ??
+    (!isValidGitHubToken(value) && value
+      ? "Invalid GitHub token format"
+      : null);
+
+  // Determine input color and description based on state
+  let inputColor: InputProps["color"] = undefined;
+  let inputDescription =
+    "Token should start with 'ghp_' or other GitHub prefixes";
+
+  if (isValidating) {
+    inputDescription = "Validating token...";
+  } else if (isTokenValid && username) {
+    inputColor = "success";
+    inputDescription = `Token is valid. Welcome ${username}, click submit to continue!`;
+  } else if (showValidationError) {
+    inputColor = "danger";
+  }
 
   return (
     <form
       className={clsx("flex flex-col gap-10", className)}
-      onSubmit={onSubmit}
+      data-testid="github-token-form"
+      onSubmit={(e) => {
+        handleSubmit(e);
+      }}
     >
       <div className="flex flex-col gap-4">
         <Input
           autoComplete="off"
           className={"w-1/2"}
-          color={state === "validated" ? "success" : undefined}
-          errorMessage={state === "invalid" ? "Invalid token format" : ""}
+          color={inputColor}
+          data-testid="github-token-input"
+          description={inputDescription}
+          errorMessage={validationMessage}
           isClearable
-          isInvalid={state === "invalid"}
+          isInvalid={showValidationError}
           label="Please enter your Personal Access Token"
-          maxLength={40}
-          minLength={40}
           name="personal-access-token"
-          onChange={(e) => setValue(e.target.value)}
-          onClear={() => setValue("")}
+          onChange={(e) => {
+            handleChange(e.target.value);
+          }}
+          onClear={() => {
+            handleChange("");
+          }}
           required
           type="text"
           value={value}
         />
 
-        <Checkbox isSelected={remember} onValueChange={setRemember}>
+        {/* TODO: Set to false */}
+        <Checkbox data-testid="github-token-remember" isSelected={true}>
           Remember me (token is stored locally, on your device)
         </Checkbox>
       </div>
@@ -73,42 +155,13 @@ export default function GitHubTokenForm({ className }: { className?: string }) {
       <Button
         className="w-20"
         color="primary"
-        isDisabled={state !== "validated" || value === ""}
+        data-testid="github-token-submit"
+        isDisabled={!isTokenValid || isValidating}
+        isLoading={isValidating}
         type="submit"
       >
         Submit
       </Button>
     </form>
   );
-}
-
-/**
- * Reducer function to manage the state transitions for the form validation process
- *
- * @param {State} state - The current state of the form
- * @param {Action} action - The action dispatched to change the state
- * @returns {State} The new state after applying the action
- *
- * @throws {Error} If the action type is not recognized
- *
- * The state can be one of the following:
- * - "idle": The initial state or after a reset
- * - "validated": The state when the form is successfully validated
- * - "invalid": The state when the form validation fails
- *
- * The action can be one of the following:
- * - { type: "reset" }: Resets the state to "idle"
- * - { type: "validate", isValid: boolean }: Sets the state to "validated" if isValid is true, otherwise sets it to "invalid"
- */
-function reducer(state: State, action: Action): State {
-  switch (action.type) {
-    case "reset":
-      return "idle";
-    case "validate":
-      return action.isValid ? "validated" : "invalid";
-    default:
-      throw new Error(
-        "Unknown action type. Please provide a valid action type.",
-      );
-  }
 }

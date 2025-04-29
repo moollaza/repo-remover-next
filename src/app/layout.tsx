@@ -1,16 +1,7 @@
-import { config } from "@fortawesome/fontawesome-svg-core";
-import clsx from "clsx";
+// src/app/layout.tsx
 import { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
-import "@fortawesome/fontawesome-svg-core/styles.css";
 
-import { Providers } from "@/providers/providers";
-import { Header } from "@components/header";
-import "@/globals.css";
-
-config.autoAddCss = false;
-
-const inter = Inter({ subsets: ["latin"] });
+import LayoutContent, { bodyClasses } from "./layout-content";
 
 export const viewport: Viewport = {
   themeColor: [
@@ -32,18 +23,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body
-        className={clsx(
-          inter.className,
-          "min-h-screen bg-background font-sans antialiased",
-        )}
-      >
-        <Providers themeProps={{ attribute: "class", defaultTheme: "light" }}>
-          <div className="relative flex flex-col h-screen">
-            <Header />
-            {children}
-          </div>
-        </Providers>
+      <body className={bodyClasses}>
+        <LayoutContent>{children}</LayoutContent>
       </body>
     </html>
   );

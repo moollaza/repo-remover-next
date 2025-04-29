@@ -1,10 +1,8 @@
-import { Button } from "@nextui-org/react";
+import { Button } from "@heroui/react";
 import { useState } from "react";
-import { useSWRConfig } from "swr";
 
-import { GET_REPOS } from "@/hooks/use-github-data";
-import { useGitHub } from "@/providers/github-provider";
-import { generateRepos } from "@utils/github-utils";
+import { useGitHubData } from "@/hooks/use-github-data";
+import { createThrottledOctokit, generateRepos } from "@/utils/github-utils";
 
 /**
  * This component generates random repositories for the user
@@ -12,9 +10,11 @@ import { generateRepos } from "@utils/github-utils";
  * @returns void
  */
 export function GenerateReposButton() {
-  const { mutate } = useSWRConfig();
+  // Get the mutate function and PAT from the GitHub context
+  const { mutate, pat } = useGitHubData();
 
-  const { octokit } = useGitHub();
+  // Create an Octokit instance with the PAT
+  const octokit = pat ? createThrottledOctokit(pat) : null;
   const [isLoading, setIsLoading] = useState(false);
 
   if (process.env.NODE_ENV !== "development" || !octokit) {
@@ -25,10 +25,11 @@ export function GenerateReposButton() {
     <Button
       color="secondary"
       isLoading={isLoading}
-      onClick={() => {
+      onPress={() => {
         void generateRepos(octokit, setIsLoading)
           .then(() => {
-            void mutate(GET_REPOS);
+            // Mutate all GitHub data
+            void mutate();
           })
           .catch(() => {
             setIsLoading(false);

@@ -1,12 +1,18 @@
 import { faker } from "@faker-js/faker";
 import { type Repository } from "@octokit/graphql-schema";
+import { paginateGraphQL } from "@octokit/plugin-paginate-graphql";
+import { throttling } from "@octokit/plugin-throttling";
+import { Octokit } from "@octokit/rest";
 
-import { type MyOctokitType } from "@providers/github-provider";
+// Create a custom Octokit class with the throttling plugin and pagination
+export const ThrottledOctokit = Octokit.plugin(throttling, paginateGraphQL);
+
+export type ThrottledOctokitType = InstanceType<typeof ThrottledOctokit>;
 
 const DEBUG = false;
 
 export async function generateRepos(
-  octokit: MyOctokitType,
+  octokit: Octokit,
   setLoading: (loading: boolean) => void,
   numberOfRepos = 10,
 ): Promise<void> {
@@ -33,8 +39,33 @@ export async function generateRepos(
   }
 }
 
+// Reference: https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/about-authentication-to-github#githubs-token-formats
+// Reference: https://github.blog/changelog/2021-03-31-authentication-token-format-updates-are-generally-available/
+export function isValidGitHubToken(token: string): boolean {
+  if (!token) return false;
+
+  // Special case for github_pat_ tokens
+  if (token.startsWith("github_pat_")) {
+    return token.length >= 40 && /^[a-zA-Z0-9_]+$/.test(token.slice(11));
+  }
+
+  // All other tokens start with 3-letter prefix + underscore
+  const standardPrefixes = ["ghp_", "gho_", "ghu_", "ghs_", "ghr_"];
+  const matchedPrefix = standardPrefixes.find((prefix) =>
+    token.startsWith(prefix),
+  );
+
+  if (!matchedPrefix) return false;
+
+  // Standard tokens should be exactly 40 characters in total
+  if (token.length !== 40) return false;
+
+  // Check that characters after the prefix are alphanumeric
+  return /^[a-zA-Z0-9]+$/.test(token.slice(matchedPrefix.length));
+}
+
 export const archiveRepo = async (
-  octokit: MyOctokitType,
+  octokit: Octokit,
   repo: Repository,
 ): Promise<void> => {
   try {
@@ -53,7 +84,7 @@ export const archiveRepo = async (
 };
 
 export const deleteRepo = async (
-  octokit: MyOctokitType,
+  octokit: Octokit,
   repo: Repository,
 ): Promise<void> => {
   try {
@@ -71,13 +102,60 @@ export const deleteRepo = async (
 };
 
 export const processRepo = async (
-  octokit: MyOctokitType,
+  octokit: Octokit,
   repo: Repository,
   action: "archive" | "delete",
 ): Promise<void> => {
+  if (!octokit) {
+    throw new Error("Octokit instance is required");
+  }
+
+  if (!repo) {
+    throw new Error("Repository is required");
+  }
+
+  if (!action) {
+    throw new Error("Action is required");
+  }
+
+  console.log(`Processing ${action} for ${repo.name}...`);
+
   if (action === "archive") {
     await archiveRepo(octokit, repo);
   } else if (action === "delete") {
     await deleteRepo(octokit, repo);
   }
 };
+
+/**
+ * Creates a throttled Octokit instance with pagination support
+ * @param token GitHub Personal Access Token
+ * @returns Octokit instance with throttling and pagination
+ */
+export function createThrottledOctokit(
+  token: string,
+): InstanceType<typeof ThrottledOctokit> {
+  // Create a custom Octokit instance with the token and throttling
+  return new ThrottledOctokit({
+    auth: token,
+    throttle: {
+      onRateLimit: (_retryAfter, _options, _octokitInstance, retryCount) => {
+        // Otherwise retry once, then give up
+        if (retryCount < 1) {
+          if (DEBUG) console.log("[Throttle] Rate limited - retrying once");
+          return true;
+        }
+        if (DEBUG) console.log("[Throttle] Rate limited - giving up");
+        return false;
+      },
+      onSecondaryRateLimit: () => {
+        // Don't retry secondary rate limits (abuse detection)
+        if (DEBUG)
+          console.log(
+            "[Throttle] Secondary rate limit detected - not retrying",
+          );
+        return false;
+      },
+    },
+  });
+}

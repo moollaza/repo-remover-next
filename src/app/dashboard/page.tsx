@@ -1,26 +1,46 @@
 "use client";
 
+import { Alert } from "@heroui/react";
 import { useRouter } from "next/navigation";
-import { useLayoutEffect } from "react";
+import { useEffect } from "react";
 
-import { useGitHub } from "@/providers/github-provider";
-import Dashboard from "@components/dashboard";
+import RepoTable from "@/components/repo-table/repo-table";
+import { useGitHubData } from "@/hooks/use-github-data";
 
 export default function DashboardPage() {
-  const { login, pat } = useGitHub();
+  const { isError, isInitialized, isLoading, login, pat, refetchData, repos } =
+    useGitHubData();
 
   const router = useRouter();
 
-  // Redirect to the login page if the user is not logged in, and the data is not loading
-  useLayoutEffect(() => {
+  useEffect(() => {
+    if (!isInitialized) return;
+
     if (!pat) {
       router.push("/");
+    } else {
+      refetchData();
     }
-  }, [pat, login, router]);
+  }, [pat, router, refetchData, isInitialized]);
 
   return (
-    <main className="container mx-auto max-w-7xl pt-16 px-6 flex-grow">
-      <Dashboard />
-    </main>
+    <section className="py-16 flex-grow ">
+      <h1
+        className="text-3xl font-semibold mb-10"
+        data-testid="repo-table-header"
+      >
+        Select Repos to Modify
+      </h1>
+
+      {isError && (
+        <Alert className="mb-4" color="danger">
+          Error loading repositories. Please check your token and try again.
+        </Alert>
+      )}
+
+      {(isLoading || (repos && login !== null)) && (
+        <RepoTable isLoading={isLoading} login={login} repos={repos} />
+      )}
+    </section>
   );
 }
