@@ -64,7 +64,60 @@ export const GET_CURRENT_USER = `
   }
 `;
 
-// Types remain the same
+export const GET_ORGS = `
+  query getOrganizations($login: String!, $cursor: String) {
+    user(login: $login) {
+      organizations(first: 100, after: $cursor) {
+        nodes {
+          login
+          url
+        }
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+      }
+    }
+  }
+`;
+
+export const GET_ORG_REPOS = `
+  query getOrgRepositories($org: String!, $cursor: String) {
+    organization(login: $org) {
+      login
+      url
+      repositories(first: 100, after: $cursor) {
+        nodes {
+          id
+          name
+          description
+          isPrivate
+          isArchived
+          isFork
+          isTemplate
+          isMirror
+          isLocked
+          isInOrganization
+          viewerCanAdminister
+          viewerPermission
+          owner {
+            id
+            login
+            url
+          }
+          updatedAt
+          url
+        }
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+      }
+    }
+  }
+`;
+
+// Types for GraphQL responses
 export interface CurrentUserResponse {
   viewer: {
     avatarUrl: string;
@@ -72,6 +125,32 @@ export interface CurrentUserResponse {
     id: string;
     login: string;
     name: string;
+  };
+}
+
+export interface OrganizationsResponse {
+  user: {
+    organizations: {
+      nodes: { login: string; url: string }[];
+      pageInfo: {
+        endCursor: null | string;
+        hasNextPage: boolean;
+      };
+    };
+  };
+}
+
+export interface OrgRepositoriesResponse {
+  organization: {
+    login: string;
+    repositories: {
+      nodes: Repository[];
+      pageInfo: {
+        endCursor: null | string;
+        hasNextPage: boolean;
+      };
+    };
+    url: string;
   };
 }
 
@@ -100,6 +179,10 @@ export interface User {
   url: string;
 }
 
+export interface UserRepositoriesResponse {
+  user: RepositoriesResponse["user"];
+}
+
 interface FetchResult {
   error: Error | null;
   repos: null | Repository[];
@@ -122,44 +205,145 @@ export async function fetchGitHubData(
 
   const octokit = createThrottledOctokit(pat);
 
-  // If login is provided, use it directly
-  if (login) {
-    // Fetch repositories with the provided login
-    const repoResult = await fetchRepositories(octokit, login);
+  // Helper to fetch all orgs for a user (paginated)
+  async function fetchAllOrganizations(
+    userLogin: string,
+  ): Promise<{ login: string; url: string }[]> {
+    let orgs: { login: string; url: string }[] = [];
+    let cursor: null | string = null;
+    let hasNextPage = true;
 
-    return {
-      error: repoResult.error,
-      repos: repoResult.repos,
-      user: repoResult.userData,
-    };
+    while (hasNextPage) {
+      try {
+        // Execute the GraphQL query with explicit type annotation
+        // We have to use type assertions here because the GraphQL client isn't properly typed
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const rawResponse: any = await octokit.graphql(GET_ORGS, {
+          cursor,
+          login: userLogin,
+        });
+
+        // Safe access to typed properties
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        if (rawResponse?.user?.organizations?.nodes) {
+          // Use type assertion after validating structure
+          const typedResponse = rawResponse as OrganizationsResponse;
+          const nodes = typedResponse.user.organizations.nodes;
+          orgs = orgs.concat(nodes);
+
+          // Extract pagination info
+          const pageInfo = typedResponse.user.organizations.pageInfo;
+          hasNextPage = pageInfo.hasNextPage;
+          cursor = pageInfo.endCursor;
+        } else {
+          // Response doesn't match expected structure
+          console.warn(
+            "Unexpected organization response structure:",
+            rawResponse,
+          );
+          hasNextPage = false;
+        }
+      } catch (error) {
+        console.error("Error fetching organizations:", error);
+        // Break the loop on error, but return what we have so far
+        hasNextPage = false;
+      }
+    }
+
+    return orgs;
   }
-  // Otherwise, get current user's login first
-  else {
-    try {
+
+  // Helper to fetch all repos for an org (paginated)
+  async function fetchAllOrgRepos(orgLogin: string): Promise<Repository[]> {
+    let repos: Repository[] = [];
+    let cursor: null | string = null;
+    let hasNextPage = true;
+
+    while (hasNextPage) {
+      try {
+        // Execute the GraphQL query with explicit type annotation
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const rawResponse: any = await octokit.graphql(GET_ORG_REPOS, {
+          cursor,
+          org: orgLogin,
+        });
+
+        // Safe access to typed properties
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        if (rawResponse?.organization?.repositories?.nodes) {
+          // Use type assertion after validating structure
+          const typedResponse = rawResponse as OrgRepositoriesResponse;
+          const nodes = typedResponse.organization.repositories.nodes;
+          repos = repos.concat(nodes);
+
+          // Extract pagination info
+          const pageInfo = typedResponse.organization.repositories.pageInfo;
+          hasNextPage = pageInfo.hasNextPage;
+          cursor = pageInfo.endCursor;
+        } else {
+          // Response doesn't match expected structure
+          console.warn(
+            `Unexpected response structure for org ${orgLogin}:`,
+            rawResponse,
+          );
+          hasNextPage = false;
+        }
+      } catch (error) {
+        console.error(`Error fetching repos for org ${orgLogin}:`, error);
+        // Break the loop on error, but return what we have so far
+        hasNextPage = false;
+      }
+    }
+
+    return repos;
+  }
+
+  // Helper to fetch user repos (existing logic)
+  async function fetchUserRepos(userLogin: string) {
+    return fetchRepositories(octokit, userLogin);
+  }
+
+  // If login is provided, use it directly
+  let userLogin = login;
+  let userData: null | User = null;
+  try {
+    if (!userLogin) {
       const userResponse =
         await octokit.graphql<CurrentUserResponse>(GET_CURRENT_USER);
-      const userLogin = userResponse.viewer.login;
-
-      // Now fetch repositories with the obtained login
-      const repoResult = await fetchRepositories(octokit, userLogin);
-
-      return {
-        error: repoResult.error,
-        repos: repoResult.repos,
-        user: repoResult.userData,
-      };
-    } catch (error) {
-      console.error("Error fetching GitHub user data:", error);
-
-      return {
-        error:
-          error instanceof Error
-            ? error
-            : new Error("Unknown error fetching user data"),
-        repos: null,
-        user: null,
-      };
+      userLogin = userResponse.viewer.login;
     }
+
+    // Fetch user repos and orgs in parallel
+    const [userRepoResult, orgs] = await Promise.all([
+      fetchUserRepos(userLogin),
+      fetchAllOrganizations(userLogin),
+    ]);
+    userData = userRepoResult.userData;
+    let allRepos: Repository[] = userRepoResult.repos ?? [];
+
+    // Fetch all org repos in parallel
+    const orgReposArrays = await Promise.all(
+      orgs.map((org) => fetchAllOrgRepos(org.login)),
+    );
+    for (const orgRepos of orgReposArrays) {
+      allRepos = allRepos.concat(orgRepos);
+    }
+
+    return {
+      error: userRepoResult.error,
+      repos: allRepos,
+      user: userData,
+    };
+  } catch (error) {
+    console.error("Error fetching GitHub data:", error);
+    return {
+      error:
+        error instanceof Error
+          ? error
+          : new Error("Unknown error fetching data"),
+      repos: null,
+      user: null,
+    };
   }
 }
 
@@ -175,17 +359,19 @@ async function fetchRepositories(
   userData: null | User; // Keep user data since it comes with the repo query
 }> {
   try {
-    const result = await octokit.graphql.paginate<{
-      user: RepositoriesResponse["user"];
-    }>(GET_REPOS, { login: userLogin });
+    // Avoid the unsafe call by proper typing
+    const result = await paginateGraphQLQuery<UserRepositoriesResponse>(
+      octokit,
+      GET_REPOS,
+      { login: userLogin },
+    );
 
     const { user } = result;
-
     const userData: User = {
       avatarUrl: user.avatarUrl,
       id: user.id,
       login: user.login,
-      name: user.name || user.login,
+      name: user.name ?? user.login,
       url: `https://github.com/${user.login}`,
     };
 
@@ -199,12 +385,10 @@ async function fetchRepositories(
 
     if (error instanceof GraphqlResponseError) {
       console.log("GraphQL error:", error.message);
-      // Check if we have partial data from the error
       const partialRepos =
         (error.data as { user?: { repositories?: { nodes?: Repository[] } } })
           ?.user?.repositories?.nodes ?? null;
 
-      // If we have partial user data from the error, extract it
       let userData = null;
       type PartialUserData = { name?: string } & Pick<
         User,
@@ -241,4 +425,18 @@ async function fetchRepositories(
       userData: null,
     };
   }
+}
+
+// Type-safe wrapper for GraphQL pagination
+async function paginateGraphQLQuery<T>(
+  octokit: ThrottledOctokitType,
+  query: string,
+  variables: Record<string, unknown>,
+): Promise<T> {
+  // This is the boundary between untyped API and our typed code
+  // We need to use a well-controlled type assertion at this boundary
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+  const result = await octokit.graphql.paginate(query, variables);
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  return result as T;
 }
