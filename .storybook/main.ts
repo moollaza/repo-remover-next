@@ -7,8 +7,14 @@ const config: StorybookConfig = {
     "@storybook/addon-interactions",
     "@chromatic-com/storybook",
   ],
-  framework: "@storybook/experimental-nextjs-vite",
-  // framework: "@storybook/nextjs",
+  framework: {
+    name: "@storybook/experimental-nextjs-vite",
+    options: {
+      builder: {
+        viteConfigPath: "vite.config.ts",
+      },
+    },
+  },
 
   // https://storybook.js.org/docs/get-started/frameworks/nextjs#react-server-components-rsc
   features: {
