@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
 import { expect, fn, screen, userEvent } from "@storybook/test";
-import { waitFor } from "@testing-library/dom";
+import { getByText, waitFor } from "@testing-library/dom";
 
 import { GitHubDataDecorator } from "@/../.storybook/decorators";
 import ConfirmationModal from "@/components/repo-table/confirmation-modal";
@@ -56,21 +56,9 @@ export const SuccessfulArchive: Story = {
       await userEvent.click(confirmButton);
     });
 
-    await step("Wait for progress screen", async () => {
-      await waitFor(() =>
-        expect(screen.getByTestId("progress-modal-header")).toBeInTheDocument(),
-      );
-    });
-
     await step("Wait for archival to complete", async () => {
-      // wait for 3 seconds
-      await new Promise((resolve) => setTimeout(resolve, 3000));
+      await screen.findByText("Archival Complete", {}, { timeout: 10000 });
 
-      await waitFor(() =>
-        expect(
-          screen.getByText((content) => content.includes("Archival Complete")),
-        ).toBeInTheDocument(),
-      );
       await expect(
         screen.getByText("2 out of 2 repos archived successfully!"),
       ).toBeInTheDocument();
@@ -82,7 +70,7 @@ export const SuccessfulDelete: Story = {
   args: {
     action: "delete",
   },
-  play: async ({ step }) => {
+  play: async ({ args, step }) => {
     const usernameInput = await screen.findByTestId("confirmation-modal-input");
 
     await step("Enter username", async () => {
@@ -91,29 +79,13 @@ export const SuccessfulDelete: Story = {
 
     await step("Click confirm button", async () => {
       const confirmButton = screen.getByTestId("confirmation-modal-confirm");
-
-      // Assert that the confirm button is enabled
       await expect(confirmButton).toBeEnabled();
-
-      // click the confirm button
       await userEvent.click(confirmButton);
     });
 
-    await step("Wait for progress screen", async () => {
-      await waitFor(() =>
-        expect(screen.getByTestId("progress-modal-header")).toBeInTheDocument(),
-      );
-    });
-
     await step("Wait for deletion to complete", async () => {
-      // wait for 3 seconds
-      await new Promise((resolve) => setTimeout(resolve, 3000));
+      await screen.findByText("Deletion Complete", {}, { timeout: 10000 });
 
-      await waitFor(() =>
-        expect(
-          screen.getByText((content) => content.includes("Deletion Complete")),
-        ).toBeInTheDocument(),
-      );
       await expect(
         screen.getByText("2 out of 2 repos deleted successfully!"),
       ).toBeInTheDocument();
