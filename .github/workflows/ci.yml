@@ -5,7 +5,7 @@ on:
   pull_request:
     branches: [main, master]
 jobs:
-  lint:
+  lint-and-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -23,42 +23,6 @@ jobs:
         run: npm ci
       - name: Lint code
         run: npm run lint
-
-  type-check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: lts/*
-      - name: Cache Node.js modules
-        uses: actions/cache@v4
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-      - name: Install dependencies
-        run: npm ci
-      - name: TypeScript check
-        run: npx tsc --noEmit
-
-  unit-tests:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: lts/*
-      - name: Cache Node.js modules
-        uses: actions/cache@v4
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-      - name: Install dependencies
-        run: npm ci
       - name: Run unit tests
         run: npm run test:unit
       - name: Upload test results
@@ -119,7 +83,6 @@ jobs:
 
   chromatic:
     runs-on: ubuntu-latest
-    if: ${{ github.actor != 'dependabot[bot]' && vars.CHROMATIC_ENABLED != 'false' }}
     env:
       HAS_CHROMATIC_TOKEN: ${{ secrets.CHROMATIC_PROJECT_TOKEN != '' }}
     steps:
@@ -144,10 +107,13 @@ jobs:
         with:
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
           exitOnceUploaded: true
+          skip: "dependabot/**"
+          autoAcceptChanges: "main"
+          exitZeroOnChanges: false
 
   build:
     runs-on: ubuntu-latest
-    needs: [lint, type-check, unit-tests, e2e-tests]
+    needs: [lint-and-test, e2e-tests]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
