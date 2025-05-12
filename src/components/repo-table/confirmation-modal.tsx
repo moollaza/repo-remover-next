@@ -96,7 +96,14 @@ export default function ConfirmationModal({
   const [state, dispatch] = useReducer(modalReducer, initialState);
 
   async function handleConfirm() {
-    if (!octokit || state.confirming) return;
+    console.log("handleConfirm called");
+
+    console.log("State before confirmation:", state);
+
+    if (!octokit || state.confirming) {
+      console.error("Octokit is not initialized or already processing");
+      return;
+    }
 
     // Single dispatch to handle the full state transition
     dispatch({ type: "START_PROCESSING" });
