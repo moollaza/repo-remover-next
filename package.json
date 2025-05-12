@@ -17,7 +17,8 @@
     "test:all": "npm run test:unit && npm run test:e2e",
     "storybook": "storybook dev -p 6006",
     "sb": "npm run storybook",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "chromatic": "chromatic --exit-zero-on-changes"
   },
   "dependencies": {
     "@emotion/is-prop-valid": "^1.3.1",
@@ -64,7 +65,7 @@
     "@vitejs/plugin-react": "^4.4.1",
     "autoprefixer": "^10.4.20",
     "axios": "^1.8.2",
-    "chromatic": "^11.27.0",
+    "chromatic": "^11.28.2",
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",
     "eslint": "^8.57.1",

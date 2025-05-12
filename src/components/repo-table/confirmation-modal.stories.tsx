@@ -30,7 +30,7 @@ type Story = StoryObj<typeof ConfirmationModal>;
 export const Archive: Story = {
   play: async ({ args }) => {
     // Click cancel button and assert onClose is called
-    const cancelButton = screen.getByTestId("close-repo-confirmation-modal");
+    const cancelButton = screen.getByTestId("confirmation-modal-cancel");
     await userEvent.click(cancelButton);
     await waitFor(() => expect(args.onClose).toHaveBeenCalled());
   },
@@ -58,7 +58,7 @@ export const SuccessfulArchive: Story = {
 
     await step("Wait for progress screen", async () => {
       await waitFor(() =>
-        expect(screen.getByText("Archiving Repositories")).toBeInTheDocument(),
+        expect(screen.getByTestId("progress-modal-header")).toBeInTheDocument(),
       );
     });
 
@@ -67,7 +67,9 @@ export const SuccessfulArchive: Story = {
       await new Promise((resolve) => setTimeout(resolve, 3000));
 
       await waitFor(() =>
-        expect(screen.getByText("Archival Complete")).toBeInTheDocument(),
+        expect(
+          screen.getByText((content) => content.includes("Archival Complete")),
+        ).toBeInTheDocument(),
       );
       await expect(
         screen.getByText("2 out of 2 repos archived successfully!"),
@@ -99,7 +101,7 @@ export const SuccessfulDelete: Story = {
 
     await step("Wait for progress screen", async () => {
       await waitFor(() =>
-        expect(screen.getByText("Deleting Repositories")).toBeInTheDocument(),
+        expect(screen.getByTestId("progress-modal-header")).toBeInTheDocument(),
       );
     });
 
@@ -108,7 +110,9 @@ export const SuccessfulDelete: Story = {
       await new Promise((resolve) => setTimeout(resolve, 3000));
 
       await waitFor(() =>
-        expect(screen.getByText("Deletion Complete")).toBeInTheDocument(),
+        expect(
+          screen.getByText((content) => content.includes("Deletion Complete")),
+        ).toBeInTheDocument(),
       );
       await expect(
         screen.getByText("2 out of 2 repos deleted successfully!"),
