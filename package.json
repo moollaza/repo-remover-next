@@ -64,7 +64,7 @@
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@vitejs/plugin-react": "^4.4.1",
     "autoprefixer": "^10.4.20",
-    "axios": "^1.8.2",
+    "axios": "^1.12.0",
     "chromatic": "^11.28.2",
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",
