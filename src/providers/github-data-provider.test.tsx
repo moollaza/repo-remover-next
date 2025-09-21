@@ -1,133 +1,25 @@
 import "@testing-library/jest-dom";
 import { act, renderHook, waitFor } from "@testing-library/react";
-import { http, HttpResponse } from "msw";
-import { setupServer } from "msw/node";
 import {
-  afterAll,
   afterEach,
-  beforeAll,
   describe,
   expect,
   it,
   vi,
 } from "vitest";
 
-// Mock Octokit before importing the provider
-vi.mock("@octokit/rest", () => {
-  const graphqlPaginateMock = vi.fn().mockImplementation((query, variables) => {
-    return {
-      user: {
-        avatarUrl: `https://example.com/${variables.login}.jpg`,
-        bioHTML: "<p>Bio</p>",
-        id: "user123",
-        login: variables.login,
-        name: `${variables.login} Name`,
-        repositories: {
-          nodes: [
-            {
-              description: "Test repository",
-              id: "repo123",
-              isArchived: false,
-              isDisabled: false,
-              isEmpty: false,
-              isFork: false,
-              isInOrganization: false,
-              isLocked: false,
-              isMirror: false,
-              isPrivate: false,
-              isTemplate: false,
-              name: "test-repo",
-              owner: {
-                id: "user123",
-                login: variables.login,
-                url: `https://github.com/${variables.login}`,
-              },
-              updatedAt: "2023-01-01T00:00:00Z",
-              url: `https://github.com/${variables.login}/test-repo`,
-              viewerCanAdminister: true,
-            },
-          ],
-          pageInfo: {
-            endCursor: null,
-            hasNextPage: false,
-          },
-        },
-      },
-    };
-  });
-
-  return {
-    Octokit: vi.fn().mockImplementation(() => ({
-      graphql: {
-        paginate: graphqlPaginateMock,
-      },
-      rest: {
-        users: {
-          getByUsername: vi.fn().mockResolvedValue({
-            data: {
-              avatar_url: "https://example.com/testuser.jpg",
-              id: "user123",
-              login: "testuser",
-              name: "Test User",
-            },
-          }),
-        },
-      },
-    })),
-  };
-});
-
 import { useGitHubData } from "@/hooks/use-github-data";
+import { getValidPersonalAccessToken } from "@/mocks/static-fixtures";
 
 import { GitHubDataProvider } from "./github-data-provider";
 
-const validToken = "ghp_abcdefghijklmnopqrstuvwxyz1234567890";
+const validToken = getValidPersonalAccessToken();
 
-// Setup MSW
-const server = setupServer(
-  // Default handler for user endpoint
-  http.get("https://api.github.com/user", async ({ request }) => {
-    const authHeader = request.headers.get("Authorization");
-
-    // Add delay to simulate network request
-    await new Promise((resolve) => setTimeout(resolve, 50));
-
-    if (!authHeader?.startsWith("token ghp_")) {
-      return HttpResponse.json({ message: "Bad credentials" }, { status: 401 });
-    }
-
-    return HttpResponse.json({ login: "testuser" });
-  }),
-
-  // Handler for specific user endpoint
-  http.get("https://api.github.com/users/:username", ({ params }) => {
-    const { username } = params;
-
-    // Ensure username is a string
-    if (typeof username !== "string") {
-      return HttpResponse.json(
-        { message: "Invalid username" },
-        { status: 400 },
-      );
-    }
-
-    return HttpResponse.json({
-      avatar_url: `https://example.com/${username}.jpg`,
-      id: "user123",
-      login: username,
-      name: `${username} Name`,
-    });
-  }),
-);
-
-// MSW Setup
-beforeAll(() => server.listen());
+// Test cleanup
 afterEach(() => {
-  server.resetHandlers();
   localStorage.clear();
   vi.clearAllMocks();
 });
-afterAll(() => server.close());
 
 describe("GitHubDataProvider", () => {
   describe("Initial state", () => {
@@ -256,15 +148,3 @@ describe("GitHubDataProvider", () => {
   });
 });
 
-// Mock the createThrottledOctokit function
-vi.mock("@/utils/github-utils", () => ({
-  createThrottledOctokit: vi.fn().mockImplementation(() => ({
-    rest: {
-      users: {
-        getAuthenticated: vi.fn().mockResolvedValue({
-          data: { login: "testuser" },
-        }),
-      },
-    },
-  })),
-}));

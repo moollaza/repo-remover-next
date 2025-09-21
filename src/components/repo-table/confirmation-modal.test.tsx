@@ -3,22 +3,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { GitHubContext, GitHubContextType } from "@/contexts/github-context";
-import { createMockRepo } from "@/mocks/fixtures";
-
-// Important: mock before importing the component
-vi.mock("@/utils/github-utils", () => ({
-  createThrottledOctokit: vi.fn().mockReturnValue({
-    rest: {
-      repos: {
-        delete: vi.fn().mockResolvedValue({}),
-        update: vi.fn().mockResolvedValue({}),
-      },
-    },
-  }),
-  processRepo: vi.fn().mockImplementation(async () => {
-    return Promise.resolve();
-  }),
-}));
+import { createMockRepo } from "@/mocks/static-fixtures";
 
 import ConfirmationModal from "./confirmation-modal";
 
