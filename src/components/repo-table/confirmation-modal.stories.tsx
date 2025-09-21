@@ -4,7 +4,7 @@ import { expect, fn, screen, userEvent, waitFor } from "@storybook/test";
 
 import { GitHubDataDecorator } from "@/../.storybook/decorators";
 import ConfirmationModal from "@/components/repo-table/confirmation-modal";
-import { mockRepos } from "@/mocks/fixtures";
+import { mockRepos } from "@/mocks/static-fixtures";
 
 const fewRepos = mockRepos.slice(0, 2);
 

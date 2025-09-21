@@ -116,21 +116,16 @@ describe("GitHubDataProvider", () => {
   });
 
   describe("Data fetching", () => {
-    test.skip("fetches data when authenticated", async () => {
-      // Mock localStorage
-      vi.spyOn(Storage.prototype, "getItem").mockImplementation((key) => {
-        if (key === "pat") return "test-pat";
-        if (key === "login") return "testuser";
-        return null;
+    it.skip("fetches data when authenticated", async () => {
+      // Setup localStorage before rendering
+      act(() => {
+        localStorage.setItem("pat", validToken);
+        localStorage.setItem("login", "testuser");
       });
 
       const { result } = renderHook(() => useGitHubData(), {
         wrapper: GitHubDataProvider,
       });
-
-      // Initial state
-      expect(result.current.isLoading).toBe(true);
-      expect(result.current.repos).toBeNull();
 
       // Wait for data to load
       await waitFor(
@@ -141,9 +136,10 @@ describe("GitHubDataProvider", () => {
         { timeout: 3000 },
       );
 
-      // Check that data was loaded
-      expect(result.current.repos).toHaveLength(1);
-      expect(result.current.repos?.[0].name).toBe("test-repo");
+      // Check that data was loaded from our static fixtures
+      expect(result.current.repos).toHaveLength(5); // We have 5 repos in MOCK_REPOS
+      expect(result.current.repos?.[0].name).toBe("test-repo-1");
+      expect(result.current.user?.login).toBe("testuser");
     });
   });
 });

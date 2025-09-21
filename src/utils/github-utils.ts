@@ -1,4 +1,3 @@
-import { faker } from "@faker-js/faker";
 import { type Repository } from "@octokit/graphql-schema";
 import { paginateGraphQL } from "@octokit/plugin-paginate-graphql";
 import { throttling } from "@octokit/plugin-throttling";
@@ -11,22 +10,32 @@ export type ThrottledOctokitType = InstanceType<typeof ThrottledOctokit>;
 
 const DEBUG = false;
 
+// Static test repository data for generation
+const REPO_TEMPLATES = [
+  { description: "A test project for demos", homepage: "https://example.com", name: "test-project-1", private: false },
+  { description: "Sample application for testing", homepage: "https://demo.com", name: "sample-app-2", private: true },
+  { description: "Demo repository", homepage: "https://test.com", name: "demo-repo-3", private: false },
+  { description: "Test library project", homepage: "https://lib.com", name: "test-lib-4", private: true },
+  { description: "Example project", homepage: "https://sample.com", name: "example-5", private: false },
+];
+
 export async function generateRepos(
   octokit: Octokit,
   setLoading: (loading: boolean) => void,
   numberOfRepos = 10,
 ): Promise<void> {
-  DEBUG && console.log("Generating random repos...");
+  DEBUG && console.log("Generating test repos...");
   setLoading(true);
 
   try {
     for (let i = 0; i < numberOfRepos; i++) {
       DEBUG && console.log(`Creating repo ${i + 1}...`);
+      const template = REPO_TEMPLATES[i % REPO_TEMPLATES.length];
       await octokit.rest.repos.createForAuthenticatedUser({
-        description: faker.company.catchPhrase(),
-        homepage: faker.internet.url(),
-        name: faker.company.name(),
-        private: faker.datatype.boolean(),
+        description: template.description,
+        homepage: template.homepage,
+        name: `${template.name}-${Date.now()}-${i}`, // Make unique
+        private: template.private,
       });
       await new Promise((resolve) => setTimeout(resolve, 500));
     }

@@ -4,7 +4,8 @@
       "Bash(npm run test:unit:*)",
       "Bash(npm run lint)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(npm run lint:*)"
     ],
     "deny": [],
     "ask": []

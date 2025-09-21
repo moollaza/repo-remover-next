@@ -1,6 +1,6 @@
 import { http, HttpResponse } from "msw";
 
-import { MOCK_REPOS, MOCK_USER, MOCK_ORGANIZATIONS, getValidPersonalAccessToken } from "@/mocks/static-fixtures";
+import { getValidPersonalAccessToken, MOCK_ORGANIZATIONS, MOCK_REPOS, MOCK_USER } from "@/mocks/static-fixtures";
 
 export const handlers = [
   // Handle GraphQL requests - User repositories
@@ -15,7 +15,7 @@ export const handlers = [
       );
     }
 
-    const body = await request.json() as { query: string; variables?: any };
+    const body = await request.json() as { query: string; variables?: unknown };
     
     // Handle different GraphQL queries
     if (body.query.includes("getCurrentUser")) {
@@ -66,7 +66,6 @@ export const handlers = [
         data: {
           organization: {
             login: "testorg",
-            url: "https://github.com/testorg",
             repositories: {
               nodes: orgRepos,
               pageInfo: {
@@ -74,6 +73,7 @@ export const handlers = [
                 hasNextPage: false,
               },
             },
+            url: "https://github.com/testorg",
           },
         },
       });
@@ -88,8 +88,8 @@ export const handlers = [
   // Handle REST API repository operations
   http.patch("https://api.github.com/repos/:owner/:repo", () => {
     return HttpResponse.json({ 
-      message: "Repository archived successfully",
-      archived: true 
+      archived: true,
+      message: "Repository archived successfully" 
     });
   }),
 
@@ -100,7 +100,7 @@ export const handlers = [
   }),
 
   // Handle user authentication
-  http.get("https://api.github.com/user", async ({ request }) => {
+  http.get("https://api.github.com/user", ({ request }) => {
     const authHeader = request.headers.get("Authorization");
     
     if (!authHeader?.includes(getValidPersonalAccessToken())) {

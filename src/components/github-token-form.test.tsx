@@ -2,8 +2,6 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
-import { isValidGitHubToken } from "@/utils/github-utils";
-
 import GitHubTokenForm from "./github-token-form";
 
 describe("GitHubTokenForm", () => {
