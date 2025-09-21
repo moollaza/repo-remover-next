@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { expect, fn, screen, userEvent } from "@storybook/test";
-import { getByText, waitFor } from "@testing-library/dom";
+import { expect, fn, screen, userEvent, waitFor } from "@storybook/test";
 
 import { GitHubDataDecorator } from "@/../.storybook/decorators";
 import ConfirmationModal from "@/components/repo-table/confirmation-modal";
@@ -70,7 +69,7 @@ export const SuccessfulDelete: Story = {
   args: {
     action: "delete",
   },
-  play: async ({ args, step }) => {
+  play: async ({ step }) => {
     const usernameInput = await screen.findByTestId("confirmation-modal-input");
 
     await step("Enter username", async () => {

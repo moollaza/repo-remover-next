@@ -100,8 +100,13 @@ export default function ConfirmationModal({
 
     console.log("State before confirmation:", state);
 
-    if (!octokit || state.confirming) {
+    if (!octokit) {
       console.error("Octokit is not initialized or already processing");
+      return;
+    }
+
+    if (state.confirming) {
+      console.warn("Already processing, ignoring confirmation");
       return;
     }
 
