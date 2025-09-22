@@ -1,21 +1,10 @@
 "use client";
 
 import { Button, Link } from "@heroui/react";
-import { useRouter } from "next/navigation";
-import React from "react";
 
-import GitHubTokenForm from "@/components/github-token-form";
+import ScrollButton from "@/components/scroll-button";
 import { ScrollingQuotes } from "@/components/scrolling-quotes";
-import { useGitHubData } from "@/hooks/use-github-data";
-
-const scrollToID = (id: string) => {
-  const form = document.getElementById(id);
-  form?.scrollIntoView({ behavior: "smooth" });
-};
-
-const scrollToForm = () => {
-  scrollToID("github-token-form");
-};
+import TokenFormSection from "@/components/token-form-section";
 
 export default function HomePage() {
   return (
@@ -31,22 +20,12 @@ export default function HomePage() {
           </p>
 
           <div className="inline-flex gap-5 pt-10">
-            <Button
-              color="primary"
-              onPress={scrollToForm}
-              size="lg"
-              variant="solid"
-            >
+            <ScrollButton targetId="github-token-form">
               Get Started
-            </Button>
-            <Button
-              color="primary"
-              onPress={() => scrollToID("features")}
-              size="lg"
-              variant="ghost"
-            >
+            </ScrollButton>
+            <ScrollButton targetId="features" variant="ghost">
               Learn More
-            </Button>
+            </ScrollButton>
           </div>
         </div>
       </section>
@@ -99,14 +78,13 @@ export default function HomePage() {
             find them, quickly.
           </p>
 
-          <Button
+          <ScrollButton
             className="mt-10 bg-secondary"
             color="secondary"
-            onPress={scrollToForm}
-            size="lg"
+            targetId="github-token-form"
           >
             Get Started It&apos;s Free!
-          </Button>
+          </ScrollButton>
         </div>
       </section>
 
@@ -120,14 +98,13 @@ export default function HomePage() {
             Join thousands of developers who have simplified their lives and
             saved hours of time thanks to Repo Remover.
           </p>
-          <Button
+          <ScrollButton
             className="mt-10 bg-success"
             color="primary"
-            onPress={scrollToForm}
-            size="lg"
+            targetId="github-token-form"
           >
             Get Started It&apos;s Free!
-          </Button>
+          </ScrollButton>
         </div>
 
         {/* QUOTES */}
@@ -175,28 +152,5 @@ export default function HomePage() {
         </section>
       </div>
     </>
-  );
-}
-
-// TODO: Move this to a client component so this is a server component
-
-function TokenFormSection() {
-  const [value, setValue] = React.useState("");
-  const { setPat } = useGitHubData();
-  const router = useRouter();
-
-  const handleSubmit = (token: string) => {
-    setPat(token);
-    router.push("/dashboard");
-  };
-
-  return (
-    <div className="pt-10" id="github-token-form">
-      <GitHubTokenForm
-        onSubmit={handleSubmit}
-        onValueChange={setValue}
-        value={value}
-      />
-    </div>
   );
 }

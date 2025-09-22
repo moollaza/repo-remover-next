@@ -6,7 +6,19 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(npm run lint:*)",
-      "Bash(npm uninstall:*)"
+      "Bash(npm uninstall:*)",
+      "WebSearch",
+      "WebFetch(domain:docs.github.com)",
+      "WebFetch(domain:stackoverflow.com)",
+      "WebFetch(domain:owasp.org)",
+      "Bash(git rm:*)",
+      "Bash(npm run test:e2e:*)",
+      "Bash(npx playwright test:*)",
+      "Bash(npm install:*)",
+      "WebFetch(domain:docs.sentry.io)",
+      "Bash(npm run build:*)",
+      "Bash(npm run dev:*)",
+      "Bash(npx playwright:*)"
     ],
     "deny": [],
     "ask": []

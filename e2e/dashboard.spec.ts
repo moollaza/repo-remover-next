@@ -2,7 +2,7 @@ import { DashboardPage } from "@e2e/pages/dashboard";
 import { mockArchiveRepo } from "@e2e/utils/github-api-mocks";
 import { expect, test } from "@playwright/test";
 
-import { MOCK_REPO_TEMPLATES } from "@/mocks/fixture-utils";
+import { mockRepos } from "@/mocks/static-fixtures";
 
 test.describe("Dashboard Page", () => {
   let dashboard: DashboardPage;
@@ -83,19 +83,19 @@ test.describe("Dashboard Page", () => {
 
     // Check repos 1-5 are displayed (all have viewerCanAdminister: true)
     for (let i = 0; i < 5; i++) {
-      const template = MOCK_REPO_TEMPLATES[i];
+      const template = mockRepos[i];
       await dashboard.expectRepoNameVisible(template.name);
     }
 
     // Verify repos 6 and 8 are NOT visible since viewerCanAdminister is false
-    await dashboard.expectRepoNotVisible(MOCK_REPO_TEMPLATES[5].name); // repo-6
-    await dashboard.expectRepoNotVisible(MOCK_REPO_TEMPLATES[7].name); // repo-8
+    await dashboard.expectRepoNotVisible(mockRepos[5].name); // repo-6
+    await dashboard.expectRepoNotVisible(mockRepos[7].name); // repo-8
   });
 
   test("should display correct tags for each repository", async () => {
     // Check appropriate tags for each visible repository on first page
     for (let i = 0; i < 5; i++) {
-      const template = MOCK_REPO_TEMPLATES[i];
+      const template = mockRepos[i];
 
       if (template.isPrivate) {
         await dashboard.expectRepoHasTag(template.name, "Private");
@@ -134,20 +134,20 @@ test.describe("Dashboard Page", () => {
 
     // The administerable repositories on page 2 should be repo-7, repo-9, and repo-10
     // (skipping repo-6 and repo-8 which have viewerCanAdminister: false)
-    await dashboard.expectRepoNameVisible(MOCK_REPO_TEMPLATES[6].name); // repo-7
-    await dashboard.expectRepoNameVisible(MOCK_REPO_TEMPLATES[8].name); // repo-9
-    await dashboard.expectRepoNameVisible(MOCK_REPO_TEMPLATES[9].name); // repo-10
+    await dashboard.expectRepoNameVisible(mockRepos[6].name); // repo-7
+    await dashboard.expectRepoNameVisible(mockRepos[8].name); // repo-9
+    await dashboard.expectRepoNameVisible(mockRepos[9].name); // repo-10
 
     // Verify repos from page 1 are not visible on page 2
-    await dashboard.expectRepoNotVisible(MOCK_REPO_TEMPLATES[0].name); // repo-1
+    await dashboard.expectRepoNotVisible(mockRepos[0].name); // repo-1
 
     // Test going back to page 1
     await dashboard.goToPrevPage();
     await dashboard.expectCurrentPage(1);
 
     // Check first page repos are visible again
-    await dashboard.expectRepoNameVisible(MOCK_REPO_TEMPLATES[0].name); // repo-1
-    await dashboard.expectRepoNotVisible(MOCK_REPO_TEMPLATES[6].name); // repo-7
+    await dashboard.expectRepoNameVisible(mockRepos[0].name); // repo-1
+    await dashboard.expectRepoNotVisible(mockRepos[6].name); // repo-7
   });
 
   test("should filter repositories", async () => {

@@ -116,7 +116,7 @@ describe("GitHubDataProvider", () => {
   });
 
   describe("Data fetching", () => {
-    it("validates authentication state changes properly", async () => {
+    it("validates authentication state changes properly", () => {
       const { result } = renderHook(() => useGitHubData(), {
         wrapper: GitHubDataProvider,
       });

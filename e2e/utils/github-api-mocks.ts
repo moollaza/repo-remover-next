@@ -5,7 +5,7 @@ import {
   getValidPersonalAccessToken,
   mockRepos,
   mockUser,
-} from "@/mocks/fixtures";
+} from "@/mocks/static-fixtures";
 
 export async function mockArchiveRepo(
   page: Page,

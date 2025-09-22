@@ -3,7 +3,7 @@ import { HomePage } from "@e2e/pages/home";
 import { mockLocalStorage } from "@e2e/utils/github-api-mocks";
 import { expect, test } from "@playwright/test";
 
-import { mockUser } from "@/mocks/fixtures";
+import { mockUser } from "@/mocks/static-fixtures";
 
 test.describe("Layout Components", () => {
   test.describe("Header", () => {

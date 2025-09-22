@@ -1,11 +1,15 @@
+"use client";
+
 import { config } from "@fortawesome/fontawesome-svg-core";
 import "@fortawesome/fontawesome-svg-core/styles.css";
 import clsx from "clsx";
 import { Inter } from "next/font/google";
+import { useEffect } from "react";
 
 import Footer from "@/components/footer";
 import Header from "@/components/header";
 import { Providers } from "@/providers/providers";
+import { analytics } from "@/utils/analytics";
 import "@/globals.css";
 
 config.autoAddCss = false;
@@ -23,6 +27,11 @@ export default function LayoutContent({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Initialize analytics on app load (production only)
+  useEffect(() => {
+    analytics.init();
+  }, []);
+
   return (
     <Providers themeProps={{ attribute: "class", defaultTheme: "light" }}>
       <div className="min-h-full">

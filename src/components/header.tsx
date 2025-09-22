@@ -16,6 +16,7 @@ import {
 import { usePathname } from "next/navigation";
 
 import { GenerateReposButton } from "@/components/generate-repos-button";
+import { ThemeSwitcher } from "@/components/theme-switcher";
 import { useGitHubData } from "@/hooks/use-github-data";
 
 const homeLinks = [
@@ -79,6 +80,8 @@ export default function Header() {
       )}
 
       <NavbarContent justify="end">
+        <ThemeSwitcher />
+        
         {isDashboard ? (
           <>
             {isDevelopment && <GenerateReposButton />}

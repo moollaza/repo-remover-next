@@ -43,3 +43,6 @@ node_modules/
 /playwright/.cache/
 
 *storybook.log
+
+# Claude Code assistant files (keep local only)
+CLAUDE.md
