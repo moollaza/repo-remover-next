@@ -205,6 +205,32 @@ test.describe("Dashboard Page", () => {
     await dashboard.expectRepoAtPosition(1, "repo-1");
   });
 
+  test("should focus search input with Cmd+K keyboard shortcut", async () => {
+    await dashboard.expectRepoVisible("repo-1");
+
+    // Verify search input is not focused initially
+    await expect(dashboard.searchInput).not.toBeFocused();
+
+    // Use Cmd+K (Mac) to focus search input
+    await dashboard.page.keyboard.press("Meta+k");
+
+    // Verify search input is now focused
+    await expect(dashboard.searchInput).toBeFocused();
+  });
+
+  test("should focus search input with Ctrl+K keyboard shortcut", async () => {
+    await dashboard.expectRepoVisible("repo-1");
+
+    // Verify search input is not focused initially
+    await expect(dashboard.searchInput).not.toBeFocused();
+
+    // Use Ctrl+K (Windows/Linux) to focus search input
+    await dashboard.page.keyboard.press("Control+k");
+
+    // Verify search input is now focused
+    await expect(dashboard.searchInput).toBeFocused();
+  });
+
   test("should change action button when selecting different actions", async () => {
     // First select a repository so the action buttons are enabled
     await dashboard.selectRepository("repo-1");

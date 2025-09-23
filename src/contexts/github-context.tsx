@@ -95,6 +95,11 @@ export interface GitHubContextType {
    * The user.
    */
   user: null | User;
+
+  /**
+   * Permission warning message if token lacks required scopes.
+   */
+  permissionWarning?: string;
 }
 
 /**

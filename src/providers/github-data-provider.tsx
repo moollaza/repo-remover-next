@@ -10,6 +10,7 @@ import useSWR from "swr";
 
 import { GitHubContext, GitHubContextType } from "@/contexts/github-context";
 import { fetchGitHubData } from "@/utils/github-api";
+import { secureStorage } from "@/utils/secure-storage";
 
 const IS_DEV = process.env.NODE_ENV === "development";
 
@@ -18,6 +19,7 @@ export interface GitHubFetcherResult {
   error: Error | null;
   repos: null | Repository[];
   user: null | User;
+  permissionWarning?: string;
 }
 
 type GitHubFetcherKey = [string, string];
@@ -46,20 +48,24 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
   const [isInitialized, setIsInitialized] = useState(false);
   const lastFetchTimeRef = useRef<number>(0);
 
-  // Load from localStorage on mount
+  // Load from secure storage on mount
   useLayoutEffect(() => {
-    try {
-      const storedLogin = localStorage.getItem("login");
-      const storedPat = localStorage.getItem("pat");
+    async function loadStoredData() {
+      try {
+        const storedLogin = await secureStorage.getItem("login");
+        const storedPat = await secureStorage.getItem("pat");
 
-      if (storedLogin && typeof storedLogin === "string")
-        setLoginState(storedLogin);
-      if (storedPat && typeof storedPat === "string") setPatState(storedPat);
-    } catch (error) {
-      console.warn("Error accessing localStorage:", error);
+        if (storedLogin && typeof storedLogin === "string")
+          setLoginState(storedLogin);
+        if (storedPat && typeof storedPat === "string") setPatState(storedPat);
+      } catch (error) {
+        console.warn("Error accessing secure storage:", error);
+      } finally {
+        setIsInitialized(true);
+      }
     }
 
-    setIsInitialized(true);
+    void loadStoredData();
 
     // Cleanup function
     return () => {
@@ -124,11 +130,9 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
 
     setLoginState(newLogin);
     if (typeof window !== "undefined") {
-      try {
-        localStorage.setItem("login", newLogin);
-      } catch (error) {
-        console.warn("Failed to save login to localStorage:", error);
-      }
+      secureStorage.setItem("login", newLogin).catch((error) => {
+        console.warn("Failed to save login to secure storage:", error);
+      });
     }
   }, []);
 
@@ -140,11 +144,9 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
 
     setPatState(newPat);
     if (typeof window !== "undefined") {
-      try {
-        localStorage.setItem("pat", newPat);
-      } catch (error) {
-        console.warn("Failed to save PAT to localStorage:", error);
-      }
+      secureStorage.setItem("pat", newPat).catch((error) => {
+        console.warn("Failed to save PAT to secure storage:", error);
+      });
     }
   }, []);
 
@@ -153,10 +155,10 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
     setPatState(null);
     if (typeof window !== "undefined") {
       try {
-        localStorage.removeItem("login");
-        localStorage.removeItem("pat");
+        secureStorage.removeItem("login");
+        secureStorage.removeItem("pat");
       } catch (error) {
-        console.warn("Failed to clear localStorage during logout:", error);
+        console.warn("Failed to clear secure storage during logout:", error);
       }
     }
   }, []);
@@ -206,6 +208,7 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
     setLogin,
     setPat,
     user,
+    permissionWarning: data?.permissionWarning,
   };
 
   return (

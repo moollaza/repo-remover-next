@@ -15,6 +15,7 @@ import {
   type Selection,
   SelectItem,
 } from "@heroui/react";
+import { useEffect, useRef } from "react";
 
 const PER_PAGE_OPTIONS = [5, 10, 20, 50, 100];
 const REPO_TYPES = [
@@ -67,6 +68,23 @@ export default function RepoFilters({
   selectedRepoAction,
   selectedRepoKeys,
 }: RepoFiltersProps): JSX.Element {
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Check for Cmd+K (Mac) or Ctrl+K (Windows/Linux)
+      if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
+        event.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
   return (
     <div className="grid grid-cols-12 gap-4">
       {/* PER PAGE SELECTOR */}
@@ -117,6 +135,7 @@ export default function RepoFilters({
       {/* SEARCH INPUT */}
       <div className="col-span-4">
         <Input
+          ref={searchInputRef}
           data-testid="repo-search-input"
           endContent={<Kbd keys={["command"]}>K</Kbd>}
           label="Search"

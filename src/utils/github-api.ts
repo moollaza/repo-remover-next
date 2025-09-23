@@ -245,7 +245,17 @@ export async function fetchGitHubData(
         }
       } catch (error) {
         console.error("Error fetching organizations:", error);
-        // Break the loop on error, but return what we have so far
+
+        // Check if this is a permission/scope error
+        if (error instanceof Error && error.message.includes("required scopes")) {
+          // This is a scope permission error - we should surface this to the UI
+          throw new Error(
+            "Missing GitHub token permissions: Your token needs 'read:org' scope to fetch organization data. " +
+            "You can update your token permissions at: https://github.com/settings/tokens"
+          );
+        }
+
+        // For other errors, break the loop but return what we have so far
         hasNextPage = false;
       }
     }
@@ -290,7 +300,13 @@ export async function fetchGitHubData(
         }
       } catch (error) {
         console.error(`Error fetching repos for org ${orgLogin}:`, error);
-        // Break the loop on error, but return what we have so far
+
+        // Check if this is a permission/scope error
+        if (error instanceof Error && error.message.includes("required scopes")) {
+          console.warn(`Skipping org ${orgLogin} due to insufficient permissions`);
+        }
+
+        // For any error, break the loop but return what we have so far
         hasNextPage = false;
       }
     }
@@ -313,26 +329,41 @@ export async function fetchGitHubData(
       userLogin = userResponse.viewer.login;
     }
 
-    // Fetch user repos and orgs in parallel
-    const [userRepoResult, orgs] = await Promise.all([
-      fetchUserRepos(userLogin),
-      fetchAllOrganizations(userLogin),
-    ]);
+    // Fetch user repos first
+    const userRepoResult = await fetchUserRepos(userLogin);
     userData = userRepoResult.userData;
     let allRepos: Repository[] = userRepoResult.repos ?? [];
 
-    // Fetch all org repos in parallel
-    const orgReposArrays = await Promise.all(
-      orgs.map((org) => fetchAllOrgRepos(org.login)),
-    );
-    for (const orgRepos of orgReposArrays) {
-      allRepos = allRepos.concat(orgRepos);
+    // Fetch orgs with permission error handling
+    let orgs: { login: string; url: string }[] = [];
+    let permissionError: string | null = null;
+
+    try {
+      orgs = await fetchAllOrganizations(userLogin);
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("Missing GitHub token permissions")) {
+        permissionError = error.message;
+        console.warn("Organization access limited due to token permissions");
+      } else {
+        throw error; // Re-throw unexpected errors
+      }
+    }
+
+    // Fetch all org repos in parallel (only if we have orgs)
+    if (orgs.length > 0) {
+      const orgReposArrays = await Promise.all(
+        orgs.map((org) => fetchAllOrgRepos(org.login)),
+      );
+      for (const orgRepos of orgReposArrays) {
+        allRepos = allRepos.concat(orgRepos);
+      }
     }
 
     return {
       error: userRepoResult.error,
       repos: allRepos,
       user: userData,
+      ...(permissionError && { permissionWarning: permissionError }),
     };
   } catch (error) {
     console.error("Error fetching GitHub data:", error);

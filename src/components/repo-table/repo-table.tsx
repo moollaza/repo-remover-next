@@ -207,6 +207,21 @@ export default function RepoTable({
     [setSelectedRepoAction],
   );
 
+  // Helper function to determine if a repo should be disabled for selection
+  const isRepoDisabled = useCallback((repo: Repository): boolean => {
+    // If archive action is selected and repo is already archived, disable it
+    return selectedRepoAction.has("archive") && repo.isArchived;
+  }, [selectedRepoAction]);
+
+  // Get disabled repo keys for the table
+  const disabledKeys = useMemo(() => {
+    return new Set(
+      paginatedRepos
+        .filter(isRepoDisabled)
+        .map(repo => repo.id)
+    );
+  }, [paginatedRepos, isRepoDisabled]);
+
   const handleConfirm = useCallback(() => {
     // TODO: Record # of repos deleted/archived?
   }, []);
@@ -245,6 +260,7 @@ export default function RepoTable({
         }
         className="mb-5"
         data-testid="repo-table"
+        disabledKeys={disabledKeys}
         isStriped
         onSelectionChange={setSelectedRepoKeys}
         onSortChange={setSortDescriptor}
@@ -273,7 +289,11 @@ export default function RepoTable({
           loadingContent={<Spinner label="Loading..." />}
         >
           {(repo) => (
-            <TableRow data-testid="repo-row" key={repo.id}>
+            <TableRow
+              data-testid="repo-row"
+              key={repo.id}
+              className={isRepoDisabled(repo) ? "opacity-50 pointer-events-none" : ""}
+            >
               <TableCell>
                 <div data-testid="repo-details">
                   <div className="mb-2" data-testid="repo-name">
@@ -291,7 +311,7 @@ export default function RepoTable({
                       <Chip size="sm">Organization</Chip>
                     )}
                     {repo.isFork && <Chip size="sm">Fork</Chip>}
-                    {repo.isArchived && <Chip size="sm">Archived</Chip>}
+                    {repo.isArchived && <Chip size="sm" color="warning">Archived</Chip>}
                   </div>
 
                   {repo.owner.login !== login && (

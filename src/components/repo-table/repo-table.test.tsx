@@ -77,4 +77,38 @@ describe("RepoTable", () => {
 
     expect(screen.getByLabelText("Loading...")).toBeInTheDocument();
   });
+
+  test("disables archived repos when archive action is selected", () => {
+    const mockReposWithArchived: Repository[] = [
+      createMockRepo({
+        description: "Active repo",
+        id: "active-repo",
+        isArchived: false,
+        name: "active-repo",
+      }),
+      createMockRepo({
+        description: "Archived repo",
+        id: "archived-repo",
+        isArchived: true,
+        name: "archived-repo",
+      }),
+    ];
+
+    render(<RepoTable isLoading={false} login={mockLogin} repos={mockReposWithArchived} />);
+
+    // Find archived repo and verify its row has disabled styling
+    expect(screen.getByText("active-repo")).toBeInTheDocument();
+    expect(screen.getByText("archived-repo")).toBeInTheDocument();
+
+    // The archived repo should be dimmed when archive action is selected (which is the default)
+    // Check for opacity styling on the archived repo row
+    const archivedRepoRow = screen.getByText("archived-repo").closest('[data-testid="repo-row"]');
+    expect(archivedRepoRow).toHaveClass("opacity-50");
+    expect(archivedRepoRow).toHaveClass("pointer-events-none");
+
+    // Active repo should not have these classes
+    const activeRepoRow = screen.getByText("active-repo").closest('[data-testid="repo-row"]');
+    expect(activeRepoRow).not.toHaveClass("opacity-50");
+    expect(activeRepoRow).not.toHaveClass("pointer-events-none");
+  });
 });

@@ -8,7 +8,7 @@ import RepoTable from "@/components/repo-table/repo-table";
 import { useGitHubData } from "@/hooks/use-github-data";
 
 export default function DashboardPage() {
-  const { isError, isInitialized, isLoading, login, pat, refetchData, repos } =
+  const { isError, isInitialized, isLoading, login, pat, permissionWarning, refetchData, repos } =
     useGitHubData();
 
   const router = useRouter();
@@ -35,6 +35,17 @@ export default function DashboardPage() {
       {isError && (
         <Alert className="mb-4" color="danger">
           Error loading repositories. Please check your token and try again.
+        </Alert>
+      )}
+
+      {permissionWarning && (
+        <Alert className="mb-4" color="warning">
+          <div>
+            <strong>Limited Access:</strong> {permissionWarning}
+          </div>
+          <div className="mt-2 text-sm">
+            Some organization repositories may not be visible due to insufficient token permissions.
+          </div>
         </Alert>
       )}
 
