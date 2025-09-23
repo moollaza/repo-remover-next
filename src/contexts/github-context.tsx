@@ -1,4 +1,4 @@
-import { Repository, User } from "@octokit/graphql-schema";
+import { type Repository, type User } from "@octokit/graphql-schema";
 import { createContext } from "react";
 import { type KeyedMutator } from "swr";
 

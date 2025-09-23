@@ -9,7 +9,7 @@ import {
   Progress,
   Spacer,
 } from "@heroui/react";
-import { Repository } from "@octokit/graphql-schema";
+import { type Repository } from "@octokit/graphql-schema";
 import { useReducer } from "react";
 
 import { useGitHubData } from "@/hooks/use-github-data";
