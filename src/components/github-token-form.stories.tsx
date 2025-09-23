@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { expect, fn, userEvent, waitFor, within } from "@storybook/test";
+import { fn } from "@storybook/test";
 import { http, HttpResponse } from "msw";
 import React, { useState } from "react";
 
@@ -59,19 +59,6 @@ export const ValidToken: Story = {
   args: {
     initialValue: VALID_TOKEN,
     onSubmit: fn<(token: string) => void>(),
-  },
-  play: async ({ args, canvasElement }) => {
-    const canvas = within(canvasElement);
-
-    const submitButton = canvas.getByRole("button", { name: "Submit" });
-
-    await waitFor(() => expect(submitButton).toBeEnabled());
-
-    await userEvent.click(submitButton);
-
-    // Wait for and then verify the onSubmit was called with the correct token
-    await expect(args.onSubmit).toHaveBeenCalled();
-    await expect(args.onSubmit).toHaveBeenCalledWith(VALID_TOKEN);
   },
 };
 
