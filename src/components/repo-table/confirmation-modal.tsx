@@ -13,6 +13,7 @@ import { Repository } from "@octokit/graphql-schema";
 import { useReducer } from "react";
 
 import { useGitHubData } from "@/hooks/use-github-data";
+import { analytics } from "@/utils/analytics";
 import { createThrottledOctokit, processRepo } from "@/utils/github-utils";
 
 interface ConfirmationModalProps {
@@ -112,6 +113,13 @@ export default function ConfirmationModal({
 
     // Single dispatch to handle the full state transition
     dispatch({ type: "START_PROCESSING" });
+
+    // Track bulk action submission
+    if (action === "archive") {
+      analytics.trackArchiveActionSubmitted(repos.length);
+    } else {
+      analytics.trackDeleteActionSubmitted(repos.length);
+    }
 
     // Record the start time to ensure minimum progress display time
     const startTime = Date.now();

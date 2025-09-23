@@ -122,6 +122,27 @@ export const MOCK_REPOS: Repository[] = [
     url: "https://github.com/testorg/admin-org-repo",
     viewerCanAdminister: true,
   } as Repository,
+  {
+    description: "Another test repository",
+    id: "repo-6",
+    isArchived: false,
+    isFork: false,
+    isInOrganization: false,
+    isLocked: false,
+    isMirror: false,
+    isPrivate: false,
+    isTemplate: false,
+    name: "test-repo-6",
+    owner: {
+      id: "user-123456",
+      login: "testuser",
+      url: "https://github.com/testuser",
+    },
+    parent: null,
+    updatedAt: "2023-07-01T09:00:00Z",
+    url: "https://github.com/testuser/test-repo-6",
+    viewerCanAdminister: true,
+  } as Repository,
 ];
 
 // Helper function to create a mock repo with overrides

@@ -1,104 +1,70 @@
-// Fathom Analytics utilities for privacy-first usage tracking
-// Only active in production with proper environment variables
-// Sentry handles error tracking separately
+// Fathom Analytics utilities for privacy-first event tracking
+// Uses modern trackEvent API (2024+) instead of deprecated trackGoal
+// Page views are handled automatically by FathomAnalytics component
 
-import * as Fathom from 'fathom-client';
+import { trackEvent } from 'fathom-client';
 
 // Configuration constants
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
-const FATHOM_SITE_ID = process.env.NEXT_PUBLIC_FATHOM_SITE_ID;
 
-// Initialize Fathom in production only
-let fathomInitialized = false;
-
-const initializeFathom = () => {
-  if (!IS_PRODUCTION || !FATHOM_SITE_ID || fathomInitialized) {
+/**
+ * Track user events using modern Fathom trackEvent API
+ * 
+ * @param eventName - Descriptive event name (no special characters)
+ * @param value - Optional value for counting (e.g., number of repos)
+ */
+export function track(eventName: string, value?: number): void {
+  if (!IS_PRODUCTION) {
+    console.log(`[DEV] Would track event: ${eventName}`, value ? `(value: ${value})` : '');
     return;
   }
 
   try {
-    Fathom.load(FATHOM_SITE_ID, {
-      // Privacy-first settings
-      excludedDomains: ['localhost', '127.0.0.1'], // Never track locally
-      includedDomains: ['repo-remover.com'], // Only track on production domain
-      spa: 'auto', // Single page app tracking
-    });
-    fathomInitialized = true;
+    if (value !== undefined) {
+      trackEvent(eventName, { _value: value });
+    } else {
+      trackEvent(eventName);
+    }
   } catch (error) {
-    console.warn('Failed to initialize Fathom Analytics:', error);
+    console.warn('Failed to track event:', error);
   }
-};
+}
 
-// Analytics interface (Fathom only - Sentry handles errors automatically)
+/**
+ * Pre-defined event tracking functions for common user actions
+ */
 export const analytics = {
   /**
-   * Initialize analytics (call once in app root)
+   * Track when user submits bulk archive action
+   * @param repoCount - Number of repositories being archived
    */
-  init: () => {
-    initializeFathom();
-  },
+  trackArchiveActionSubmitted: (repoCount: number) => track('archive_action_submitted', repoCount),
 
   /**
-   * Track page views (automatic with Fathom in SPA mode)
+   * Track when user submits bulk delete action
+   * @param repoCount - Number of repositories being deleted
    */
-  pageView: (url?: string) => {
-    if (!IS_PRODUCTION || !fathomInitialized) {
-      return; // No-op in development
-    }
-
-    try {
-      Fathom.trackPageview({ url });
-    } catch (error) {
-      console.warn('Failed to track page view:', error);
-    }
-  },
+  trackDeleteActionSubmitted: (repoCount: number) => track('delete_action_submitted', repoCount),
 
   /**
-   * Track custom events using Fathom goals (use sparingly to respect privacy)
+   * Track when user clicks "Get Started" CTA buttons
    */
-  track: (eventName: string, value?: number) => {
-    if (!IS_PRODUCTION || !fathomInitialized) {
-      return; // No-op in development
-    }
+  trackGetStartedClick: () => track('get_started_click'),
 
-    try {
-      // Map common events to Fathom goals (production goal IDs from existing setup)
-      const eventMap: Record<string, string> = {
-        'get_started_click': 'RYC0QQCP',
-        'repos_archived': 'WW8IOKY2', 
-        'repos_deleted': 'XNGNSEXJ',
-        'token_validated': 'TOKEN_VALID',
-      };
+  /**
+   * Track individual repository archived (for total counting)
+   */
+  trackRepoArchived: () => track('repo_archived', 1),
 
-      const goalId = eventMap[eventName];
-      if (goalId) {
-        // Use goal ID directly for production goals, or environment variable for new goals
-        if (['RYC0QQCP', 'WW8IOKY2', 'XNGNSEXJ'].includes(goalId)) {
-          Fathom.trackGoal(goalId, value ?? 0);
-        } else if (process.env[`NEXT_PUBLIC_FATHOM_${goalId}`]) {
-          Fathom.trackGoal(process.env[`NEXT_PUBLIC_FATHOM_${goalId}`]!, value ?? 0);
-        }
-      }
-    } catch (error) {
-      console.warn('Failed to track event:', error);
-    }
-  },
+  /**
+   * Track individual repository deleted (for total counting)
+   */
+  trackRepoDeleted: () => track('repo_deleted', 1),
+
+  /**
+   * Track successful GitHub token validation
+   */
+  trackTokenValidated: () => track('token_validated'),
 };
-
-// Development helpers
-if (!IS_PRODUCTION) {
-  // Override console methods to show what would be tracked
-  const originalTrack = analytics.track;
-  analytics.track = (eventName: string, value?: number) => {
-    console.log(`[DEV] Would track event: ${eventName}`, value ? `(value: ${value})` : '');
-    return originalTrack(eventName, value);
-  };
-
-  const originalPageView = analytics.pageView;
-  analytics.pageView = (url?: string) => {
-    console.log(`[DEV] Would track page view:`, url ?? 'current page');
-    return originalPageView(url);
-  };
-}
 
 export default analytics;

@@ -18,7 +18,11 @@
       "WebFetch(domain:docs.sentry.io)",
       "Bash(npm run build:*)",
       "Bash(npm run dev:*)",
-      "Bash(npx playwright:*)"
+      "Bash(npx playwright:*)",
+      "WebFetch(domain:usefathom.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:vercel.com)",
+      "Bash(pkill:*)"
     ],
     "deny": [],
     "ask": []

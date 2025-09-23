@@ -3,6 +3,8 @@ import { paginateGraphQL } from "@octokit/plugin-paginate-graphql";
 import { throttling } from "@octokit/plugin-throttling";
 import { Octokit } from "@octokit/rest";
 
+import { analytics } from "@/utils/analytics";
+
 // Create a custom Octokit class with the throttling plugin and pagination
 export const ThrottledOctokit = Octokit.plugin(throttling, paginateGraphQL);
 
@@ -131,8 +133,12 @@ export const processRepo = async (
 
   if (action === "archive") {
     await archiveRepo(octokit, repo);
+    // Track individual successful archive
+    analytics.trackRepoArchived();
   } else if (action === "delete") {
     await deleteRepo(octokit, repo);
+    // Track individual successful delete
+    analytics.trackRepoDeleted();
   }
 };
 

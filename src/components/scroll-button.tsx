@@ -2,6 +2,8 @@
 
 import { Button } from "@heroui/react";
 
+import { analytics } from "@/utils/analytics";
+
 interface ScrollButtonProps {
   children: React.ReactNode;
   className?: string;
@@ -16,19 +18,28 @@ const scrollToID = (id: string) => {
   element?.scrollIntoView({ behavior: "smooth" });
 };
 
-export default function ScrollButton({ 
-  children, 
-  className, 
+export default function ScrollButton({
+  children,
+  className,
   color = "primary",
   size = "lg",
   targetId,
-  variant = "solid" 
+  variant = "solid"
 }: ScrollButtonProps) {
+  const handlePress = () => {
+    // Track "Get Started" clicks when scrolling to the token form
+    if (targetId === "github-token-form") {
+      analytics.trackGetStartedClick();
+    }
+
+    scrollToID(targetId);
+  };
+
   return (
     <Button
       className={className}
       color={color}
-      onPress={() => scrollToID(targetId)}
+      onPress={handlePress}
       size={size}
       variant={variant}
     >
