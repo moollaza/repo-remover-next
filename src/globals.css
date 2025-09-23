@@ -2,19 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Dark theme styles */
-@media (prefers-color-scheme: dark) {
-  body {
-    background-color: black;
-    color: white;
-  }
-}
-
-body {
-  background-color: white;
-  color: black;
-}
-
 @layer utilities {
   .text-balance {
     text-wrap: balance;
