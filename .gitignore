@@ -46,3 +46,4 @@ node_modules/
 
 # Claude Code assistant files (keep local only)
 CLAUDE.md
+.claude/
