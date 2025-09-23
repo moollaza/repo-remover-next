@@ -1,4 +1,4 @@
-import { Repository } from "@octokit/graphql-schema";
+import { type Repository } from "@octokit/graphql-schema";
 
 // Extended Repository type with additional properties for testing
 type MockRepository = {

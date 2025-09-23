@@ -1,4 +1,4 @@
-import { Repository } from "@octokit/graphql-schema";
+import { type Repository } from "@octokit/graphql-schema";
 import { Octokit } from "@octokit/rest";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 

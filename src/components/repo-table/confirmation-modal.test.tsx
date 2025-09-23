@@ -1,4 +1,4 @@
-import { Repository } from "@octokit/graphql-schema";
+import { type Repository } from "@octokit/graphql-schema";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
