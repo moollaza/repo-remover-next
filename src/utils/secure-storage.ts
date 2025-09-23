@@ -6,6 +6,36 @@
 const STORAGE_KEY_PREFIX = 'secure_';
 const ALGORITHM = 'AES-GCM';
 
+// Decrypt data
+async function decryptData(encryptedData: string): Promise<string> {
+  try {
+    const decoder = new TextDecoder();
+    const password = await getBrowserFingerprint();
+
+    // Convert from base64
+    const combined = new Uint8Array(
+      atob(encryptedData).split('').map(char => char.charCodeAt(0))
+    );
+
+    // Extract salt, iv, and encrypted data
+    const salt = combined.slice(0, 16);
+    const iv = combined.slice(16, 28);
+    const encrypted = combined.slice(28);
+
+    const key = await deriveKey(password, salt);
+    const decrypted = await crypto.subtle.decrypt(
+      { iv, name: ALGORITHM },
+      key,
+      encrypted
+    );
+
+    return decoder.decode(decrypted);
+  } catch (error) {
+    console.error('Decryption failed:', error);
+    throw new Error('Failed to decrypt data');
+  }
+}
+
 // Generate a key from a password using PBKDF2
 async function deriveKey(password: string, salt: Uint8Array): Promise<CryptoKey> {
   const encoder = new TextEncoder();
@@ -19,26 +49,55 @@ async function deriveKey(password: string, salt: Uint8Array): Promise<CryptoKey>
 
   return crypto.subtle.deriveKey(
     {
+      hash: 'SHA-256',
+      iterations: 100000,
       name: 'PBKDF2',
       salt,
-      iterations: 100000,
-      hash: 'SHA-256',
     },
     keyMaterial,
-    { name: ALGORITHM, length: 256 },
+    { length: 256, name: ALGORITHM },
     false,
     ['encrypt', 'decrypt']
   );
 }
 
-// Generate a random salt
-function generateSalt(): Uint8Array {
-  return crypto.getRandomValues(new Uint8Array(16));
+// Encrypt data
+async function encryptData(data: string): Promise<string> {
+  try {
+    const encoder = new TextEncoder();
+    const password = await getBrowserFingerprint();
+    const salt = generateSalt();
+    const iv = generateIV();
+
+    const key = await deriveKey(password, salt);
+    const encrypted = await crypto.subtle.encrypt(
+      { iv, name: ALGORITHM },
+      key,
+      encoder.encode(data)
+    );
+
+    // Combine salt, iv, and encrypted data
+    const combined = new Uint8Array(salt.length + iv.length + encrypted.byteLength);
+    combined.set(salt, 0);
+    combined.set(iv, salt.length);
+    combined.set(new Uint8Array(encrypted), salt.length + iv.length);
+
+    // Convert to base64 for storage
+    return btoa(String.fromCharCode(...combined));
+  } catch (error) {
+    console.error('Encryption failed:', error);
+    throw new Error('Failed to encrypt data');
+  }
 }
 
 // Generate a random IV
 function generateIV(): Uint8Array {
   return crypto.getRandomValues(new Uint8Array(12));
+}
+
+// Generate a random salt
+function generateSalt(): Uint8Array {
+  return crypto.getRandomValues(new Uint8Array(16));
 }
 
 // Get a deterministic password based on the browser/device
@@ -61,65 +120,6 @@ async function getBrowserFingerprint(): Promise<string> {
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-// Encrypt data
-async function encryptData(data: string): Promise<string> {
-  try {
-    const encoder = new TextEncoder();
-    const password = await getBrowserFingerprint();
-    const salt = generateSalt();
-    const iv = generateIV();
-
-    const key = await deriveKey(password, salt);
-    const encrypted = await crypto.subtle.encrypt(
-      { name: ALGORITHM, iv },
-      key,
-      encoder.encode(data)
-    );
-
-    // Combine salt, iv, and encrypted data
-    const combined = new Uint8Array(salt.length + iv.length + encrypted.byteLength);
-    combined.set(salt, 0);
-    combined.set(iv, salt.length);
-    combined.set(new Uint8Array(encrypted), salt.length + iv.length);
-
-    // Convert to base64 for storage
-    return btoa(String.fromCharCode(...combined));
-  } catch (error) {
-    console.error('Encryption failed:', error);
-    throw new Error('Failed to encrypt data');
-  }
-}
-
-// Decrypt data
-async function decryptData(encryptedData: string): Promise<string> {
-  try {
-    const decoder = new TextDecoder();
-    const password = await getBrowserFingerprint();
-
-    // Convert from base64
-    const combined = new Uint8Array(
-      atob(encryptedData).split('').map(char => char.charCodeAt(0))
-    );
-
-    // Extract salt, iv, and encrypted data
-    const salt = combined.slice(0, 16);
-    const iv = combined.slice(16, 28);
-    const encrypted = combined.slice(28);
-
-    const key = await deriveKey(password, salt);
-    const decrypted = await crypto.subtle.decrypt(
-      { name: ALGORITHM, iv },
-      key,
-      encrypted
-    );
-
-    return decoder.decode(decrypted);
-  } catch (error) {
-    console.error('Decryption failed:', error);
-    throw new Error('Failed to decrypt data');
-  }
-}
-
 // Check if Web Crypto API is available and we're not in a test environment
 function isWebCryptoAvailable(): boolean {
   // In test environments, fall back to plain storage for simplicity
@@ -127,12 +127,44 @@ function isWebCryptoAvailable(): boolean {
     return false;
   }
 
-  return typeof crypto !== 'undefined' &&
-         typeof crypto.subtle !== 'undefined' &&
+  return typeof crypto?.subtle !== 'undefined' &&
          typeof crypto.getRandomValues !== 'undefined';
 }
 
 export const secureStorage = {
+  /**
+   * Retrieve and decrypt data from localStorage
+   */
+  async getItem(key: string): Promise<null | string> {
+    const stored = localStorage.getItem(STORAGE_KEY_PREFIX + key);
+    if (!stored) return null;
+
+    if (!isWebCryptoAvailable()) {
+      return stored;
+    }
+
+    try {
+      return await decryptData(stored);
+    } catch (error) {
+      console.warn('Decryption failed, treating as plain text:', error);
+      return stored;
+    }
+  },
+
+  /**
+   * Check if an item exists
+   */
+  hasItem(key: string): boolean {
+    return localStorage.getItem(STORAGE_KEY_PREFIX + key) !== null;
+  },
+
+  /**
+   * Remove item from localStorage
+   */
+  removeItem(key: string): void {
+    localStorage.removeItem(STORAGE_KEY_PREFIX + key);
+  },
+
   /**
    * Store encrypted data in localStorage
    */
@@ -150,38 +182,5 @@ export const secureStorage = {
       console.warn('Encryption failed, falling back to plain storage:', error);
       localStorage.setItem(STORAGE_KEY_PREFIX + key, value);
     }
-  },
-
-  /**
-   * Retrieve and decrypt data from localStorage
-   */
-  async getItem(key: string): Promise<string | null> {
-    const stored = localStorage.getItem(STORAGE_KEY_PREFIX + key);
-    if (!stored) return null;
-
-    if (!isWebCryptoAvailable()) {
-      return stored;
-    }
-
-    try {
-      return await decryptData(stored);
-    } catch (error) {
-      console.warn('Decryption failed, treating as plain text:', error);
-      return stored;
-    }
-  },
-
-  /**
-   * Remove item from localStorage
-   */
-  removeItem(key: string): void {
-    localStorage.removeItem(STORAGE_KEY_PREFIX + key);
-  },
-
-  /**
-   * Check if an item exists
-   */
-  hasItem(key: string): boolean {
-    return localStorage.getItem(STORAGE_KEY_PREFIX + key) !== null;
   }
 };

@@ -10,6 +10,7 @@ import {
 
 import { useGitHubData } from "@/hooks/use-github-data";
 import { getValidPersonalAccessToken } from "@/mocks/static-fixtures";
+import { secureStorage } from "@/utils/secure-storage";
 
 import { GitHubDataProvider } from "./github-data-provider";
 
@@ -18,6 +19,12 @@ const validToken = getValidPersonalAccessToken();
 // Test cleanup
 afterEach(() => {
   localStorage.clear();
+  // Clear secure storage prefixed keys
+  Object.keys(localStorage).forEach(key => {
+    if (key.startsWith('secure_')) {
+      localStorage.removeItem(key);
+    }
+  });
   vi.clearAllMocks();
 });
 
@@ -37,18 +44,18 @@ describe("GitHubDataProvider", () => {
       expect(result.current.user).toBeNull();
     });
 
-    it("loads token from localStorage if available", async () => {
-      // Setup localStorage before rendering
-      act(() => {
-        localStorage.setItem("pat", validToken);
-        localStorage.setItem("login", "testuser");
+    it("loads token from secure storage if available", async () => {
+      // Setup secure storage before rendering
+      await act(async () => {
+        await secureStorage.setItem("pat", validToken);
+        await secureStorage.setItem("login", "testuser");
       });
 
       const { result } = renderHook(() => useGitHubData(), {
         wrapper: GitHubDataProvider,
       });
 
-      // Initial state should reflect the token from localStorage
+      // Initial state should reflect the token from secure storage
       await waitFor(() => {
         expect(result.current.pat).toBe(validToken);
         expect(result.current.login).toBe("testuser");
@@ -80,22 +87,26 @@ describe("GitHubDataProvider", () => {
         expect(result.current.isAuthenticated).toBe(true);
       });
 
-      // Should be stored in localStorage
-      expect(localStorage.getItem("pat")).toBe(validToken);
-      expect(localStorage.getItem("login")).toBe("testuser");
+      // Should be stored in secure storage
+      await waitFor(async () => {
+        expect(await secureStorage.getItem("pat")).toBe(validToken);
+        expect(await secureStorage.getItem("login")).toBe("testuser");
+      });
     });
 
     it("logs out correctly", async () => {
       // Setup initial authenticated state
-      localStorage.setItem("pat", validToken);
-      localStorage.setItem("login", "testuser");
+      await secureStorage.setItem("pat", validToken);
+      await secureStorage.setItem("login", "testuser");
 
       const { result } = renderHook(() => useGitHubData(), {
         wrapper: GitHubDataProvider,
       });
 
-      // Initial state should be authenticated
-      expect(result.current.isAuthenticated).toBe(true);
+      // Wait for initial state to be loaded
+      await waitFor(() => {
+        expect(result.current.isAuthenticated).toBe(true);
+      });
 
       // Logout
       act(() => {
@@ -109,14 +120,16 @@ describe("GitHubDataProvider", () => {
         expect(result.current.isAuthenticated).toBe(false);
       });
 
-      // Should be removed from localStorage
-      expect(localStorage.getItem("pat")).toBeNull();
-      expect(localStorage.getItem("login")).toBeNull();
+      // Should be removed from secure storage
+      await waitFor(async () => {
+        expect(await secureStorage.getItem("pat")).toBeNull();
+        expect(await secureStorage.getItem("login")).toBeNull();
+      });
     });
   });
 
   describe("Data fetching", () => {
-    it("validates authentication state changes properly", () => {
+    it("validates authentication state changes properly", async () => {
       const { result } = renderHook(() => useGitHubData(), {
         wrapper: GitHubDataProvider,
       });
@@ -133,9 +146,11 @@ describe("GitHubDataProvider", () => {
       });
 
       // Should now be authenticated
-      expect(result.current.isAuthenticated).toBe(true);
-      expect(result.current.pat).toBe(validToken);
-      expect(result.current.login).toBe("testuser");
+      await waitFor(() => {
+        expect(result.current.isAuthenticated).toBe(true);
+        expect(result.current.pat).toBe(validToken);
+        expect(result.current.login).toBe("testuser");
+      });
     });
   });
 });

@@ -290,9 +290,9 @@ export default function RepoTable({
         >
           {(repo) => (
             <TableRow
+              className={isRepoDisabled(repo) ? "opacity-50 pointer-events-none" : ""}
               data-testid="repo-row"
               key={repo.id}
-              className={isRepoDisabled(repo) ? "opacity-50 pointer-events-none" : ""}
             >
               <TableCell>
                 <div data-testid="repo-details">
@@ -311,7 +311,7 @@ export default function RepoTable({
                       <Chip size="sm">Organization</Chip>
                     )}
                     {repo.isFork && <Chip size="sm">Fork</Chip>}
-                    {repo.isArchived && <Chip size="sm" color="warning">Archived</Chip>}
+                    {repo.isArchived && <Chip color="warning" size="sm">Archived</Chip>}
                   </div>
 
                   {repo.owner.login !== login && (

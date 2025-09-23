@@ -336,7 +336,7 @@ export async function fetchGitHubData(
 
     // Fetch orgs with permission error handling
     let orgs: { login: string; url: string }[] = [];
-    let permissionError: string | null = null;
+    let permissionError: null | string = null;
 
     try {
       orgs = await fetchAllOrganizations(userLogin);

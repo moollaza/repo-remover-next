@@ -17,9 +17,9 @@ const IS_DEV = process.env.NODE_ENV === "development";
 // Interface for SWR fetcher function
 export interface GitHubFetcherResult {
   error: Error | null;
+  permissionWarning?: string;
   repos: null | Repository[];
   user: null | User;
-  permissionWarning?: string;
 }
 
 type GitHubFetcherKey = [string, string];
@@ -203,12 +203,12 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
     logout,
     mutate,
     pat,
+    permissionWarning: data?.permissionWarning,
     refetchData,
     repos,
     setLogin,
     setPat,
     user,
-    permissionWarning: data?.permissionWarning,
   };
 
   return (

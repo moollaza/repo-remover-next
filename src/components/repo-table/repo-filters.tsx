@@ -135,12 +135,12 @@ export default function RepoFilters({
       {/* SEARCH INPUT */}
       <div className="col-span-4">
         <Input
-          ref={searchInputRef}
           data-testid="repo-search-input"
           endContent={<Kbd keys={["command"]}>K</Kbd>}
           label="Search"
           onValueChange={onSearchChange}
           placeholder="Search by name or description"
+          ref={searchInputRef}
           startContent={<MagnifyingGlassIcon className="h-5 w-5" />}
           value={searchQuery}
         />
