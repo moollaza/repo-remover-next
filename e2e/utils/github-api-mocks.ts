@@ -1,4 +1,4 @@
-import { GraphQlQueryResponseData } from "@octokit/graphql";
+import { type GraphQlQueryResponseData } from "@octokit/graphql";
 import { Page } from "@playwright/test";
 
 import {
