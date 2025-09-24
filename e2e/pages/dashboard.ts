@@ -2,7 +2,7 @@ import {
   mockGraphQLRepos,
   mockGraphQLReposEmpty,
 } from "@e2e/utils/github-api-mocks";
-import { expect, Locator, Page } from "@playwright/test";
+import { expect, type Locator, type Page } from "@playwright/test";
 
 import { mockLocalStorage, mockOctokitInit } from "../utils/github-api-mocks";
 import { BasePage } from "./base-page";
