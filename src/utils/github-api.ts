@@ -1,5 +1,5 @@
 import { GraphqlResponseError } from "@octokit/graphql";
-import { Repository } from "@octokit/graphql-schema";
+import { type Repository } from "@octokit/graphql-schema";
 
 import {
   createThrottledOctokit,

@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { getValidPersonalAccessToken } from "@/mocks/fixtures";
+import { getValidPersonalAccessToken } from "@/mocks/static-fixtures";
 
 import { HomePage } from "./pages/home";
 import { mockGraphQLRepos, mockInvalidToken } from "./utils/github-api-mocks";

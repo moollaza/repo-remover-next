@@ -1,4 +1,4 @@
-import { Repository } from "@octokit/graphql-schema";
+import { type Repository } from "@octokit/graphql-schema";
 import { Octokit } from "@octokit/rest";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -10,22 +10,6 @@ import {
   isValidGitHubToken,
   processRepo,
 } from "./github-utils";
-
-// Mock faker to avoid randomness in tests
-vi.mock("@faker-js/faker", () => ({
-  faker: {
-    company: {
-      catchPhrase: vi.fn().mockReturnValue("Test catchphrase"),
-      name: vi.fn().mockReturnValue("Test Company"),
-    },
-    datatype: {
-      boolean: vi.fn().mockReturnValue(false),
-    },
-    internet: {
-      url: vi.fn().mockReturnValue("https://example.com"),
-    },
-  },
-}));
 
 describe("GitHub Utils", () => {
   let mockOctokit: Partial<Octokit>;

@@ -1,6 +1,8 @@
 // src/app/layout.tsx
 import { Metadata, Viewport } from "next";
 
+import { FathomAnalytics } from "@/components/fathom-analytics";
+
 import LayoutContent, { bodyClasses } from "./layout-content";
 
 export const viewport: Viewport = {
@@ -24,6 +26,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={bodyClasses}>
+        <FathomAnalytics />
         <LayoutContent>{children}</LayoutContent>
       </body>
     </html>

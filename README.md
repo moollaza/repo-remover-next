@@ -1,22 +1,13 @@
 # Repo Remover (Next.js)
 
-## Development TODO
-
-- Encrypt localstorage or remove
-- Improve Homepage Content
-- Dark Theme
-- Handle partial data when API has errors + data
-  e.g. { type: "FORBIDDEN", message: "Resource protected by organization SAML enforcement. You must grant your Personal Access token access to this organization.", path: (5)[…], … }
-
-  Happens when requesting data from org that requires SSO.
-
-  We should flag errors to user.
-
 ## Try it now at https://next.reporemover.xyz
 
-> [!NOTE]  
-> This version is still a Work-In-Progress
-> The core functionality is implemented, but changes are still happening
+✅ **Production Ready** - The application is now fully production-ready with:
+- Privacy-first analytics and error monitoring
+- Zero-knowledge security architecture
+- Comprehensive testing coverage
+- Dark theme support
+- Enterprise-grade security headers
 
 _Don't want to use the hosted version? You can run Repo Remover locally using the instructions below._
 
@@ -60,11 +51,14 @@ Before any changes are made, you will be asked to review the list of selected re
 
 ## Built with
 
-- [Next.js](https://nextjs.org/)
-- [NextUI](https://nextui.org/)
-- Hosted on [Vercel](https://vercel.com/)
-- Privacy-focused analytics by [Fathom Analytics](https://usefathom.com/ref/E83PFO)
+- [Next.js](https://nextjs.org/) - React framework with App Router
+- [HeroUI](https://www.heroui.com/) - NextUI fork for modern UI components
+- [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS framework
+- [Vitest](https://vitest.dev/) + [Playwright](https://playwright.dev/) - Testing framework
+- [Sentry.io](https://sentry.io/) - Privacy-first error monitoring
+- [Fathom Analytics](https://usefathom.com/ref/E83PFO) - Privacy-focused analytics
   - Want to know how many repos have been deleted? [Checkout the public analytics dashboard](https://app.usefathom.com/share/ikjnvhai/repo+remover)
+- Hosted on [Vercel](https://vercel.com/)
 
 ## Author
 

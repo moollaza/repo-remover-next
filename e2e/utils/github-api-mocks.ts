@@ -1,11 +1,11 @@
-import { GraphQlQueryResponseData } from "@octokit/graphql";
-import { Page } from "@playwright/test";
+import { type GraphQlQueryResponseData } from "@octokit/graphql";
+import { type Page } from "@playwright/test";
 
 import {
   getValidPersonalAccessToken,
   mockRepos,
   mockUser,
-} from "@/mocks/fixtures";
+} from "@/mocks/static-fixtures";
 
 export async function mockArchiveRepo(
   page: Page,

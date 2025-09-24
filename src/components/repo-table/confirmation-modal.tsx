@@ -9,10 +9,11 @@ import {
   Progress,
   Spacer,
 } from "@heroui/react";
-import { Repository } from "@octokit/graphql-schema";
+import { type Repository } from "@octokit/graphql-schema";
 import { useReducer } from "react";
 
 import { useGitHubData } from "@/hooks/use-github-data";
+import { analytics } from "@/utils/analytics";
 import { createThrottledOctokit, processRepo } from "@/utils/github-utils";
 
 interface ConfirmationModalProps {
@@ -96,10 +97,29 @@ export default function ConfirmationModal({
   const [state, dispatch] = useReducer(modalReducer, initialState);
 
   async function handleConfirm() {
-    if (!octokit || state.confirming) return;
+    console.log("handleConfirm called");
+
+    console.log("State before confirmation:", state);
+
+    if (!octokit) {
+      console.error("Octokit is not initialized or already processing");
+      return;
+    }
+
+    if (state.confirming) {
+      console.warn("Already processing, ignoring confirmation");
+      return;
+    }
 
     // Single dispatch to handle the full state transition
     dispatch({ type: "START_PROCESSING" });
+
+    // Track bulk action submission
+    if (action === "archive") {
+      analytics.trackArchiveActionSubmitted(repos.length);
+    } else {
+      analytics.trackDeleteActionSubmitted(repos.length);
+    }
 
     // Record the start time to ensure minimum progress display time
     const startTime = Date.now();

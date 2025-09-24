@@ -2,21 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
-import { isValidGitHubToken } from "@/utils/github-utils";
-
 import GitHubTokenForm from "./github-token-form";
-
-// Mock dependencies
-vi.mock("@/utils/github-utils", () => ({
-  createThrottledOctokit: vi.fn().mockImplementation(() => ({
-    users: {
-      getAuthenticated: vi.fn().mockResolvedValue({
-        data: { login: "testuser" },
-      }),
-    },
-  })),
-  isValidGitHubToken: vi.fn(),
-}));
 
 describe("GitHubTokenForm", () => {
   const mockOnValueChange = vi.fn();
@@ -40,9 +26,6 @@ describe("GitHubTokenForm", () => {
   beforeEach(() => {
     // Reset mocks before each test
     vi.clearAllMocks();
-
-    // Mock token validation to return true by default
-    vi.mocked(isValidGitHubToken).mockReturnValue(true);
   });
 
   test("renders input field and submit button", () => {
@@ -70,9 +53,6 @@ describe("GitHubTokenForm", () => {
   });
 
   test("shows error for invalid token format", () => {
-    // Mock validation to return false
-    vi.mocked(isValidGitHubToken).mockReturnValue(false);
-
     setupForm({ value: "invalid-token" });
 
     expect(
@@ -100,9 +80,6 @@ describe("GitHubTokenForm", () => {
   });
 
   test("doesn't call onSubmit when token is invalid", async () => {
-    // Mock validation to return false
-    vi.mocked(isValidGitHubToken).mockReturnValue(false);
-
     const { submitButton } = setupForm({
       value: "invalid-token",
     });

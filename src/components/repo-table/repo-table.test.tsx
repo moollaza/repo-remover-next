@@ -1,8 +1,8 @@
-import { Repository } from "@octokit/graphql-schema";
+import { type Repository } from "@octokit/graphql-schema";
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
-import { createMockRepo } from "@/mocks/fixtures";
+import { createMockRepo } from "@/mocks/static-fixtures";
 
 import RepoTable from "./repo-table";
 
@@ -33,15 +33,19 @@ describe("RepoTable", () => {
   const mockRepos: Repository[] = [
     createMockRepo({
       description: "First test repo",
+      id: "test-repo-1",
       isInOrganization: false,
       isPrivate: true,
       name: "test-repo-1",
+      url: "https://github.com/testuser/test-repo-1",
     }),
     createMockRepo({
       description: "Second test repo",
+      id: "test-repo-2",
       isInOrganization: true,
       isPrivate: false,
       name: "test-repo-2",
+      url: "https://github.com/testuser/test-repo-2",
     }),
   ];
 
