@@ -1,5 +1,5 @@
 import { type GraphQlQueryResponseData } from "@octokit/graphql";
-import { Page } from "@playwright/test";
+import { type Page } from "@playwright/test";
 
 import {
   getValidPersonalAccessToken,
