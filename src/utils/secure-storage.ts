@@ -83,7 +83,7 @@ async function encryptData(data: string): Promise<string> {
     combined.set(new Uint8Array(encrypted), salt.length + iv.length);
 
     // Convert to base64 for storage
-    return btoa(String.fromCharCode(...combined));
+    return btoa(String.fromCharCode.apply(null, Array.from(combined)));
   } catch (error) {
     console.error('Encryption failed:', error);
     throw new Error('Failed to encrypt data');
