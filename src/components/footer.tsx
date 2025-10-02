@@ -16,7 +16,7 @@ export default function Footer() {
     >
       <div className="flex flex-col">
         <h3 className="text-lg font-semibold mb-2">
-          Mady by{" "}
+          Made by{" "}
           <Link
             className="text-lg font-semibold mb-2"
             href="https://zaahir.ca"
