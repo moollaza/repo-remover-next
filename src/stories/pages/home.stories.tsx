@@ -1,12 +1,22 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { GitHubDataDecorator, PageDecorator } from "@/../.storybook/decorators";
+import { PageDecorator } from "@/../.storybook/decorators";
 import HomePage from "@/app/page";
 
 const meta: Meta<typeof HomePage> = {
   component: HomePage,
-  decorators: [PageDecorator, GitHubDataDecorator],
+  decorators: [PageDecorator],
   parameters: {
+    chromatic: {
+      modes: {
+        dark: {
+          theme: "dark",
+        },
+        light: {
+          theme: "light",
+        },
+      },
+    },
     layout: "fullscreen",
   },
   title: "Pages/Home",

@@ -1,12 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { GitHubDataDecorator } from "@/../.storybook/decorators";
+import { PageDecorator } from "@/../.storybook/decorators";
 
 import DashboardPage from "./page";
 
 const meta: Meta<typeof DashboardPage> = {
   component: DashboardPage,
-  decorators: [GitHubDataDecorator],
+  decorators: [PageDecorator],
   parameters: {
     chromatic: {
       modes: {
