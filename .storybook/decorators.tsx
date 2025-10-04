@@ -25,16 +25,18 @@ export const GitHubDataDecorator: Decorator = (Story) => {
 
 export const ClearLocalStorageDecorator: Decorator = (Story) => {
   if (typeof window !== "undefined") {
-    localStorage.removeItem("pat");
-    localStorage.removeItem("login");
+    // secureStorage uses 'secure_' prefix
+    localStorage.removeItem("secure_pat");
+    localStorage.removeItem("secure_login");
   }
   return <Story />;
 };
 
 export const AuthenticatedUserDecorator: Decorator = (Story) => {
   if (typeof window !== "undefined") {
-    localStorage.setItem("pat", "ghp_abcdefghijklmnopqrstuvwxyz1234567890");
-    localStorage.setItem("login", "testuser");
+    // secureStorage uses 'secure_' prefix and stores plain text in test/dev mode
+    localStorage.setItem("secure_pat", "ghp_abcdefghijklmnopqrstuvwxyz1234567890");
+    localStorage.setItem("secure_login", "testuser");
   }
   return <Story />;
 };
