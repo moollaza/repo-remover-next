@@ -1,18 +1,33 @@
 "use client";
 
-import { Alert } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-import RepoTable from "@/components/repo-table/repo-table";
+import Dashboard from "@/components/dashboard";
+import { ErrorBoundary } from "@/components/error-boundary";
 import { useGitHubData } from "@/hooks/use-github-data";
 
+/**
+ * DashboardPage - Container Component
+ *
+ * Handles data fetching, authentication, and routing.
+ * Presentational component: src/components/dashboard.tsx
+ */
 export default function DashboardPage() {
-  const { isError, isInitialized, isLoading, login, pat, permissionWarning, refetchData, repos } =
-    useGitHubData();
+  const {
+    isError,
+    isInitialized,
+    isLoading,
+    login,
+    pat,
+    permissionWarning,
+    refetchData,
+    repos,
+  } = useGitHubData();
 
   const router = useRouter();
 
+  // Side effect: Redirect to home if not authenticated
   useEffect(() => {
     if (!isInitialized) return;
 
@@ -23,35 +38,17 @@ export default function DashboardPage() {
     }
   }, [pat, router, refetchData, isInitialized]);
 
+  // Render presentational component with all data
   return (
-    <section className="py-16 flex-grow ">
-      <h1
-        className="text-3xl font-semibold mb-10"
-        data-testid="repo-table-header"
-      >
-        Select Repos to Modify
-      </h1>
-
-      {isError && (
-        <Alert className="mb-4" color="danger">
-          Error loading repositories. Please check your token and try again.
-        </Alert>
-      )}
-
-      {permissionWarning && (
-        <Alert className="mb-4" color="warning">
-          <div>
-            <strong>Limited Access:</strong> {permissionWarning}
-          </div>
-          <div className="mt-2 text-sm">
-            Some organization repositories may not be visible due to insufficient token permissions.
-          </div>
-        </Alert>
-      )}
-
-      {(isLoading || (repos && login !== null)) && (
-        <RepoTable isLoading={isLoading} login={login} repos={repos} />
-      )}
-    </section>
+    <ErrorBoundary>
+      <Dashboard
+        isError={isError}
+        isLoading={isLoading}
+        login={login}
+        onRefresh={refetchData}
+        permissionWarning={permissionWarning}
+        repos={repos}
+      />
+    </ErrorBoundary>
   );
 }

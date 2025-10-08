@@ -65,9 +65,9 @@ export const ValidToken: Story = {
       handlers: [
         http.get("https://api.github.com/user", () => {
           return HttpResponse.json({
-            login: "testuser",
-            id: 1,
             avatar_url: "https://avatars.githubusercontent.com/u/1?v=4",
+            id: 1,
+            login: "testuser",
             name: "Test User",
           });
         }),

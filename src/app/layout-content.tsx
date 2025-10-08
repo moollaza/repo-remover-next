@@ -5,6 +5,7 @@ import "@fortawesome/fontawesome-svg-core/styles.css";
 import clsx from "clsx";
 import { Inter } from "next/font/google";
 
+import { ErrorBoundary } from "@/components/error-boundary";
 import Footer from "@/components/footer";
 import Header from "@/components/header";
 import { Providers } from "@/providers/providers";
@@ -27,20 +28,22 @@ export default function LayoutContent({
 }>) {
   return (
     <Providers themeProps={{ attribute: "class", defaultTheme: "light" }}>
-      <div className="min-h-full">
-        {/* Layout content */}
-        <div className="border-b border-divider">
+      <ErrorBoundary>
+        <div className="min-h-full">
+          {/* Layout content */}
+          <div className="border-b border-divider">
+            <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+              <Header />
+            </div>
+          </div>
           <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <Header />
+            <main>{children}</main>
+          </div>
+          <div className="px-4 sm:px-6 lg:px-8 bg-content1">
+            <Footer />
           </div>
         </div>
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-          <main>{children}</main>
-        </div>
-        <div className="px-4 sm:px-6 lg:px-8 bg-content1">
-          <Footer />
-        </div>
-      </div>
+      </ErrorBoundary>
     </Providers>
   );
 }
