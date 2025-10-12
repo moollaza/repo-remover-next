@@ -9,7 +9,10 @@ import React, {
 import useSWR from "swr";
 
 import { GitHubContext, GitHubContextType } from "@/contexts/github-context";
-import { fetchGitHubData } from "@/utils/github-api";
+import {
+  fetchGitHubDataWithProgress,
+  type LoadingProgress,
+} from "@/utils/github-api";
 import { secureStorage } from "@/utils/secure-storage";
 
 const IS_DEV = process.env.NODE_ENV === "development";
@@ -46,6 +49,7 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
   const [login, setLoginState] = useState<null | string>(null);
   const [pat, setPatState] = useState<null | string>(null);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [progress, setProgress] = useState<LoadingProgress | null>(null);
   const lastFetchTimeRef = useRef<number>(0);
 
   // Load from secure storage on mount
@@ -84,24 +88,50 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
   >(
     // We only fetch when we have a PAT, login is optional and will be determined from the API if not provided
     pat ? ([login ?? "", pat] as GitHubFetcherKey) : null,
-    // Cast to expected return type
-    fetchGitHubData as unknown as (
-      key: GitHubFetcherKey,
-    ) => Promise<GitHubFetcherResult>,
+    // Use the progress-aware fetcher
+    async ([login, pat]): Promise<GitHubFetcherResult> => {
+      const result = await fetchGitHubDataWithProgress([login, pat], (progressUpdate) => {
+        // Update progress state
+        setProgress(progressUpdate);
+
+        // Update SWR cache immediately with partial data!
+        void mutate(
+          {
+            error: null,
+            repos: progressUpdate.repos,
+            user: progressUpdate.user as null | User,
+          },
+          false, // false = don't revalidate
+        );
+      });
+
+      // Cast the result to match GitHubFetcherResult type
+      return {
+        ...result,
+        user: result.user as null | User,
+      };
+    },
     {
       dedupingInterval: 60000, // 1 minute
-      onError: (err) => {
+      onError: (err: Error) => {
         console.error("GitHub API error:", err);
+        // Clear progress on error
+        setProgress(null);
         // If error is authentication related, consider clearing credentials
-        if (err.message?.includes("401") || err.message?.includes("auth")) {
+        if (
+          err.message.includes("401") ||
+          err.message.includes("auth")
+        ) {
           console.warn("Authentication error detected, consider logging out");
         }
       },
-      onSuccess: (data) => {
+      onSuccess: (data: GitHubFetcherResult) => {
         // Set the login from the API response if it wasn't provided
-        if (data?.user?.login && !login) {
+        if (data.user?.login && !login) {
           setLogin(data.user.login);
         }
+        // Clear progress when complete
+        setProgress(null);
       },
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
@@ -204,6 +234,7 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
     mutate,
     pat,
     permissionWarning: data?.permissionWarning,
+    progress,
     refetchData,
     repos,
     setLogin,

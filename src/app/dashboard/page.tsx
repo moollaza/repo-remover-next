@@ -21,6 +21,7 @@ export default function DashboardPage() {
     login,
     pat,
     permissionWarning,
+    progress,
     refetchData,
     repos,
   } = useGitHubData();
@@ -47,6 +48,7 @@ export default function DashboardPage() {
         login={login}
         onRefresh={refetchData}
         permissionWarning={permissionWarning}
+        progress={progress}
         repos={repos}
       />
     </ErrorBoundary>

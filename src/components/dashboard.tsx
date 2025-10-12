@@ -3,7 +3,10 @@
 import { Alert } from "@heroui/react";
 import { type Repository } from "@octokit/graphql-schema";
 
+import RepoLoadingProgress from "@/components/repo-loading-progress";
 import RepoTable from "@/components/repo-table/repo-table";
+import RepoTableSkeleton from "@/components/repo-table/repo-table-skeleton";
+import { type LoadingProgress } from "@/utils/github-api";
 
 export interface DashboardProps {
   /** Whether an error occurred during data fetch */
@@ -16,6 +19,8 @@ export interface DashboardProps {
   onRefresh?: () => void;
   /** Optional permission warning message */
   permissionWarning?: string;
+  /** Loading progress information */
+  progress?: LoadingProgress | null;
   /** Current user's repositories */
   repos: null | Repository[];
 }
@@ -32,6 +37,7 @@ export default function Dashboard({
   login,
   onRefresh,
   permissionWarning,
+  progress,
   repos,
 }: DashboardProps) {
   return (
@@ -53,6 +59,16 @@ export default function Dashboard({
         )}
       </div>
 
+      {/* Show progress while loading */}
+      {isLoading && progress && (
+        <RepoLoadingProgress
+          currentOrg={progress.currentOrg}
+          orgsLoaded={progress.orgsLoaded}
+          orgsTotal={progress.orgsTotal}
+          stage={progress.stage}
+        />
+      )}
+
       {isError && (
         <Alert className="mb-4" color="danger">
           Error loading repositories. Please check your token and try again.
@@ -71,7 +87,13 @@ export default function Dashboard({
         </Alert>
       )}
 
-      {(isLoading || (repos && login !== null)) && (
+      {/* Show skeleton only before first repos arrive */}
+      {isLoading && (!repos || repos.length === 0) && (
+        <RepoTableSkeleton rows={10} />
+      )}
+
+      {/* Once repos start arriving, show real table */}
+      {repos && repos.length > 0 && (
         <RepoTable isLoading={isLoading} login={login} repos={repos} />
       )}
     </section>
