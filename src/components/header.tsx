@@ -27,7 +27,7 @@ const homeLinks = [
 
 export default function Header() {
   const pathname = usePathname();
-  const { login, pat, user } = useGitHubData();
+  const { isAuthenticated, user } = useGitHubData();
 
   const isDashboard = pathname === "/dashboard";
   const isDevelopment = process.env.NODE_ENV === "development";
@@ -88,22 +88,24 @@ export default function Header() {
 
             <Dropdown placement="bottom-end">
               <DropdownTrigger>
-                <User
-                  avatarProps={{
-                    showFallback: true,
-                    src: user?.avatarUrl as string,
-                  }}
-                  description={
-                    <Link
-                      href={(user?.url as string) ?? "https://github.com"}
-                      isExternal
-                      size="sm"
-                    >
-                      {user?.login}
-                    </Link>
-                  }
-                  name={user?.name}
-                />
+                <div className="cursor-pointer transition-opacity hover:opacity-80">
+                  <User
+                    avatarProps={{
+                      showFallback: true,
+                      src: user?.avatarUrl as string,
+                    }}
+                    description={
+                      <Link
+                        href={(user?.url as string) ?? "https://github.com"}
+                        isExternal
+                        size="sm"
+                      >
+                        {user?.login}
+                      </Link>
+                    }
+                    name={user?.name}
+                  />
+                </div>
               </DropdownTrigger>
               <DropdownMenu aria-label="Profile Actions" variant="flat">
                 <DropdownItem className="h-14 gap-2" key="profile">
@@ -121,8 +123,7 @@ export default function Header() {
             </Dropdown>
           </>
         ) : (
-          pat &&
-          login && (
+          isAuthenticated && (
             <Button as={Link} color="primary" href="/dashboard" variant="flat">
               Go to Dashboard
             </Button>

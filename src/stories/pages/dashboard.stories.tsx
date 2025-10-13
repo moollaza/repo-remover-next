@@ -85,3 +85,57 @@ export const LargeDataset: Story = {
     })),
   },
 };
+
+/** Loading with progress - personal repos stage */
+export const LoadingPersonal: Story = {
+  args: {
+    isError: false,
+    isLoading: true,
+    login: MOCK_USER.login,
+    progress: {
+      currentOrg: undefined,
+      orgsLoaded: 0,
+      orgsTotal: 5,
+      repos: [],
+      stage: "personal",
+      user: null,
+    },
+    repos: null,
+  },
+};
+
+/** Loading with progress - orgs stage */
+export const LoadingOrgs: Story = {
+  args: {
+    isError: false,
+    isLoading: true,
+    login: MOCK_USER.login,
+    progress: {
+      currentOrg: "acme-corp",
+      orgsLoaded: 2,
+      orgsTotal: 5,
+      repos: MOCK_REPOS.slice(0, 50),
+      stage: "orgs",
+      user: MOCK_USER,
+    },
+    repos: MOCK_REPOS.slice(0, 50), // Some personal repos already loaded
+  },
+};
+
+/** Progressive loading simulation - shows repos appearing */
+export const ProgressiveLoading: Story = {
+  args: {
+    isError: false,
+    isLoading: true,
+    login: MOCK_USER.login,
+    progress: {
+      currentOrg: "tech-startup",
+      orgsLoaded: 1,
+      orgsTotal: 3,
+      repos: MOCK_REPOS.slice(0, 20),
+      stage: "orgs",
+      user: MOCK_USER,
+    },
+    repos: MOCK_REPOS.slice(0, 20), // Partial data
+  },
+};
