@@ -29,7 +29,6 @@ interface RepositoryWithKey extends Repository {
 }
 
 interface RepoTableProps {
-  isLoading: boolean;
   login: null | string;
   repos: null | Repository[];
 }
@@ -38,7 +37,6 @@ interface RepoTableProps {
 type SelectionSet = Exclude<Selection, "all">;
 
 export default function RepoTable({
-  isLoading,
   login,
   repos,
 }: RepoTableProps): JSX.Element {
@@ -212,7 +210,7 @@ export default function RepoTable({
         {/* TABLE BODY */}
         <TableBody
           emptyContent={"No repos to display."}
-          isLoading={isLoading}
+          isLoading={false}
           items={paginatedRepos}
           loadingContent={<Spinner label="Loading..." />}
         >

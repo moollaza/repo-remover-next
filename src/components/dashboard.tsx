@@ -87,14 +87,12 @@ export default function Dashboard({
         </Alert>
       )}
 
-      {/* Show skeleton only before first repos arrive */}
-      {isLoading && (!repos || repos.length === 0) && (
+      {/* Show skeleton while loading and no repos yet */}
+      {(!repos || repos.length === 0) ? (
         <RepoTableSkeleton rows={10} />
-      )}
-
-      {/* Once repos start arriving, show real table */}
-      {repos && repos.length > 0 && (
-        <RepoTable isLoading={isLoading} login={login} repos={repos} />
+      ) : (
+        /* Once repos arrive, show real table */
+        <RepoTable login={login} repos={repos} />
       )}
     </section>
   );

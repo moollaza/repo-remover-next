@@ -39,8 +39,10 @@ export default function LayoutContent({
           <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <main>{children}</main>
           </div>
-          <div className="px-4 sm:px-6 lg:px-8 bg-content1">
-            <Footer />
+          <div className="bg-content1">
+            <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+              <Footer />
+            </div>
           </div>
         </div>
       </ErrorBoundary>

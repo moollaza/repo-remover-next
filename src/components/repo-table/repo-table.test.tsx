@@ -54,7 +54,7 @@ describe("RepoTable", () => {
   });
 
   test("renders table with repos", () => {
-    render(<RepoTable isLoading={false} login={mockLogin} repos={mockRepos} />);
+    render(<RepoTable login={mockLogin} repos={mockRepos} />);
 
     expect(screen.getByTestId("repo-table")).toBeInTheDocument();
     expect(screen.getByText("test-repo-1")).toBeInTheDocument();
@@ -62,7 +62,7 @@ describe("RepoTable", () => {
   });
 
   test("displays empty state when no repos are available", () => {
-    render(<RepoTable isLoading={false} login={mockLogin} repos={[]} />);
+    render(<RepoTable login={mockLogin} repos={[]} />);
 
     expect(screen.getByTestId("repo-table")).toBeInTheDocument();
     expect(screen.queryByText("test-repo-1")).not.toBeInTheDocument();
@@ -70,12 +70,6 @@ describe("RepoTable", () => {
 
     // Check for empty state message
     expect(screen.queryByText("No repos to display.")).toBeInTheDocument();
-  });
-
-  test("displays loading state", () => {
-    render(<RepoTable isLoading={true} login={mockLogin} repos={null} />);
-
-    expect(screen.getByLabelText("Loading...")).toBeInTheDocument();
   });
 
   test("disables archived repos when archive action is selected", () => {
@@ -94,7 +88,7 @@ describe("RepoTable", () => {
       }),
     ];
 
-    render(<RepoTable isLoading={false} login={mockLogin} repos={mockReposWithArchived} />);
+    render(<RepoTable login={mockLogin} repos={mockReposWithArchived} />);
 
     // Find archived repo and verify its row has disabled styling
     expect(screen.getByText("active-repo")).toBeInTheDocument();
