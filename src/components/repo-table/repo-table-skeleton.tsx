@@ -8,6 +8,8 @@ import {
   TableRow,
 } from "@heroui/react";
 
+import { COLUMN_ORDER } from "@/config/repo-config";
+
 import RepoFiltersSkeleton from "./repo-filters-skeleton";
 
 interface RepoTableSkeletonProps {
@@ -19,20 +21,39 @@ export default function RepoTableSkeleton({
 }: RepoTableSkeletonProps) {
   return (
     <div className="space-y-5" data-testid="repo-table-skeleton-container">
-      {/* Add filters skeleton to match real table structure */}
+      {/* Filters skeleton */}
       <RepoFiltersSkeleton />
 
-      {/* Table skeleton */}
-      <Table aria-label="Loading repositories">
+      {/* Table skeleton - matches real table exactly */}
+      <Table
+        aria-label="Loading repositories"
+        bottomContent={
+          <div className="flex w-full justify-center">
+            <Skeleton className="h-10 w-64 rounded-lg" />
+          </div>
+        }
+        className="mb-5"
+        isStriped
+        removeWrapper
+        selectedKeys={new Set()}
+        selectionMode="multiple"
+      >
         <TableHeader>
-          <TableColumn className="w-4/5">NAME</TableColumn>
-          <TableColumn className="w-1/5">LAST UPDATED</TableColumn>
+          {COLUMN_ORDER.map((column) => (
+            <TableColumn
+              allowsSorting
+              className={column.className}
+              key={column.key}
+            >
+              {column.label}
+            </TableColumn>
+          ))}
         </TableHeader>
         <TableBody>
           {Array.from({ length: rows }).map((_, i) => (
             <TableRow key={i}>
+              {/* NAME column */}
               <TableCell>
-                {/* Match real structure: name + chips + owner + description */}
                 <div>
                   {/* Repo name */}
                   <div className="mb-2">
@@ -51,6 +72,8 @@ export default function RepoTableSkeleton({
                   <Skeleton className="h-4 w-full rounded-lg" />
                 </div>
               </TableCell>
+
+              {/* LAST UPDATED column */}
               <TableCell>
                 <Skeleton className="h-4 w-20 rounded-lg" />
               </TableCell>

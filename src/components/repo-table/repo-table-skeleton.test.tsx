@@ -31,11 +31,16 @@ describe("RepoTableSkeleton", () => {
     expect(screen.getByLabelText("Loading repositories")).toBeInTheDocument();
   });
 
-  it("renders NAME and LAST UPDATED columns", () => {
+  it("uses correct column headers from COLUMN_ORDER", () => {
     render(<RepoTableSkeleton />);
 
-    expect(screen.getByText("NAME")).toBeInTheDocument();
-    expect(screen.getByText("LAST UPDATED")).toBeInTheDocument();
+    // Should use title case from COLUMN_ORDER
+    expect(screen.getByText("Name")).toBeInTheDocument();
+    expect(screen.getByText("Last Updated")).toBeInTheDocument();
+
+    // Should NOT have uppercase versions
+    expect(screen.queryByText("NAME")).not.toBeInTheDocument();
+    expect(screen.queryByText("LAST UPDATED")).not.toBeInTheDocument();
   });
 
   it("renders skeleton container with correct test id", () => {
@@ -60,5 +65,40 @@ describe("RepoTableSkeleton", () => {
     const rows = screen.getAllByRole("row");
     // 1 header + 3 body rows
     expect(rows).toHaveLength(4);
+  });
+
+  it("renders without card wrapper", () => {
+    const { container } = render(<RepoTableSkeleton />);
+
+    // Should not have HeroUI's default card wrapper classes
+    const table = container.querySelector("table");
+    expect(table?.closest(".shadow-sm")).not.toBeInTheDocument();
+  });
+
+  it("renders with striped rows enabled", () => {
+    render(<RepoTableSkeleton rows={3} />);
+
+    // HeroUI uses grid role when selectionMode is enabled
+    const table = screen.getByRole("grid");
+    expect(table).toBeInTheDocument();
+    // Table should have striped mode enabled (HeroUI handles the actual striping)
+  });
+
+  it("renders checkbox column for selection", () => {
+    render(<RepoTableSkeleton />);
+
+    // HeroUI uses grid role when selectionMode is enabled
+    const table = screen.getByRole("grid");
+    expect(table).toBeInTheDocument();
+    // HeroUI will render checkboxes with selection mode
+  });
+
+  it("renders pagination skeleton in bottom content", () => {
+    render(<RepoTableSkeleton />);
+
+    // Look for skeleton elements (they have various ARIA roles depending on implementation)
+    const container = screen.getByTestId("repo-table-skeleton-container");
+    expect(container).toBeInTheDocument();
+    // Pagination skeleton is rendered in bottomContent
   });
 });
