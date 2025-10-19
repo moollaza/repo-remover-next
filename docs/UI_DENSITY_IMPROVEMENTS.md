@@ -4,6 +4,13 @@
 
 This document outlines the design changes needed to improve information density, compactness, and visual polish based on the Figma reference design while working within HeroUI constraints.
 
+**Goal**: Match Figma's clean, dense layout with:
+- Outlined chip badges (not solid fill)
+- Smaller border radius on chips
+- Compact spacing and component sizes
+- Clear table borders
+- Properly styled archived repos (visible, not faded)
+
 ## Design Comparison
 
 ### Current Issues
@@ -124,13 +131,57 @@ This document outlines the design changes needed to improve information density,
 <div className="flex gap-2 mb-2" data-testid="repo-tags">
 ```
 
-#### 2.3 Chip Styling
-**Current chips**: `<Chip size="sm">` already using small size
+#### 2.3 Chip Styling (Match Figma Design)
+**Current chips**: `<Chip size="sm">` using solid fill style
+
+**Target Design**: Outlined chips with smaller border radius (like Figma)
 
 **Changes**:
-- [ ] Verify chips are using smallest HeroUI size
-- [ ] Consider custom chip styling if HeroUI sm is still too large
-- [ ] Ensure proper visual weight for archived badge (warning color)
+- [ ] Change chip variant from default (solid) to `variant="bordered"`
+- [ ] Reduce border radius using custom className or HeroUI props
+- [ ] Ensure chips use `size="sm"` for compact layout
+- [ ] Update all chip instances (Private, Organization, Fork, Archived, etc.)
+- [ ] Verify outlined style works in both light and dark themes
+- [ ] Maintain warning color for Archived chip with bordered variant
+
+**Before**:
+```typescript
+{repo.isPrivate && <Chip size="sm">Private</Chip>}
+{repo.isArchived && (
+  <Chip color="warning" size="sm">
+    Archived
+  </Chip>
+)}
+```
+
+**After**:
+```typescript
+{repo.isPrivate && (
+  <Chip size="sm" variant="bordered" radius="sm">
+    Private
+  </Chip>
+)}
+{repo.isArchived && (
+  <Chip color="warning" size="sm" variant="bordered" radius="sm">
+    Archived
+  </Chip>
+)}
+```
+
+**HeroUI Chip Variants**:
+- `solid` (default) - Filled background
+- `bordered` - Outlined style (matches Figma)
+- `flat` - Subtle background
+- `faded` - Low contrast
+- `shadow` - With shadow
+- `dot` - With dot indicator
+
+**HeroUI Chip Radius Options**:
+- `full` (default) - Fully rounded
+- `lg` - Large radius
+- `md` - Medium radius
+- `sm` - Small radius (target)
+- `none` - No radius
 
 ### Phase 3: Archived Repository Styling (CRITICAL)
 
@@ -292,6 +343,9 @@ This applies `opacity-50` to the **entire row**, making text hard to read and lo
 - [ ] Light theme: all text readable
 - [ ] Dark theme: all text readable
 - [ ] Archived repos: clearly indicated but not faded
+- [ ] Chips: bordered style visible in both themes
+- [ ] Chips: smaller border radius applied correctly
+- [ ] Chips: warning color works with bordered variant
 - [ ] Table borders visible in both themes
 - [ ] Hover states work correctly
 - [ ] Selection checkbox alignment correct
@@ -301,16 +355,17 @@ This applies `opacity-50` to the **entire row**, making text hard to read and lo
 
 ### High Priority (P0)
 1. **Archived repo styling fix** - Current implementation is poor UX
-2. **Component size reduction** - Quick wins for density
-3. **Table borders** - Improves visual structure
+2. **Chip styling update** - Bordered variant with small radius (matches Figma)
+3. **Component size reduction** - Quick wins for density
+4. **Table borders** - Improves visual structure
 
 ### Medium Priority (P1)
-4. **Text size adjustments** - Balance readability with density
-5. **Spacing reduction** - Incremental improvements
-6. **Skeleton updates** - Maintain consistency
+5. **Text size adjustments** - Balance readability with density
+6. **Spacing reduction** - Incremental improvements
+7. **Skeleton updates** - Maintain consistency
 
 ### Low Priority (P2)
-7. **Dashboard header adjustments** - Nice-to-have polish
+8. **Dashboard header adjustments** - Nice-to-have polish
 
 ### Risks
 - **Text legibility**: Monitor small text sizes in dark mode
@@ -321,12 +376,13 @@ This applies `opacity-50` to the **entire row**, making text hard to read and lo
 ## Implementation Order
 
 ### Recommended Sequence
-1. Start with **archived repo styling** (highest impact)
-2. Add **table borders** (structural improvement)
-3. Update **component sizes** (filters, buttons)
-4. Adjust **text sizes and spacing** (incremental)
-5. Update **skeleton components** (consistency)
-6. Final polish: **dashboard header**
+1. Start with **archived repo styling** (highest impact, worst UX issue)
+2. Update **chip styling** (bordered variant + small radius)
+3. Add **table borders** (structural improvement)
+4. Update **component sizes** (filters, buttons to sm/md)
+5. Adjust **text sizes and spacing** (repo names, margins, gaps)
+6. Update **skeleton components** (match new real table styling)
+7. Final polish: **dashboard header** (optional)
 
 ### Commit Strategy
 - Each phase should be a separate commit
@@ -369,10 +425,13 @@ Ensure all changes use semantic colors:
 
 After implementation:
 - [ ] 20-30% more content visible without scrolling
-- [ ] Archived repos clearly visible and differentiated
+- [ ] Archived repos clearly visible and differentiated (not faded)
+- [ ] Chips use bordered outline style with small radius
+- [ ] Table has clear visual structure with borders
 - [ ] All tests pass
 - [ ] No accessibility regressions
 - [ ] Positive visual comparison to Figma reference
+- [ ] Both light and dark themes look polished
 
 ## Notes
 
