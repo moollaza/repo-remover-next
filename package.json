@@ -44,7 +44,7 @@
     "@octokit/plugin-paginate-graphql": "^5.2.4",
     "@octokit/plugin-throttling": "^9.4.0",
     "@octokit/rest": "^21.0.2",
-    "@playwright/test": "^1.50.1",
+    "@playwright/test": "^1.56.1",
     "@storybook/addon-essentials": "^8.6.12",
     "@storybook/addon-interactions": "^8.6.12",
     "@storybook/addon-onboarding": "^8.6.12",
