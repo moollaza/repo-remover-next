@@ -70,7 +70,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",
     "eslint": "^8.57.1",
-    "eslint-config-next": "14.2.8",
+    "eslint-config-next": "16.0.3",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-perfectionist": "^4.2.0",
     "eslint-plugin-storybook": "^0.12.0",
