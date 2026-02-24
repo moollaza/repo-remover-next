@@ -6,9 +6,14 @@ import { COLUMNS } from "@/config/repo-config";
 
 import { useRepoFilters } from "./use-repo-filters";
 
+type MockRepoOverrides = {
+  key?: string;
+  owner?: { login: string; url: string };
+} & Partial<Omit<Repository, "owner">>;
+
 // Helper to create a mock repository
 function createMockRepo(
-  overrides: Partial<Repository> = {},
+  overrides: MockRepoOverrides = {},
 ): { key: string } & Repository {
   return {
     description: "A test repository",
