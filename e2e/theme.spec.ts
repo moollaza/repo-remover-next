@@ -1,5 +1,11 @@
 import { expect, test } from "@playwright/test";
 
+import {
+  mockGraphQLRepos,
+  mockLocalStorage,
+  mockOctokitInit,
+} from "./utils/github-api-mocks";
+
 test.describe("Theme Functionality", () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to dashboard (where theme switcher is located)
@@ -76,6 +82,13 @@ test.describe("Theme Functionality", () => {
   });
 
   test("dark theme has proper contrast and visibility", async ({ page }) => {
+    // Set up auth to access dashboard content
+    await mockLocalStorage(page);
+    await mockOctokitInit(page);
+    await mockGraphQLRepos(page);
+    await page.goto("/dashboard");
+    await page.waitForSelector('[data-testid="repo-table-header"]', { state: 'visible' });
+
     // Switch to dark theme
     const themeSwitcher = page.getByRole("button", { name: /switch to.*theme/i });
     await themeSwitcher.click();
@@ -107,6 +120,12 @@ test.describe("Theme Functionality", () => {
   });
 
   test("keyboard shortcuts work in both themes", async ({ page }) => {
+    // Set up auth to access dashboard content
+    await mockLocalStorage(page);
+    await mockOctokitInit(page);
+    await mockGraphQLRepos(page);
+    await page.goto("/dashboard");
+
     // Wait for data to load and search input to be available
     await page.waitForSelector('[data-testid="repo-search-input"]', { state: 'visible' });
 

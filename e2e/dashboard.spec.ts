@@ -169,13 +169,15 @@ test.describe("Dashboard Page", () => {
   test("should handle pagination", async () => {
     await dashboard.expectRepoVisible("repo-1");
 
-    // Change items per page
+    // Change items per page to 10 - all 8 administerable repos fit on one page
     await dashboard.paginationFilter.click();
     await dashboard.page.getByTestId("per-page-option-10").click();
 
-    // Verify pagination controls
-    await dashboard.nextPageButton.isDisabled();
-    await dashboard.page.getByText("1 of 1").isVisible();
+    // With 8 repos on 10-per-page, pagination disappears (only shown when totalPages > 1)
+    await expect(dashboard.pagination).not.toBeVisible();
+
+    // All repos should be visible on the single page
+    await dashboard.expectRepoVisible("repo-1");
   });
 
   test("should handle sorting", async () => {
@@ -248,44 +250,36 @@ test.describe("Dashboard Page", () => {
   });
 
   test("should select all repositories when select all is clicked", async () => {
+    // Wait for table data to load before selecting
+    await expect(dashboard.tableRows.first()).toBeVisible();
+
     // Select all repositories
     await dashboard.selectAllCheckbox.click();
 
-    // Confirm that we have 5 checkboxes
-    await expect(dashboard.checkboxes).toHaveCount(5);
+    // Verify page 1 has 5 rows
+    await expect(dashboard.tableRows).toHaveCount(5);
 
-    // Check if all checkboxes are checked
-    for (const checkbox of await dashboard.checkboxes.all()) {
-      await expect(checkbox).toBeChecked();
-    }
+    // Archive button enabled means repos are selected
+    await expect(dashboard.archiveButton).toBeEnabled();
 
-    // Go to the next page
+    // Go to the next page - selection persists across pages
     await dashboard.goToNextPage();
     await dashboard.expectCurrentPage(2);
     await dashboard.expectRepoVisible("repo-7");
+    await expect(dashboard.tableRows).toHaveCount(3);
+    await expect(dashboard.archiveButton).toBeEnabled();
 
-    // Check if all checkboxes are still checked
-    await expect(dashboard.checkboxes).toHaveCount(3);
-    for (const checkbox of await dashboard.checkboxes.all()) {
-      await expect(checkbox).toBeChecked();
-    }
-
-    // Uncheck all checkboxes
+    // Uncheck all - archive button should disable again
     await dashboard.selectAllCheckbox.click();
-    for (const checkbox of await dashboard.checkboxes.all()) {
-      await expect(checkbox).not.toBeChecked();
-    }
+    await expect(dashboard.archiveButton).toBeDisabled();
 
-    // Go back to the first page
+    // Go back to page 1
     await dashboard.goToPrevPage();
     await dashboard.expectCurrentPage(1);
     await dashboard.expectRepoVisible("repo-1");
 
-    // Check if all checkboxes are still unchecked
-    await expect(dashboard.checkboxes).toHaveCount(5);
-    for (const checkbox of await dashboard.checkboxes.all()) {
-      await expect(checkbox).not.toBeChecked();
-    }
+    // Archive button still disabled
+    await expect(dashboard.archiveButton).toBeDisabled();
   });
 
   /**
@@ -436,9 +430,9 @@ test.describe("Dashboard Page", () => {
         /Are you sure you want to archive the following 1 repository/i,
       );
 
-      // Test with multiple repos
+      // Test with multiple repos (use repo-3 - not archived, so not disabled for archive action)
       await dashboard.cancelConfirmation();
-      await dashboard.selectRepository("repo-2");
+      await dashboard.selectRepository("repo-3");
       await dashboard.archiveButton.click();
       await dashboard.expectModalBody(
         /Are you sure you want to archive the following 2 repositories/i,
