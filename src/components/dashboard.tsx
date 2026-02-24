@@ -41,9 +41,9 @@ export default function Dashboard({
   repos,
 }: DashboardProps) {
   return (
-    <section className="py-16 flex-grow">
-      <div className="flex items-center justify-between mb-10">
-        <h1 className="text-3xl font-semibold" data-testid="repo-table-header">
+    <section className="py-10 flex-grow">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-semibold" data-testid="repo-table-header">
           Select Repos to Modify
         </h1>
 

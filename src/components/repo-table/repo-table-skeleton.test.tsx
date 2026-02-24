@@ -67,12 +67,14 @@ describe("RepoTableSkeleton", () => {
     expect(rows).toHaveLength(4);
   });
 
-  it("renders without card wrapper", () => {
+  it("renders with table border styling", () => {
     const { container } = render(<RepoTableSkeleton />);
 
-    // Should not have HeroUI's default card wrapper classes
+    // Should have border styling from custom wrapper div
     const table = container.querySelector("table");
-    expect(table?.closest(".shadow-sm")).not.toBeInTheDocument();
+    const wrapper = table?.closest(".border");
+    expect(wrapper).toBeInTheDocument();
+    expect(wrapper).toHaveClass("rounded-lg");
   });
 
   it("renders with striped rows enabled", () => {

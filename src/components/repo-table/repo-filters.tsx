@@ -86,7 +86,7 @@ export default function RepoFilters({
   }, []);
 
   return (
-    <div className="grid grid-cols-12 gap-4">
+    <div className="grid grid-cols-12 gap-3">
       {/* PER PAGE SELECTOR */}
       <div className="col-span-2">
         <Select
@@ -96,6 +96,7 @@ export default function RepoFilters({
           placeholder="Per page"
           selectedKeys={new Set([perPage.toString()])}
           selectionMode="single"
+          size="sm"
         >
           {PER_PAGE_OPTIONS.map((option) => (
             <SelectItem
@@ -120,6 +121,7 @@ export default function RepoFilters({
           placeholder="Filter by type"
           selectedKeys={repoTypesFilter}
           selectionMode="multiple"
+          size="sm"
         >
           {(repoType) => (
             <SelectItem
@@ -141,6 +143,7 @@ export default function RepoFilters({
           onValueChange={onSearchChange}
           placeholder="Search by name or description"
           ref={searchInputRef}
+          size="sm"
           startContent={<MagnifyingGlassIcon className="h-5 w-5" />}
           value={searchQuery}
         />
@@ -156,18 +159,18 @@ export default function RepoFilters({
               selectedRepoKeys !== "all" && selectedRepoKeys.size === 0
             }
             onPress={onRepoActionClick}
-            size="lg"
+            size="md"
           >
             {REPO_ACTIONS.find((action) => selectedRepoAction.has(action.key))
               ?.label ?? "Select Action"}
           </Button>
-          <Dropdown placement="bottom-end" size="lg">
+          <Dropdown placement="bottom-end" size="md">
             <DropdownTrigger>
               <Button
                 color={selectedRepoAction.has("delete") ? "danger" : "warning"}
                 data-testid="repo-action-dropdown-trigger"
                 isIconOnly
-                size="lg"
+                size="md"
               >
                 <ChevronDownIcon className="h-4 w-4" />
               </Button>

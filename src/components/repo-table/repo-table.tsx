@@ -153,7 +153,7 @@ export default function RepoTable({
   }, []);
 
   return (
-    <div className="space-y-5" data-testid="repo-table-container">
+    <div className="space-y-4" data-testid="repo-table-container">
       <RepoFilters
         onPerPageChange={handlePerPageChange}
         onRepoActionChange={handleRepoActionChange}
@@ -168,33 +168,41 @@ export default function RepoTable({
       />
 
       {/* TABLE */}
-      <Table
-        aria-label="GitHub repositories table"
-        bottomContent={
-          <div className="flex w-full justify-center">
-            {/* PAGINATION */}
-            <Pagination
-              data-testid="table-pagination"
-              hidden={totalPages <= 1}
-              onChange={setCurrentPage}
-              page={currentPage}
-              showControls
-              showShadow
-              total={totalPages}
-            />
-          </div>
-        }
-        className="mb-5"
-        data-testid="repo-table"
-        disabledKeys={disabledKeys}
-        isStriped
-        onSelectionChange={setSelectedRepoKeys}
-        onSortChange={setSortDescriptor}
-        removeWrapper
-        selectedKeys={selectedRepoKeys}
-        selectionMode="multiple"
-        sortDescriptor={sortDescriptor}
-      >
+      <div className="border border-divider rounded-lg overflow-hidden">
+        <Table
+          aria-label="GitHub repositories table"
+          classNames={{
+            table: "table-fixed",
+            td: [
+              "py-3",
+              "border-b",
+              "border-divider",
+              // First column (checkbox) should be narrow
+              "first:w-12",
+              // Remove rounded corners from hover/selection backgrounds
+              "group-data-[first=true]/tr:first:before:rounded-none",
+              "group-data-[first=true]/tr:last:before:rounded-none",
+              "group-data-[middle=true]/tr:before:rounded-none",
+              "group-data-[last=true]/tr:first:before:rounded-none",
+              "group-data-[last=true]/tr:last:before:rounded-none",
+            ],
+            th: [
+              "bg-default-100",
+              "border-b",
+              "border-divider",
+              // First column (checkbox) should be narrow
+              "first:w-12",
+            ],
+          }}
+          data-testid="repo-table"
+          disabledKeys={disabledKeys}
+          onSelectionChange={setSelectedRepoKeys}
+          onSortChange={setSortDescriptor}
+          removeWrapper
+          selectedKeys={selectedRepoKeys}
+          selectionMode="multiple"
+          sortDescriptor={sortDescriptor}
+        >
         <TableHeader columns={[...COLUMN_ORDER]}>
           {(column) => (
             <TableColumn
@@ -216,31 +224,39 @@ export default function RepoTable({
         >
           {(repo) => (
             <TableRow
-              className={
-                isRepoDisabled(repo) ? "opacity-50 pointer-events-none" : ""
-              }
+              className={isRepoDisabled(repo) ? "pointer-events-none opacity-50" : ""}
               data-testid="repo-row"
               key={repo.id}
             >
               <TableCell>
                 <div data-testid="repo-details">
-                  <div className="mb-2" data-testid="repo-name">
+                  <div className="mb-1.5" data-testid="repo-name">
                     <Link
-                      className="font-semibold text-xl"
+                      className="font-medium text-base"
                       href={repo.url as string}
                       isExternal
                     >
                       {repo.name}
                     </Link>
                   </div>
-                  <div className="flex gap-2 mb-5" data-testid="repo-tags">
-                    {repo.isPrivate && <Chip size="sm">Private</Chip>}
-                    {repo.isInOrganization && (
-                      <Chip size="sm">Organization</Chip>
+                  <div className="flex gap-2 mb-2" data-testid="repo-tags">
+                    {repo.isPrivate && (
+                      <Chip radius="sm" size="sm" variant="bordered">
+                        Private
+                      </Chip>
                     )}
-                    {repo.isFork && <Chip size="sm">Fork</Chip>}
+                    {repo.isInOrganization && (
+                      <Chip radius="sm" size="sm" variant="bordered">
+                        Organization
+                      </Chip>
+                    )}
+                    {repo.isFork && (
+                      <Chip radius="sm" size="sm" variant="bordered">
+                        Fork
+                      </Chip>
+                    )}
                     {repo.isArchived && (
-                      <Chip color="warning" size="sm">
+                      <Chip color="warning" radius="sm" size="sm" variant="bordered">
                         Archived
                       </Chip>
                     )}
@@ -248,7 +264,7 @@ export default function RepoTable({
 
                   {repo.owner.login !== login && (
                     <div
-                      className="mb-2 text-default-500 text-sm"
+                      className="mb-1 text-default-500 text-sm"
                       data-testid="repo-owner"
                     >
                       Owned by{" "}
@@ -262,7 +278,7 @@ export default function RepoTable({
                     </div>
                   )}
 
-                  <div data-testid="repo-description">
+                  <div className="text-sm" data-testid="repo-description">
                     {repo.description ?? <i>No description</i>}
                   </div>
                 </div>
@@ -286,6 +302,21 @@ export default function RepoTable({
           )}
         </TableBody>
       </Table>
+      </div>
+
+      {/* PAGINATION - Outside table border */}
+      {totalPages > 1 && (
+        <div className="flex w-full justify-center">
+          <Pagination
+            data-testid="table-pagination"
+            onChange={setCurrentPage}
+            page={currentPage}
+            showControls
+            showShadow
+            total={totalPages}
+          />
+        </div>
+      )}
 
       {/* CONFIRMATION MODAL */}
       {repos && selectedRepos && login && (

@@ -94,11 +94,11 @@ describe("RepoTable", () => {
     expect(screen.getByText("active-repo")).toBeInTheDocument();
     expect(screen.getByText("archived-repo")).toBeInTheDocument();
 
-    // The archived repo should be dimmed when archive action is selected (which is the default)
-    // Check for opacity styling on the archived repo row
+    // The archived repo should be disabled when archive action is selected (which is the default)
+    // Check for disabled styling on the archived repo row
     const archivedRepoRow = screen.getByText("archived-repo").closest('[data-testid="repo-row"]');
-    expect(archivedRepoRow).toHaveClass("opacity-50");
     expect(archivedRepoRow).toHaveClass("pointer-events-none");
+    expect(archivedRepoRow).toHaveClass("opacity-50");
 
     // Active repo should not have these classes
     const activeRepoRow = screen.getByText("active-repo").closest('[data-testid="repo-row"]');
