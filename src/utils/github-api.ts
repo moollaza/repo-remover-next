@@ -128,6 +128,15 @@ export interface CurrentUserResponse {
   };
 }
 
+export interface LoadingProgress {
+  currentOrg?: string;
+  orgsLoaded: number;
+  orgsTotal: number;
+  repos: Repository[];
+  stage: "complete" | "orgs" | "personal";
+  user: null | User;
+}
+
 export interface OrganizationsResponse {
   user: {
     organizations: {
@@ -245,7 +254,17 @@ export async function fetchGitHubData(
         }
       } catch (error) {
         console.error("Error fetching organizations:", error);
-        // Break the loop on error, but return what we have so far
+
+        // Check if this is a permission/scope error
+        if (error instanceof Error && error.message.includes("required scopes")) {
+          // This is a scope permission error - we should surface this to the UI
+          throw new Error(
+            "Missing GitHub token permissions: Your token needs 'read:org' scope to fetch organization data. " +
+            "You can update your token permissions at: https://github.com/settings/tokens"
+          );
+        }
+
+        // For other errors, break the loop but return what we have so far
         hasNextPage = false;
       }
     }
@@ -290,7 +309,13 @@ export async function fetchGitHubData(
         }
       } catch (error) {
         console.error(`Error fetching repos for org ${orgLogin}:`, error);
-        // Break the loop on error, but return what we have so far
+
+        // Check if this is a permission/scope error
+        if (error instanceof Error && error.message.includes("required scopes")) {
+          console.warn(`Skipping org ${orgLogin} due to insufficient permissions`);
+        }
+
+        // For any error, break the loop but return what we have so far
         hasNextPage = false;
       }
     }
@@ -313,26 +338,256 @@ export async function fetchGitHubData(
       userLogin = userResponse.viewer.login;
     }
 
-    // Fetch user repos and orgs in parallel
-    const [userRepoResult, orgs] = await Promise.all([
-      fetchUserRepos(userLogin),
-      fetchAllOrganizations(userLogin),
-    ]);
+    // Fetch user repos first
+    const userRepoResult = await fetchUserRepos(userLogin);
     userData = userRepoResult.userData;
     let allRepos: Repository[] = userRepoResult.repos ?? [];
 
-    // Fetch all org repos in parallel
-    const orgReposArrays = await Promise.all(
-      orgs.map((org) => fetchAllOrgRepos(org.login)),
-    );
-    for (const orgRepos of orgReposArrays) {
-      allRepos = allRepos.concat(orgRepos);
+    // Fetch orgs with permission error handling
+    let orgs: { login: string; url: string }[] = [];
+    let permissionError: null | string = null;
+
+    try {
+      orgs = await fetchAllOrganizations(userLogin);
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("Missing GitHub token permissions")) {
+        permissionError = error.message;
+        console.warn("Organization access limited due to token permissions");
+      } else {
+        throw error; // Re-throw unexpected errors
+      }
+    }
+
+    // Fetch all org repos in parallel (only if we have orgs)
+    if (orgs.length > 0) {
+      const orgReposArrays = await Promise.all(
+        orgs.map((org) => fetchAllOrgRepos(org.login)),
+      );
+      for (const orgRepos of orgReposArrays) {
+        allRepos = allRepos.concat(orgRepos);
+      }
     }
 
     return {
       error: userRepoResult.error,
       repos: allRepos,
       user: userData,
+      ...(permissionError && { permissionWarning: permissionError }),
+    };
+  } catch (error) {
+    console.error("Error fetching GitHub data:", error);
+    return {
+      error:
+        error instanceof Error
+          ? error
+          : new Error("Unknown error fetching data"),
+      repos: null,
+      user: null,
+    };
+  }
+}
+
+/**
+ * Fetches GitHub data with progressive loading callbacks
+ * @param params A tuple of [login, pat] where login is the GitHub username and pat is the personal access token
+ * @param onProgress Callback function called with loading progress updates
+ * @returns An object containing the repositories and user data
+ */
+export async function fetchGitHubDataWithProgress(
+  params: [string, string],
+  onProgress: (progress: LoadingProgress) => void,
+): Promise<FetchResult> {
+  const [login, pat] = params;
+
+  if (!pat) {
+    throw new Error("PAT is required");
+  }
+
+  const octokit = createThrottledOctokit(pat);
+
+  // Helper to fetch all orgs for a user (paginated)
+  async function fetchAllOrganizations(
+    userLogin: string,
+  ): Promise<{ login: string; url: string }[]> {
+    let orgs: { login: string; url: string }[] = [];
+    let cursor: null | string = null;
+    let hasNextPage = true;
+
+    while (hasNextPage) {
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const rawResponse: any = await octokit.graphql(GET_ORGS, {
+          cursor,
+          login: userLogin,
+        });
+
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        if (rawResponse?.user?.organizations?.nodes) {
+          const typedResponse = rawResponse as OrganizationsResponse;
+          const nodes = typedResponse.user.organizations.nodes;
+          orgs = orgs.concat(nodes);
+
+          const pageInfo = typedResponse.user.organizations.pageInfo;
+          hasNextPage = pageInfo.hasNextPage;
+          cursor = pageInfo.endCursor;
+        } else {
+          console.warn(
+            "Unexpected organization response structure:",
+            rawResponse,
+          );
+          hasNextPage = false;
+        }
+      } catch (error) {
+        console.error("Error fetching organizations:", error);
+
+        if (error instanceof Error && error.message.includes("required scopes")) {
+          throw new Error(
+            "Missing GitHub token permissions: Your token needs 'read:org' scope to fetch organization data. " +
+            "You can update your token permissions at: https://github.com/settings/tokens"
+          );
+        }
+
+        hasNextPage = false;
+      }
+    }
+
+    return orgs;
+  }
+
+  // Helper to fetch all repos for an org (paginated)
+  async function fetchAllOrgRepos(orgLogin: string): Promise<Repository[]> {
+    let repos: Repository[] = [];
+    let cursor: null | string = null;
+    let hasNextPage = true;
+
+    while (hasNextPage) {
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const rawResponse: any = await octokit.graphql(GET_ORG_REPOS, {
+          cursor,
+          org: orgLogin,
+        });
+
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        if (rawResponse?.organization?.repositories?.nodes) {
+          const typedResponse = rawResponse as OrgRepositoriesResponse;
+          const nodes = typedResponse.organization.repositories.nodes;
+          repos = repos.concat(nodes);
+
+          const pageInfo = typedResponse.organization.repositories.pageInfo;
+          hasNextPage = pageInfo.hasNextPage;
+          cursor = pageInfo.endCursor;
+        } else {
+          console.warn(
+            `Unexpected response structure for org ${orgLogin}:`,
+            rawResponse,
+          );
+          hasNextPage = false;
+        }
+      } catch (error) {
+        console.error(`Error fetching repos for org ${orgLogin}:`, error);
+
+        if (error instanceof Error && error.message.includes("required scopes")) {
+          console.warn(`Skipping org ${orgLogin} due to insufficient permissions`);
+        }
+
+        hasNextPage = false;
+      }
+    }
+
+    return repos;
+  }
+
+  // Helper to fetch user repos
+  async function fetchUserRepos(userLogin: string) {
+    return fetchRepositories(octokit, userLogin);
+  }
+
+  // Get user login
+  let userLogin = login;
+  let userData: null | User = null;
+
+  try {
+    if (!userLogin) {
+      const userResponse =
+        await octokit.graphql<CurrentUserResponse>(GET_CURRENT_USER);
+      userLogin = userResponse.viewer.login;
+    }
+
+    // 1. Fetch personal repos FIRST
+    const userRepoResult = await fetchUserRepos(userLogin);
+    userData = userRepoResult.userData;
+    let allRepos: Repository[] = userRepoResult.repos ?? [];
+
+    // Report personal repos immediately
+    onProgress({
+      orgsLoaded: 0,
+      orgsTotal: 0,
+      repos: allRepos,
+      stage: "personal",
+      user: userData,
+    });
+
+    // 2. Fetch orgs list
+    let orgs: { login: string; url: string }[] = [];
+    let permissionError: null | string = null;
+
+    try {
+      orgs = await fetchAllOrganizations(userLogin);
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("Missing GitHub token permissions")) {
+        permissionError = error.message;
+        console.warn("Organization access limited due to token permissions");
+      } else {
+        throw error;
+      }
+    }
+
+    // 3. Fetch org repos in PARALLEL (keep current speed!)
+    if (orgs.length > 0) {
+      let completedOrgs = 0;
+
+      const orgReposPromises = orgs.map(async (org) => {
+        // Fetch this org's repos
+        const orgRepos = await fetchAllOrgRepos(org.login);
+
+        // Update counter
+        completedOrgs++;
+
+        // Append to allRepos immediately
+        allRepos = allRepos.concat(orgRepos);
+
+        // Report progress
+        onProgress({
+          currentOrg: org.login,
+          orgsLoaded: completedOrgs,
+          orgsTotal: orgs.length,
+          repos: allRepos,
+          stage: "orgs",
+          user: userData,
+        });
+
+        return orgRepos;
+      });
+
+      // Wait for all orgs (but already reported progress)
+      await Promise.all(orgReposPromises);
+    }
+
+    // Final update
+    onProgress({
+      orgsLoaded: orgs.length,
+      orgsTotal: orgs.length,
+      repos: allRepos,
+      stage: "complete",
+      user: userData,
+    });
+
+    return {
+      error: userRepoResult.error,
+      repos: allRepos,
+      user: userData,
+      ...(permissionError && { permissionWarning: permissionError }),
     };
   } catch (error) {
     console.error("Error fetching GitHub data:", error);

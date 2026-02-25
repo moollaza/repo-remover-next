@@ -11,30 +11,23 @@ const meta: Meta<typeof RepoTable> = {
 export default meta;
 type Story = StoryObj<typeof RepoTable>;
 
-export const Loading: Story = {
-  args: {
-    isLoading: true,
-    repos: null,
-  },
-};
-
 export const Empty: Story = {
   args: {
-    isLoading: false,
+    login: null,
     repos: [],
   },
 };
 
 export const WithRepos: Story = {
   args: {
-    isLoading: false,
+    login: "testuser",
     repos: mockRepos,
   },
 };
 
 export const WithManyRepos: Story = {
   args: {
-    isLoading: false,
+    login: "testuser",
     repos: manyMockRepos,
   },
 };

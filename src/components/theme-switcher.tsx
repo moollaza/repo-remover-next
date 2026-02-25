@@ -4,6 +4,7 @@
 
 "use client";
 
+import { MoonIcon, SunIcon } from "@heroicons/react/16/solid";
 import { Button } from "@heroui/react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
@@ -18,13 +19,13 @@ export const ThemeSwitcher = () => {
 
   if (!mounted) {
     return (
-      <Button 
-        aria-label="Theme switcher loading" 
-        isIconOnly 
+      <Button
+        aria-label="Theme switcher loading"
+        isIconOnly
         size="sm"
         variant="light"
       >
-        <span className="text-lg">🌓</span>
+        <SunIcon className="h-4 w-4" />
       </Button>
     );
   }
@@ -39,9 +40,11 @@ export const ThemeSwitcher = () => {
       size="sm"
       variant="light"
     >
-      <span className="text-lg">
-        {isDark ? "☀️" : "🌙"}
-      </span>
+      {isDark ? (
+        <SunIcon className="h-4 w-4" />
+      ) : (
+        <MoonIcon className="h-4 w-4" />
+      )}
     </Button>
   );
 };

@@ -14,6 +14,7 @@ import { useReducer } from "react";
 
 import { useGitHubData } from "@/hooks/use-github-data";
 import { analytics } from "@/utils/analytics";
+import { debug } from "@/utils/debug";
 import { createThrottledOctokit, processRepo } from "@/utils/github-utils";
 
 interface ConfirmationModalProps {
@@ -97,17 +98,17 @@ export default function ConfirmationModal({
   const [state, dispatch] = useReducer(modalReducer, initialState);
 
   async function handleConfirm() {
-    console.log("handleConfirm called");
+    debug.log("handleConfirm called");
 
-    console.log("State before confirmation:", state);
+    debug.log("State before confirmation:", state);
 
     if (!octokit) {
-      console.error("Octokit is not initialized or already processing");
+      debug.error("Octokit is not initialized or already processing");
       return;
     }
 
     if (state.confirming) {
-      console.warn("Already processing, ignoring confirmation");
+      debug.warn("Already processing, ignoring confirmation");
       return;
     }
 

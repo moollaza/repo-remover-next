@@ -42,18 +42,31 @@ const quotes: Quote[] = [
 export function ScrollingQuotes() {
   const [shuffledQuotes, setShuffledQuotes] = useState<Quote[]>([]);
   const [isPaused, setIsPaused] = useState(false);
+  const [reduceMotion, setReduceMotion] = useState(false);
 
   useEffect(() => {
     const shuffled = [...quotes].sort(() => Math.random() - 0.5);
     setShuffledQuotes(shuffled);
   }, []);
 
+  useEffect(() => {
+    // Check for reduced motion preference or Storybook environment
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const isStorybook = typeof window !== 'undefined' && (
+      window.location.href.includes('storybook') ||
+      window.parent !== window ||
+      !!document.querySelector('#storybook-root')
+    );
+
+    setReduceMotion(prefersReducedMotion || isStorybook);
+  }, []);
+
   return (
     <div
       aria-label="Scrolling quotes"
-      className="w-full"
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
+      className={clsx("w-full", reduceMotion && "no-animations")}
+      onMouseEnter={() => !reduceMotion && setIsPaused(true)}
+      onMouseLeave={() => !reduceMotion && setIsPaused(false)}
     >
       <div
         className={clsx(
@@ -67,7 +80,10 @@ export function ScrollingQuotes() {
       >
         {[...shuffledQuotes, ...shuffledQuotes].map((quote, index) => (
           <Link
-            className="w-72 flex-shrink-0 transition-transform duration-300 ease-in-out hover:scale-105 cursor-pointer"
+            className={clsx(
+              "w-72 flex-shrink-0 cursor-pointer",
+              !reduceMotion && "transition-transform duration-300 ease-in-out hover:scale-105"
+            )}
             href={quote.source}
             key={index}
             rel="noopener noreferrer"

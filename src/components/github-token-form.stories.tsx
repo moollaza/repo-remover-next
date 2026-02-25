@@ -60,6 +60,20 @@ export const ValidToken: Story = {
     initialValue: VALID_TOKEN,
     onSubmit: fn<(token: string) => void>(),
   },
+  parameters: {
+    msw: {
+      handlers: [
+        http.get("https://api.github.com/user", () => {
+          return HttpResponse.json({
+            avatar_url: "https://avatars.githubusercontent.com/u/1?v=4",
+            id: 1,
+            login: "testuser",
+            name: "Test User",
+          });
+        }),
+      ],
+    },
+  },
 };
 
 export const InvalidToken: Story = {

@@ -3,6 +3,7 @@ import { createContext } from "react";
 import { type KeyedMutator } from "swr";
 
 import { type GitHubFetcherResult } from "@/providers/github-data-provider";
+import { type LoadingProgress } from "@/utils/github-api";
 
 /**
  * Context type for GitHub data and authentication
@@ -72,6 +73,16 @@ export interface GitHubContextType {
   pat: null | string;
 
   /**
+   * Permission warning message if token lacks required scopes.
+   */
+  permissionWarning?: string;
+
+  /**
+   * Loading progress information for progressive rendering.
+   */
+  progress: LoadingProgress | null;
+
+  /**
    * Refetches the data.
    */
   refetchData: () => void;
@@ -115,6 +126,7 @@ export const GitHubContext = createContext<GitHubContextType>({
   mutate: async () =>
     await Promise.resolve({ error: null, repos: null, user: null }),
   pat: null,
+  progress: null,
   refetchData: () => {
     // no-op
   },

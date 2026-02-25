@@ -32,6 +32,7 @@ const mockContextValue: GitHubContextType = {
   logout: vi.fn(),
   mutate: vi.fn(),
   pat: "fake-token",
+  progress: null,
   refetchData: vi.fn(),
   repos: mockRepos,
   setLogin: vi.fn(),

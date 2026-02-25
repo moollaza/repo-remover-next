@@ -163,9 +163,10 @@ export async function mockInvalidToken(
 export async function mockLocalStorage(page: Page) {
   const validToken = getValidPersonalAccessToken();
 
+  // Use the secure_ prefix to match secureStorage key convention
   await page.addInitScript((token) => {
-    window.localStorage.setItem("pat", token);
-    window.localStorage.setItem("login", "testuser");
+    window.localStorage.setItem("secure_pat", token);
+    window.localStorage.setItem("secure_login", "testuser");
   }, validToken);
 }
 

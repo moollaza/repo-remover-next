@@ -11,8 +11,8 @@ export default defineConfig({
   // Fail the build on CI if you accidentally left test.only in the source code.
   forbidOnly: !!process.env.CI,
 
-  // Retry on CI only.
-  retries: process.env.CI ? 2 : 1,
+  // Retry on CI only - faster local development with no retries
+  retries: process.env.CI ? 2 : 0,
 
   // Opt out of parallel tests on CI.
   workers: process.env.CI ? 1 : undefined,
@@ -20,12 +20,18 @@ export default defineConfig({
   // Reporter to use
   reporter: "html",
 
+  // Global timeout for tests (30 seconds)
+  timeout: 30 * 1000,
+
   use: {
     // Base URL to use in actions like `await page.goto('/')`.
     baseURL: "http://127.0.0.1:3000",
 
     // Collect trace when retrying the failed test.
     trace: "on-first-retry",
+
+    // Action timeout (10 seconds)
+    actionTimeout: 10 * 1000,
   },
   // Configure projects for major browsers.
   projects: [

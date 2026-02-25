@@ -11,12 +11,12 @@ import { Link } from "@heroui/react";
 export default function Footer() {
   return (
     <footer
-      className="container mx-auto max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-8 py-8"
+      className="grid grid-cols-1 md:grid-cols-3 gap-8 py-8"
       data-testid="footer"
     >
       <div className="flex flex-col">
         <h3 className="text-lg font-semibold mb-2">
-          Mady by{" "}
+          Made by{" "}
           <Link
             className="text-lg font-semibold mb-2"
             href="https://zaahir.ca"

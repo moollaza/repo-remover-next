@@ -54,7 +54,7 @@ describe("RepoTable", () => {
   });
 
   test("renders table with repos", () => {
-    render(<RepoTable isLoading={false} login={mockLogin} repos={mockRepos} />);
+    render(<RepoTable login={mockLogin} repos={mockRepos} />);
 
     expect(screen.getByTestId("repo-table")).toBeInTheDocument();
     expect(screen.getByText("test-repo-1")).toBeInTheDocument();
@@ -62,7 +62,7 @@ describe("RepoTable", () => {
   });
 
   test("displays empty state when no repos are available", () => {
-    render(<RepoTable isLoading={false} login={mockLogin} repos={[]} />);
+    render(<RepoTable login={mockLogin} repos={[]} />);
 
     expect(screen.getByTestId("repo-table")).toBeInTheDocument();
     expect(screen.queryByText("test-repo-1")).not.toBeInTheDocument();
@@ -72,9 +72,37 @@ describe("RepoTable", () => {
     expect(screen.queryByText("No repos to display.")).toBeInTheDocument();
   });
 
-  test("displays loading state", () => {
-    render(<RepoTable isLoading={true} login={mockLogin} repos={null} />);
+  test("disables archived repos when archive action is selected", () => {
+    const mockReposWithArchived: Repository[] = [
+      createMockRepo({
+        description: "Active repo",
+        id: "active-repo",
+        isArchived: false,
+        name: "active-repo",
+      }),
+      createMockRepo({
+        description: "Archived repo",
+        id: "archived-repo",
+        isArchived: true,
+        name: "archived-repo",
+      }),
+    ];
 
-    expect(screen.getByLabelText("Loading...")).toBeInTheDocument();
+    render(<RepoTable login={mockLogin} repos={mockReposWithArchived} />);
+
+    // Find archived repo and verify its row has disabled styling
+    expect(screen.getByText("active-repo")).toBeInTheDocument();
+    expect(screen.getByText("archived-repo")).toBeInTheDocument();
+
+    // The archived repo should be disabled when archive action is selected (which is the default)
+    // Check for disabled styling on the archived repo row
+    const archivedRepoRow = screen.getByText("archived-repo").closest('[data-testid="repo-row"]');
+    expect(archivedRepoRow).toHaveClass("pointer-events-none");
+    expect(archivedRepoRow).toHaveClass("opacity-50");
+
+    // Active repo should not have these classes
+    const activeRepoRow = screen.getByText("active-repo").closest('[data-testid="repo-row"]');
+    expect(activeRepoRow).not.toHaveClass("opacity-50");
+    expect(activeRepoRow).not.toHaveClass("pointer-events-none");
   });
 });
