@@ -161,9 +161,15 @@ test.describe("Dashboard Page", () => {
     // Clear search
     await dashboard.clearSearch();
 
-    // Filter by type
-    await dashboard.filterByType("Private");
-    await dashboard.expectRepoNotVisible("repo-2");
+    // Clearing all type filters should blank the table
+    await dashboard.repoTypeClearButton.click();
+    await expect(
+      dashboard.table.getByText("No repos to display"),
+    ).toBeVisible();
+
+    // Restore the default type set
+    await dashboard.repoTypeShowAllButton.click();
+    await dashboard.expectRepoVisible("repo-1");
   });
 
   test("should handle pagination", async () => {

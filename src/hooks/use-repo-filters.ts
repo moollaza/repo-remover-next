@@ -97,6 +97,8 @@ export function useRepoFilters({
   const filteredByQueryAndType = useMemo(() => {
     if (!repos) return [];
 
+    const selectedTypeKeys = Array.from(typeFilters);
+
     return repos.filter((repo) => {
       // Check if user can administer this repo (either they own it or have admin rights)
       const canAdminister =
@@ -109,18 +111,27 @@ export function useRepoFilters({
         repo.name.toLowerCase().includes(nameFilter.toLowerCase()) ||
         repo.description?.toLowerCase().includes(nameFilter.toLowerCase());
 
-      const matchesType =
-        // For each type, if it is not selected, we check if the repo has it and return false
-        REPO_TYPES.every((type) => {
-          // If the type is not selected, check if the repo has it and return false
-          if (!typeFilters.has(type.key)) {
-            if (repo[type.key as keyof Repository]) {
-              return false;
-            }
-            return true;
-          }
-          return true;
-        });
+      if (selectedTypeKeys.length === 0) {
+        return false;
+      }
+
+      const specialTypeMatches = {
+        isArchived: repo.isArchived === true,
+        isDisabled: repo.isDisabled === true,
+        isFork: repo.isFork === true,
+        isInOrganization: repo.isInOrganization === true,
+        isMirror: repo.isMirror === true,
+        isPrivate: repo.isPrivate === true,
+        isTemplate: repo.isTemplate === true,
+      } as const;
+
+      const matchesType = selectedTypeKeys.some((typeKey) => {
+        if (typeKey === "isStandard") {
+          return !Object.values(specialTypeMatches).some(Boolean);
+        }
+
+        return specialTypeMatches[typeKey as keyof typeof specialTypeMatches];
+      });
 
       return matchesSearchQuery && matchesType;
     });

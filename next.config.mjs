@@ -1,10 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Enable instrumentation for Sentry
-  experimental: {
-    instrumentationHook: true,
-  },
-  
   // Security headers for production
   async headers() {
     return [
@@ -52,6 +47,10 @@ const nextConfig = {
             key: 'Permissions-Policy',
             value: 'camera=(), microphone=(), geolocation=(), interest-cohort=()'
           },
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=0, must-revalidate, no-transform'
+          },
           // Force HTTPS
           {
             key: 'Strict-Transport-Security',
@@ -64,3 +63,5 @@ const nextConfig = {
 };
 
 export default nextConfig;
+
+import('@opennextjs/cloudflare').then(m => m.initOpenNextCloudflareForDev());

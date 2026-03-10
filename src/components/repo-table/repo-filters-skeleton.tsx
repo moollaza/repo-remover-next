@@ -1,6 +1,6 @@
 import { Skeleton } from "@heroui/react";
 
-export default function RepoFiltersSkeleton(): JSX.Element {
+export default function RepoFiltersSkeleton(): React.JSX.Element {
   return (
     <div className="grid grid-cols-12 gap-3" data-testid="repo-filters-skeleton">
       {/* Per page selector skeleton */}

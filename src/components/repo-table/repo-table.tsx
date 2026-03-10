@@ -16,7 +16,7 @@ import { type Repository } from "@octokit/graphql-schema";
 import { formatDistanceToNow } from "date-fns";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { COLUMN_ORDER, REPO_ACTIONS } from "@/config/repo-config";
+import { COLUMN_ORDER, REPO_ACTIONS, REPO_TYPES } from "@/config/repo-config";
 import { useRepoFilters } from "@/hooks/use-repo-filters";
 import { useRepoPagination } from "@/hooks/use-repo-pagination";
 import { debug } from "@/utils/debug";
@@ -39,7 +39,7 @@ type SelectionSet = Exclude<Selection, "all">;
 export default function RepoTable({
   login,
   repos,
-}: RepoTableProps): JSX.Element {
+}: RepoTableProps): React.JSX.Element {
   const [selectedRepoKeys, setSelectedRepoKeys] = useState<Selection>(
     new Set(),
   );
@@ -107,6 +107,16 @@ export default function RepoTable({
     [setTypeFilters, resetPage],
   );
 
+  const handleClearRepoTypes = useCallback(() => {
+    setTypeFilters(new Set());
+    resetPage();
+  }, [setTypeFilters, resetPage]);
+
+  const handleShowAllRepoTypes = useCallback(() => {
+    setTypeFilters(new Set(REPO_TYPES.map((type) => type.key)));
+    resetPage();
+  }, [setTypeFilters, resetPage]);
+
   const handlePerPageChange = useCallback(
     (keys: Selection) => {
       setPerPage(keys);
@@ -158,7 +168,9 @@ export default function RepoTable({
         onPerPageChange={handlePerPageChange}
         onRepoActionChange={handleRepoActionChange}
         onRepoActionClick={handleRepoActionClick}
+        onRepoTypesClear={handleClearRepoTypes}
         onRepoTypesFilterChange={handleRepoTypesFilterChange}
+        onRepoTypesShowAll={handleShowAllRepoTypes}
         onSearchChange={setNameFilter}
         perPage={perPage}
         repoTypesFilter={typeFilters}

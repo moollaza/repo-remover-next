@@ -21,7 +21,9 @@ describe("RepoFilters", () => {
     onPerPageChange: vi.fn(),
     onRepoActionChange: vi.fn(),
     onRepoActionClick: vi.fn(),
+    onRepoTypesClear: vi.fn(),
     onRepoTypesFilterChange: vi.fn(),
+    onRepoTypesShowAll: vi.fn(),
     onSearchChange: vi.fn(),
     perPage: PER_PAGE_OPTIONS[0],
     repoTypesFilter: new Set(
@@ -43,6 +45,8 @@ describe("RepoFilters", () => {
     expect(screen.getByTestId("per-page-select")).toBeInTheDocument();
 
     expect(screen.getAllByText("Repo types to show")[0]).toBeInTheDocument();
+    expect(screen.getByTestId("repo-type-show-all-button")).toBeInTheDocument();
+    expect(screen.getByTestId("repo-type-clear-button")).toBeInTheDocument();
     expect(screen.getByTestId("repo-search-input")).toBeInTheDocument();
     expect(screen.getAllByText(REPO_ACTIONS[0].label)[0]).toBeInTheDocument();
   });
@@ -204,6 +208,16 @@ describe("RepoFilters", () => {
     );
 
     expect(defaultProps.onRepoActionChange).toHaveBeenCalled();
+  });
+
+  it("calls repo type utility actions", async () => {
+    render(<RepoFilters {...defaultProps} />);
+
+    await userEvent.click(screen.getByTestId("repo-type-show-all-button"));
+    await userEvent.click(screen.getByTestId("repo-type-clear-button"));
+
+    expect(defaultProps.onRepoTypesShowAll).toHaveBeenCalledTimes(1);
+    expect(defaultProps.onRepoTypesClear).toHaveBeenCalledTimes(1);
   });
 
   it("shows danger color for delete action", () => {

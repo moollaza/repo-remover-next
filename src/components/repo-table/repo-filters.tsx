@@ -17,34 +17,19 @@ import {
 } from "@heroui/react";
 import { useEffect, useRef } from "react";
 
-const PER_PAGE_OPTIONS = [5, 10, 20, 50, 100];
-const REPO_TYPES = [
-  { key: "isPrivate", label: "Private" },
-  { key: "isInOrganization", label: "Organization" },
-  { key: "isFork", label: "Forked" },
-  { key: "isArchived", label: "Archived" },
-  { key: "isTemplate", label: "Template" },
-  { key: "isMirror", label: "Mirror" },
-  { key: "isDisabled", label: "Disabled" },
-];
-const REPO_ACTIONS = [
-  {
-    description: "This can be undone later",
-    key: "archive",
-    label: "Archive Selected Repos",
-  },
-  {
-    description: "This action is irreversible",
-    key: "delete",
-    label: "Delete Selected Repos",
-  },
-];
+import {
+  PER_PAGE_OPTIONS,
+  REPO_ACTIONS,
+  REPO_TYPES,
+} from "@/config/repo-config";
 
 export interface RepoFiltersProps {
   onPerPageChange: (keys: Selection) => void;
   onRepoActionChange: (keys: Selection) => void;
   onRepoActionClick: () => void;
+  onRepoTypesClear: () => void;
   onRepoTypesFilterChange: (keys: Selection) => void;
+  onRepoTypesShowAll: () => void;
   onSearchChange: (value: string) => void;
   perPage: number;
   repoTypesFilter: SelectionSet;
@@ -60,14 +45,16 @@ export default function RepoFilters({
   onPerPageChange,
   onRepoActionChange,
   onRepoActionClick,
+  onRepoTypesClear,
   onRepoTypesFilterChange,
+  onRepoTypesShowAll,
   onSearchChange,
   perPage,
   repoTypesFilter,
   searchQuery,
   selectedRepoAction,
   selectedRepoKeys,
-}: RepoFiltersProps): JSX.Element {
+}: RepoFiltersProps): React.JSX.Element {
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -114,7 +101,6 @@ export default function RepoFilters({
       <div className="col-span-6">
         <Select
           data-testid="repo-type-select"
-          defaultSelectedKeys={new Set(REPO_TYPES.map((type) => type.key))}
           items={REPO_TYPES}
           label="Repo types to show"
           onSelectionChange={onRepoTypesFilterChange}
@@ -132,6 +118,24 @@ export default function RepoFilters({
             </SelectItem>
           )}
         </Select>
+        <div className="mt-1 flex justify-end gap-2">
+          <Button
+            data-testid="repo-type-show-all-button"
+            onPress={onRepoTypesShowAll}
+            size="sm"
+            variant="light"
+          >
+            All
+          </Button>
+          <Button
+            data-testid="repo-type-clear-button"
+            onPress={onRepoTypesClear}
+            size="sm"
+            variant="light"
+          >
+            None
+          </Button>
+        </div>
       </div>
 
       {/* SEARCH INPUT */}

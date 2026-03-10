@@ -25,9 +25,10 @@ export const PER_PAGE_OPTIONS = [5, 10, 20, 50, 100] as const;
 
 /**
  * Repository type filters with their labels
- * Each key corresponds to a boolean property on the Repository type
+ * `isStandard` is a derived type for repos that do not match any special flags.
  */
 export const REPO_TYPES = [
+  { key: "isStandard", label: "Standard" },
   { key: "isPrivate", label: "Private" },
   { key: "isInOrganization", label: "Organization" },
   { key: "isFork", label: "Forked" },

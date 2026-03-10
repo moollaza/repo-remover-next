@@ -130,16 +130,31 @@ describe("useRepoFilters", () => {
     // Initially all types are selected, so both repos should be shown
     expect(result.current.filteredRepos).toHaveLength(2);
 
-    // Deselect private repos
+    // Select only private repos
     act(() => {
-      result.current.setTypeFilters(
-        new Set(["isArchived", "isDisabled", "isFork", "isInOrganization", "isMirror", "isTemplate"]),
-      );
+      result.current.setTypeFilters(new Set(["isPrivate"]));
     });
 
-    // Now only public repo should be shown
     expect(result.current.filteredRepos).toHaveLength(1);
-    expect(result.current.filteredRepos[0].name).toBe("public-repo");
+    expect(result.current.filteredRepos[0].name).toBe("private-repo");
+  });
+
+  it("should filter repos by the standard type", () => {
+    const repos = [
+      createMockRepo({ id: "1", isPrivate: false, key: "1", name: "standard-repo" }),
+      createMockRepo({ id: "2", isFork: true, key: "2", name: "forked-repo" }),
+    ];
+
+    const { result } = renderHook(() =>
+      useRepoFilters({ login: "testuser", repos }),
+    );
+
+    act(() => {
+      result.current.setTypeFilters(new Set(["isStandard"]));
+    });
+
+    expect(result.current.filteredRepos).toHaveLength(1);
+    expect(result.current.filteredRepos[0].name).toBe("standard-repo");
   });
 
   it("should filter repos by type (isArchived)", () => {
@@ -152,15 +167,30 @@ describe("useRepoFilters", () => {
       useRepoFilters({ login: "testuser", repos }),
     );
 
-    // Deselect archived repos
+    // Select only archived repos
     act(() => {
-      result.current.setTypeFilters(
-        new Set(["isDisabled", "isFork", "isInOrganization", "isMirror", "isPrivate", "isTemplate"]),
-      );
+      result.current.setTypeFilters(new Set(["isArchived"]));
     });
 
     expect(result.current.filteredRepos).toHaveLength(1);
-    expect(result.current.filteredRepos[0].name).toBe("active-repo");
+    expect(result.current.filteredRepos[0].name).toBe("archived-repo");
+  });
+
+  it("should return no repos when all type filters are cleared", () => {
+    const repos = [
+      createMockRepo({ id: "1", key: "1", name: "standard-repo" }),
+      createMockRepo({ id: "2", isFork: true, key: "2", name: "forked-repo" }),
+    ];
+
+    const { result } = renderHook(() =>
+      useRepoFilters({ login: "testuser", repos }),
+    );
+
+    act(() => {
+      result.current.setTypeFilters(new Set());
+    });
+
+    expect(result.current.filteredRepos).toHaveLength(0);
   });
 
   it("should only show repos user can administer", () => {

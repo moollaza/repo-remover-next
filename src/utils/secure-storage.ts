@@ -6,6 +6,12 @@
 const STORAGE_KEY_PREFIX = 'secure_';
 const ALGORITHM = 'AES-GCM';
 
+function toArrayBuffer(view: Uint8Array): ArrayBuffer {
+  const buffer = new ArrayBuffer(view.byteLength);
+  new Uint8Array(buffer).set(view);
+  return buffer;
+}
+
 // Decrypt data
 async function decryptData(encryptedData: string): Promise<string> {
   try {
@@ -24,9 +30,9 @@ async function decryptData(encryptedData: string): Promise<string> {
 
     const key = await deriveKey(password, salt);
     const decrypted = await crypto.subtle.decrypt(
-      { iv, name: ALGORITHM },
+      { iv: toArrayBuffer(iv), name: ALGORITHM },
       key,
-      encrypted
+      toArrayBuffer(encrypted)
     );
 
     return decoder.decode(decrypted);
@@ -41,7 +47,7 @@ async function deriveKey(password: string, salt: Uint8Array): Promise<CryptoKey>
   const encoder = new TextEncoder();
   const keyMaterial = await crypto.subtle.importKey(
     'raw',
-    encoder.encode(password),
+    toArrayBuffer(encoder.encode(password)),
     'PBKDF2',
     false,
     ['deriveKey']
@@ -52,7 +58,7 @@ async function deriveKey(password: string, salt: Uint8Array): Promise<CryptoKey>
       hash: 'SHA-256',
       iterations: 100000,
       name: 'PBKDF2',
-      salt,
+      salt: toArrayBuffer(salt),
     },
     keyMaterial,
     { length: 256, name: ALGORITHM },
@@ -71,9 +77,9 @@ async function encryptData(data: string): Promise<string> {
 
     const key = await deriveKey(password, salt);
     const encrypted = await crypto.subtle.encrypt(
-      { iv, name: ALGORITHM },
+      { iv: toArrayBuffer(iv), name: ALGORITHM },
       key,
-      encoder.encode(data)
+      toArrayBuffer(encoder.encode(data))
     );
 
     // Combine salt, iv, and encrypted data
@@ -115,7 +121,7 @@ async function getBrowserFingerprint(): Promise<string> {
   // Hash the fingerprint to create a more uniform key
   const encoder = new TextEncoder();
   const data = encoder.encode(fingerprint);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', toArrayBuffer(data));
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }

@@ -26,6 +26,8 @@ export class DashboardPage extends BasePage {
   readonly nextPageButton: Locator;
   readonly pagination: Locator;
   readonly paginationFilter: Locator;
+  readonly repoTypeClearButton: Locator;
+  readonly repoTypeShowAllButton: Locator;
   readonly prevPageButton: Locator;
   readonly progressBar: Locator;
   readonly progressModalHeader: Locator;
@@ -42,6 +44,8 @@ export class DashboardPage extends BasePage {
     super(page);
     this.searchInput = page.getByLabel("Search");
     this.typeFilter = page.getByTestId("repo-type-select");
+    this.repoTypeShowAllButton = page.getByTestId("repo-type-show-all-button");
+    this.repoTypeClearButton = page.getByTestId("repo-type-clear-button");
     this.selectAllCheckbox = page.getByRole("checkbox", { name: "Select all" });
     this.archiveButton = page.getByTestId("repo-action-button-archive");
     this.deleteButton = page.getByTestId("repo-action-button-delete");
@@ -278,7 +282,34 @@ export class DashboardPage extends BasePage {
 
   async filterByType(type: string) {
     await this.typeFilter.click();
-    await this.page.getByRole("option", { name: type }).click();
+    await this.page.getByRole("dialog").getByRole("option", { name: type }).click();
+  }
+
+  async showOnlyType(type: string) {
+    const allTypes = [
+      "Standard",
+      "Private",
+      "Organization",
+      "Forked",
+      "Archived",
+      "Template",
+      "Mirror",
+      "Disabled",
+    ];
+
+    await this.repoTypeShowAllButton.click();
+    await this.typeFilter.click();
+
+    for (const option of allTypes) {
+      if (option !== type) {
+        await this.page
+          .getByRole("dialog")
+          .getByRole("option", { name: option })
+          .click();
+      }
+    }
+
+    await this.page.keyboard.press("Escape");
   }
 
   async getCurrentPage() {
@@ -342,7 +373,9 @@ export class DashboardPage extends BasePage {
    */
   async selectArchiveAction() {
     await this.openRepoActionDropdown();
-    await this.repoActionDropdownItemArchive.click();
+    await this.page
+      .getByRole("menuitemradio", { name: "Archive Selected Repos" })
+      .click({ force: true });
 
     await Promise.all([
       // Wait for the archive button to be visible
@@ -358,7 +391,9 @@ export class DashboardPage extends BasePage {
    */
   async selectDeleteAction() {
     await this.openRepoActionDropdown();
-    await this.repoActionDropdownItemDelete.click();
+    await this.page
+      .getByRole("menuitemradio", { name: "Delete Selected Repos" })
+      .click({ force: true });
 
     await Promise.all([
       // Wait for the delete button to be visible
