@@ -1,4 +1,17 @@
-import { Github, Heart, Trash2, Twitter } from "lucide-react";
+import { Github, Heart, Trash2 } from "lucide-react";
+
+function BlueskyIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      fill="currentColor"
+      viewBox="0 0 24 24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path d="M12 10.8c-1.087-2.114-4.046-6.053-6.798-7.995C2.566.944 1.561 1.266.902 1.565.139 1.908 0 3.08 0 3.768c0 .69.378 5.65.624 6.479.785 2.627 3.6 3.476 6.178 3.126-4.594.664-7.093 2.806-3.897 6.317 3.597 3.955 6.027-.326 7.095-2.76.147-.335.221-.532.221-.384 0-.148.074.049.221.384 1.068 2.434 3.498 6.715 7.095 2.76 3.196-3.511.697-5.653-3.897-6.317 2.578.35 5.393-.499 6.178-3.126C20.622 9.418 21 4.458 21 3.768c0-.69-.139-1.86-.902-2.203-.659-.299-1.664-.621-4.3 1.24C13.046 4.747 10.087 8.686 9 10.8h3z" />
+    </svg>
+  );
+}
 
 export default function Footer() {
   return (
@@ -30,11 +43,11 @@ export default function Footer() {
               </a>
               <a
                 className="text-default-400 hover:text-foreground transition-colors"
-                href="https://x.com/RepoRemover"
+                href="https://bsky.app/profile/reporemover.xyz"
                 rel="noopener noreferrer"
                 target="_blank"
               >
-                <Twitter className="h-5 w-5" />
+                <BlueskyIcon className="h-5 w-5" />
               </a>
             </div>
           </div>
@@ -80,6 +93,16 @@ export default function Footer() {
                   target="_blank"
                 >
                   GitHub
+                </a>
+              </li>
+              <li>
+                <a
+                  className="hover:text-foreground transition-colors"
+                  href="https://bsky.app/profile/reporemover.xyz"
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  Bluesky
                 </a>
               </li>
               <li>

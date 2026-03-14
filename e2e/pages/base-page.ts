@@ -105,6 +105,10 @@ export class BasePage {
 
     // Resources links
     await this.expectFooterLink(
+      "Bluesky",
+      "https://bsky.app/profile/reporemover.xyz",
+    );
+    await this.expectFooterLink(
       "Feedback",
       "mailto:hello@quickbudget.xyz?subject=Repo%20Remover%20Feedback",
     );
