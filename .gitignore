@@ -36,6 +36,5 @@ yarn-error.log*
 *storybook.log
 storybook-static
 
-# Claude Code assistant files (keep local only)
-CLAUDE.md
-.claude/
+# Claude Code local files
+.claude/settings.local.json
