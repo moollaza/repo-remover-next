@@ -60,7 +60,7 @@ export function ProductShowcase() {
     <section className="w-full px-6 py-20 bg-gradient-to-b from-background to-default-50">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
-          <span className="inline-block px-3 py-1 text-xs rounded-full bg-primary/10 text-primary border border-primary/20 mb-4">
+          <span className="inline-block px-3 py-1 text-xs rounded-full bg-[var(--brand-blue)]/10 text-[var(--brand-blue)] border border-[var(--brand-blue)]/20 mb-4">
             See it in action
           </span>
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
