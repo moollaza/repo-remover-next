@@ -17,7 +17,7 @@ export function GenerateReposButton() {
   const octokit = pat ? createThrottledOctokit(pat) : null;
   const [isLoading, setIsLoading] = useState(false);
 
-  if (process.env.NODE_ENV !== "development" || !octokit) {
+  if (!import.meta.env.DEV || !octokit) {
     return null;
   }
 

@@ -123,7 +123,7 @@ async function getBrowserFingerprint(): Promise<string> {
 // Check if Web Crypto API is available and we're not in a test environment
 function isWebCryptoAvailable(): boolean {
   // In test environments, fall back to plain storage for simplicity
-  if (process.env.NODE_ENV === 'test') {
+  if (import.meta.env.MODE === 'test') {
     return false;
   }
 

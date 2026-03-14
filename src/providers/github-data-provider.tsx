@@ -15,7 +15,7 @@ import {
 } from "@/utils/github-api";
 import { secureStorage } from "@/utils/secure-storage";
 
-const IS_DEV = process.env.NODE_ENV === "development";
+const IS_DEV = import.meta.env.DEV;
 
 // Interface for SWR fetcher function
 export interface GitHubFetcherResult {

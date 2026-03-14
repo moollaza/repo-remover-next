@@ -1,7 +1,5 @@
-"use client";
-
 import { Button } from "@heroui/react";
-import * as Sentry from "@sentry/nextjs";
+import * as Sentry from "@sentry/react";
 import { Component, type ErrorInfo, type ReactNode } from "react";
 
 interface ErrorBoundaryProps {
@@ -44,7 +42,7 @@ export class ErrorBoundary extends Component<
     });
 
     // Log to console in development
-    if (process.env.NODE_ENV === "development") {
+    if (import.meta.env.DEV) {
       console.error("Error Boundary caught an error:", error, errorInfo);
     }
   }
@@ -73,7 +71,7 @@ export class ErrorBoundary extends Component<
               An unexpected error occurred. Please try again or refresh the
               page.
             </p>
-            {process.env.NODE_ENV === "development" &&
+            {import.meta.env.DEV &&
               this.state.error && (
                 <div className="mb-6 rounded bg-danger-50 p-4 text-left">
                   <p className="mb-2 text-sm font-semibold text-danger">

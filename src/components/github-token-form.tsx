@@ -1,5 +1,3 @@
-"use client";
-
 import { Button, Checkbox, Input, type InputProps } from "@heroui/react";
 import clsx from "clsx";
 import { useEffect, useState } from "react";

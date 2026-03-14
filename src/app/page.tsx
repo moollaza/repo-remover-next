@@ -1,5 +1,3 @@
-"use client";
-
 import { Button, Link } from "@heroui/react";
 
 import ScrollButton from "@/components/scroll-button";
