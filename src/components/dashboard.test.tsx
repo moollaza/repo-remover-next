@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen } from "@/utils/test-utils";
 import userEvent from "@testing-library/user-event";
 import { vi } from "vitest";
 
@@ -23,9 +23,7 @@ describe("Dashboard", () => {
   it("shows error alert when isError is true", () => {
     render(<Dashboard {...defaultProps} isError={true} />);
 
-    expect(
-      screen.getByText(/error loading repositories/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/error loading repositories/i)).toBeInTheDocument();
   });
 
   it("shows permission warning when provided", () => {
@@ -59,11 +57,11 @@ describe("Dashboard", () => {
 
   it("hides refresh button when loading", () => {
     render(
-      <Dashboard {...defaultProps} isLoading={true} onRefresh={vi.fn()} />
+      <Dashboard {...defaultProps} isLoading={true} onRefresh={vi.fn()} />,
     );
 
     expect(
-      screen.queryByRole("button", { name: /refresh repository data/i })
+      screen.queryByRole("button", { name: /refresh repository data/i }),
     ).not.toBeInTheDocument();
   });
 
@@ -71,7 +69,7 @@ describe("Dashboard", () => {
     render(<Dashboard {...defaultProps} />);
 
     expect(
-      screen.queryByRole("button", { name: /refresh repository data/i })
+      screen.queryByRole("button", { name: /refresh repository data/i }),
     ).not.toBeInTheDocument();
   });
 
@@ -102,12 +100,10 @@ describe("Dashboard", () => {
         {...defaultProps}
         isError={true}
         permissionWarning={warning}
-      />
+      />,
     );
 
-    expect(
-      screen.getByText(/error loading repositories/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/error loading repositories/i)).toBeInTheDocument();
     expect(screen.getByText(/limited access/i)).toBeInTheDocument();
     expect(screen.getByText(warning)).toBeInTheDocument();
   });

@@ -10,7 +10,16 @@
   "parserOptions": {
     "project": "./tsconfig.app.json"
   },
-  "ignorePatterns": ["node_modules/", "dist/", ".vscode/", "out/"],
+  "ignorePatterns": [
+    "node_modules/",
+    "dist/",
+    ".vscode/",
+    "out/",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx"
+  ],
   "rules": {
     "perfectionist/sort-imports": [
       "error",
