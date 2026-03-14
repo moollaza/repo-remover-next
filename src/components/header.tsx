@@ -9,7 +9,7 @@ import {
   NavbarContent,
   User,
 } from "@heroui/react";
-import { Moon, Sun } from "lucide-react";
+import { Moon, Sun, Trash2 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
@@ -57,8 +57,8 @@ function LandingHeader({ isAuthenticated }: { isAuthenticated: boolean }) {
     >
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         <a className="flex items-center gap-2" href="/">
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-bold text-sm">
-            R
+          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+            <Trash2 className="h-4 w-4 text-white" />
           </div>
           <span className="font-semibold text-lg">Repo Remover</span>
         </a>

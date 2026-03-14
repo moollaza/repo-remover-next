@@ -1,4 +1,4 @@
-import { Github, Heart, Twitter } from "lucide-react";
+import { Github, Heart, Trash2, Twitter } from "lucide-react";
 
 export default function Footer() {
   return (
@@ -7,8 +7,8 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-bold">
-                R
+              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                <Trash2 className="h-4 w-4 text-white" />
               </div>
               <span className="font-semibold text-lg">Repo Remover</span>
             </div>
