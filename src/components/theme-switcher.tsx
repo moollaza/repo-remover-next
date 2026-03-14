@@ -2,8 +2,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 
-"use client";
-
 import { MoonIcon, SunIcon } from "@heroicons/react/16/solid";
 import { Button } from "@heroui/react";
 import { useTheme } from "next-themes";

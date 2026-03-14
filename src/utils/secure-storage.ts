@@ -52,7 +52,7 @@ async function deriveKey(password: string, salt: Uint8Array): Promise<CryptoKey>
       hash: 'SHA-256',
       iterations: 100000,
       name: 'PBKDF2',
-      salt,
+      salt: salt as BufferSource,
     },
     keyMaterial,
     { length: 256, name: ALGORITHM },
@@ -71,7 +71,7 @@ async function encryptData(data: string): Promise<string> {
 
     const key = await deriveKey(password, salt);
     const encrypted = await crypto.subtle.encrypt(
-      { iv, name: ALGORITHM },
+      { iv: iv as BufferSource, name: ALGORITHM },
       key,
       encoder.encode(data)
     );
@@ -123,7 +123,7 @@ async function getBrowserFingerprint(): Promise<string> {
 // Check if Web Crypto API is available and we're not in a test environment
 function isWebCryptoAvailable(): boolean {
   // In test environments, fall back to plain storage for simplicity
-  if (process.env.NODE_ENV === 'test') {
+  if (import.meta.env.MODE === 'test') {
     return false;
   }
 

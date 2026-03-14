@@ -1,6 +1,4 @@
-"use client";
-
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 import React from "react";
 
 import GitHubTokenForm from "@/components/github-token-form";
@@ -9,10 +7,10 @@ import { analytics } from "@/utils/analytics";
 
 export default function TokenFormSection() {
   // Pre-populate with dev token if available (development only)
-  const devToken = process.env.NODE_ENV === 'development' ? process.env.NEXT_PUBLIC_GITHUB_DEV_TOKEN : undefined;
+  const devToken = import.meta.env.DEV ? import.meta.env.VITE_GITHUB_DEV_TOKEN : undefined;
   const [value, setValue] = React.useState(devToken ?? "");
   const { setPat } = useGitHubData();
-  const router = useRouter();
+  const navigate = useNavigate();
 
   const handleSubmit = (token: string) => {
     setPat(token);
@@ -20,7 +18,7 @@ export default function TokenFormSection() {
     // Track successful token validation
     analytics.trackTokenValidated();
 
-    router.push("/dashboard");
+    navigate("/dashboard");
   };
 
   return (

@@ -1,10 +1,15 @@
 import Header from "@/components/header";
 import { render, screen } from "@/utils/test-utils";
 
-// Mock next/navigation
-vi.mock("next/navigation", () => ({
-  usePathname: vi.fn(() => "/"),
-}));
+// Mock react-router-dom
+vi.mock("react-router-dom", async () => {
+  const actual = await vi.importActual("react-router-dom");
+  return {
+    ...actual,
+    useLocation: vi.fn(() => ({ pathname: "/", search: "", hash: "", state: null, key: "default" })),
+    useNavigate: vi.fn(() => vi.fn()),
+  };
+});
 
 describe("Header", () => {
   describe("Authentication states", () => {

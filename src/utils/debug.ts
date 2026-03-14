@@ -10,7 +10,7 @@
 /**
  * Check if we're in development mode
  */
-const isDevelopment = process.env.NODE_ENV === "development";
+const isDevelopment = import.meta.env.DEV;
 
 /**
  * Patterns to detect and sanitize sensitive data
@@ -128,8 +128,14 @@ function sanitize(value: unknown): unknown {
  */
 function table(data: unknown): void {
   if (!isDevelopment) return;
-  // eslint-disable-next-line no-console
-  console.table(sanitize(data));
+  try {
+    // eslint-disable-next-line no-console
+    console.table(sanitize(data));
+  } catch {
+    // Fallback for environments where console.table fails (e.g. jsdom)
+    // eslint-disable-next-line no-console
+    console.log(sanitize(data));
+  }
 }
 
 /**

@@ -1,11 +1,9 @@
-"use client";
-
 import { HeroUIProvider } from "@heroui/system";
 import {
   ThemeProvider as NextThemesProvider,
-  ThemeProviderProps,
+  type ThemeProviderProps,
 } from "next-themes";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 import { type ReactNode } from "react";
 
 import { GitHubDataProvider } from "@/providers/github-data-provider";
@@ -16,10 +14,10 @@ export interface ProvidersProps {
 }
 
 export function Providers({ children, themeProps }: ProvidersProps) {
-  const router = useRouter();
+  const navigate = useNavigate();
 
   return (
-    <HeroUIProvider navigate={(url) => router.push(url)}>
+    <HeroUIProvider navigate={(url) => navigate(url)}>
       <NextThemesProvider {...themeProps}>
         <GitHubDataProvider>{children}</GitHubDataProvider>
       </NextThemesProvider>

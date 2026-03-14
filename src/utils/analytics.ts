@@ -5,7 +5,7 @@
 import { trackEvent } from 'fathom-client';
 
 // Configuration constants
-const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+const IS_PRODUCTION = import.meta.env.PROD;
 
 /**
  * Track user events using modern Fathom trackEvent API

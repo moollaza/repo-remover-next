@@ -1,6 +1,6 @@
 import { Card, CardBody, CardFooter } from "@heroui/react";
 import clsx from "clsx";
-import Link from "next/link";
+
 import { useEffect, useState } from "react";
 
 import styles from "./scrolling-quotes.module.css";
@@ -79,7 +79,7 @@ export function ScrollingQuotes() {
         }}
       >
         {[...shuffledQuotes, ...shuffledQuotes].map((quote, index) => (
-          <Link
+          <a
             className={clsx(
               "w-72 flex-shrink-0 cursor-pointer",
               !reduceMotion && "transition-transform duration-300 ease-in-out hover:scale-105"
@@ -109,7 +109,7 @@ export function ScrollingQuotes() {
                 </span>
               </CardFooter>
             </Card>
-          </Link>
+          </a>
         ))}
       </div>
     </div>

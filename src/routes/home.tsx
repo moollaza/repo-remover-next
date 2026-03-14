@@ -1,12 +1,10 @@
-"use client";
-
 import { Button, Link } from "@heroui/react";
 
 import ScrollButton from "@/components/scroll-button";
 import { ScrollingQuotes } from "@/components/scrolling-quotes";
 import TokenFormSection from "@/components/token-form-section";
 
-export default function HomePage() {
+export function Home() {
   return (
     <>
       <section>

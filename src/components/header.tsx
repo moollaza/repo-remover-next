@@ -1,5 +1,3 @@
-"use client";
-
 import {
   Button,
   Dropdown,
@@ -13,7 +11,7 @@ import {
   NavbarItem,
   User,
 } from "@heroui/react";
-import { usePathname } from "next/navigation";
+import { useLocation } from "react-router-dom";
 
 import { GenerateReposButton } from "@/components/generate-repos-button";
 import { ThemeSwitcher } from "@/components/theme-switcher";
@@ -26,11 +24,11 @@ const homeLinks = [
 ];
 
 export default function Header() {
-  const pathname = usePathname();
+  const { pathname } = useLocation();
   const { isAuthenticated, user } = useGitHubData();
 
   const isDashboard = pathname === "/dashboard";
-  const isDevelopment = process.env.NODE_ENV === "development";
+  const isDevelopment = import.meta.env.DEV;
 
   // Clear the localStorage and redirect to the homepage
   function handleLogout() {

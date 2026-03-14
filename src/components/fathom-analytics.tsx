@@ -1,47 +1,33 @@
-"use client";
-
-import { load, trackPageview } from "fathom-client";
-import { usePathname, useSearchParams } from "next/navigation";
-import { Suspense, useEffect } from "react";
+import * as Fathom from "fathom-client";
+import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
 
 export function FathomAnalytics() {
-  return (
-    <Suspense fallback={null}>
-      <TrackPageView />
-    </Suspense>
-  );
-}
+  const location = useLocation();
 
-function TrackPageView() {
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-
-  // Initialize Fathom
   useEffect(() => {
-    const siteId = process.env.NEXT_PUBLIC_FATHOM_SITE_ID;
+    const siteId = import.meta.env.VITE_FATHOM_SITE_ID;
     if (!siteId) {
-      console.warn("Fathom Analytics: NEXT_PUBLIC_FATHOM_SITE_ID not found");
+      if (import.meta.env.DEV) {
+        console.warn("Fathom Analytics: VITE_FATHOM_SITE_ID not set");
+      }
       return;
     }
 
-    load(siteId, {
-      auto: false, // We'll manually track page views
-      excludedDomains: ["localhost", "127.0.0.1"], // Never track locally
-      includedDomains: ["repo-remover.com"], // Only track on production domain
+    Fathom.load(siteId, {
+      auto: false,
+      excludedDomains: ["localhost", "127.0.0.1"],
+      includedDomains: ["reporemover.xyz"],
     });
   }, []);
 
-  // Track page views on route changes
   useEffect(() => {
-    if (!pathname) return;
-
-    const url = pathname + (searchParams?.toString() ? `?${searchParams.toString()}` : "");
-    
-    trackPageview({
-      referrer: document.referrer,
+    const url = location.pathname + location.search;
+    Fathom.trackPageview({
       url,
+      referrer: document.referrer,
     });
-  }, [pathname, searchParams]);
+  }, [location.pathname, location.search]);
 
   return null;
 }

@@ -1,19 +1,17 @@
-"use client";
-
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 
-import Dashboard from "@/components/dashboard";
+import DashboardComponent from "@/components/dashboard";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { useGitHubData } from "@/hooks/use-github-data";
 
 /**
- * DashboardPage - Container Component
+ * Dashboard - Container Component
  *
  * Handles data fetching, authentication, and routing.
  * Presentational component: src/components/dashboard.tsx
  */
-export default function DashboardPage() {
+export function Dashboard() {
   const {
     isError,
     isInitialized,
@@ -26,23 +24,23 @@ export default function DashboardPage() {
     repos,
   } = useGitHubData();
 
-  const router = useRouter();
+  const navigate = useNavigate();
 
   // Side effect: Redirect to home if not authenticated
   useEffect(() => {
     if (!isInitialized) return;
 
     if (!pat) {
-      router.push("/");
+      navigate("/");
     } else {
       refetchData();
     }
-  }, [pat, router, refetchData, isInitialized]);
+  }, [pat, navigate, refetchData, isInitialized]);
 
   // Render presentational component with all data
   return (
     <ErrorBoundary>
-      <Dashboard
+      <DashboardComponent
         isError={isError}
         isLoading={isLoading}
         login={login}
