@@ -18,11 +18,8 @@ export function App() {
       <ErrorBoundary>
         <FathomAnalytics />
         <div className="min-h-full">
-          <div className="border-b border-divider">
-            <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-              <Header />
-            </div>
-          </div>
+          {/* Header renders its own sticky/border/blur per route */}
+          <Header />
           <main>
             <Routes>
               {/* Home is full-width — sections handle their own max-width */}
