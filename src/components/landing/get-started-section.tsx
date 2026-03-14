@@ -187,7 +187,7 @@ export function GetStartedSection() {
                 </div>
                 <div className="flex-1 pt-1 pb-2">
                   <div className="flex items-center gap-2 mb-1.5">
-                    <step.icon className="h-4 w-4 text-primary" />
+                    <step.icon className="h-4 w-4 text-[var(--brand-blue)]" />
                     <h3 className="text-lg font-semibold">{step.title}</h3>
                   </div>
                   <p className="text-default-500 mb-3">{step.description}</p>

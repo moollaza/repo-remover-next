@@ -2,6 +2,7 @@ import { ExternalLink, Star } from "lucide-react";
 
 const testimonials = [
   {
+    avatar: "LW",
     handle: "Lindsay W.",
     quote:
       "This saved me a lot of time when I needed to delete 100 repos. The developer helped me out by making updates when I gave some feedback. Great!",
@@ -10,6 +11,7 @@ const testimonials = [
     sourceUrl: "https://www.producthunt.com/products/repo-remover/reviews",
   },
   {
+    avatar: "GA",
     handle: "George A.",
     quote:
       "It was dumb simple, and the UI made it easy to filter out repos I did not want to be affected.",
@@ -18,6 +20,7 @@ const testimonials = [
     sourceUrl: "https://www.producthunt.com/products/repo-remover/reviews",
   },
   {
+    avatar: "JY",
     handle: "@jayanth0107",
     quote: "You have created a website that GitHub won't provide.",
     rating: 5,
@@ -33,7 +36,7 @@ export function TestimonialsSection() {
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Loved by Developers
+            Loved by Developers Worldwide
           </h2>
           <p className="text-lg text-default-500 max-w-2xl mx-auto">
             Join thousands of developers who have reclaimed control of their
@@ -49,21 +52,31 @@ export function TestimonialsSection() {
             >
               <div className="flex gap-1 mb-4">
                 {Array.from({ length: t.rating }, (_, i) => (
-                  <Star className="w-4 h-4 fill-warning text-warning" key={i} />
+                  <Star
+                    className="w-4 h-4 fill-yellow-400 text-yellow-400"
+                    key={i}
+                  />
                 ))}
               </div>
-              <p className="mb-6 leading-relaxed">&ldquo;{t.quote}&rdquo;</p>
-              <div className="flex items-center justify-between">
-                <span className="font-semibold text-sm">{t.handle}</span>
-                <a
-                  className="inline-flex items-center gap-1 text-xs text-default-400 hover:text-primary transition-colors"
-                  href={t.sourceUrl}
-                  rel="noopener noreferrer"
-                  target="_blank"
-                >
-                  {t.source}
-                  <ExternalLink className="w-3 h-3" />
-                </a>
+              <p className="text-foreground mb-6 leading-relaxed">
+                &ldquo;{t.quote}&rdquo;
+              </p>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--brand-blue)] to-[var(--brand-cyan)] flex items-center justify-center text-white font-semibold text-sm">
+                  {t.avatar}
+                </div>
+                <div>
+                  <div className="font-semibold">{t.handle}</div>
+                  <a
+                    className="text-sm text-default-500 hover:text-primary transition-colors inline-flex items-center gap-1"
+                    href={t.sourceUrl}
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
+                    {t.source}
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div>
               </div>
             </div>
           ))}

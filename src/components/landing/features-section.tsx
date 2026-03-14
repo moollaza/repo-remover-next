@@ -19,7 +19,7 @@ const features = [
       "Combine multiple filters for precise results",
     ],
     description:
-      "Take control with powerful filters. Show only private repos, archived projects, or forked repos. Sort by any metric that matters.",
+      "Take control with powerful filters. Show only private repos, archived projects, or forked repos. Sort by name or last updated.",
     icon: Filter,
     title: "Advanced Filtering & Sorting",
   },
@@ -60,7 +60,7 @@ export function FeaturesSection() {
               className={`flex flex-col ${index % 2 === 1 ? "lg:flex-row-reverse" : "lg:flex-row"} items-center gap-12 lg:gap-16`}
             >
               <div className="flex-1 flex justify-center">
-                <div className="w-48 h-48 rounded-2xl bg-gradient-to-br from-[var(--brand-blue)] to-[var(--brand-cyan)] flex items-center justify-center shadow-xl">
+                <div className="w-48 h-48 rounded-2xl bg-gradient-to-br from-[var(--brand-blue)] to-[var(--brand-cyan)] dark:from-[var(--brand-blue)]/80 dark:to-[var(--brand-cyan)]/80 flex items-center justify-center shadow-xl">
                   <feature.icon
                     className="w-24 h-24 text-white"
                     strokeWidth={1.5}
@@ -74,7 +74,7 @@ export function FeaturesSection() {
                 <p className="text-lg text-default-500 mb-6">
                   {feature.description}
                 </p>
-                <ul className="space-y-3">
+                <ul className="space-y-3 mb-8">
                   {feature.benefits.map((benefit, i) => (
                     <li className="flex items-start gap-3" key={i}>
                       <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
@@ -84,6 +84,18 @@ export function FeaturesSection() {
                     </li>
                   ))}
                 </ul>
+                {index === 0 && (
+                  <button
+                    className="mt-4 inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-[var(--brand-blue)] text-white font-medium text-sm hover:opacity-90 transition-opacity"
+                    onClick={() => {
+                      const target = document.getElementById("get-started");
+                      target?.scrollIntoView({ behavior: "smooth" });
+                    }}
+                    type="button"
+                  >
+                    Try It Now
+                  </button>
+                )}
               </div>
             </div>
           </div>

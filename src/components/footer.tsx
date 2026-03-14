@@ -2,8 +2,11 @@ import { Github, Heart, Trash2, Twitter } from "lucide-react";
 
 export default function Footer() {
   return (
-    <footer className="border-t border-divider" data-testid="footer">
-      <div className="py-12">
+    <footer
+      className="w-full border-t border-divider bg-default-50/50"
+      data-testid="footer"
+    >
+      <div className="max-w-7xl mx-auto px-6 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center gap-2 mb-4">
