@@ -57,7 +57,10 @@ const mockRepos = [
 
 export function ProductShowcase() {
   return (
-    <section className="w-full px-6 py-20 bg-gradient-to-b from-background to-default-50">
+    <section
+      className="w-full px-6 py-20 bg-gradient-to-b from-background to-default-50"
+      id="how-it-works"
+    >
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <span className="inline-block px-3 py-1 text-xs rounded-full bg-[var(--brand-blue)]/10 text-[var(--brand-blue)] border border-[var(--brand-blue)]/20 mb-4">

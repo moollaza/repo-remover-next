@@ -140,7 +140,7 @@ function InlinePATForm() {
       <button
         className={`w-full py-3 rounded-lg font-medium text-base transition-all ${
           canSubmit
-            ? "bg-primary text-primary-foreground hover:opacity-90 shadow-sm"
+            ? "bg-[var(--brand-blue)] text-white hover:opacity-90 shadow-sm"
             : "bg-default-200 text-default-400 cursor-not-allowed"
         }`}
         data-testid="github-token-submit"
@@ -158,7 +158,7 @@ export function GetStartedSection() {
     <section className="w-full px-6 py-20" id="get-started">
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4" id="how-it-works">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Get Started in Under 2 Minutes
           </h2>
           <p className="text-lg text-default-500 max-w-2xl mx-auto">
