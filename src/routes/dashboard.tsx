@@ -1,5 +1,5 @@
-import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 import DashboardComponent from "@/components/dashboard";
 import { ErrorBoundary } from "@/components/error-boundary";
@@ -31,9 +31,9 @@ export function Dashboard() {
     if (!isInitialized) return;
 
     if (!pat) {
-      navigate("/");
+      void navigate("/");
     } else {
-      refetchData();
+      void refetchData();
     }
   }, [pat, navigate, refetchData, isInitialized]);
 

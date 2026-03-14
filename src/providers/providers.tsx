@@ -3,8 +3,8 @@ import {
   ThemeProvider as NextThemesProvider,
   type ThemeProviderProps,
 } from "next-themes";
-import { useNavigate } from "react-router-dom";
 import { type ReactNode } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { GitHubDataProvider } from "@/providers/github-data-provider";
 
@@ -17,7 +17,7 @@ export function Providers({ children, themeProps }: ProvidersProps) {
   const navigate = useNavigate();
 
   return (
-    <HeroUIProvider navigate={(url) => navigate(url)}>
+    <HeroUIProvider navigate={(url) => void navigate(url)}>
       <NextThemesProvider {...themeProps}>
         <GitHubDataProvider>{children}</GitHubDataProvider>
       </NextThemesProvider>

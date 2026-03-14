@@ -1,6 +1,5 @@
 import { Card, CardBody, CardFooter } from "@heroui/react";
 import clsx from "clsx";
-
 import { useEffect, useState } from "react";
 
 import styles from "./scrolling-quotes.module.css";
@@ -51,12 +50,14 @@ export function ScrollingQuotes() {
 
   useEffect(() => {
     // Check for reduced motion preference or Storybook environment
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const isStorybook = typeof window !== 'undefined' && (
-      window.location.href.includes('storybook') ||
-      window.parent !== window ||
-      !!document.querySelector('#storybook-root')
-    );
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    const isStorybook =
+      typeof window !== "undefined" &&
+      (window.location.href.includes("storybook") ||
+        window.parent !== window ||
+        !!document.querySelector("#storybook-root"));
 
     setReduceMotion(prefersReducedMotion || isStorybook);
   }, []);
@@ -82,7 +83,8 @@ export function ScrollingQuotes() {
           <a
             className={clsx(
               "w-72 flex-shrink-0 cursor-pointer",
-              !reduceMotion && "transition-transform duration-300 ease-in-out hover:scale-105"
+              !reduceMotion &&
+                "transition-transform duration-300 ease-in-out hover:scale-105",
             )}
             href={quote.source}
             key={index}
