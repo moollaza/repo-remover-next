@@ -12,44 +12,27 @@ export async function mockArchiveRepo(
   repoName: string,
   options: { delay?: number; error?: string; success?: boolean } = {},
 ) {
-  await page.route(`**/repos/testuser/${repoName}`, (route) => {
-    // Only handle PATCH requests for archiving
-    if (route.request().method() === "PATCH") {
-      // Add delay if specified for testing loading states
-      if (options.delay) {
-        return setTimeout(() => {
-          if (options.success === false) {
-            void route.fulfill({
-              json: {
-                message: options.error ?? "Repository archiving failed",
-              },
-              status: 403,
-            });
-          } else {
-            void route.fulfill({
-              json: { archived: true },
-              status: 200,
-            });
-          }
-        }, options.delay);
-      }
+  await page.route(`**/repos/**/${repoName}`, (route) => {
+    if (route.request().method() !== "PATCH") {
+      void route.continue();
+      return;
+    }
 
+    const fulfill = () => {
       if (options.success === false) {
         void route.fulfill({
-          json: {
-            message: options.error ?? "Repository archiving failed",
-          },
+          json: { message: options.error ?? "Repository archiving failed" },
           status: 403,
         });
       } else {
-        void route.fulfill({
-          json: { archived: true },
-          status: 200,
-        });
+        void route.fulfill({ json: { archived: true }, status: 200 });
       }
+    };
+
+    if (options.delay) {
+      setTimeout(fulfill, options.delay);
     } else {
-      // Continue for non-PATCH requests
-      void route.continue();
+      fulfill();
     }
   });
 }
@@ -58,12 +41,10 @@ export async function mockBulkActions(
   page: Page,
   options: { error?: string; success?: boolean } = {},
 ) {
-  await page.route("**/repos/testuser/**", (route) => {
+  await page.route("**/repos/**", (route) => {
     if (options.success === false) {
       void route.fulfill({
-        json: {
-          message: options.error ?? "Bulk action failed",
-        },
+        json: { message: options.error ?? "Bulk action failed" },
         status: 403,
       });
     } else {
@@ -77,18 +58,19 @@ export async function mockDeleteRepo(
   repoName: string,
   options: { error?: string; success?: boolean } = {},
 ) {
-  await page.route(`**/repos/testuser/${repoName}`, (route) => {
-    if (route.request().method() === "DELETE") {
-      if (options.success === false) {
-        void route.fulfill({
-          json: {
-            message: options.error ?? "Repository deletion failed",
-          },
-          status: 403,
-        });
-      } else {
-        void route.fulfill({ status: 204 });
-      }
+  await page.route(`**/repos/**/${repoName}`, (route) => {
+    if (route.request().method() !== "DELETE") {
+      void route.continue();
+      return;
+    }
+
+    if (options.success === false) {
+      void route.fulfill({
+        json: { message: options.error ?? "Repository deletion failed" },
+        status: 403,
+      });
+    } else {
+      void route.fulfill({ status: 204 });
     }
   });
 }
