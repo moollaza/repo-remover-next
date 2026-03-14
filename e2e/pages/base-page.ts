@@ -104,6 +104,9 @@ export class BasePage {
     await this.expectFooterLink("Get Started", "#get-started");
 
     // Resources links
-    await this.expectFooterLink("About the Author", "https://zaahir.ca");
+    await this.expectFooterLink(
+      "Feedback",
+      "mailto:hello@quickbudget.xyz?subject=Repo%20Remover%20Feedback",
+    );
   }
 }

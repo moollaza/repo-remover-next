@@ -85,11 +85,9 @@ export default function Footer() {
               <li>
                 <a
                   className="hover:text-foreground transition-colors"
-                  href="https://zaahir.ca"
-                  rel="noopener noreferrer"
-                  target="_blank"
+                  href="mailto:hello@quickbudget.xyz?subject=Repo%20Remover%20Feedback"
                 >
-                  About the Author
+                  Feedback
                 </a>
               </li>
             </ul>
