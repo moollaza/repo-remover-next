@@ -6,8 +6,8 @@ export function HeroSection() {
       <div className="max-w-5xl mx-auto text-center">
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-default-100 border border-divider mb-8">
           <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--brand-blue)] opacity-75" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--brand-blue)]" />
           </span>
           <span className="text-sm text-default-500">
             300,000+ repos managed and counting
@@ -28,7 +28,7 @@ export function HeroSection() {
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <button
-            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-lg bg-primary text-primary-foreground font-medium text-base hover:opacity-90 transition-opacity shadow-sm"
+            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-lg bg-[var(--brand-blue)] text-white font-medium text-base hover:opacity-90 transition-opacity shadow-sm"
             onClick={() => {
               const target = document.getElementById("get-started");
               target?.scrollIntoView({ behavior: "smooth" });
@@ -48,7 +48,7 @@ export function HeroSection() {
           </a>
         </div>
 
-        <div className="mt-12 flex items-center justify-center gap-6 text-sm text-default-400">
+        <div className="mt-12 flex items-center justify-center gap-6 text-sm text-default-600">
           <span>Free forever</span>
           <span className="w-1 h-1 rounded-full bg-default-300" />
           <span>100% in-browser</span>

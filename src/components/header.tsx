@@ -55,7 +55,7 @@ function LandingHeader({ isAuthenticated }: { isAuthenticated: boolean }) {
       className="w-full border-b border-divider bg-background/80 backdrop-blur-sm sticky top-0 z-50"
       data-testid="navbar"
     >
-      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between relative">
         <a className="flex items-center gap-2" href="/">
           <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
             <Trash2 className="h-4 w-4 text-white" />
@@ -63,7 +63,7 @@ function LandingHeader({ isAuthenticated }: { isAuthenticated: boolean }) {
           <span className="font-semibold text-lg">Repo Remover</span>
         </a>
 
-        <nav className="hidden md:flex items-center gap-8">
+        <nav className="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
           {homeLinks.map((link) => (
             <a
               className="text-default-500 hover:text-foreground transition-colors"
