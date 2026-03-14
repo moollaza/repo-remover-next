@@ -4,11 +4,11 @@ const features = [
   {
     benefits: [
       "Search across all your repositories instantly",
-      "Filter by name, description, and programming language",
+      "Filter by name and description",
       "See results update in real-time as you type",
     ],
     description:
-      "Never scroll through endless lists again. Our smart search instantly finds repositories by name, description, or language.",
+      "Never scroll through endless lists again. Our smart search instantly finds repositories by name or description.",
     icon: Search,
     title: "Lightning-Fast Search",
   },
@@ -19,7 +19,7 @@ const features = [
       "Combine multiple filters for precise results",
     ],
     description:
-      "Take control with powerful filters. Show only private repos, archived projects, or specific languages. Sort by any metric that matters.",
+      "Take control with powerful filters. Show only private repos, archived projects, or forked repos. Sort by any metric that matters.",
     icon: Filter,
     title: "Advanced Filtering & Sorting",
   },

@@ -31,13 +31,13 @@ export class BasePage {
 
   async expectFooterCopyright() {
     await expect(
-      this.page.getByText(/© 2019-2025 All rights reserved./),
+      this.page.getByText(/© 2019-2025 Repo Remover/),
     ).toBeVisible();
   }
 
   // Footer assertions
   async expectFooterLink(text: string, href: string) {
-    const link = this.page.getByRole("link", { exact: true, name: text });
+    const link = this.footer.getByRole("link", { exact: true, name: text });
     await expect(link).toBeVisible();
     await expect(link).toHaveAttribute("href", href);
   }
@@ -77,9 +77,16 @@ export class BasePage {
   }
 
   async verifyCommonFooterElements() {
+    // Brand — scoped to footer, use first() since it appears in brand section
+    await expect(this.footer.getByText("Repo Remover").first()).toBeVisible();
+
     // Author link
     await this.expectFooterLink("Zaahir Moolla", "https://zaahir.ca");
-    await this.expectFooterCopyright();
+
+    // Copyright
+    await expect(
+      this.page.getByText(/© 2019-2025 Repo Remover/),
+    ).toBeVisible();
 
     // GitHub link
     await this.expectFooterLink(
@@ -88,13 +95,15 @@ export class BasePage {
     );
 
     // Section headings
-    await this.expectFooterSectionHeading("Contribute");
-    await this.expectFooterSectionHeading("Share");
+    await this.expectFooterSectionHeading("Product");
+    await this.expectFooterSectionHeading("Resources");
 
-    // Social media links
-    await this.expectFooterLink("Bluesky", "https://bsky.app");
-    await this.expectFooterLink("Reddit", "https://reddit.com");
-    await this.expectFooterLink("X", "https://x.com");
-    await this.expectFooterLink("LinkedIn", "https://linkedin.com");
+    // Product links
+    await this.expectFooterLink("Features", "#features");
+    await this.expectFooterLink("How It Works", "#how-it-works");
+    await this.expectFooterLink("Get Started", "#get-started");
+
+    // Resources links
+    await this.expectFooterLink("About the Author", "https://zaahir.ca");
   }
 }

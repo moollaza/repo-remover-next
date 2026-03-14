@@ -124,7 +124,7 @@ export default function GitHubTokenForm({
       <div className="flex flex-col gap-4">
         <Input
           autoComplete="off"
-          className={"w-1/2"}
+          className={"w-full"}
           color={inputColor}
           data-testid="github-token-input"
           description={inputDescription}
@@ -151,7 +151,7 @@ export default function GitHubTokenForm({
       </div>
 
       <Button
-        className="w-20"
+        className="w-full"
         color="primary"
         data-testid="github-token-submit"
         isDisabled={!isTokenValid || isValidating}
