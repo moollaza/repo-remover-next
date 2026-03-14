@@ -1,5 +1,5 @@
 import { type Repository } from "@octokit/graphql-schema";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@/utils/test-utils";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { GitHubContext, GitHubContextType } from "@/contexts/github-context";

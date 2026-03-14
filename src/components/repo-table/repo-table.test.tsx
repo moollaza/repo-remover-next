@@ -1,5 +1,5 @@
 import { type Repository } from "@octokit/graphql-schema";
-import { render, screen } from "@testing-library/react";
+import { render, screen } from "@/utils/test-utils";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
 import { createMockRepo } from "@/mocks/static-fixtures";
@@ -96,12 +96,16 @@ describe("RepoTable", () => {
 
     // The archived repo should be disabled when archive action is selected (which is the default)
     // Check for disabled styling on the archived repo row
-    const archivedRepoRow = screen.getByText("archived-repo").closest('[data-testid="repo-row"]');
+    const archivedRepoRow = screen
+      .getByText("archived-repo")
+      .closest('[data-testid="repo-row"]');
     expect(archivedRepoRow).toHaveClass("pointer-events-none");
     expect(archivedRepoRow).toHaveClass("opacity-50");
 
     // Active repo should not have these classes
-    const activeRepoRow = screen.getByText("active-repo").closest('[data-testid="repo-row"]');
+    const activeRepoRow = screen
+      .getByText("active-repo")
+      .closest('[data-testid="repo-row"]');
     expect(activeRepoRow).not.toHaveClass("opacity-50");
     expect(activeRepoRow).not.toHaveClass("pointer-events-none");
   });
