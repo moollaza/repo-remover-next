@@ -23,7 +23,8 @@
     "test:all": "bun run test:unit && bun run test:e2e",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "chromatic": "chromatic --exit-zero-on-changes"
+    "chromatic": "chromatic --exit-zero-on-changes",
+    "prepare": "husky"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.7.1",
@@ -74,7 +75,9 @@
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-perfectionist": "^4.2.0",
     "eslint-plugin-storybook": "^0.12.0",
+    "husky": "^9.1.7",
     "jsdom": "^28.1.0",
+    "lint-staged": "^16.3.3",
     "msw": "^2.7.3",
     "msw-storybook-addon": "^2.0.4",
     "next-themes": "^0.4.3",
@@ -90,6 +93,14 @@
   "msw": {
     "workerDirectory": [
       "public"
+    ]
+  },
+  "lint-staged": {
+    "*.{js,ts,tsx}": [
+      "eslint --fix"
+    ],
+    "*.{js,ts,tsx,css,md,json}": [
+      "prettier --write"
     ]
   }
 }
