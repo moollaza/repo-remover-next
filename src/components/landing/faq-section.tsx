@@ -36,17 +36,19 @@ const faqs = [
 
 function AccordionItem({
   answer,
+  isLast,
   question,
 }: {
   answer: string;
+  isLast: boolean;
   question: string;
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="border border-divider rounded-lg overflow-hidden">
+    <div className={isLast ? "" : "border-b border-divider"}>
       <button
-        className="flex items-center justify-between w-full px-6 py-4 text-left font-medium hover:bg-default-50 transition-colors"
+        className="flex items-center justify-between w-full py-4 text-left font-medium hover:underline transition-colors"
         onClick={() => setIsOpen(!isOpen)}
         type="button"
       >
@@ -63,9 +65,7 @@ function AccordionItem({
         }`}
       >
         <div className="overflow-hidden">
-          <div className="px-6 pb-4 text-default-500 leading-relaxed">
-            {answer}
-          </div>
+          <div className="pb-4 text-default-500 leading-relaxed">{answer}</div>
         </div>
       </div>
     </div>
@@ -85,10 +85,11 @@ export function FAQSection() {
           </p>
         </div>
 
-        <div className="space-y-3">
+        <div className="border-t border-divider">
           {faqs.map((faq, index) => (
             <AccordionItem
               answer={faq.answer}
+              isLast={index === faqs.length - 1}
               key={index}
               question={faq.question}
             />
