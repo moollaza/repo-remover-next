@@ -120,7 +120,10 @@ export const loadingHandlers = [
 
 export const errorHandlers = [
   github.query("getCurrentUser", () =>
-    HttpResponse.json({ message: "Bad credentials" }, { status: 401 }),
+    HttpResponse.json({
+      data: null,
+      errors: [{ message: "Bad credentials" }],
+    }),
   ),
   http.get("https://api.github.com/user", () =>
     HttpResponse.json({ message: "Bad credentials" }, { status: 401 }),
@@ -158,7 +161,10 @@ export const largeDatasetHandlers = [
 
 export const invalidTokenHandlers = [
   github.query("getCurrentUser", () =>
-    HttpResponse.json({ message: "Bad credentials" }, { status: 401 }),
+    HttpResponse.json({
+      data: null,
+      errors: [{ message: "Bad credentials" }],
+    }),
   ),
   http.get("https://api.github.com/user", () =>
     HttpResponse.json({ message: "Bad credentials" }, { status: 401 }),
@@ -175,10 +181,12 @@ export const partialDataHandlers = [
   github.query("getOrgRepositories", ({ variables }) => {
     const vars = variables as { org?: string };
     if (vars.org === "anotherorg") {
-      return HttpResponse.json(
-        { message: "Resource protected by organization SAML enforcement" },
-        { status: 403 },
-      );
+      return HttpResponse.json({
+        data: null,
+        errors: [
+          { message: "Resource protected by organization SAML enforcement" },
+        ],
+      });
     }
     const orgRepos = MOCK_REPOS.filter((r) => r.isInOrganization);
     return HttpResponse.json({

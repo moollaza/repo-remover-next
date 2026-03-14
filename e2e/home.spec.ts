@@ -21,10 +21,11 @@ test.describe("Home Page", () => {
     await expect(home.navbar.getByText("Repo Remover")).toBeVisible();
     await expect(home.navbar.getByText("Test User")).not.toBeVisible();
 
-    await home.expectHeading(
-      "Archive or Delete Multiple GitHub Repos, Instantly.",
-    );
+    await home.expectHeading("Archive or Delete Multiple GitHub Repos,");
 
+    // Token form is now in the "Get Started" section further down the page
+    // Scroll down to verify it's there
+    await home.page.getByText("Ready to start?").scrollIntoViewIfNeeded();
     await home.expectSubmitDisabled();
   });
 

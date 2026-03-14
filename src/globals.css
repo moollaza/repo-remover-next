@@ -8,7 +8,23 @@
 }
 
 @utility bg-gradient-conic {
-  background-image: conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops));
+  background-image: conic-gradient(
+    from 180deg at 50% 50%,
+    var(--tw-gradient-stops)
+  );
+}
+
+/* Shared brand tokens — used by both landing (Tailwind) and dashboard (HeroUI) */
+:root {
+  --brand-blue: #0066ff;
+  --brand-cyan: #06b6d4;
+  --brand-blue-light: #e6f0ff;
+}
+
+.dark {
+  --brand-blue: #60a5fa;
+  --brand-cyan: #22d3ee;
+  --brand-blue-light: #1e3a8a;
 }
 
 @layer utilities {
