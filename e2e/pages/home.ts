@@ -28,8 +28,8 @@ export class HomePage extends BasePage {
   }
 
   async expectErrorMessage(message: string) {
-    await expect(this.tokenFormError).toBeVisible();
-    await expect(this.tokenFormError).toHaveText(message);
+    // HeroUI Input error-message slot may animate in — wait for text to appear
+    await expect(this.tokenFormError).toHaveText(message, { timeout: 5000 });
   }
 
   async expectHeading(text: string) {

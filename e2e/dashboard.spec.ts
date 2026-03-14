@@ -254,7 +254,7 @@ test.describe("Dashboard Page", () => {
     await expect(dashboard.tableRows.first()).toBeVisible();
 
     // Select all repositories
-    await dashboard.selectAllCheckbox.click();
+    await dashboard.selectAll();
 
     // Verify page 1 has 5 rows
     await expect(dashboard.tableRows).toHaveCount(5);
@@ -270,7 +270,7 @@ test.describe("Dashboard Page", () => {
     await expect(dashboard.archiveButton).toBeEnabled();
 
     // Uncheck all - archive button should disable again
-    await dashboard.selectAllCheckbox.click();
+    await dashboard.deselectAll();
     await expect(dashboard.archiveButton).toBeDisabled();
 
     // Go back to page 1
@@ -398,7 +398,7 @@ test.describe("Dashboard Page", () => {
     });
 
     test("shows different text for delete action", async () => {
-      await dashboard.selectRepository("repo-1");
+      // repo-1 already selected in beforeEach
       await dashboard.selectDeleteAction();
       await dashboard.deleteButton.click();
       await dashboard.expectModalInMode("confirmation");
