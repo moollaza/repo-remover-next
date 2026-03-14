@@ -1,5 +1,9 @@
-import { ChevronDown } from "lucide-react";
-import { useState } from "react";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 const faqs = [
   {
@@ -34,44 +38,6 @@ const faqs = [
   },
 ];
 
-function AccordionItem({
-  answer,
-  isLast,
-  question,
-}: {
-  answer: string;
-  isLast: boolean;
-  question: string;
-}) {
-  const [isOpen, setIsOpen] = useState(false);
-
-  return (
-    <div className={isLast ? "" : "border-b border-divider"}>
-      <button
-        className="flex items-center justify-between w-full py-4 text-left font-medium hover:underline transition-colors"
-        onClick={() => setIsOpen(!isOpen)}
-        type="button"
-      >
-        {question}
-        <ChevronDown
-          className={`ml-4 h-4 w-4 shrink-0 text-default-400 transition-transform duration-200 ${
-            isOpen ? "rotate-180" : ""
-          }`}
-        />
-      </button>
-      <div
-        className={`grid transition-all duration-200 ease-in-out ${
-          isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
-        }`}
-      >
-        <div className="overflow-hidden">
-          <div className="pb-4 text-default-500 leading-relaxed">{answer}</div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export function FAQSection() {
   return (
     <section className="w-full px-6 py-20">
@@ -85,16 +51,18 @@ export function FAQSection() {
           </p>
         </div>
 
-        <div className="border-t border-divider">
+        <Accordion>
           {faqs.map((faq, index) => (
-            <AccordionItem
-              answer={faq.answer}
-              isLast={index === faqs.length - 1}
-              key={index}
-              question={faq.question}
-            />
+            <AccordionItem key={index} value={index}>
+              <AccordionTrigger className="text-left text-base">
+                {faq.question}
+              </AccordionTrigger>
+              <AccordionContent className="text-default-500">
+                {faq.answer}
+              </AccordionContent>
+            </AccordionItem>
           ))}
-        </div>
+        </Accordion>
       </div>
     </section>
   );
