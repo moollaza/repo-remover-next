@@ -1,23 +1,14 @@
-import {
-  Chip,
-  Link,
-  Pagination,
-  type Selection,
-  Spinner,
-  Table,
-  TableBody,
-  TableCell,
-  TableColumn,
-  TableHeader,
-  TableRow,
-  useDisclosure,
-} from "@heroui/react";
 import { type Repository } from "@octokit/graphql-schema";
 import { formatDistanceToNow } from "date-fns";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { COLUMN_ORDER, REPO_ACTIONS } from "@/config/repo-config";
-import { useRepoFilters } from "@/hooks/use-repo-filters";
+import {
+  type Selection,
+  type SelectionSet,
+  type SortDescriptor,
+  useRepoFilters,
+} from "@/hooks/use-repo-filters";
 import { useRepoPagination } from "@/hooks/use-repo-pagination";
 import { debug } from "@/utils/debug";
 
@@ -33,9 +24,6 @@ interface RepoTableProps {
   repos: null | Repository[];
 }
 
-// Remove unused `all` type from the Selection type
-type SelectionSet = Exclude<Selection, "all">;
-
 export default function RepoTable({
   login,
   repos,
@@ -48,7 +36,9 @@ export default function RepoTable({
   );
 
   // For the confirmation modal
-  const { isOpen, onClose, onOpen } = useDisclosure();
+  const [isOpen, setIsOpen] = useState(false);
+  const onOpen = useCallback(() => setIsOpen(true), []);
+  const onClose = useCallback(() => setIsOpen(false), []);
 
   // For debugging purposes
   useEffect(() => {
@@ -116,9 +106,15 @@ export default function RepoTable({
 
   const handleRepoActionClick = () => {
     if (selectedRepoAction.has("delete")) {
-      debug.log("Deleting selected repos:", Array.from(selectedRepoKeys));
+      debug.log(
+        "Deleting selected repos:",
+        Array.from(selectedRepoKeys as Set<string>),
+      );
     } else if (selectedRepoAction.has("archive")) {
-      debug.log("Archiving selected repos:", Array.from(selectedRepoKeys));
+      debug.log(
+        "Archiving selected repos:",
+        Array.from(selectedRepoKeys as Set<string>),
+      );
     }
 
     // Open the confirmation modal
@@ -152,6 +148,79 @@ export default function RepoTable({
     // TODO: Record # of repos deleted/archived?
   }, []);
 
+  // --- Selection handlers ---
+  const selectableRepos = useMemo(
+    () => paginatedRepos.filter((r) => !disabledKeys.has(r.id)),
+    [paginatedRepos, disabledKeys],
+  );
+
+  const allSelectableSelected = useMemo(() => {
+    if (selectedRepoKeys === "all") return true;
+    if (selectableRepos.length === 0) return false;
+    return selectableRepos.every((r) => selectedRepoKeys.has(r.id));
+  }, [selectedRepoKeys, selectableRepos]);
+
+  const handleSelectAll = useCallback(() => {
+    if (allSelectableSelected) {
+      // Deselect all
+      setSelectedRepoKeys(new Set());
+    } else {
+      // Select all filteredRepos (not just current page) to match HeroUI "all" behavior
+      const allIds = new Set(
+        filteredRepos.filter((r) => !isRepoDisabled(r)).map((r) => r.id),
+      );
+      setSelectedRepoKeys(allIds);
+    }
+  }, [allSelectableSelected, filteredRepos, isRepoDisabled]);
+
+  const handleRowSelect = useCallback(
+    (repoId: string) => {
+      if (disabledKeys.has(repoId)) return;
+
+      setSelectedRepoKeys((prev) => {
+        const prevSet =
+          prev === "all"
+            ? new Set(filteredRepos.map((r) => r.id))
+            : new Set(prev);
+        if (prevSet.has(repoId)) {
+          prevSet.delete(repoId);
+        } else {
+          prevSet.add(repoId);
+        }
+        return prevSet;
+      });
+    },
+    [disabledKeys, filteredRepos],
+  );
+
+  // --- Sort handler ---
+  const handleSortChange = useCallback(
+    (columnKey: string) => {
+      setSortDescriptor((prev: SortDescriptor) => {
+        if (prev.column === columnKey) {
+          // Toggle direction
+          return {
+            column: columnKey,
+            direction:
+              prev.direction === "ascending" ? "descending" : "ascending",
+          };
+        }
+        // New column: default to ascending
+        return { column: columnKey, direction: "ascending" };
+      });
+    },
+    [setSortDescriptor],
+  );
+
+  // --- Pagination ---
+  const pageNumbers = useMemo(() => {
+    const pages: number[] = [];
+    for (let i = 1; i <= totalPages; i++) {
+      pages.push(i);
+    }
+    return pages;
+  }, [totalPages]);
+
   return (
     <div className="space-y-4" data-testid="repo-table-container">
       <RepoFilters
@@ -169,159 +238,220 @@ export default function RepoTable({
 
       {/* TABLE */}
       <div className="border border-divider rounded-lg overflow-hidden">
-        <Table
+        <table
           aria-label="GitHub repositories table"
-          classNames={{
-            table: "table-fixed",
-            td: [
-              "py-3",
-              "border-b",
-              "border-divider",
-              // First column (checkbox) should be narrow
-              "first:w-12",
-              // Remove rounded corners from hover/selection backgrounds
-              "group-data-[first=true]/tr:first:before:rounded-none",
-              "group-data-[first=true]/tr:last:before:rounded-none",
-              "group-data-[middle=true]/tr:before:rounded-none",
-              "group-data-[last=true]/tr:first:before:rounded-none",
-              "group-data-[last=true]/tr:last:before:rounded-none",
-            ],
-            th: [
-              "bg-default-100",
-              "border-b",
-              "border-divider",
-              // First column (checkbox) should be narrow
-              "first:w-12",
-            ],
-          }}
+          className="w-full table-fixed"
           data-testid="repo-table"
-          disabledKeys={disabledKeys}
-          onSelectionChange={setSelectedRepoKeys}
-          onSortChange={setSortDescriptor}
-          removeWrapper
-          selectedKeys={selectedRepoKeys}
-          selectionMode="multiple"
-          sortDescriptor={sortDescriptor}
         >
-          <TableHeader columns={[...COLUMN_ORDER]}>
-            {(column) => (
-              <TableColumn
-                allowsSorting
-                className={column.className}
-                key={column.key}
-              >
-                {column.label}
-              </TableColumn>
-            )}
-          </TableHeader>
+          <thead>
+            <tr className="bg-default-100 border-b border-divider">
+              {/* Checkbox column */}
+              <th className="w-12 px-3 py-3 text-left" scope="col">
+                <input
+                  aria-label="Select all"
+                  checked={allSelectableSelected && selectableRepos.length > 0}
+                  className="rounded border-divider cursor-pointer"
+                  onChange={handleSelectAll}
+                  type="checkbox"
+                />
+              </th>
+              {COLUMN_ORDER.map((column) => {
+                const isSorted = sortDescriptor.column === column.key;
+                const ariaSortValue = isSorted
+                  ? sortDescriptor.direction
+                  : "none";
+
+                return (
+                  <th
+                    aria-sort={ariaSortValue}
+                    className={`${column.className} px-3 py-3 text-left text-xs font-semibold text-default-500 uppercase tracking-wider cursor-pointer select-none hover:bg-default-200 transition-colors`}
+                    data-sortable="true"
+                    key={column.key}
+                    onClick={() => handleSortChange(column.key)}
+                    scope="col"
+                  >
+                    <span className="inline-flex items-center gap-1">
+                      {column.label}
+                      {isSorted && (
+                        <span className="text-default-400">
+                          {sortDescriptor.direction === "ascending"
+                            ? "\u25B2"
+                            : "\u25BC"}
+                        </span>
+                      )}
+                    </span>
+                  </th>
+                );
+              })}
+            </tr>
+          </thead>
 
           {/* TABLE BODY */}
-          <TableBody
-            emptyContent={"No repos to display."}
-            isLoading={false}
-            items={paginatedRepos}
-            loadingContent={<Spinner label="Loading..." />}
-          >
-            {(repo) => (
-              <TableRow
-                className={
-                  isRepoDisabled(repo) ? "pointer-events-none opacity-50" : ""
-                }
-                data-testid="repo-row"
-                key={repo.id}
-              >
-                <TableCell>
-                  <div data-testid="repo-details">
-                    <div className="mb-1.5" data-testid="repo-name">
-                      <Link
-                        className="font-medium text-base"
-                        href={repo.url as string}
-                        isExternal
-                      >
-                        {repo.name}
-                      </Link>
-                    </div>
-                    <div className="flex gap-2 mb-2" data-testid="repo-tags">
-                      {repo.isPrivate && (
-                        <Chip radius="sm" size="sm" variant="bordered">
-                          Private
-                        </Chip>
-                      )}
-                      {repo.isInOrganization && (
-                        <Chip radius="sm" size="sm" variant="bordered">
-                          Organization
-                        </Chip>
-                      )}
-                      {repo.isFork && (
-                        <Chip radius="sm" size="sm" variant="bordered">
-                          Fork
-                        </Chip>
-                      )}
-                      {repo.isArchived && (
-                        <Chip
-                          color="warning"
-                          radius="sm"
-                          size="sm"
-                          variant="bordered"
-                        >
-                          Archived
-                        </Chip>
-                      )}
-                    </div>
+          <tbody>
+            {paginatedRepos.length === 0 ? (
+              <tr>
+                <td
+                  className="px-3 py-8 text-center text-default-500"
+                  colSpan={COLUMN_ORDER.length + 1}
+                >
+                  No repos to display.
+                </td>
+              </tr>
+            ) : (
+              paginatedRepos.map((repo) => {
+                const disabled = isRepoDisabled(repo);
+                const isSelected =
+                  selectedRepoKeys === "all" || selectedRepoKeys.has(repo.id);
 
-                    {repo.owner.login !== login && (
-                      <div
-                        className="mb-1 text-default-500 text-sm"
-                        data-testid="repo-owner"
-                      >
-                        Owned by{" "}
-                        <Link
-                          className="text-sm"
-                          href={repo.owner.url as string}
-                          isExternal
-                        >
-                          {repo.owner.login}
-                        </Link>
-                      </div>
-                    )}
-
-                    <div className="text-sm" data-testid="repo-description">
-                      {repo.description ?? <i>No description</i>}
-                    </div>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <span
-                    data-testid="repo-updated-at"
-                    title={new Date(repo.updatedAt as string).toLocaleString(
-                      navigator.language,
-                      {
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric",
-                      },
-                    )}
+                return (
+                  <tr
+                    className={`border-b border-divider transition-colors ${
+                      disabled
+                        ? "pointer-events-none opacity-50"
+                        : "hover:bg-content2"
+                    } ${isSelected && !disabled ? "bg-primary-50/50" : ""}`}
+                    data-testid="repo-row"
+                    key={repo.id}
                   >
-                    {formatDistanceToNow(new Date(repo.updatedAt as string))}
-                  </span>
-                </TableCell>
-              </TableRow>
+                    {/* Checkbox cell */}
+                    <td className="w-12 px-3 py-3">
+                      <input
+                        aria-label={repo.name}
+                        checked={isSelected && !disabled}
+                        className="rounded border-divider cursor-pointer"
+                        disabled={disabled}
+                        onChange={() => handleRowSelect(repo.id)}
+                        type="checkbox"
+                      />
+                    </td>
+                    <td className="px-3 py-3">
+                      <div data-testid="repo-details">
+                        <div className="mb-1.5" data-testid="repo-name">
+                          <a
+                            className="font-medium text-base text-primary hover:underline"
+                            href={repo.url as string}
+                            rel="noopener noreferrer"
+                            target="_blank"
+                          >
+                            {repo.name}
+                          </a>
+                        </div>
+                        <div
+                          className="flex gap-2 mb-2"
+                          data-testid="repo-tags"
+                        >
+                          {repo.isPrivate && (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded border border-divider text-xs text-foreground">
+                              Private
+                            </span>
+                          )}
+                          {repo.isInOrganization && (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded border border-divider text-xs text-foreground">
+                              Organization
+                            </span>
+                          )}
+                          {repo.isFork && (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded border border-divider text-xs text-foreground">
+                              Fork
+                            </span>
+                          )}
+                          {repo.isArchived && (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded border border-warning text-xs text-warning">
+                              Archived
+                            </span>
+                          )}
+                        </div>
+
+                        {repo.owner.login !== login && (
+                          <div
+                            className="mb-1 text-default-500 text-sm"
+                            data-testid="repo-owner"
+                          >
+                            Owned by{" "}
+                            <a
+                              className="text-sm text-primary hover:underline"
+                              href={repo.owner.url as string}
+                              rel="noopener noreferrer"
+                              target="_blank"
+                            >
+                              {repo.owner.login}
+                            </a>
+                          </div>
+                        )}
+
+                        <div className="text-sm" data-testid="repo-description">
+                          {repo.description ?? <i>No description</i>}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-3 py-3">
+                      <span
+                        data-testid="repo-updated-at"
+                        title={new Date(
+                          repo.updatedAt as string,
+                        ).toLocaleString(navigator.language, {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      >
+                        {formatDistanceToNow(
+                          new Date(repo.updatedAt as string),
+                        )}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })
             )}
-          </TableBody>
-        </Table>
+          </tbody>
+        </table>
       </div>
 
       {/* PAGINATION - Outside table border */}
       {totalPages > 1 && (
-        <div className="flex w-full justify-center">
-          <Pagination
-            data-testid="table-pagination"
-            onChange={setCurrentPage}
-            page={currentPage}
-            showControls
-            showShadow
-            total={totalPages}
-          />
+        <div
+          className="flex w-full justify-center"
+          data-testid="table-pagination"
+        >
+          <nav
+            aria-label="Pagination"
+            className="inline-flex items-center gap-1"
+          >
+            <button
+              aria-label="prev"
+              className="px-3 py-1.5 rounded-lg text-sm border border-divider bg-content1 text-foreground hover:bg-content2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage(currentPage - 1)}
+              type="button"
+            >
+              &lsaquo;
+            </button>
+            {pageNumbers.map((page) => (
+              <button
+                aria-current={page === currentPage ? "true" : undefined}
+                className={`px-3 py-1.5 rounded-lg text-sm border transition-colors ${
+                  page === currentPage
+                    ? "bg-primary text-white border-primary shadow-sm"
+                    : "border-divider bg-content1 text-foreground hover:bg-content2"
+                }`}
+                key={page}
+                onClick={() => setCurrentPage(page)}
+                type="button"
+              >
+                {page}
+              </button>
+            ))}
+            <button
+              aria-label="next"
+              className="px-3 py-1.5 rounded-lg text-sm border border-divider bg-content1 text-foreground hover:bg-content2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage(currentPage + 1)}
+              type="button"
+            >
+              &rsaquo;
+            </button>
+          </nav>
         </div>
       )}
 

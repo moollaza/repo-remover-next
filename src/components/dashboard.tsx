@@ -1,4 +1,3 @@
-import { Alert } from "@heroui/react";
 import { type Repository } from "@octokit/graphql-schema";
 
 import RepoLoadingProgress from "@/components/repo-loading-progress";
@@ -68,21 +67,27 @@ export default function Dashboard({
       )}
 
       {isError && (
-        <Alert className="mb-4" color="danger">
+        <div
+          className="mb-4 p-4 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800"
+          role="alert"
+        >
           Error loading repositories. Please check your token and try again.
-        </Alert>
+        </div>
       )}
 
       {permissionWarning && (
-        <Alert className="mb-4" color="warning">
+        <div
+          className="mb-4 p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800"
+          role="alert"
+        >
           <div>
             <strong>Limited Access:</strong> {permissionWarning}
           </div>
           <div className="mt-2 text-sm">
-            Some organization repositories may not be visible due to insufficient
-            token permissions.
+            Some organization repositories may not be visible due to
+            insufficient token permissions.
           </div>
-        </Alert>
+        </div>
       )}
 
       {/* Show skeleton until first data arrives; show table even when empty */}

@@ -1,17 +1,6 @@
-import {
-  Dropdown,
-  DropdownItem,
-  DropdownMenu,
-  DropdownTrigger,
-  Link,
-  Navbar,
-  NavbarBrand,
-  NavbarContent,
-  User,
-} from "@heroui/react";
 import { Moon, Sun, Trash2 } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 
 import { GenerateReposButton } from "@/components/generate-repos-button";
@@ -97,7 +86,7 @@ function LandingHeader({ isAuthenticated }: { isAuthenticated: boolean }) {
 }
 
 /**
- * Dashboard header — HeroUI Navbar with user dropdown.
+ * Dashboard header — plain Tailwind with user dropdown.
  */
 function DashboardHeader({
   handleLogout,
@@ -108,57 +97,127 @@ function DashboardHeader({
   isDevelopment: boolean;
   user: ReturnType<typeof useGitHubData>["user"];
 }) {
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const closeDropdown = useCallback(() => {
+    setDropdownOpen(false);
+  }, []);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        closeDropdown();
+      }
+    }
+
+    if (dropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [dropdownOpen, closeDropdown]);
+
+  // Close on Escape
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        closeDropdown();
+      }
+    }
+
+    if (dropdownOpen) {
+      document.addEventListener("keydown", handleKeyDown);
+    }
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [dropdownOpen, closeDropdown]);
+
   return (
-    <Navbar
-      className="border-b border-divider"
-      classNames={{ wrapper: "mx-auto max-w-6xl px-4 sm:px-6 lg:px-8" }}
+    <header
+      className="w-full border-b border-divider bg-background"
       data-testid="navbar"
-      maxWidth="full"
-      position="static"
     >
-      <NavbarBrand>
-        <Link className="font-extrabold text-inherit text-xl" href="/">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        {/* Brand */}
+        <a className="font-extrabold text-xl text-foreground" href="/">
           Repo Remover
-        </Link>
-      </NavbarBrand>
+        </a>
 
-      <NavbarContent justify="end">
-        <LandingThemeSwitcher />
-        {isDevelopment && <GenerateReposButton />}
+        {/* Right side */}
+        <div className="flex items-center gap-3">
+          <LandingThemeSwitcher />
+          {isDevelopment && <GenerateReposButton />}
 
-        <Dropdown placement="bottom-end">
-          <DropdownTrigger>
-            <div className="cursor-pointer transition-opacity hover:opacity-80">
-              <User
-                avatarProps={{
-                  showFallback: true,
-                  src: user?.avatarUrl as string,
-                }}
-                description={
-                  <Link
-                    href={(user?.url as string) ?? "https://github.com"}
-                    isExternal
-                    size="sm"
-                  >
-                    {user?.login}
-                  </Link>
-                }
-                name={user?.name}
-              />
-            </div>
-          </DropdownTrigger>
-          <DropdownMenu aria-label="Profile Actions" variant="flat">
-            <DropdownItem className="h-14 gap-2" key="profile">
-              <p className="font-semibold">Signed in as</p>
-              <p className="font-semibold">{user?.name}</p>
-            </DropdownItem>
-            <DropdownItem color="danger" key="logout" onPress={handleLogout}>
-              Log Out
-            </DropdownItem>
-          </DropdownMenu>
-        </Dropdown>
-      </NavbarContent>
-    </Navbar>
+          {/* User dropdown */}
+          <div className="relative" ref={dropdownRef}>
+            <button
+              className="cursor-pointer transition-opacity hover:opacity-80 flex items-center gap-3"
+              onClick={() => setDropdownOpen((prev) => !prev)}
+              type="button"
+            >
+              {/* Avatar */}
+              {user?.avatarUrl ? (
+                <img
+                  alt={`${user?.name ?? user?.login ?? "User"}'s avatar`}
+                  className="w-8 h-8 rounded-full object-cover"
+                  src={user.avatarUrl as string}
+                />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-default-200 flex items-center justify-center text-default-500 text-sm font-medium">
+                  {(user?.name ?? user?.login ?? "?").charAt(0).toUpperCase()}
+                </div>
+              )}
+              {/* Name + link */}
+              <div className="text-left hidden sm:block">
+                <div className="text-sm font-medium text-foreground">
+                  {user?.name}
+                </div>
+                <a
+                  className="text-xs text-primary hover:underline"
+                  href={(user?.url as string) ?? "https://github.com"}
+                  onClick={(e) => e.stopPropagation()}
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  {user?.login}
+                </a>
+              </div>
+            </button>
+
+            {/* Dropdown menu */}
+            {dropdownOpen && (
+              <div className="absolute right-0 mt-2 w-48 rounded-lg border border-divider bg-content1 shadow-lg z-50">
+                <div className="px-4 py-3 border-b border-divider">
+                  <p className="text-sm font-semibold text-foreground">
+                    Signed in as
+                  </p>
+                  <p className="text-sm font-semibold text-foreground">
+                    {user?.name}
+                  </p>
+                </div>
+                <button
+                  className="w-full text-left px-4 py-2 text-sm text-danger hover:bg-danger-50 dark:hover:bg-danger-900/20 rounded-b-lg transition-colors"
+                  onClick={() => {
+                    closeDropdown();
+                    handleLogout();
+                  }}
+                  type="button"
+                >
+                  Log Out
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </header>
   );
 }
 

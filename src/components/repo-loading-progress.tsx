@@ -1,5 +1,4 @@
 import { ArrowPathIcon } from "@heroicons/react/16/solid";
-import { Progress } from "@heroui/react";
 
 interface RepoLoadingProgressProps {
   currentOrg?: string;
@@ -46,13 +45,20 @@ export default function RepoLoadingProgress({
           )}
         </div>
       </div>
-      <Progress
+      {/* Progress bar */}
+      <div
         aria-label="Loading progress"
-        className="w-full"
-        color="primary"
-        size="sm"
-        value={percentage}
-      />
+        aria-valuemax={100}
+        aria-valuemin={0}
+        aria-valuenow={percentage}
+        className="w-full h-1.5 bg-default-200 rounded-full overflow-hidden"
+        role="progressbar"
+      >
+        <div
+          className="h-full bg-primary rounded-full transition-all duration-300"
+          style={{ width: `${percentage}%` }}
+        />
+      </div>
     </div>
   );
 }

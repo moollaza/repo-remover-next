@@ -77,22 +77,21 @@ describe("RepoTableSkeleton", () => {
     expect(wrapper).toHaveClass("rounded-lg");
   });
 
-  it("renders with striped rows enabled", () => {
+  it("renders table element", () => {
     render(<RepoTableSkeleton rows={3} />);
 
-    // HeroUI uses grid role when selectionMode is enabled
-    const table = screen.getByRole("grid");
+    const table = screen.getByRole("table");
     expect(table).toBeInTheDocument();
-    // Table should have striped mode enabled (HeroUI handles the actual striping)
   });
 
-  it("renders checkbox column for selection", () => {
-    render(<RepoTableSkeleton />);
+  it("renders skeleton rows with pulse animation", () => {
+    render(<RepoTableSkeleton rows={3} />);
 
-    // HeroUI uses grid role when selectionMode is enabled
-    const table = screen.getByRole("grid");
+    const table = screen.getByRole("table");
     expect(table).toBeInTheDocument();
-    // HeroUI will render checkboxes with selection mode
+    // Skeleton rows should exist
+    const rows = screen.getAllByRole("row");
+    expect(rows.length).toBeGreaterThan(1);
   });
 
   it("renders pagination skeleton in bottom content", () => {

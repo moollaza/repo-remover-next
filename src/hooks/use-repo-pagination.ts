@@ -1,7 +1,8 @@
-import { type Selection } from "@heroui/react";
 import { useCallback, useMemo, useState } from "react";
 
 import { PER_PAGE_OPTIONS } from "@/config/repo-config";
+
+import { type Selection } from "./use-repo-filters";
 
 export interface UseRepoPaginationProps<T> {
   /**
@@ -80,9 +81,9 @@ export function useRepoPagination<T>({
     return items.slice(start, end);
   }, [items, currentPage, perPage]);
 
-  // Handle per page change with Selection type from HeroUI
+  // Handle per page change with Selection type
   const setPerPage = useCallback((keys: Selection) => {
-    const newPerPage = Number(Array.from(keys)[0]);
+    const newPerPage = Number(Array.from(keys as Set<string>)[0]);
     setPerPageState(newPerPage);
     setCurrentPage(1); // Reset to first page when changing items per page
   }, []);

@@ -1,8 +1,26 @@
-import { type Selection, type SortDescriptor } from "@heroui/react";
 import { type Repository } from "@octokit/graphql-schema";
 import { useCallback, useMemo, useState } from "react";
 
 import { COLUMNS, REPO_TYPES } from "@/config/repo-config";
+
+/**
+ * Local replacement for HeroUI's Selection type.
+ * Represents either a Set of selected keys or the literal "all".
+ */
+export type Selection = Set<string> | "all";
+
+/**
+ * A Selection that is always a concrete Set (never "all").
+ */
+export type SelectionSet = Exclude<Selection, "all">;
+
+/**
+ * Sort descriptor compatible with the old HeroUI SortDescriptor.
+ */
+export interface SortDescriptor {
+  column?: string;
+  direction?: "ascending" | "descending";
+}
 
 export interface UseRepoFiltersProps {
   /**
@@ -31,7 +49,9 @@ export interface UseRepoFiltersReturn {
   /**
    * Update the sort configuration
    */
-  setSortDescriptor: (descriptor: SortDescriptor) => void;
+  setSortDescriptor: (
+    descriptor: SortDescriptor | ((prev: SortDescriptor) => SortDescriptor),
+  ) => void;
   /**
    * Update the type filters and reset pagination
    */
@@ -49,9 +69,6 @@ export interface UseRepoFiltersReturn {
 interface RepositoryWithKey extends Repository {
   key: string;
 }
-
-// Remove unused `all` type from the Selection type
-type SelectionSet = Exclude<Selection, "all">;
 
 /**
  * Custom hook for filtering and sorting repositories.

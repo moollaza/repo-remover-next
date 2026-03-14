@@ -2,20 +2,9 @@ import {
   ChevronDownIcon,
   MagnifyingGlassIcon,
 } from "@heroicons/react/16/solid";
-import {
-  Button,
-  ButtonGroup,
-  Dropdown,
-  DropdownItem,
-  DropdownMenu,
-  DropdownTrigger,
-  Input,
-  Kbd,
-  Select,
-  type Selection,
-  SelectItem,
-} from "@heroui/react";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+
+import { type Selection, type SelectionSet } from "@/hooks/use-repo-filters";
 
 const PER_PAGE_OPTIONS = [5, 10, 20, 50, 100];
 const REPO_TYPES = [
@@ -53,8 +42,7 @@ export interface RepoFiltersProps {
   selectedRepoKeys: Selection;
 }
 
-// Remove unused `all` type from the Selection type
-export type SelectionSet = Exclude<Selection, "all">;
+export { type SelectionSet } from "@/hooks/use-repo-filters";
 
 export default function RepoFilters({
   onPerPageChange,
@@ -69,133 +57,277 @@ export default function RepoFilters({
   selectedRepoKeys,
 }: RepoFiltersProps): JSX.Element {
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const [perPageOpen, setPerPageOpen] = useState(false);
+  const [repoTypeOpen, setRepoTypeOpen] = useState(false);
+  const [actionDropdownOpen, setActionDropdownOpen] = useState(false);
+  const perPageDropdownRef = useRef<HTMLDivElement>(null);
+  const repoTypeDropdownRef = useRef<HTMLDivElement>(null);
+  const actionDropdownRef = useRef<HTMLDivElement>(null);
 
+  // Keyboard shortcut for Cmd+K / Ctrl+K
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      // Check for Cmd+K (Mac) or Ctrl+K (Windows/Linux)
-      if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
+      if ((event.metaKey || event.ctrlKey) && event.key === "k") {
         event.preventDefault();
         searchInputRef.current?.focus();
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
     return () => {
-      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener("keydown", handleKeyDown);
     };
   }, []);
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        perPageDropdownRef.current &&
+        !perPageDropdownRef.current.contains(event.target as Node)
+      ) {
+        setPerPageOpen(false);
+      }
+      if (
+        repoTypeDropdownRef.current &&
+        !repoTypeDropdownRef.current.contains(event.target as Node)
+      ) {
+        setRepoTypeOpen(false);
+      }
+      if (
+        actionDropdownRef.current &&
+        !actionDropdownRef.current.contains(event.target as Node)
+      ) {
+        setActionDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const handlePerPageSelect = useCallback(
+    (value: string) => {
+      onPerPageChange(new Set([value]));
+      setPerPageOpen(false);
+    },
+    [onPerPageChange],
+  );
+
+  const handleRepoTypeToggle = useCallback(
+    (key: string) => {
+      const newSet = new Set(repoTypesFilter);
+      if (newSet.has(key)) {
+        newSet.delete(key);
+      } else {
+        newSet.add(key);
+      }
+      onRepoTypesFilterChange(newSet);
+    },
+    [repoTypesFilter, onRepoTypesFilterChange],
+  );
+
+  const handleActionSelect = useCallback(
+    (key: string) => {
+      onRepoActionChange(new Set([key]));
+      setActionDropdownOpen(false);
+    },
+    [onRepoActionChange],
+  );
+
+  const isDisabled = selectedRepoKeys !== "all" && selectedRepoKeys.size === 0;
+
+  const isDeleteAction = selectedRepoAction.has("delete");
+
+  // Summarize selected repo types for the trigger button
+  const selectedTypeLabels = REPO_TYPES.filter((t) =>
+    repoTypesFilter.has(t.key),
+  ).map((t) => t.label);
+  const typesSummary =
+    selectedTypeLabels.length === REPO_TYPES.length
+      ? "All"
+      : selectedTypeLabels.length === 0
+        ? "None"
+        : selectedTypeLabels.join(", ");
 
   return (
     <div className="grid grid-cols-12 gap-3">
       {/* PER PAGE SELECTOR */}
-      <div className="col-span-2">
-        <Select
+      <div className="col-span-2" ref={perPageDropdownRef}>
+        <div
+          className="relative cursor-pointer"
           data-testid="per-page-select"
-          label="Repos per page"
-          onSelectionChange={onPerPageChange}
-          placeholder="Per page"
-          selectedKeys={new Set([perPage.toString()])}
-          selectionMode="single"
-          size="sm"
+          onClick={() => setPerPageOpen((prev) => !prev)}
         >
-          {PER_PAGE_OPTIONS.map((option) => (
-            <SelectItem
-              data-testid={`per-page-option-${option}`}
-              key={option}
-              textValue={option.toString()}
+          <label className="block text-xs text-default-500 mb-1 pointer-events-none">
+            Repos per page
+          </label>
+          <div className="w-full h-10 px-3 rounded-lg border border-divider bg-content1 text-foreground text-sm text-left flex items-center justify-between hover:bg-content2 transition-colors">
+            <span>{perPage}</span>
+            <ChevronDownIcon className="h-4 w-4 text-default-400" />
+          </div>
+          {perPageOpen && (
+            <ul
+              className="absolute z-50 mt-1 w-full rounded-lg border border-divider bg-content1 shadow-lg py-1 max-h-60 overflow-auto"
+              onClick={(e) => e.stopPropagation()}
+              role="listbox"
             >
-              {option}
-            </SelectItem>
-          ))}
-        </Select>
+              {PER_PAGE_OPTIONS.map((option) => (
+                <li
+                  aria-selected={perPage === option}
+                  className={`px-3 py-2 text-sm cursor-pointer hover:bg-content2 transition-colors ${
+                    perPage === option
+                      ? "bg-primary-50 text-primary font-medium"
+                      : "text-foreground"
+                  }`}
+                  data-testid={`per-page-option-${option}`}
+                  key={option}
+                  onClick={() => handlePerPageSelect(option.toString())}
+                  role="option"
+                >
+                  {option}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
 
       {/* REPO TYPE SELECTOR */}
-      <div className="col-span-6">
-        <Select
+      <div className="col-span-6" ref={repoTypeDropdownRef}>
+        <div
+          className="relative cursor-pointer"
           data-testid="repo-type-select"
-          defaultSelectedKeys={new Set(REPO_TYPES.map((type) => type.key))}
-          items={REPO_TYPES}
-          label="Repo types to show"
-          onSelectionChange={onRepoTypesFilterChange}
-          placeholder="Filter by type"
-          selectedKeys={repoTypesFilter}
-          selectionMode="multiple"
-          size="sm"
+          onClick={() => setRepoTypeOpen((prev) => !prev)}
         >
-          {(repoType) => (
-            <SelectItem
-              data-testid={`repo-type-select-item-${repoType.key}`}
-              key={repoType.key}
+          <label className="block text-xs text-default-500 mb-1 pointer-events-none">
+            Repo types to show
+          </label>
+          <div className="w-full h-10 px-3 rounded-lg border border-divider bg-content1 text-foreground text-sm text-left flex items-center justify-between hover:bg-content2 transition-colors">
+            <span className="truncate">{typesSummary}</span>
+            <ChevronDownIcon className="h-4 w-4 text-default-400 shrink-0" />
+          </div>
+          {repoTypeOpen && (
+            <ul
+              className="absolute z-50 mt-1 w-full rounded-lg border border-divider bg-content1 shadow-lg py-1 max-h-60 overflow-auto"
+              onClick={(e) => e.stopPropagation()}
+              role="listbox"
             >
-              {repoType.label}
-            </SelectItem>
+              {REPO_TYPES.map((repoType) => (
+                <li
+                  aria-selected={repoTypesFilter.has(repoType.key)}
+                  className={`px-3 py-2 text-sm cursor-pointer hover:bg-content2 transition-colors flex items-center gap-2 ${
+                    repoTypesFilter.has(repoType.key)
+                      ? "text-foreground"
+                      : "text-default-400"
+                  }`}
+                  data-testid={`repo-type-select-item-${repoType.key}`}
+                  key={repoType.key}
+                  onClick={() => handleRepoTypeToggle(repoType.key)}
+                  role="option"
+                >
+                  <input
+                    checked={repoTypesFilter.has(repoType.key)}
+                    className="rounded border-divider"
+                    onChange={() => handleRepoTypeToggle(repoType.key)}
+                    type="checkbox"
+                  />
+                  {repoType.label}
+                </li>
+              ))}
+            </ul>
           )}
-        </Select>
+        </div>
       </div>
 
       {/* SEARCH INPUT */}
       <div className="col-span-4">
-        <Input
-          data-testid="repo-search-input"
-          endContent={<Kbd keys={["command"]}>K</Kbd>}
-          label="Search"
-          onValueChange={onSearchChange}
-          placeholder="Search by name or description"
-          ref={searchInputRef}
-          size="sm"
-          startContent={<MagnifyingGlassIcon className="h-5 w-5" />}
-          value={searchQuery}
-        />
+        <div>
+          <label className="block text-xs text-default-500 mb-1">Search</label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+              <MagnifyingGlassIcon className="h-5 w-5 text-default-400" />
+            </div>
+            <input
+              aria-label="Search"
+              className="w-full h-10 pl-10 pr-16 rounded-lg border border-divider bg-content1 text-foreground text-sm placeholder:text-default-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+              data-testid="repo-search-input"
+              onChange={(e) => onSearchChange(e.target.value)}
+              placeholder="Search by name or description"
+              ref={searchInputRef}
+              type="text"
+              value={searchQuery}
+            />
+            <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+              <kbd className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded border border-divider bg-content2 text-default-500 text-xs font-mono">
+                ⌘K
+              </kbd>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* ACTION BUTTONS */}
       <div className="col-span-3">
-        <ButtonGroup>
-          <Button
-            color={selectedRepoAction.has("delete") ? "danger" : "warning"}
-            data-testid={`repo-action-button-${selectedRepoAction.has("delete") ? "delete" : "archive"}`}
-            isDisabled={
-              selectedRepoKeys !== "all" && selectedRepoKeys.size === 0
-            }
-            onPress={onRepoActionClick}
-            size="md"
-          >
-            {REPO_ACTIONS.find((action) => selectedRepoAction.has(action.key))
-              ?.label ?? "Select Action"}
-          </Button>
-          <Dropdown placement="bottom-end" size="md">
-            <DropdownTrigger>
-              <Button
-                color={selectedRepoAction.has("delete") ? "danger" : "warning"}
+        <div className="flex h-full items-end">
+          <div className="flex">
+            <button
+              className={`px-4 py-2 text-sm font-medium rounded-l-lg transition-colors text-white ${
+                isDeleteAction
+                  ? "bg-danger hover:bg-danger/90"
+                  : "bg-warning hover:bg-warning/90"
+              } ${isDisabled ? "opacity-50 cursor-not-allowed" : ""}`}
+              data-testid={`repo-action-button-${isDeleteAction ? "delete" : "archive"}`}
+              disabled={isDisabled}
+              onClick={onRepoActionClick}
+              type="button"
+            >
+              {REPO_ACTIONS.find((action) => selectedRepoAction.has(action.key))
+                ?.label ?? "Select Action"}
+            </button>
+            <div className="relative" ref={actionDropdownRef}>
+              <button
+                className={`px-2 py-2 rounded-r-lg border-l border-white/20 transition-colors text-white ${
+                  isDeleteAction
+                    ? "bg-danger hover:bg-danger/90"
+                    : "bg-warning hover:bg-warning/90"
+                }`}
                 data-testid="repo-action-dropdown-trigger"
-                isIconOnly
-                size="md"
+                onClick={() => setActionDropdownOpen((prev) => !prev)}
+                type="button"
               >
                 <ChevronDownIcon className="h-4 w-4" />
-              </Button>
-            </DropdownTrigger>
-            <DropdownMenu
-              aria-label="Repo actions"
-              className="max-w-[300px]"
-              data-testid="repo-action-dropdown-menu"
-              disallowEmptySelection
-              onSelectionChange={onRepoActionChange}
-              selectedKeys={selectedRepoAction}
-              selectionMode="single"
-            >
-              {REPO_ACTIONS.map((action) => (
-                <DropdownItem
-                  data-testid={`repo-action-dropdown-item-${action.key}`}
-                  description={action.description}
-                  key={action.key}
+              </button>
+              {actionDropdownOpen && (
+                <div
+                  className="absolute right-0 z-50 mt-1 w-72 rounded-lg border border-divider bg-content1 shadow-lg py-1"
+                  data-testid="repo-action-dropdown-menu"
                 >
-                  {action.label}
-                </DropdownItem>
-              ))}
-            </DropdownMenu>
-          </Dropdown>
-        </ButtonGroup>
+                  {REPO_ACTIONS.map((action) => (
+                    <button
+                      className={`w-full px-3 py-2 text-left hover:bg-content2 transition-colors ${
+                        selectedRepoAction.has(action.key) ? "bg-content2" : ""
+                      }`}
+                      data-testid={`repo-action-dropdown-item-${action.key}`}
+                      key={action.key}
+                      onClick={() => handleActionSelect(action.key)}
+                      type="button"
+                    >
+                      <div className="text-sm font-medium text-foreground">
+                        {action.label}
+                      </div>
+                      <div className="text-xs text-default-500">
+                        {action.description}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

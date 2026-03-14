@@ -1,9 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-
 import { MoonIcon, SunIcon } from "@heroicons/react/16/solid";
-import { Button } from "@heroui/react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 
@@ -17,32 +12,30 @@ export const ThemeSwitcher = () => {
 
   if (!mounted) {
     return (
-      <Button
+      <button
         aria-label="Theme switcher loading"
-        isIconOnly
-        size="sm"
-        variant="light"
+        className="inline-flex items-center justify-center rounded-lg p-2 text-default-500 hover:bg-default-100 transition-colors"
+        type="button"
       >
         <SunIcon className="h-4 w-4" />
-      </Button>
+      </button>
     );
   }
 
   const isDark = theme === "dark";
 
   return (
-    <Button
+    <button
       aria-label={`Switch to ${isDark ? "light" : "dark"} theme`}
-      isIconOnly
-      onPress={() => setTheme(isDark ? "light" : "dark")}
-      size="sm"
-      variant="light"
+      className="inline-flex items-center justify-center rounded-lg p-2 text-default-500 hover:bg-default-100 transition-colors"
+      onClick={() => setTheme(isDark ? "light" : "dark")}
+      type="button"
     >
       {isDark ? (
         <SunIcon className="h-4 w-4" />
       ) : (
         <MoonIcon className="h-4 w-4" />
       )}
-    </Button>
+    </button>
   );
 };

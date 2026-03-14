@@ -1,4 +1,3 @@
-import { Card, CardBody, CardFooter } from "@heroui/react";
 import clsx from "clsx";
 import { useEffect, useState } from "react";
 
@@ -91,8 +90,8 @@ export function ScrollingQuotes() {
             rel="noopener noreferrer"
             target="_blank"
           >
-            <Card className="h-full bg-success-50 text-success-900 shadow-md">
-              <CardBody className="relative">
+            <div className="h-full rounded-lg bg-success-50 text-success-900 shadow-md flex flex-col">
+              <div className="relative p-3 flex-grow">
                 <div className="absolute top-2 left-2 text-8xl text-success opacity-10 font-serif">
                   &ldquo;
                 </div>
@@ -104,13 +103,13 @@ export function ScrollingQuotes() {
                     — <cite>{quote.author}</cite>
                   </footer>
                 </blockquote>
-              </CardBody>
-              <CardFooter className="justify-between items-center">
+              </div>
+              <div className="flex justify-between items-center px-3 py-2 border-t border-success-200">
                 <span className="text-xs text-success-700 opacity-50">
                   {quote.sourceName}
                 </span>
-              </CardFooter>
-            </Card>
+              </div>
+            </div>
           </a>
         ))}
       </div>
