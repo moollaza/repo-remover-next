@@ -52,7 +52,7 @@ async function deriveKey(password: string, salt: Uint8Array): Promise<CryptoKey>
       hash: 'SHA-256',
       iterations: 100000,
       name: 'PBKDF2',
-      salt,
+      salt: salt as BufferSource,
     },
     keyMaterial,
     { length: 256, name: ALGORITHM },
@@ -71,7 +71,7 @@ async function encryptData(data: string): Promise<string> {
 
     const key = await deriveKey(password, salt);
     const encrypted = await crypto.subtle.encrypt(
-      { iv, name: ALGORITHM },
+      { iv: iv as BufferSource, name: ALGORITHM },
       key,
       encoder.encode(data)
     );

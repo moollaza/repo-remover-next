@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
 import { PageDecorator } from "@/../.storybook/decorators";
-import HomePage from "@/app/page";
+import { Home } from "@/routes/home";
 
-const meta: Meta<typeof HomePage> = {
-  component: HomePage,
+const meta: Meta<typeof Home> = {
+  component: Home,
   decorators: [PageDecorator],
   parameters: {
     chromatic: {
@@ -24,6 +24,6 @@ const meta: Meta<typeof HomePage> = {
 
 export default meta;
 
-type Story = StoryObj<typeof HomePage>;
+type Story = StoryObj<typeof Home>;
 
 export const Default: Story = {};

@@ -1,25 +1,30 @@
 import { type Decorator } from "@storybook/react";
+import { BrowserRouter } from "react-router-dom";
 
 import { GitHubDataProvider } from "@/providers/github-data-provider";
-import LayoutContent, { bodyClasses } from "../src/app/layout-content";
+import { Providers } from "@/providers/providers";
 
 export const PageDecorator: Decorator = (Story) => {
   return (
-    <div className={bodyClasses}>
-      <LayoutContent>
-        <GitHubDataProvider>
-          <Story />
-        </GitHubDataProvider>
-      </LayoutContent>
-    </div>
+    <BrowserRouter>
+      <Providers themeProps={{ attribute: "class", defaultTheme: "light" }}>
+        <div className="min-h-full bg-background text-foreground font-sans antialiased">
+          <main className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <Story />
+          </main>
+        </div>
+      </Providers>
+    </BrowserRouter>
   );
 };
 
 export const GitHubDataDecorator: Decorator = (Story) => {
   return (
-    <GitHubDataProvider>
-      <Story />
-    </GitHubDataProvider>
+    <BrowserRouter>
+      <GitHubDataProvider>
+        <Story />
+      </GitHubDataProvider>
+    </BrowserRouter>
   );
 };
 
