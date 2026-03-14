@@ -1,4 +1,3 @@
-import { type GraphQlQueryResponseData } from "@octokit/graphql";
 import { type Page } from "@playwright/test";
 
 import {
@@ -76,45 +75,115 @@ export async function mockDeleteRepo(
 }
 
 export async function mockGraphQLRepos(page: Page): Promise<void> {
-  await page.route("https://api.github.com/graphql", (route) => {
-    const json: GraphQlQueryResponseData = {
-      data: {
-        user: {
-          ...mockUser,
-          repositories: {
-            nodes: mockRepos,
-            pageInfo: {
-              endCursor: "blah",
-              hasNextPage: false,
+  await page.route("https://api.github.com/graphql", async (route) => {
+    const body = (await route.request().postDataJSON()) as {
+      query: string;
+      variables?: Record<string, unknown>;
+    };
+
+    if (body.query.includes("getCurrentUser")) {
+      return void route.fulfill({
+        json: { data: { viewer: mockUser } },
+      });
+    }
+
+    if (body.query.includes("getRepositories")) {
+      return void route.fulfill({
+        json: {
+          data: {
+            user: {
+              ...mockUser,
+              repositories: {
+                nodes: mockRepos,
+                pageInfo: { endCursor: null, hasNextPage: false },
+              },
             },
           },
         },
-      },
-    };
+      });
+    }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    void route.fulfill({ json });
+    if (body.query.includes("getOrganizations")) {
+      return void route.fulfill({
+        json: {
+          data: {
+            user: {
+              organizations: {
+                nodes: [
+                  { login: "testorg", url: "https://github.com/testorg" },
+                ],
+                pageInfo: { endCursor: null, hasNextPage: false },
+              },
+            },
+          },
+        },
+      });
+    }
+
+    if (body.query.includes("getOrgRepositories")) {
+      const orgRepos = mockRepos.filter((r) => r.isInOrganization);
+      return void route.fulfill({
+        json: {
+          data: {
+            organization: {
+              login: "testorg",
+              repositories: {
+                nodes: orgRepos,
+                pageInfo: { endCursor: null, hasNextPage: false },
+              },
+              url: "https://github.com/testorg",
+            },
+          },
+        },
+      });
+    }
+
+    void route.fulfill({ json: { data: {} } });
   });
 }
 
 export async function mockGraphQLReposEmpty(page: Page): Promise<void> {
-  await page.route("https://api.github.com/graphql", (route) => {
-    const json: GraphQlQueryResponseData = {
-      data: {
-        user: {
-          ...mockUser,
-          repositories: {
-            nodes: [],
-            pageInfo: {
-              endCursor: null,
-              hasNextPage: false,
+  await page.route("https://api.github.com/graphql", async (route) => {
+    const body = (await route.request().postDataJSON()) as { query: string };
+
+    if (body.query.includes("getCurrentUser")) {
+      return void route.fulfill({
+        json: { data: { viewer: mockUser } },
+      });
+    }
+
+    if (body.query.includes("getRepositories")) {
+      return void route.fulfill({
+        json: {
+          data: {
+            user: {
+              ...mockUser,
+              repositories: {
+                nodes: [],
+                pageInfo: { endCursor: null, hasNextPage: false },
+              },
             },
           },
         },
-      },
-    };
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    void route.fulfill({ json });
+      });
+    }
+
+    if (body.query.includes("getOrganizations")) {
+      return void route.fulfill({
+        json: {
+          data: {
+            user: {
+              organizations: {
+                nodes: [],
+                pageInfo: { endCursor: null, hasNextPage: false },
+              },
+            },
+          },
+        },
+      });
+    }
+
+    void route.fulfill({ json: { data: {} } });
   });
 }
 
