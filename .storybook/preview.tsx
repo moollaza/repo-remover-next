@@ -20,7 +20,7 @@ const preview: Preview = {
       },
     },
     msw: {
-      handlers: [handlers],
+      handlers: handlers,
     },
   },
   loaders: [mswLoader],
