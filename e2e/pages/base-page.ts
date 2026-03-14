@@ -31,7 +31,7 @@ export class BasePage {
 
   async expectFooterCopyright() {
     await expect(
-      this.page.getByText(/© 2019-2025 Repo Remover/),
+      this.page.getByText(/© 2019-2026 Repo Remover/),
     ).toBeVisible();
   }
 
@@ -85,7 +85,7 @@ export class BasePage {
 
     // Copyright
     await expect(
-      this.page.getByText(/© 2019-2025 Repo Remover/),
+      this.page.getByText(/© 2019-2026 Repo Remover/),
     ).toBeVisible();
 
     // GitHub link

@@ -98,7 +98,7 @@ export default function Footer() {
 
         <div className="pt-8 border-t border-divider flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-default-400">
-            © 2019-2025 Repo Remover. All rights reserved.
+            © 2019-2026 Repo Remover. All rights reserved.
           </p>
           <p className="text-sm text-default-400 flex items-center gap-2">
             Made with <Heart className="h-4 w-4 text-danger fill-danger" /> by{" "}
