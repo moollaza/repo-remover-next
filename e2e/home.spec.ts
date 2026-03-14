@@ -30,14 +30,9 @@ test.describe("Home Page", () => {
   });
 
   test("should show error for invalid token format", async () => {
-    // Test invalid format (too short)
-    await home.fillToken("short");
-    await home.expectErrorMessage("Invalid GitHub token format");
-    await home.expectSubmitDisabled();
-
-    // Test invalid format (wrong prefix)
+    // Test invalid format (wrong prefix, long enough to trigger error)
     await home.fillToken("invalid_token_123456789012345678901234567890123456");
-    await home.expectErrorMessage("Invalid GitHub token format");
+    await home.expectErrorMessage("Invalid token format");
     await home.expectSubmitDisabled();
 
     // Test empty input

@@ -1,6 +1,20 @@
-import { CheckSquare, ExternalLink, Key, Search, Trash2 } from "lucide-react";
+import {
+  CheckSquare,
+  ExternalLink,
+  Key,
+  Loader2,
+  Search,
+  Trash2,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-import TokenFormSection from "@/components/token-form-section";
+import { useGitHubData } from "@/hooks/use-github-data";
+import { analytics } from "@/utils/analytics";
+import {
+  createThrottledOctokit,
+  isValidGitHubToken,
+} from "@/utils/github-utils";
 
 const steps = [
   {
@@ -36,6 +50,108 @@ const steps = [
     title: "Archive or Delete in One Click",
   },
 ];
+
+/**
+ * Inline PAT form — matches Figma design (key icon + password input + full-width button).
+ * Handles validation + auth without HeroUI components.
+ */
+function InlinePATForm() {
+  const [token, setToken] = useState("");
+  const [error, setError] = useState<null | string>(null);
+  const [isValidating, setIsValidating] = useState(false);
+  const [isValid, setIsValid] = useState(false);
+  const { setPat } = useGitHubData();
+  const navigate = useNavigate();
+
+  // Auto-validate when token changes (with debounce)
+  useEffect(() => {
+    if (!token || !isValidGitHubToken(token)) {
+      setIsValid(false);
+      if (token && token.length > 5) {
+        setError("Invalid token format");
+      } else {
+        setError(null);
+      }
+      return;
+    }
+
+    setError(null);
+    setIsValidating(true);
+
+    const timeout = setTimeout(() => {
+      const octokit = createThrottledOctokit(token);
+      octokit.rest.users
+        .getAuthenticated()
+        .then(() => {
+          setIsValid(true);
+          setIsValidating(false);
+        })
+        .catch(() => {
+          setError("Invalid or expired token");
+          setIsValid(false);
+          setIsValidating(false);
+        });
+    }, 500);
+
+    return () => clearTimeout(timeout);
+  }, [token]);
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!isValid || isValidating) return;
+
+    setPat(token);
+    analytics.trackTokenValidated();
+    void navigate("/dashboard");
+  }
+
+  const canSubmit = isValid && !isValidating;
+
+  return (
+    <form className="space-y-4" onSubmit={handleSubmit}>
+      <div className="relative">
+        <Key className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-default-400" />
+        <input
+          autoComplete="off"
+          className={`w-full pl-10 pr-4 py-3 rounded-lg border bg-default-100 text-sm font-mono placeholder:text-default-400 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors ${
+            error
+              ? "border-danger"
+              : isValid
+                ? "border-success"
+                : "border-divider"
+          }`}
+          data-testid="github-token-input"
+          onChange={(e) => setToken(e.target.value)}
+          placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          type="password"
+          value={token}
+        />
+        {isValidating && (
+          <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-default-400 animate-spin" />
+        )}
+      </div>
+
+      {error && <p className="text-xs text-danger">{error}</p>}
+
+      {isValid && (
+        <p className="text-xs text-success">Token validated successfully</p>
+      )}
+
+      <button
+        className={`w-full py-3 rounded-lg font-medium text-base transition-all ${
+          canSubmit
+            ? "bg-primary text-primary-foreground hover:opacity-90 shadow-sm"
+            : "bg-default-200 text-default-400 cursor-not-allowed"
+        }`}
+        data-testid="github-token-submit"
+        disabled={!canSubmit}
+        type="submit"
+      >
+        {isValidating ? "Validating..." : "Load My Repositories"}
+      </button>
+    </form>
+  );
+}
 
 export function GetStartedSection() {
   return (
@@ -92,7 +208,7 @@ export function GetStartedSection() {
           </div>
         </div>
 
-        {/* Actual PAT form — connects to existing auth flow */}
+        {/* PAT form card — plain Tailwind, no HeroUI */}
         <div className="mt-16 bg-content1 border border-divider rounded-xl p-8 max-w-xl mx-auto">
           <h3 className="text-xl font-semibold mb-2 text-center">
             Ready to start?
@@ -100,7 +216,9 @@ export function GetStartedSection() {
           <p className="text-sm text-default-500 text-center mb-6">
             Paste your PAT below to load your repositories.
           </p>
-          <TokenFormSection />
+
+          <InlinePATForm />
+
           <div className="flex items-center justify-center gap-6 mt-5 text-xs text-default-400">
             <span className="flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-success inline-block" />
