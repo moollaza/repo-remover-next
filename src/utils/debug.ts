@@ -128,8 +128,14 @@ function sanitize(value: unknown): unknown {
  */
 function table(data: unknown): void {
   if (!isDevelopment) return;
-  // eslint-disable-next-line no-console
-  console.table(sanitize(data));
+  try {
+    // eslint-disable-next-line no-console
+    console.table(sanitize(data));
+  } catch {
+    // Fallback for environments where console.table fails (e.g. jsdom)
+    // eslint-disable-next-line no-console
+    console.log(sanitize(data));
+  }
 }
 
 /**
