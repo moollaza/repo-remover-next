@@ -6,19 +6,6 @@ import { createMockRepo } from "@/mocks/static-fixtures";
 
 import RepoTable from "./repo-table";
 
-// Mock dependencies
-vi.mock("@heroui/react", async () => {
-  const actual = await vi.importActual("@heroui/react");
-  return {
-    ...(actual as Record<string, unknown>),
-    useDisclosure: vi.fn().mockReturnValue({
-      isOpen: true,
-      onClose: vi.fn(),
-      onOpen: vi.fn(),
-    }),
-  };
-});
-
 // Mock ConfirmationModal
 vi.mock("./confirmation-modal", () => ({
   default: vi

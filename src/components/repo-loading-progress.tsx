@@ -1,4 +1,4 @@
-import { ArrowPathIcon } from "@heroicons/react/16/solid";
+import { RefreshCw as ArrowPathIcon } from "lucide-react";
 
 interface RepoLoadingProgressProps {
   currentOrg?: string;

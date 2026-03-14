@@ -1,4 +1,4 @@
-import { MoonIcon, SunIcon } from "@heroicons/react/16/solid";
+import { Moon as MoonIcon, Sun as SunIcon } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 

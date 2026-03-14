@@ -50,9 +50,6 @@
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^3.2.6",
-    "@heroicons/react": "^2.1.5",
-    "@heroui/react": "^2.8.10",
-    "@heroui/system": "^2.4.28",
     "@heroui/theme": "^2.4.26",
     "@octokit/core": "^6.1.2",
     "@octokit/graphql": "^8.1.1",

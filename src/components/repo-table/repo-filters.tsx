@@ -1,7 +1,7 @@
 import {
-  ChevronDownIcon,
-  MagnifyingGlassIcon,
-} from "@heroicons/react/16/solid";
+  ChevronDown as ChevronDownIcon,
+  Search as MagnifyingGlassIcon,
+} from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { type Selection, type SelectionSet } from "@/hooks/use-repo-filters";
