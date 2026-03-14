@@ -1,5 +1,5 @@
 import { DashboardPage } from "@e2e/pages/dashboard";
-import { mockArchiveRepo } from "@e2e/utils/github-api-mocks";
+import { mockArchiveRepo, mockDeleteRepo } from "@e2e/utils/github-api-mocks";
 import { expect, test } from "@playwright/test";
 
 import { mockRepos } from "@/mocks/static-fixtures";
@@ -455,6 +455,55 @@ test.describe("Dashboard Page", () => {
 
       // Modal should be gone
       await dashboard.expectModalNotVisible();
+    });
+
+    test("should handle delete flow end-to-end", async () => {
+      // Switch to delete action
+      await dashboard.selectDeleteAction();
+
+      // Open delete confirmation modal
+      await dashboard.deleteButton.click();
+      await dashboard.expectModalInMode("confirmation");
+      await dashboard.expectModalTitle(/Confirm Deletion/i);
+      await dashboard.expectRepoInConfirmationModal("repo-1");
+
+      // Confirm button should mention "delete"
+      await dashboard.expectText(/I understand the consequences, delete/i);
+
+      // Mock the delete API call
+      await mockDeleteRepo(dashboard.page, "repo-1");
+
+      // Confirm the deletion
+      await dashboard.confirmAction("testuser");
+
+      // Should show progress
+      await dashboard.expectModalInMode("progress");
+      await expect(dashboard.progressModalHeader).toContainText(
+        /Deleting Repositories/i,
+      );
+
+      // Should show result
+      await dashboard.expectModalInMode("result");
+      await expect(dashboard.resultModalHeader).toContainText(
+        /Deletion Complete/i,
+      );
+      await dashboard.expectSuccessMessage("deleted");
+    });
+
+    test("should handle delete errors", async () => {
+      await dashboard.selectDeleteAction();
+      await dashboard.deleteButton.click();
+
+      await mockDeleteRepo(dashboard.page, "repo-1", {
+        error: "You do not have permission to delete this repository",
+        success: false,
+      });
+
+      await dashboard.confirmAction("testuser");
+      await dashboard.expectModalInMode("result");
+      await expect(
+        dashboard.page.getByText(/1 error occurred while deleting/i),
+      ).toBeVisible();
     });
   });
 });
