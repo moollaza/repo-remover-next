@@ -117,7 +117,7 @@ function InlinePATForm() {
             error
               ? "border-danger"
               : isValid
-                ? "border-success"
+                ? "border-emerald-600"
                 : "border-divider"
           }`}
           data-testid="github-token-input"
@@ -134,7 +134,9 @@ function InlinePATForm() {
       {error && <p className="text-xs text-danger">{error}</p>}
 
       {isValid && (
-        <p className="text-xs text-success">Token validated successfully</p>
+        <p className="text-xs text-emerald-700 dark:text-emerald-400">
+          Token validated successfully
+        </p>
       )}
 
       <button
