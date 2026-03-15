@@ -179,8 +179,8 @@ export class DashboardPage extends BasePage {
   }
 
   async expectProgressVisible(count: number) {
-    await expect(this.progressBar).toBeVisible();
-    await expect(this.page.getByText(`Progress: ${count}`)).toBeVisible();
+    await expect(this.progressModalHeader).toBeVisible();
+    await expect(this.page.getByText(`${count} /`)).toBeVisible();
   }
 
   /**

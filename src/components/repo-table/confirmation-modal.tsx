@@ -114,13 +114,25 @@ export default function ConfirmationModal({
         await processRepo(octokit, repo, action);
       } catch (error) {
         if (error instanceof Error) {
-          console.error(`Failed to ${action} the repo:`, error);
+          debug.error(`Failed to ${action} the repo:`, error);
           dispatch({
             payload: { error, repository: repo },
             type: "ADD_ERROR",
           });
+
+          // Detect authentication failure — stop the batch early
+          // All remaining repos will also fail with the same expired token
+          if (
+            error.message.includes("401") ||
+            error.message.includes("Bad credentials")
+          ) {
+            debug.error(
+              "Authentication failed — stopping batch early. Token may have expired.",
+            );
+            break;
+          }
         } else {
-          console.error("An unknown error occurred");
+          debug.error("An unknown error occurred");
         }
       } finally {
         dispatch({

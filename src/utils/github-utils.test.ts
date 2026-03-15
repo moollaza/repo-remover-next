@@ -148,6 +148,50 @@ describe("GitHub Utils", () => {
       });
       expect(mockUpdate).not.toHaveBeenCalled();
     });
+
+    it("should use debug.log instead of direct console.log", async () => {
+      const debugModule = await import("@/utils/debug");
+      const debugSpy = vi
+        .spyOn(debugModule.debug, "log")
+        .mockImplementation(() => {});
+
+      await processRepo(mockOctokit as Octokit, mockRepo, "archive");
+
+      expect(debugSpy).toHaveBeenCalledWith(
+        expect.stringContaining("Processing archive for test-repo"),
+      );
+      debugSpy.mockRestore();
+    });
+
+    it("should use debug.error on archive failure", async () => {
+      const debugModule = await import("@/utils/debug");
+      const debugSpy = vi
+        .spyOn(debugModule.debug, "error")
+        .mockImplementation(() => {});
+      mockUpdate.mockRejectedValueOnce(new Error("Permission denied"));
+
+      await expect(
+        archiveRepo(mockOctokit as Octokit, mockRepo),
+      ).rejects.toThrow();
+
+      expect(debugSpy).toHaveBeenCalled();
+      debugSpy.mockRestore();
+    });
+
+    it("should use debug.error on delete failure", async () => {
+      const debugModule = await import("@/utils/debug");
+      const debugSpy = vi
+        .spyOn(debugModule.debug, "error")
+        .mockImplementation(() => {});
+      mockDelete.mockRejectedValueOnce(new Error("Not found"));
+
+      await expect(
+        deleteRepo(mockOctokit as Octokit, mockRepo),
+      ).rejects.toThrow();
+
+      expect(debugSpy).toHaveBeenCalled();
+      debugSpy.mockRestore();
+    });
   });
 
   describe("isValidGitHubToken", () => {

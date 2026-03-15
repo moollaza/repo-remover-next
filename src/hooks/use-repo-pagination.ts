@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { PER_PAGE_OPTIONS } from "@/config/repo-config";
 
@@ -95,7 +95,7 @@ export function useRepoPagination<T>({
 
   // Auto-reset page if current page exceeds total pages
   // This handles the case where items are filtered and current page becomes invalid
-  useMemo(() => {
+  useEffect(() => {
     if (currentPage > totalPages && totalPages > 0) {
       setCurrentPage(1);
     }

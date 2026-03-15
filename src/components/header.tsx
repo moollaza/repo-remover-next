@@ -235,7 +235,9 @@ export default function Header() {
 
   function handleLogout() {
     if (typeof localStorage !== "undefined") {
-      localStorage.clear();
+      // Only clear auth data — preserve theme and other preferences
+      localStorage.removeItem("secure_pat");
+      localStorage.removeItem("secure_login");
       window.location.href = "/";
     }
   }

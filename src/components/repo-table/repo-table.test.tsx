@@ -96,4 +96,36 @@ describe("RepoTable", () => {
     expect(activeRepoRow).not.toHaveClass("opacity-50");
     expect(activeRepoRow).not.toHaveClass("pointer-events-none");
   });
+
+  test("disables locked repos in the table", () => {
+    const mockReposWithLocked: Repository[] = [
+      createMockRepo({
+        description: "Normal repo",
+        id: "normal-repo",
+        name: "normal-repo",
+      }),
+      createMockRepo({
+        description: "Locked repo",
+        id: "locked-repo",
+        isLocked: true,
+        name: "locked-repo",
+      }),
+    ];
+
+    render(<RepoTable login={mockLogin} repos={mockReposWithLocked} />);
+
+    // The locked repo should have disabled styling
+    const lockedRepoRow = screen
+      .getByText("locked-repo")
+      .closest('[data-testid="repo-row"]');
+    expect(lockedRepoRow).toHaveClass("pointer-events-none");
+    expect(lockedRepoRow).toHaveClass("opacity-50");
+
+    // Normal repo should not have disabled styling
+    const normalRepoRow = screen
+      .getByText("normal-repo")
+      .closest('[data-testid="repo-row"]');
+    expect(normalRepoRow).not.toHaveClass("opacity-50");
+    expect(normalRepoRow).not.toHaveClass("pointer-events-none");
+  });
 });

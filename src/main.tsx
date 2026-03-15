@@ -4,18 +4,12 @@ import { BrowserRouter } from "react-router-dom";
 
 import { App } from "./app";
 import "./globals.css";
+import { sanitizeTokens } from "./utils/sanitize-tokens";
 
 // Sentry initialization — privacy-first (ported from instrumentation-client.ts)
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 const SENTRY_DSN = import.meta.env.VITE_SENTRY_DSN;
 if (SENTRY_DSN && import.meta.env.PROD) {
-  const sanitizeTokens = (text: string): string => {
-    return text
-      .replace(/ghp_[a-zA-Z0-9]{36}/g, "[REDACTED_PAT]")
-      .replace(/github_pat_[a-zA-Z0-9_]+/g, "[REDACTED_PAT]")
-      .replace(/Bearer\s+[a-zA-Z0-9_.-]+/g, "Bearer [REDACTED]");
-  };
-
   Sentry.init({
     beforeSend(event) {
       if (event.user?.ip_address) {

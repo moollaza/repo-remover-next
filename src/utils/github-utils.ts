@@ -4,6 +4,7 @@ import { throttling } from "@octokit/plugin-throttling";
 import { Octokit } from "@octokit/rest";
 
 import { analytics } from "@/utils/analytics";
+import { debug } from "@/utils/debug";
 
 // Create a custom Octokit class with the throttling plugin and pagination
 export const ThrottledOctokit = Octokit.plugin(throttling, paginateGraphQL);
@@ -14,11 +15,36 @@ const DEBUG = false;
 
 // Static test repository data for generation
 const REPO_TEMPLATES = [
-  { description: "A test project for demos", homepage: "https://example.com", name: "test-project-1", private: false },
-  { description: "Sample application for testing", homepage: "https://demo.com", name: "sample-app-2", private: true },
-  { description: "Demo repository", homepage: "https://test.com", name: "demo-repo-3", private: false },
-  { description: "Test library project", homepage: "https://lib.com", name: "test-lib-4", private: true },
-  { description: "Example project", homepage: "https://sample.com", name: "example-5", private: false },
+  {
+    description: "A test project for demos",
+    homepage: "https://example.com",
+    name: "test-project-1",
+    private: false,
+  },
+  {
+    description: "Sample application for testing",
+    homepage: "https://demo.com",
+    name: "sample-app-2",
+    private: true,
+  },
+  {
+    description: "Demo repository",
+    homepage: "https://test.com",
+    name: "demo-repo-3",
+    private: false,
+  },
+  {
+    description: "Test library project",
+    homepage: "https://lib.com",
+    name: "test-lib-4",
+    private: true,
+  },
+  {
+    description: "Example project",
+    homepage: "https://sample.com",
+    name: "example-5",
+    private: false,
+  },
 ];
 
 export async function generateRepos(
@@ -87,7 +113,7 @@ export const archiveRepo = async (
     });
   } catch (error) {
     const errorMessage = (error as Error).message;
-    console.error(errorMessage);
+    debug.error(errorMessage);
     throw new Error(
       `Failed to archive ${repo.name}: ${(error as Error).message}`,
     );
@@ -105,7 +131,7 @@ export const deleteRepo = async (
     });
   } catch (error) {
     const errorMessage = (error as Error).message;
-    console.error(errorMessage);
+    debug.error(errorMessage);
     throw new Error(
       `Failed to delete ${repo.name}: ${(error as Error).message}`,
     );
@@ -129,7 +155,7 @@ export const processRepo = async (
     throw new Error("Action is required");
   }
 
-  console.log(`Processing ${action} for ${repo.name}...`);
+  debug.log(`Processing ${action} for ${repo.name}...`);
 
   if (action === "archive") {
     await archiveRepo(octokit, repo);

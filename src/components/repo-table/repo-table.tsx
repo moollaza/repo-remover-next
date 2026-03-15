@@ -132,6 +132,8 @@ export default function RepoTable({
   // Helper function to determine if a repo should be disabled for selection
   const isRepoDisabled = useCallback(
     (repo: Repository): boolean => {
+      // Locked repos cannot be archived or deleted — they will 403/422
+      if (repo.isLocked) return true;
       // If archive action is selected and repo is already archived, disable it
       return selectedRepoAction.has("archive") && repo.isArchived;
     },
@@ -465,16 +467,24 @@ export default function RepoTable({
                     <td
                       className="px-3 py-3 text-default-400 whitespace-nowrap"
                       data-testid="repo-updated-at"
-                      title={new Date(repo.updatedAt as string).toLocaleString(
-                        navigator.language,
-                        {
-                          day: "numeric",
-                          month: "short",
-                          year: "numeric",
-                        },
-                      )}
+                      title={
+                        repo.updatedAt
+                          ? new Date(repo.updatedAt as string).toLocaleString(
+                              navigator.language,
+                              {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                              },
+                            )
+                          : "Unknown"
+                      }
                     >
-                      {formatDistanceToNow(new Date(repo.updatedAt as string))}
+                      {repo.updatedAt
+                        ? formatDistanceToNow(
+                            new Date(repo.updatedAt as string),
+                          )
+                        : "Unknown"}
                     </td>
                   </tr>
                 );
