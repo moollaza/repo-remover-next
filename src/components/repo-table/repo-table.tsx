@@ -277,13 +277,13 @@ export default function RepoTable({
                 </span>
               </th>
               <th
-                className="hidden lg:table-cell px-3 py-3 text-left text-xs font-semibold text-default-500 uppercase tracking-wider"
+                className="hidden xl:table-cell px-3 py-3 text-left text-xs font-semibold text-default-500 uppercase tracking-wider"
                 scope="col"
               >
                 Owner
               </th>
               <th
-                className="hidden lg:table-cell px-3 py-3 text-left text-xs font-semibold text-default-500 uppercase tracking-wider"
+                className="hidden xl:table-cell px-3 py-3 text-left text-xs font-semibold text-default-500 uppercase tracking-wider"
                 scope="col"
               >
                 Status
@@ -366,7 +366,7 @@ export default function RepoTable({
 
                         {/* Mobile-only: show pills inline (hidden on lg:) */}
                         <div
-                          className="flex gap-1.5 mb-1.5 flex-wrap lg:hidden"
+                          className="flex gap-1.5 mb-1.5 flex-wrap xl:hidden"
                           data-testid="repo-tags"
                         >
                           {repo.owner.login !== login && (
@@ -408,7 +408,7 @@ export default function RepoTable({
 
                     {/* Owner — desktop only */}
                     <td
-                      className="hidden lg:table-cell px-3 py-3"
+                      className="hidden xl:table-cell px-3 py-3"
                       data-testid="repo-owner"
                     >
                       {repo.owner.login !== login ? (
@@ -428,7 +428,7 @@ export default function RepoTable({
                     </td>
 
                     {/* Status — desktop only */}
-                    <td className="hidden lg:table-cell px-3 py-3">
+                    <td className="hidden xl:table-cell px-3 py-3">
                       <div
                         className="flex gap-1.5 flex-wrap"
                         data-testid="repo-tags"

@@ -154,9 +154,9 @@ export default function RepoFilters({
         : selectedTypeLabels.join(", ");
 
   return (
-    <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-2">
+    <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-2">
       {/* PER PAGE SELECTOR */}
-      <div className="w-full lg:w-20" ref={perPageDropdownRef}>
+      <div className="w-full md:w-20" ref={perPageDropdownRef}>
         <div
           className="relative cursor-pointer"
           data-testid="per-page-select"
@@ -201,7 +201,7 @@ export default function RepoFilters({
 
       {/* REPO TYPE SELECTOR */}
       <div
-        className="w-full lg:w-44 lg:flex-shrink-0"
+        className="w-full md:w-44 md:flex-shrink-0"
         ref={repoTypeDropdownRef}
       >
         <div
@@ -247,7 +247,7 @@ export default function RepoFilters({
       </div>
 
       {/* SEARCH INPUT */}
-      <div className="w-full lg:flex-1">
+      <div className="w-full md:flex-1">
         <div>
           <div className="relative">
             <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
@@ -273,7 +273,7 @@ export default function RepoFilters({
       </div>
 
       {/* ACTION BUTTONS */}
-      <div className="w-full lg:w-auto lg:flex-shrink-0">
+      <div className="w-full md:w-auto md:flex-shrink-0">
         <div className="flex">
           <div className="flex">
             <button

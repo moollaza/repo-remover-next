@@ -29,11 +29,11 @@ export default function RepoTableSkeleton({
                 Repository
               </th>
               {/* Owner — desktop only */}
-              <th className="hidden lg:table-cell px-3 py-3 text-left text-xs font-semibold text-default-500 uppercase tracking-wider">
+              <th className="hidden xl:table-cell px-3 py-3 text-left text-xs font-semibold text-default-500 uppercase tracking-wider">
                 Owner
               </th>
               {/* Status — desktop only */}
-              <th className="hidden lg:table-cell px-3 py-3 text-left text-xs font-semibold text-default-500 uppercase tracking-wider">
+              <th className="hidden xl:table-cell px-3 py-3 text-left text-xs font-semibold text-default-500 uppercase tracking-wider">
                 Status
               </th>
               {/* Last Updated */}
@@ -56,18 +56,18 @@ export default function RepoTableSkeleton({
                 <td className="px-3 py-3">
                   <div className="h-4 w-40 rounded bg-default-200 animate-pulse mb-1.5" />
                   {/* Mobile-only pill skeletons */}
-                  <div className="flex gap-1.5 mb-1.5 lg:hidden">
+                  <div className="flex gap-1.5 mb-1.5 xl:hidden">
                     <div className="h-4 w-14 rounded-full bg-default-200 animate-pulse" />
                     <div className="h-4 w-16 rounded-full bg-default-200 animate-pulse" />
                   </div>
                   <div className="h-3 w-full rounded bg-default-200 animate-pulse" />
                 </td>
                 {/* Owner — desktop only */}
-                <td className="hidden lg:table-cell px-3 py-3">
+                <td className="hidden xl:table-cell px-3 py-3">
                   <div className="h-3 w-20 rounded bg-default-200 animate-pulse" />
                 </td>
                 {/* Status — desktop only */}
-                <td className="hidden lg:table-cell px-3 py-3">
+                <td className="hidden xl:table-cell px-3 py-3">
                   <div className="flex gap-1.5">
                     <div className="h-4 w-14 rounded-full bg-default-200 animate-pulse" />
                   </div>
