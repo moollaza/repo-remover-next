@@ -48,7 +48,7 @@ export function HeroSection() {
           </a>
         </div>
 
-        <div className="mt-12 flex items-center justify-center gap-6 text-sm text-default-600">
+        <div className="mt-8 flex items-center justify-center gap-4 text-sm text-default-600">
           <span>Free forever</span>
           <span className="w-1 h-1 rounded-full bg-default-300" />
           <span>100% in-browser</span>

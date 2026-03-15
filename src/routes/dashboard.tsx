@@ -32,10 +32,10 @@ export function Dashboard() {
 
     if (!pat) {
       void navigate("/");
-    } else {
-      void refetchData();
     }
-  }, [pat, navigate, refetchData, isInitialized]);
+    // Don't force refetch on mount — SWR caches data and will
+    // revalidate automatically. Use the Refresh button for manual refresh.
+  }, [pat, navigate, isInitialized]);
 
   // Render presentational component with all data
   return (
