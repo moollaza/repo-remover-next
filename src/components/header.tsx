@@ -44,7 +44,7 @@ function LandingHeader({ isAuthenticated }: { isAuthenticated: boolean }) {
       className="w-full border-b border-divider bg-background/80 backdrop-blur-sm sticky top-0 z-50"
       data-testid="navbar"
     >
-      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between relative">
+      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between relative">
         <a className="flex items-center gap-2" href="/">
           <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
             <Trash2 className="h-4 w-4 text-white" />
@@ -144,7 +144,7 @@ function DashboardHeader({
       className="w-full border-b border-divider bg-background/80 backdrop-blur-sm sticky top-0 z-50"
       data-testid="navbar"
     >
-      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
         {/* Brand + dev tools */}
         <div className="flex items-center gap-3">
           <a className="flex items-center gap-2" href="/">

@@ -238,7 +238,7 @@ export default function RepoTable({
       />
 
       {/* TABLE */}
-      <div className="border border-divider rounded-xl overflow-x-auto shadow-sm bg-content1">
+      <div className="border border-divider rounded-xl overflow-x-auto bg-content1">
         <table
           aria-label="GitHub repositories table"
           className="w-full table-fixed text-sm"

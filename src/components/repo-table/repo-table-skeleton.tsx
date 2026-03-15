@@ -13,7 +13,7 @@ export default function RepoTableSkeleton({
       <RepoFiltersSkeleton />
 
       {/* Table skeleton — matches 5-column desktop + card mobile layout */}
-      <div className="border border-divider rounded-xl overflow-hidden shadow-sm bg-content1">
+      <div className="border border-divider rounded-xl overflow-hidden bg-content1">
         <table
           aria-label="Loading repositories"
           className="w-full table-fixed text-sm"
