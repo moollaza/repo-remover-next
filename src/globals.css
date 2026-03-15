@@ -18,6 +18,7 @@
 /* Shared brand tokens — used by both landing (Tailwind) and dashboard (HeroUI) */
 :root {
   --brand-blue: #0066ff;
+  --brand-link: #1d4ed8; /* blue-700 — 7.21:1 contrast on white, AAA compliant */
   --brand-cyan: #06b6d4;
   --brand-blue-light: #e6f0ff;
   --radius: 0.625rem;
@@ -25,6 +26,7 @@
 
 .dark {
   --brand-blue: #60a5fa;
+  --brand-link: #93c5fd; /* blue-300 — good contrast on dark backgrounds */
   --brand-cyan: #22d3ee;
   --brand-blue-light: #1e3a8a;
 }

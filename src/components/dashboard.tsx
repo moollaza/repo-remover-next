@@ -39,19 +39,40 @@ export default function Dashboard({
 }: DashboardProps) {
   return (
     <section className="py-10 flex-grow">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold" data-testid="repo-table-header">
-          Select Repos to Modify
-        </h1>
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1
+            className="text-2xl font-semibold"
+            data-testid="repo-table-header"
+          >
+            Repository Management
+          </h1>
+          <p className="text-default-500 mt-1">
+            Select repositories to archive or delete permanently
+          </p>
+        </div>
 
         {onRefresh && !isLoading && (
           <button
             aria-label="Refresh repository data"
-            className="text-sm text-primary hover:underline focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-divider text-sm font-medium hover:bg-default-50 transition-colors"
             onClick={onRefresh}
             type="button"
           >
-            Refresh Data
+            <svg
+              className="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            Refresh
           </button>
         )}
       </div>

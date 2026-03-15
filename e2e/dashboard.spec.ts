@@ -22,7 +22,7 @@ test.describe("Dashboard Page", () => {
 
     // Check for the page header
     await expect(
-      dashboard.page.getByText("Select Repos to Modify"),
+      dashboard.page.getByText("Repository Management"),
     ).toBeVisible();
 
     // Check if the repository table is visible

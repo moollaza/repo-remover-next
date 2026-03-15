@@ -355,7 +355,7 @@ export default function RepoTable({
                       <div data-testid="repo-details">
                         <div className="mb-1" data-testid="repo-name">
                           <a
-                            className="font-medium text-primary hover:underline"
+                            className="font-medium text-[var(--brand-link)] hover:underline"
                             href={repo.url as string}
                             rel="noopener noreferrer"
                             target="_blank"
@@ -413,7 +413,7 @@ export default function RepoTable({
                     >
                       {repo.owner.login !== login ? (
                         <a
-                          className="text-xs text-primary hover:underline"
+                          className="text-xs text-[var(--brand-link)] hover:underline"
                           href={repo.owner.url as string}
                           rel="noopener noreferrer"
                           target="_blank"

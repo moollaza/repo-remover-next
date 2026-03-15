@@ -145,15 +145,20 @@ function DashboardHeader({
       data-testid="navbar"
     >
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-        {/* Brand */}
-        <a className="font-extrabold text-xl text-foreground" href="/">
-          Repo Remover
-        </a>
+        {/* Brand + dev tools */}
+        <div className="flex items-center gap-3">
+          <a className="flex items-center gap-2" href="/">
+            <div className="w-8 h-8 bg-[var(--brand-blue)] rounded-lg flex items-center justify-center">
+              <Trash2 className="h-4 w-4 text-white" />
+            </div>
+            <span className="font-semibold text-lg">Repo Remover</span>
+          </a>
+          {isDevelopment && <GenerateReposButton />}
+        </div>
 
         {/* Right side */}
         <div className="flex items-center gap-3">
           <LandingThemeSwitcher />
-          {isDevelopment && <GenerateReposButton />}
 
           {/* User dropdown */}
           <div className="relative" ref={dropdownRef}>
@@ -180,7 +185,7 @@ function DashboardHeader({
                   {user?.name}
                 </div>
                 <a
-                  className="text-xs text-primary hover:underline"
+                  className="text-xs text-[var(--brand-link)] hover:underline"
                   href={(user?.url as string) ?? "https://github.com"}
                   onClick={(e) => e.stopPropagation()}
                   rel="noopener noreferrer"
