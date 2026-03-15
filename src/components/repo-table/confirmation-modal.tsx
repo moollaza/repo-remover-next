@@ -48,6 +48,7 @@ interface RepoActionProgressProps {
   action: "archive" | "delete";
   count: number;
   currentRepo: string;
+  onStop: () => void;
   progress: number;
 }
 
@@ -86,23 +87,14 @@ export default function ConfirmationModal({
 
   // Use reducer for state management
   const [state, dispatch] = useReducer(modalReducer, initialState);
+  const abortRef = useRef(false);
 
   async function handleConfirm() {
     debug.log("handleConfirm called");
 
-    debug.log("State before confirmation:", state);
+    if (!octokit || state.confirming) return;
 
-    if (!octokit) {
-      debug.error("Octokit is not initialized or already processing");
-      return;
-    }
-
-    if (state.confirming) {
-      debug.warn("Already processing, ignoring confirmation");
-      return;
-    }
-
-    // Single dispatch to handle the full state transition
+    abortRef.current = false;
     dispatch({ type: "START_PROCESSING" });
 
     // Track bulk action submission
@@ -112,10 +104,12 @@ export default function ConfirmationModal({
       analytics.trackDeleteActionSubmitted(repos.length);
     }
 
-    // Record the start time to ensure minimum progress display time
     const startTime = Date.now();
 
     for (const repo of repos) {
+      // Check abort flag before each repo
+      if (abortRef.current) break;
+
       try {
         await processRepo(octokit, repo, action);
       } catch (error) {
@@ -133,29 +127,25 @@ export default function ConfirmationModal({
           payload: { increment: 1, repo: repo.name },
           type: "UPDATE_PROGRESS",
         });
-        // Ensure each repo takes at least 1 second to process (for visual feedback)
+        // Brief pause for visual feedback
         await new Promise((resolve) => setTimeout(resolve, 1000));
       }
     }
 
-    // Ensure we show the progress screen for at least 3 seconds total
-    // This helps with testing and provides better UX
+    // Minimum display time for UX
     const elapsedTime = Date.now() - startTime;
-    const minimumProgressTime = 3000; // 3 seconds
-
-    if (elapsedTime < minimumProgressTime) {
-      await new Promise((resolve) =>
-        setTimeout(resolve, minimumProgressTime - elapsedTime),
-      );
+    if (elapsedTime < 2000) {
+      await new Promise((resolve) => setTimeout(resolve, 2000 - elapsedTime));
     }
 
-    // Now complete the processing
     dispatch({ type: "COMPLETE_PROCESSING" });
-
-    // Call the onConfirm callback after state is updated and with a slight delay
     setTimeout(() => {
       onConfirm();
     }, 100);
+  }
+
+  function handleStop() {
+    abortRef.current = true;
   }
 
   function resetState() {
@@ -219,6 +209,7 @@ export default function ConfirmationModal({
             action={action}
             count={count}
             currentRepo={state.currentRepo}
+            onStop={handleStop}
             progress={state.progress}
           />
         )}
@@ -435,9 +426,11 @@ function RepoActionProgress({
   action,
   count,
   currentRepo,
+  onStop,
   progress,
 }: RepoActionProgressProps) {
   const percentage = count > 0 ? Math.round((progress / count) * 100) : 0;
+  const actionVerb = action === "archive" ? "Archiving" : "Deleting";
 
   return (
     <>
@@ -446,23 +439,40 @@ function RepoActionProgress({
         data-testid="progress-modal-header"
       >
         <h3 className="text-lg font-semibold text-foreground">
-          {action === "archive" ? "Archiving" : "Deleting"} Repositories
+          {actionVerb} Repositories
         </h3>
       </div>
-      <div className="px-6 py-4 text-foreground">
-        <p>Current Repo: {currentRepo}</p>
-        <p>Progress: {progress}</p>
-        <div className="mt-4">
-          <p className="mb-2 text-sm text-default-500">
-            {action === "archive" ? "Archiving" : "Deleting"} repositories...
-          </p>
-          <div className="h-3 w-full overflow-hidden rounded-full bg-default-200">
+      <div className="px-6 py-6 text-foreground space-y-5">
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-default-500">
+            {actionVerb}{" "}
+            <span className="font-medium text-foreground">{currentRepo}</span>
+          </span>
+          <span className="font-medium tabular-nums">
+            {progress} / {count}
+          </span>
+        </div>
+
+        <div>
+          <div className="h-2.5 w-full overflow-hidden rounded-full bg-default-200">
             <div
-              className="h-full rounded-full bg-green-500 transition-all duration-300"
+              className="h-full rounded-full bg-[var(--brand-blue)] transition-all duration-300"
               style={{ width: `${percentage}%` }}
             />
           </div>
+          <p className="mt-2 text-xs text-default-400 text-right">
+            {percentage}%
+          </p>
         </div>
+      </div>
+      <div className="flex justify-end px-6 py-4 border-t border-divider">
+        <button
+          className="rounded-lg border border-divider bg-transparent px-4 py-2 text-sm font-medium text-foreground hover:bg-default-100 transition-colors"
+          onClick={onStop}
+          type="button"
+        >
+          Stop
+        </button>
       </div>
     </>
   );

@@ -17,7 +17,9 @@ describe("Dashboard", () => {
   it("renders heading", () => {
     render(<Dashboard {...defaultProps} />);
 
-    expect(screen.getByText(/select repos to modify/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/select repositories to archive or delete/i),
+    ).toBeInTheDocument();
   });
 
   it("shows error alert when isError is true", () => {
@@ -30,7 +32,9 @@ describe("Dashboard", () => {
     const warning = "Some organizations are not accessible due to SSO";
     render(<Dashboard {...defaultProps} permissionWarning={warning} />);
 
-    expect(screen.getByText(/limited access/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/some repositories may be missing/i),
+    ).toBeInTheDocument();
     expect(screen.getByText(warning)).toBeInTheDocument();
   });
 
@@ -76,19 +80,25 @@ describe("Dashboard", () => {
   it("handles null repos gracefully", () => {
     render(<Dashboard {...defaultProps} repos={null} />);
 
-    expect(screen.getByText(/select repos to modify/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/select repositories to archive or delete/i),
+    ).toBeInTheDocument();
   });
 
   it("handles empty repos array", () => {
     render(<Dashboard {...defaultProps} repos={[]} />);
 
-    expect(screen.getByText(/select repos to modify/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/select repositories to archive or delete/i),
+    ).toBeInTheDocument();
   });
 
   it("shows loading state", () => {
     render(<Dashboard {...defaultProps} isLoading={true} repos={null} />);
 
-    expect(screen.getByText(/select repos to modify/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/select repositories to archive or delete/i),
+    ).toBeInTheDocument();
     // RepoTable handles loading indicator internally
   });
 
@@ -104,7 +114,9 @@ describe("Dashboard", () => {
     );
 
     expect(screen.getByText(/error loading repositories/i)).toBeInTheDocument();
-    expect(screen.getByText(/limited access/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/some repositories may be missing/i),
+    ).toBeInTheDocument();
     expect(screen.getByText(warning)).toBeInTheDocument();
   });
 });

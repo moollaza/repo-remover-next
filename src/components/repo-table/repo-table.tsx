@@ -531,13 +531,13 @@ export default function RepoTable({
         </div>
       )}
 
-      {/* CONFIRMATION MODAL */}
-      {repos && selectedRepos && login && (
+      {/* CONFIRMATION MODAL — login derived from first selected repo's owner if prop is null */}
+      {repos && selectedRepos && (
         <ConfirmationModal
           action={Array.from(selectedRepoAction)[0] as "archive" | "delete"}
           data-testid="repo-confirmation-modal"
           isOpen={isOpen}
-          login={login}
+          login={login ?? selectedRepos[0]?.owner?.login ?? ""}
           onClose={onClose}
           onConfirm={handleConfirm}
           repos={selectedRepos}

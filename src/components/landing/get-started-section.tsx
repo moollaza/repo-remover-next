@@ -19,7 +19,7 @@ import {
 const steps = [
   {
     cta: {
-      href: "https://github.com/settings/tokens/new?scopes=repo,delete_repo&description=Repo+Remover",
+      href: "https://github.com/settings/tokens/new?scopes=repo,delete_repo,read:org&description=Repo+Remover",
       label: "Generate PAT on GitHub",
     },
     description:
@@ -165,7 +165,7 @@ export function GetStartedSection() {
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Get Started in Under 2 Minutes
           </h2>
-          <p className="text-lg text-default-500 max-w-2xl mx-auto">
+          <p className="text-lg text-default-500 max-w-2xl mx-auto text-pretty">
             No installs, no sign-up, no server. Just a token in your browser and
             you're ready to go.
           </p>

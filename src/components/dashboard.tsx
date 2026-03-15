@@ -101,13 +101,20 @@ export default function Dashboard({
           className="mb-4 p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800"
           role="alert"
         >
-          <div>
-            <strong>Limited Access:</strong> {permissionWarning}
-          </div>
-          <div className="mt-2 text-sm">
-            Some organization repositories may not be visible due to
-            insufficient token permissions.
-          </div>
+          <strong>Some repositories may be missing</strong>
+          <ul className="mt-2 text-sm list-disc list-inside space-y-1">
+            {permissionWarning.split("\n\n").map((warning, i) => (
+              <li key={i}>{warning}</li>
+            ))}
+          </ul>
+          <a
+            className="inline-block mt-3 text-sm font-medium underline hover:no-underline"
+            href="https://github.com/settings/tokens"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            Update token permissions on GitHub &rarr;
+          </a>
         </div>
       )}
 
