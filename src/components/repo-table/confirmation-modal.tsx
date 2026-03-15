@@ -198,7 +198,7 @@ export default function ConfirmationModal({
       onClose={isDismissable ? handleOnClose : undefined}
     >
       <div
-        className="relative w-full max-w-xl max-h-[80vh] overflow-y-auto rounded-xl bg-content1 shadow-xl"
+        className="relative w-full max-w-xl max-h-[80vh] overflow-y-auto rounded-xl bg-background border border-divider shadow-2xl"
         data-testid={`confirmation-modal-${state.mode}`}
       >
         {state.mode === "confirmation" && (
@@ -286,7 +286,7 @@ function ModalOverlay({
   return (
     <div
       ref={overlayRef}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
       data-testid="repo-confirmation-modal"
       onClick={handleBackdropClick}
     >
