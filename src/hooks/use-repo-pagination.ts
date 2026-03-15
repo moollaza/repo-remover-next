@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { PER_PAGE_OPTIONS } from "@/config/repo-config";
 
@@ -73,13 +73,19 @@ export function useRepoPagination<T>({
   // Calculate total pages
   const totalPages = Math.ceil(items.length / perPage);
 
+  // Auto-clamp page if it exceeds total pages (e.g. after filtering).
+  // Note: internal currentPage state may diverge from effectivePage, but this
+  // is acceptable since pagination buttons prevent navigating beyond bounds.
+  const effectivePage =
+    currentPage > totalPages && totalPages > 0 ? 1 : currentPage;
+
   // Get the current page of items
   const paginatedItems = useMemo(() => {
-    const start = (currentPage - 1) * perPage;
+    const start = (effectivePage - 1) * perPage;
     const end = start + perPage;
 
     return items.slice(start, end);
-  }, [items, currentPage, perPage]);
+  }, [items, effectivePage, perPage]);
 
   // Handle per page change with Selection type
   const setPerPage = useCallback((keys: Selection) => {
@@ -93,16 +99,8 @@ export function useRepoPagination<T>({
     setCurrentPage(1);
   }, []);
 
-  // Auto-reset page if current page exceeds total pages
-  // This handles the case where items are filtered and current page becomes invalid
-  useEffect(() => {
-    if (currentPage > totalPages && totalPages > 0) {
-      setCurrentPage(1);
-    }
-  }, [currentPage, totalPages]);
-
   return {
-    currentPage,
+    currentPage: effectivePage,
     paginatedItems,
     perPage,
     resetPage,

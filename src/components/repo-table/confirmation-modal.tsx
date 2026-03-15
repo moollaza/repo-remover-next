@@ -1,4 +1,5 @@
 import { type Repository } from "@octokit/graphql-schema";
+import { RequestError } from "@octokit/request-error";
 import { useCallback, useEffect, useReducer, useRef } from "react";
 import { createPortal } from "react-dom";
 
@@ -122,10 +123,7 @@ export default function ConfirmationModal({
 
           // Detect authentication failure — stop the batch early
           // All remaining repos will also fail with the same expired token
-          if (
-            error.message.includes("401") ||
-            error.message.includes("Bad credentials")
-          ) {
+          if (error instanceof RequestError && error.status === 401) {
             debug.error(
               "Authentication failed — stopping batch early. Token may have expired.",
             );

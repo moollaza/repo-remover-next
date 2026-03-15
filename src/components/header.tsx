@@ -5,6 +5,7 @@ import { useLocation } from "react-router-dom";
 
 import { GenerateReposButton } from "@/components/generate-repos-button";
 import { useGitHubData } from "@/hooks/use-github-data";
+import { secureStorage } from "@/utils/secure-storage";
 
 const homeLinks = [
   { href: "#features", label: "Features" },
@@ -234,12 +235,10 @@ export default function Header() {
   const isDevelopment = import.meta.env.DEV;
 
   function handleLogout() {
-    if (typeof localStorage !== "undefined") {
-      // Only clear auth data — preserve theme and other preferences
-      localStorage.removeItem("secure_pat");
-      localStorage.removeItem("secure_login");
-      window.location.href = "/";
-    }
+    // Only clear auth data — preserve theme and other preferences
+    secureStorage.removeItem("pat");
+    secureStorage.removeItem("login");
+    window.location.href = "/";
   }
 
   if (isDashboard) {
