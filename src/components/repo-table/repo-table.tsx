@@ -3,7 +3,7 @@ import { formatDistanceToNow } from "date-fns";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Checkbox } from "@/components/ui/checkbox";
-import { COLUMN_ORDER, REPO_ACTIONS } from "@/config/repo-config";
+import { REPO_ACTIONS } from "@/config/repo-config";
 import {
   type Selection,
   type SelectionSet,
@@ -247,41 +247,69 @@ export default function RepoTable({
           <thead>
             <tr className="bg-default-100 border-b border-divider">
               {/* Checkbox column */}
-              <th className="w-12 px-3 py-3 text-left" scope="col">
+              <th className="w-12 px-3 py-3" scope="col">
                 <Checkbox
                   aria-label="Select all"
                   checked={allSelectableSelected && selectableRepos.length > 0}
                   onCheckedChange={handleSelectAll}
                 />
               </th>
-              {COLUMN_ORDER.map((column) => {
-                const isSorted = sortDescriptor.column === column.key;
-                const ariaSortValue = isSorted
-                  ? sortDescriptor.direction
-                  : "none";
-
-                return (
-                  <th
-                    aria-sort={ariaSortValue}
-                    className={`${column.className} px-3 py-3 text-left text-xs font-semibold text-default-500 uppercase tracking-wider cursor-pointer select-none hover:bg-default-200 transition-colors`}
-                    data-sortable="true"
-                    key={column.key}
-                    onClick={() => handleSortChange(column.key)}
-                    scope="col"
-                  >
-                    <span className="inline-flex items-center gap-1">
-                      {column.label}
-                      {isSorted && (
-                        <span className="text-default-400">
-                          {sortDescriptor.direction === "ascending"
-                            ? "\u25B2"
-                            : "\u25BC"}
-                        </span>
-                      )}
+              <th
+                aria-sort={
+                  sortDescriptor.column === "name"
+                    ? sortDescriptor.direction
+                    : "none"
+                }
+                className="px-3 py-3 text-left text-xs font-semibold text-default-500 uppercase tracking-wider cursor-pointer select-none hover:bg-default-200 transition-colors"
+                data-sortable="true"
+                onClick={() => handleSortChange("name")}
+                scope="col"
+              >
+                <span className="inline-flex items-center gap-1">
+                  Repository
+                  {sortDescriptor.column === "name" && (
+                    <span className="text-default-400">
+                      {sortDescriptor.direction === "ascending"
+                        ? "\u25B2"
+                        : "\u25BC"}
                     </span>
-                  </th>
-                );
-              })}
+                  )}
+                </span>
+              </th>
+              <th
+                className="hidden lg:table-cell px-3 py-3 text-left text-xs font-semibold text-default-500 uppercase tracking-wider"
+                scope="col"
+              >
+                Owner
+              </th>
+              <th
+                className="hidden lg:table-cell px-3 py-3 text-left text-xs font-semibold text-default-500 uppercase tracking-wider"
+                scope="col"
+              >
+                Status
+              </th>
+              <th
+                aria-sort={
+                  sortDescriptor.column === "updatedAt"
+                    ? sortDescriptor.direction
+                    : "none"
+                }
+                className="px-3 py-3 text-left text-xs font-semibold text-default-500 uppercase tracking-wider cursor-pointer select-none hover:bg-default-200 transition-colors"
+                data-sortable="true"
+                onClick={() => handleSortChange("updatedAt")}
+                scope="col"
+              >
+                <span className="inline-flex items-center gap-1">
+                  Last Updated
+                  {sortDescriptor.column === "updatedAt" && (
+                    <span className="text-default-400">
+                      {sortDescriptor.direction === "ascending"
+                        ? "\u25B2"
+                        : "\u25BC"}
+                    </span>
+                  )}
+                </span>
+              </th>
             </tr>
           </thead>
 
@@ -291,7 +319,7 @@ export default function RepoTable({
               <tr>
                 <td
                   className="px-3 py-8 text-center text-default-500"
-                  colSpan={COLUMN_ORDER.length + 1}
+                  colSpan={5}
                 >
                   No repos to display.
                 </td>
@@ -312,7 +340,7 @@ export default function RepoTable({
                     data-testid="repo-row"
                     key={repo.id}
                   >
-                    {/* Checkbox cell */}
+                    {/* Checkbox */}
                     <td className="w-12 px-3 py-3">
                       <Checkbox
                         aria-label={repo.name}
@@ -321,9 +349,11 @@ export default function RepoTable({
                         onCheckedChange={() => handleRowSelect(repo.id)}
                       />
                     </td>
+
+                    {/* Repository — name + description + MOBILE-ONLY pills */}
                     <td className="px-3 py-3">
                       <div data-testid="repo-details">
-                        <div className="mb-1.5" data-testid="repo-name">
+                        <div className="mb-1" data-testid="repo-name">
                           <a
                             className="font-medium text-primary hover:underline"
                             href={repo.url as string}
@@ -333,10 +363,17 @@ export default function RepoTable({
                             {repo.name}
                           </a>
                         </div>
+
+                        {/* Mobile-only: show pills inline (hidden on lg:) */}
                         <div
-                          className="flex gap-2 mb-2"
+                          className="flex gap-1.5 mb-1.5 flex-wrap lg:hidden"
                           data-testid="repo-tags"
                         >
+                          {repo.owner.login !== login && (
+                            <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-default-100 text-default-500 border border-divider">
+                              {repo.owner.login}
+                            </span>
+                          )}
                           {repo.isPrivate && (
                             <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-default-100 text-default-500 border border-divider">
                               Private
@@ -344,7 +381,7 @@ export default function RepoTable({
                           )}
                           {repo.isInOrganization && (
                             <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-default-100 text-default-500 border border-divider">
-                              Organization
+                              Org
                             </span>
                           )}
                           {repo.isFork && (
@@ -359,23 +396,7 @@ export default function RepoTable({
                           )}
                         </div>
 
-                        {repo.owner.login !== login && (
-                          <div
-                            className="mb-1 text-default-400 text-xs"
-                            data-testid="repo-owner"
-                          >
-                            Owned by{" "}
-                            <a
-                              className="text-primary text-xs hover:underline"
-                              href={repo.owner.url as string}
-                              rel="noopener noreferrer"
-                              target="_blank"
-                            >
-                              {repo.owner.login}
-                            </a>
-                          </div>
-                        )}
-
+                        {/* Description */}
                         <div
                           className="text-xs text-default-400"
                           data-testid="repo-description"
@@ -384,21 +405,76 @@ export default function RepoTable({
                         </div>
                       </div>
                     </td>
-                    <td className="px-3 py-3 text-default-400">
-                      <span
-                        data-testid="repo-updated-at"
-                        title={new Date(
-                          repo.updatedAt as string,
-                        ).toLocaleString(navigator.language, {
+
+                    {/* Owner — desktop only */}
+                    <td
+                      className="hidden lg:table-cell px-3 py-3"
+                      data-testid="repo-owner"
+                    >
+                      {repo.owner.login !== login ? (
+                        <a
+                          className="text-xs text-primary hover:underline"
+                          href={repo.owner.url as string}
+                          rel="noopener noreferrer"
+                          target="_blank"
+                        >
+                          {repo.owner.login}
+                        </a>
+                      ) : (
+                        <span className="text-xs text-default-400">
+                          {repo.owner.login}
+                        </span>
+                      )}
+                    </td>
+
+                    {/* Status — desktop only */}
+                    <td className="hidden lg:table-cell px-3 py-3">
+                      <div
+                        className="flex gap-1.5 flex-wrap"
+                        data-testid="repo-tags"
+                      >
+                        {repo.isPrivate && (
+                          <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-default-100 text-default-500 border border-divider">
+                            Private
+                          </span>
+                        )}
+                        {!repo.isPrivate && (
+                          <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+                            Public
+                          </span>
+                        )}
+                        {repo.isInOrganization && (
+                          <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-default-100 text-default-500 border border-divider">
+                            Org
+                          </span>
+                        )}
+                        {repo.isFork && (
+                          <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-default-100 text-default-500 border border-divider">
+                            Fork
+                          </span>
+                        )}
+                        {repo.isArchived && (
+                          <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
+                            Archived
+                          </span>
+                        )}
+                      </div>
+                    </td>
+
+                    {/* Last Updated */}
+                    <td
+                      className="px-3 py-3 text-default-400 whitespace-nowrap"
+                      data-testid="repo-updated-at"
+                      title={new Date(repo.updatedAt as string).toLocaleString(
+                        navigator.language,
+                        {
                           day: "numeric",
                           month: "short",
                           year: "numeric",
-                        })}
-                      >
-                        {formatDistanceToNow(
-                          new Date(repo.updatedAt as string),
-                        )}
-                      </span>
+                        },
+                      )}
+                    >
+                      {formatDistanceToNow(new Date(repo.updatedAt as string))}
                     </td>
                   </tr>
                 );

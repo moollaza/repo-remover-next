@@ -233,10 +233,14 @@ export class DashboardPage extends BasePage {
       has: this.page.getByTestId("repo-name").filter({ hasText: repoName }),
     });
 
-    // Then within that row, check for the tag in the repo-tags section
-    const tagLocator = repoRow.getByTestId("repo-tags").filter({
-      hasText: tagName,
-    });
+    // Both mobile (lg:hidden) and desktop (hidden lg:table-cell) have repo-tags testid.
+    // Use last() to get the desktop version which is visible at our test viewport (1280px).
+    const tagLocator = repoRow
+      .getByTestId("repo-tags")
+      .filter({
+        hasText: tagName,
+      })
+      .last();
 
     await expect(tagLocator).toBeVisible();
   }

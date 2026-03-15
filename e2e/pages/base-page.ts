@@ -60,8 +60,9 @@ export class BasePage {
   }
 
   async expectUserProfileVisible(name: string, login: string) {
-    await expect(this.page.getByText(name)).toBeVisible();
-    await expect(this.page.getByText(login)).toBeVisible();
+    // Scope to navbar to avoid matching owner column in table
+    await expect(this.navbar.getByText(name)).toBeVisible();
+    await expect(this.navbar.getByText(login)).toBeVisible();
   }
 
   // Navigation methods

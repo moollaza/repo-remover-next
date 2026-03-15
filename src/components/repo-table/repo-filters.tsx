@@ -154,18 +154,21 @@ export default function RepoFilters({
         : selectedTypeLabels.join(", ");
 
   return (
-    <div className="flex flex-col gap-3 lg:grid lg:grid-cols-12">
+    <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-2">
       {/* PER PAGE SELECTOR */}
-      <div className="lg:col-span-2" ref={perPageDropdownRef}>
+      <div className="w-full lg:w-20" ref={perPageDropdownRef}>
         <div
           className="relative cursor-pointer"
           data-testid="per-page-select"
           onClick={() => setPerPageOpen((prev) => !prev)}
         >
-          <label className="block text-xs text-default-500 mb-1 pointer-events-none">
+          <label className="sr-only" id="per-page-label">
             Repos per page
           </label>
-          <div className="w-full h-10 px-3 rounded-lg border border-divider bg-content1 text-foreground text-sm text-left flex items-center justify-between hover:bg-content2 transition-colors">
+          <div
+            aria-labelledby="per-page-label"
+            className="w-full h-10 px-3 rounded-lg border border-divider bg-content1 text-foreground text-sm text-left flex items-center justify-between hover:bg-content2 transition-colors"
+          >
             <span>{perPage}</span>
             <ChevronDownIcon className="h-4 w-4 text-default-400" />
           </div>
@@ -197,15 +200,15 @@ export default function RepoFilters({
       </div>
 
       {/* REPO TYPE SELECTOR */}
-      <div className="lg:col-span-6" ref={repoTypeDropdownRef}>
+      <div
+        className="w-full lg:w-44 lg:flex-shrink-0"
+        ref={repoTypeDropdownRef}
+      >
         <div
           className="relative cursor-pointer"
           data-testid="repo-type-select"
           onClick={() => setRepoTypeOpen((prev) => !prev)}
         >
-          <label className="block text-xs text-default-500 mb-1 pointer-events-none">
-            Repo types to show
-          </label>
           <div className="w-full h-10 px-3 rounded-lg border border-divider bg-content1 text-foreground text-sm text-left flex items-center justify-between hover:bg-content2 transition-colors">
             <span className="truncate">{typesSummary}</span>
             <ChevronDownIcon className="h-4 w-4 text-default-400 shrink-0" />
@@ -244,9 +247,8 @@ export default function RepoFilters({
       </div>
 
       {/* SEARCH INPUT */}
-      <div className="lg:col-span-4">
+      <div className="w-full lg:flex-1">
         <div>
-          <label className="block text-xs text-default-500 mb-1">Search</label>
           <div className="relative">
             <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
               <MagnifyingGlassIcon className="h-5 w-5 text-default-400" />
@@ -271,8 +273,8 @@ export default function RepoFilters({
       </div>
 
       {/* ACTION BUTTONS */}
-      <div className="lg:col-span-3">
-        <div className="flex h-full items-end">
+      <div className="w-full lg:w-auto lg:flex-shrink-0">
+        <div className="flex">
           <div className="flex">
             <button
               className={`h-10 px-4 py-2 text-sm font-medium rounded-l-lg transition-colors text-white ${

@@ -46,7 +46,7 @@ test.describe("Dashboard Page", () => {
 
     // Check that the "Name" header is visible and sortable and not sorted
     const nameHeader = dashboard.page.getByRole("columnheader", {
-      name: "Name",
+      name: "Repository",
     });
     await expect(nameHeader).toBeVisible();
     await expect(nameHeader).toHaveAttribute("data-sortable", "true");
@@ -110,7 +110,7 @@ test.describe("Dashboard Page", () => {
       }
 
       if (template.isInOrganization) {
-        await dashboard.expectRepoHasTag(template.name, "Organization");
+        await dashboard.expectRepoHasTag(template.name, "Org");
       }
 
       // Verify owner information when it's not the current user
@@ -184,12 +184,16 @@ test.describe("Dashboard Page", () => {
     await dashboard.expectRepoVisible("repo-1");
 
     // Sort by name
-    await dashboard.page.getByRole("columnheader", { name: "Name" }).click();
+    await dashboard.page
+      .getByRole("columnheader", { name: "Repository" })
+      .click();
     // Verify ascending sort
     await dashboard.expectRepoAtPosition(1, "repo-1");
 
     // Sort by name in reverse
-    await dashboard.page.getByRole("columnheader", { name: "Name" }).click();
+    await dashboard.page
+      .getByRole("columnheader", { name: "Repository" })
+      .click();
     // Verify descending sort
     await dashboard.expectRepoAtPosition(1, "repo-9");
 

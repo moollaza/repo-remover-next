@@ -38,7 +38,7 @@ describe("RepoFilters", () => {
     // Check if all main components are rendered
     expect(screen.getByTestId("per-page-select")).toBeInTheDocument();
 
-    expect(screen.getAllByText("Repo types to show")[0]).toBeInTheDocument();
+    expect(screen.getByTestId("repo-type-select")).toBeInTheDocument();
     expect(screen.getByTestId("repo-search-input")).toBeInTheDocument();
     expect(screen.getAllByText(REPO_ACTIONS[0].label)[0]).toBeInTheDocument();
   });
