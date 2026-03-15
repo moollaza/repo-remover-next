@@ -170,17 +170,21 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
     }
   }, []);
 
-  const setPat = useCallback((newPat: string) => {
+  const setPat = useCallback((newPat: string, remember = true) => {
     if (!newPat || typeof newPat !== "string") {
       console.error("Invalid Personal Access Token format");
       return;
     }
 
     setPatState(newPat);
-    if (typeof window !== "undefined") {
+    if (remember && typeof window !== "undefined") {
       secureStorage.setItem("pat", newPat).catch((error) => {
         console.warn("Failed to save PAT to secure storage:", error);
       });
+    } else if (!remember && typeof window !== "undefined") {
+      // Clear any previously stored token
+      secureStorage.removeItem("pat");
+      secureStorage.removeItem("login");
     }
   }, []);
 

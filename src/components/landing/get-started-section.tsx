@@ -1,6 +1,7 @@
 import {
   CheckSquare,
   ExternalLink,
+  Info,
   Key,
   Loader2,
   Search,
@@ -60,6 +61,8 @@ function InlinePATForm() {
   const [error, setError] = useState<null | string>(null);
   const [isValidating, setIsValidating] = useState(false);
   const [isValid, setIsValid] = useState(false);
+  const [remember, setRemember] = useState(true);
+  const [showTooltip, setShowTooltip] = useState(false);
   const { setPat } = useGitHubData();
   const navigate = useNavigate();
 
@@ -100,7 +103,7 @@ function InlinePATForm() {
     e.preventDefault();
     if (!isValid || isValidating) return;
 
-    setPat(token);
+    setPat(token, remember);
     analytics.trackTokenValidated();
     void navigate("/dashboard");
   }
@@ -140,6 +143,39 @@ function InlinePATForm() {
           Token validated successfully
         </p>
       )}
+
+      <div className="flex items-center gap-2">
+        <input
+          checked={remember}
+          className="h-4 w-4 rounded border-default-300 accent-[var(--brand-blue)]"
+          id="remember-token"
+          onChange={(e) => setRemember(e.target.checked)}
+          type="checkbox"
+        />
+        <label
+          className="text-sm text-default-500 select-none"
+          htmlFor="remember-token"
+        >
+          Remember my token
+        </label>
+        <div className="relative">
+          <button
+            aria-label="Token storage info"
+            className="text-default-400 hover:text-default-600 transition-colors"
+            onClick={() => setShowTooltip(!showTooltip)}
+            type="button"
+          >
+            <Info className="h-3.5 w-3.5" />
+          </button>
+          {showTooltip && (
+            <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-64 p-3 rounded-lg bg-content1 border border-divider shadow-lg text-xs text-default-500 z-50">
+              Your token is AES-encrypted and stored only in your browser's
+              localStorage. It never leaves your device.
+              <div className="absolute left-1/2 -translate-x-1/2 top-full w-2 h-2 rotate-45 bg-content1 border-r border-b border-divider" />
+            </div>
+          )}
+        </div>
+      </div>
 
       <button
         className={`w-full py-3 rounded-lg font-medium text-base transition-all ${
