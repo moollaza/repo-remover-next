@@ -73,7 +73,7 @@ function LandingHeader({ isAuthenticated }: { isAuthenticated: boolean }) {
           <LandingThemeSwitcher />
           {isAuthenticated && (
             <a
-              className="inline-flex items-center px-4 py-2 rounded-lg bg-primary text-white text-sm font-medium hover:opacity-90 transition-opacity"
+              className="inline-flex items-center px-4 py-2 rounded-lg bg-[var(--brand-blue)] text-white text-sm font-medium hover:opacity-90 transition-opacity"
               href="/dashboard"
             >
               Go to Dashboard
