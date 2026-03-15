@@ -238,10 +238,10 @@ export default function RepoTable({
       />
 
       {/* TABLE */}
-      <div className="border border-divider rounded-lg overflow-x-auto">
+      <div className="border border-divider rounded-xl overflow-x-auto shadow-sm bg-content1">
         <table
           aria-label="GitHub repositories table"
-          className="w-full table-fixed"
+          className="w-full table-fixed text-sm"
           data-testid="repo-table"
         >
           <thead>
@@ -304,11 +304,11 @@ export default function RepoTable({
 
                 return (
                   <tr
-                    className={`border-b border-divider transition-colors ${
+                    className={`border-b border-divider/50 transition-colors ${
                       disabled
                         ? "pointer-events-none opacity-50"
-                        : "hover:bg-content2"
-                    } ${isSelected && !disabled ? "bg-primary-50/50" : ""}`}
+                        : "hover:bg-default-50"
+                    } ${isSelected && !disabled ? "bg-primary/5" : ""}`}
                     data-testid="repo-row"
                     key={repo.id}
                   >
@@ -325,7 +325,7 @@ export default function RepoTable({
                       <div data-testid="repo-details">
                         <div className="mb-1.5" data-testid="repo-name">
                           <a
-                            className="font-medium text-base text-primary hover:underline"
+                            className="font-medium text-primary hover:underline"
                             href={repo.url as string}
                             rel="noopener noreferrer"
                             target="_blank"
@@ -338,22 +338,22 @@ export default function RepoTable({
                           data-testid="repo-tags"
                         >
                           {repo.isPrivate && (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded border border-divider text-xs text-foreground">
+                            <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-default-100 text-default-500 border border-divider">
                               Private
                             </span>
                           )}
                           {repo.isInOrganization && (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded border border-divider text-xs text-foreground">
+                            <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-default-100 text-default-500 border border-divider">
                               Organization
                             </span>
                           )}
                           {repo.isFork && (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded border border-divider text-xs text-foreground">
+                            <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-default-100 text-default-500 border border-divider">
                               Fork
                             </span>
                           )}
                           {repo.isArchived && (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded border border-warning text-xs text-warning">
+                            <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
                               Archived
                             </span>
                           )}
@@ -361,12 +361,12 @@ export default function RepoTable({
 
                         {repo.owner.login !== login && (
                           <div
-                            className="mb-1 text-default-500 text-sm"
+                            className="mb-1 text-default-400 text-xs"
                             data-testid="repo-owner"
                           >
                             Owned by{" "}
                             <a
-                              className="text-sm text-primary hover:underline"
+                              className="text-primary text-xs hover:underline"
                               href={repo.owner.url as string}
                               rel="noopener noreferrer"
                               target="_blank"
@@ -376,12 +376,15 @@ export default function RepoTable({
                           </div>
                         )}
 
-                        <div className="text-sm" data-testid="repo-description">
+                        <div
+                          className="text-xs text-default-400"
+                          data-testid="repo-description"
+                        >
                           {repo.description ?? <i>No description</i>}
                         </div>
                       </div>
                     </td>
-                    <td className="px-3 py-3">
+                    <td className="px-3 py-3 text-default-400">
                       <span
                         data-testid="repo-updated-at"
                         title={new Date(
