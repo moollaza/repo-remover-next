@@ -55,7 +55,7 @@ description: Architecture review findings, priority recommendations, GitHub API 
 
 ### P0 — Critical (Do First)
 
-1. **Presentational/Container Refactor** — fixes broken Storybook setup (see `docs/PRESENTATIONAL_CONTAINER_REFACTOR.md`)
+1. **Presentational/Container Refactor** (see `docs/PRESENTATIONAL_CONTAINER_REFACTOR.md`)
 2. Create `src/utils/test-utils/render.tsx` (custom render utility)
 3. Add error boundaries (`src/components/error-boundary.tsx`)
 4. Migrate MSW to operation-based GraphQL handlers
@@ -64,30 +64,9 @@ description: Architecture review findings, priority recommendations, GitHub API 
 
 5. Extract hooks from `RepoTable` and `ConfirmationModal`
 6. Add missing tests (scroll-button, token-form-section, generate-repos-button)
-7. Simplify Storybook with named handler sets
-8. Extract shared constants to `src/config/`
+7. Extract shared constants to `src/config/`
 
 See `docs/RECOMMENDATIONS.md` for full list and implementation details.
-
-## Storybook Pain Point (CRITICAL TO FIX)
-
-**Current Problem**: Dashboard story requires localStorage + MSW + decorators and still doesn't work.
-
-**Root Cause**: `DashboardPage` is a container component (uses hooks, context, effects) but is being storied directly.
-
-**Solution**: Apply Presentational/Container pattern:
-
-- Extract presentational `Dashboard` component (takes props, zero hooks)
-- Keep container logic in `page.tsx` (hooks, effects, routing)
-- Stories become trivial: just pass props!
-
-**Impact**:
-
-- Stories: 100+ LOC to 10 LOC (90% reduction)
-- No MSW needed, no decorators needed
-- All states easily testable
-
-See `docs/PRESENTATIONAL_CONTAINER_REFACTOR.md` for detailed guide.
 
 ## Architecture Docs
 
@@ -141,7 +120,6 @@ Configure optional monitoring services:
 - React Testing Library: https://testing-library.com/docs/react-testing-library/intro/
 - Playwright: https://playwright.dev/docs/intro
 - MSW: https://mswjs.io/docs/
-- Storybook: https://storybook.js.org/docs
 
 ### Development Tools
 

@@ -48,17 +48,12 @@ export function ScrollingQuotes() {
   }, []);
 
   useEffect(() => {
-    // Check for reduced motion preference or Storybook environment
+    // Check for reduced motion preference
     const prefersReducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
-    const isStorybook =
-      typeof window !== "undefined" &&
-      (window.location.href.includes("storybook") ||
-        window.parent !== window ||
-        !!document.querySelector("#storybook-root"));
 
-    setReduceMotion(prefersReducedMotion || isStorybook);
+    setReduceMotion(prefersReducedMotion);
   }, []);
 
   return (
