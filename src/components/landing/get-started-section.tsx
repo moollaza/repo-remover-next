@@ -123,7 +123,9 @@ function InlinePATForm() {
           data-testid="github-token-input"
           onChange={(e) => setToken(e.target.value)}
           placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-          type="password"
+          type="text"
+          data-1p-ignore
+          data-lpignore="true"
           value={token}
         />
         {isValidating && (
