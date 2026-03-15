@@ -7,7 +7,7 @@ import {
   Search,
   Trash2,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useGitHubData } from "@/hooks/use-github-data";
@@ -63,8 +63,24 @@ function InlinePATForm() {
   const [isValid, setIsValid] = useState(false);
   const [remember, setRemember] = useState(true);
   const [showTooltip, setShowTooltip] = useState(false);
+  const tooltipRef = useRef<HTMLDivElement>(null);
   const { setPat } = useGitHubData();
   const navigate = useNavigate();
+
+  // Close tooltip on click outside
+  useEffect(() => {
+    if (!showTooltip) return;
+    function handleClick(e: MouseEvent) {
+      if (
+        tooltipRef.current &&
+        !tooltipRef.current.contains(e.target as Node)
+      ) {
+        setShowTooltip(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [showTooltip]);
 
   // Auto-validate when token changes (with debounce)
   useEffect(() => {
@@ -158,7 +174,7 @@ function InlinePATForm() {
         >
           Remember my token
         </label>
-        <div className="relative">
+        <div className="relative" ref={tooltipRef}>
           <button
             aria-label="Token storage info"
             className="text-default-400 hover:text-default-600 transition-colors"
@@ -168,10 +184,10 @@ function InlinePATForm() {
             <Info className="h-3.5 w-3.5" />
           </button>
           {showTooltip && (
-            <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-64 p-3 rounded-lg bg-content1 border border-divider shadow-lg text-xs text-default-500 z-50">
+            <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-3 w-64 p-3 rounded-lg bg-content1 border border-divider shadow-lg text-xs text-default-500 z-50">
               Your token is AES-encrypted and stored only in your browser's
               localStorage. It never leaves your device.
-              <div className="absolute left-1/2 -translate-x-1/2 top-full w-2 h-2 rotate-45 bg-content1 border-r border-b border-divider" />
+              <div className="absolute left-1/2 -translate-x-1/2 -bottom-1.5 w-3 h-3 rotate-45 bg-content1 border-r border-b border-divider" />
             </div>
           )}
         </div>
