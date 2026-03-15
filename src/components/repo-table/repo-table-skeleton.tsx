@@ -1,5 +1,3 @@
-import { COLUMN_ORDER } from "@/config/repo-config";
-
 import RepoFiltersSkeleton from "./repo-filters-skeleton";
 
 interface RepoTableSkeletonProps {
@@ -14,56 +12,69 @@ export default function RepoTableSkeleton({
       {/* Filters skeleton */}
       <RepoFiltersSkeleton />
 
-      {/* Table skeleton - matches real table exactly */}
-      <div className="border border-divider rounded-lg overflow-hidden">
-        <table aria-label="Loading repositories" className="w-full table-fixed">
+      {/* Table skeleton — matches 5-column desktop + card mobile layout */}
+      <div className="border border-divider rounded-xl overflow-hidden shadow-sm bg-content1">
+        <table
+          aria-label="Loading repositories"
+          className="w-full table-fixed text-sm"
+        >
           <thead>
-            <tr>
-              {/* Checkbox column */}
-              <th className="w-12 bg-default-100 border-b border-divider px-3 py-3">
+            <tr className="bg-default-100 border-b border-divider">
+              {/* Checkbox */}
+              <th className="w-12 px-3 py-3" scope="col">
                 <div className="h-4 w-4 rounded bg-default-200 animate-pulse" />
               </th>
-              {COLUMN_ORDER.map((column) => (
-                <th
-                  className={`${column.className} bg-default-100 border-b border-divider px-3 py-3 text-left text-xs font-medium text-default-500 uppercase`}
-                  key={column.key}
-                >
-                  {column.label}
-                </th>
-              ))}
+              {/* Repository */}
+              <th className="px-3 py-3 text-left text-xs font-semibold text-default-500 uppercase tracking-wider">
+                Repository
+              </th>
+              {/* Owner — desktop only */}
+              <th className="hidden lg:table-cell px-3 py-3 text-left text-xs font-semibold text-default-500 uppercase tracking-wider">
+                Owner
+              </th>
+              {/* Status — desktop only */}
+              <th className="hidden lg:table-cell px-3 py-3 text-left text-xs font-semibold text-default-500 uppercase tracking-wider">
+                Status
+              </th>
+              {/* Last Updated */}
+              <th className="px-3 py-3 text-left text-xs font-semibold text-default-500 uppercase tracking-wider">
+                Last Updated
+              </th>
             </tr>
           </thead>
           <tbody>
             {Array.from({ length: rows }).map((_, i) => (
-              <tr className="border-b border-divider last:border-b-0" key={i}>
-                {/* Checkbox cell */}
+              <tr
+                className="border-b border-divider/50 last:border-b-0"
+                key={i}
+              >
+                {/* Checkbox */}
                 <td className="w-12 px-3 py-3">
                   <div className="h-4 w-4 rounded bg-default-200 animate-pulse" />
                 </td>
-                {/* NAME column */}
+                {/* Repository + mobile pills */}
                 <td className="px-3 py-3">
-                  <div>
-                    {/* Repo name */}
-                    <div className="mb-1.5">
-                      <div className="h-6 w-48 rounded-lg bg-default-200 animate-pulse" />
-                    </div>
-                    {/* Chips row */}
-                    <div className="flex gap-2 mb-2">
-                      <div className="h-6 w-16 rounded-lg bg-default-200 animate-pulse" />
-                      <div className="h-6 w-24 rounded-lg bg-default-200 animate-pulse" />
-                    </div>
-                    {/* Owner */}
-                    <div className="mb-1">
-                      <div className="h-4 w-32 rounded-lg bg-default-200 animate-pulse" />
-                    </div>
-                    {/* Description */}
-                    <div className="h-4 w-full rounded-lg bg-default-200 animate-pulse" />
+                  <div className="h-4 w-40 rounded bg-default-200 animate-pulse mb-1.5" />
+                  {/* Mobile-only pill skeletons */}
+                  <div className="flex gap-1.5 mb-1.5 lg:hidden">
+                    <div className="h-4 w-14 rounded-full bg-default-200 animate-pulse" />
+                    <div className="h-4 w-16 rounded-full bg-default-200 animate-pulse" />
+                  </div>
+                  <div className="h-3 w-full rounded bg-default-200 animate-pulse" />
+                </td>
+                {/* Owner — desktop only */}
+                <td className="hidden lg:table-cell px-3 py-3">
+                  <div className="h-3 w-20 rounded bg-default-200 animate-pulse" />
+                </td>
+                {/* Status — desktop only */}
+                <td className="hidden lg:table-cell px-3 py-3">
+                  <div className="flex gap-1.5">
+                    <div className="h-4 w-14 rounded-full bg-default-200 animate-pulse" />
                   </div>
                 </td>
-
-                {/* LAST UPDATED column */}
+                {/* Last Updated */}
                 <td className="px-3 py-3">
-                  <div className="h-4 w-20 rounded-lg bg-default-200 animate-pulse" />
+                  <div className="h-3 w-20 rounded bg-default-200 animate-pulse" />
                 </td>
               </tr>
             ))}
@@ -71,7 +82,7 @@ export default function RepoTableSkeleton({
         </table>
       </div>
 
-      {/* Pagination skeleton - outside table border */}
+      {/* Pagination skeleton */}
       <div className="flex w-full justify-center">
         <div className="h-10 w-64 rounded-lg bg-default-200 animate-pulse" />
       </div>

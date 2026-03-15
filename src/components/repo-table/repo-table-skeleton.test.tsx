@@ -31,16 +31,13 @@ describe("RepoTableSkeleton", () => {
     expect(screen.getByLabelText("Loading repositories")).toBeInTheDocument();
   });
 
-  it("uses correct column headers from COLUMN_ORDER", () => {
+  it("uses correct column headers", () => {
     render(<RepoTableSkeleton />);
 
-    // Should use title case from COLUMN_ORDER
-    expect(screen.getByText("Name")).toBeInTheDocument();
+    expect(screen.getByText("Repository")).toBeInTheDocument();
     expect(screen.getByText("Last Updated")).toBeInTheDocument();
-
-    // Should NOT have uppercase versions
-    expect(screen.queryByText("NAME")).not.toBeInTheDocument();
-    expect(screen.queryByText("LAST UPDATED")).not.toBeInTheDocument();
+    expect(screen.getByText("Owner")).toBeInTheDocument();
+    expect(screen.getByText("Status")).toBeInTheDocument();
   });
 
   it("renders skeleton container with correct test id", () => {
@@ -74,7 +71,7 @@ describe("RepoTableSkeleton", () => {
     const table = container.querySelector("table");
     const wrapper = table?.closest(".border");
     expect(wrapper).toBeInTheDocument();
-    expect(wrapper).toHaveClass("rounded-lg");
+    expect(wrapper).toHaveClass("rounded-xl");
   });
 
   it("renders table element", () => {

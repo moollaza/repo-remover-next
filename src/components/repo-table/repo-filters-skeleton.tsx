@@ -1,27 +1,27 @@
 export default function RepoFiltersSkeleton(): JSX.Element {
   return (
     <div
-      className="grid grid-cols-12 gap-3"
+      className="flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-2"
       data-testid="repo-filters-skeleton"
     >
       {/* Per page selector skeleton */}
-      <div className="col-span-2">
+      <div className="w-full lg:w-20">
         <div className="h-10 w-full rounded-lg bg-default-200 animate-pulse" />
       </div>
 
       {/* Repo type selector skeleton */}
-      <div className="col-span-6">
+      <div className="w-full lg:w-44">
         <div className="h-10 w-full rounded-lg bg-default-200 animate-pulse" />
       </div>
 
       {/* Search input skeleton */}
-      <div className="col-span-4">
+      <div className="w-full lg:flex-1">
         <div className="h-10 w-full rounded-lg bg-default-200 animate-pulse" />
       </div>
 
       {/* Action buttons skeleton */}
-      <div className="col-span-3">
-        <div className="h-10 w-full rounded-lg bg-default-200 animate-pulse" />
+      <div className="w-full lg:w-auto lg:flex-shrink-0">
+        <div className="h-10 w-48 rounded-lg bg-default-200 animate-pulse" />
       </div>
     </div>
   );
