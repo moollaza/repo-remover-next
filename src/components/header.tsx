@@ -141,10 +141,10 @@ function DashboardHeader({
 
   return (
     <header
-      className="w-full border-b border-divider bg-background"
+      className="w-full border-b border-divider bg-background/80 backdrop-blur-sm sticky top-0 z-50"
       data-testid="navbar"
     >
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         {/* Brand */}
         <a className="font-extrabold text-xl text-foreground" href="/">
           Repo Remover
