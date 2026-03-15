@@ -2,6 +2,7 @@ import { type Repository } from "@octokit/graphql-schema";
 import { formatDistanceToNow } from "date-fns";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+import { Checkbox } from "@/components/ui/checkbox";
 import { COLUMN_ORDER, REPO_ACTIONS } from "@/config/repo-config";
 import {
   type Selection,
@@ -237,7 +238,7 @@ export default function RepoTable({
       />
 
       {/* TABLE */}
-      <div className="border border-divider rounded-lg overflow-hidden">
+      <div className="border border-divider rounded-lg overflow-x-auto">
         <table
           aria-label="GitHub repositories table"
           className="w-full table-fixed"
@@ -247,12 +248,10 @@ export default function RepoTable({
             <tr className="bg-default-100 border-b border-divider">
               {/* Checkbox column */}
               <th className="w-12 px-3 py-3 text-left" scope="col">
-                <input
+                <Checkbox
                   aria-label="Select all"
                   checked={allSelectableSelected && selectableRepos.length > 0}
-                  className="rounded border-divider cursor-pointer"
-                  onChange={handleSelectAll}
-                  type="checkbox"
+                  onCheckedChange={handleSelectAll}
                 />
               </th>
               {COLUMN_ORDER.map((column) => {
@@ -315,13 +314,11 @@ export default function RepoTable({
                   >
                     {/* Checkbox cell */}
                     <td className="w-12 px-3 py-3">
-                      <input
+                      <Checkbox
                         aria-label={repo.name}
                         checked={isSelected && !disabled}
-                        className="rounded border-divider cursor-pointer"
                         disabled={disabled}
-                        onChange={() => handleRowSelect(repo.id)}
-                        type="checkbox"
+                        onCheckedChange={() => handleRowSelect(repo.id)}
                       />
                     </td>
                     <td className="px-3 py-3">

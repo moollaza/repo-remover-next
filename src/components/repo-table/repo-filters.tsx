@@ -8,6 +8,7 @@ import { type Selection, type SelectionSet } from "@/hooks/use-repo-filters";
 
 const PER_PAGE_OPTIONS = [5, 10, 20, 50, 100];
 const REPO_TYPES = [
+  { key: "isSource", label: "Sources" },
   { key: "isPrivate", label: "Private" },
   { key: "isInOrganization", label: "Organization" },
   { key: "isFork", label: "Forked" },
@@ -153,9 +154,9 @@ export default function RepoFilters({
         : selectedTypeLabels.join(", ");
 
   return (
-    <div className="grid grid-cols-12 gap-3">
+    <div className="flex flex-col gap-3 lg:grid lg:grid-cols-12">
       {/* PER PAGE SELECTOR */}
-      <div className="col-span-2" ref={perPageDropdownRef}>
+      <div className="lg:col-span-2" ref={perPageDropdownRef}>
         <div
           className="relative cursor-pointer"
           data-testid="per-page-select"
@@ -196,7 +197,7 @@ export default function RepoFilters({
       </div>
 
       {/* REPO TYPE SELECTOR */}
-      <div className="col-span-6" ref={repoTypeDropdownRef}>
+      <div className="lg:col-span-6" ref={repoTypeDropdownRef}>
         <div
           className="relative cursor-pointer"
           data-testid="repo-type-select"
@@ -243,7 +244,7 @@ export default function RepoFilters({
       </div>
 
       {/* SEARCH INPUT */}
-      <div className="col-span-4">
+      <div className="lg:col-span-4">
         <div>
           <label className="block text-xs text-default-500 mb-1">Search</label>
           <div className="relative">
@@ -270,11 +271,11 @@ export default function RepoFilters({
       </div>
 
       {/* ACTION BUTTONS */}
-      <div className="col-span-3">
+      <div className="lg:col-span-3">
         <div className="flex h-full items-end">
           <div className="flex">
             <button
-              className={`px-4 py-2 text-sm font-medium rounded-l-lg transition-colors text-white ${
+              className={`h-10 px-4 py-2 text-sm font-medium rounded-l-lg transition-colors text-white ${
                 isDeleteAction
                   ? "bg-danger hover:bg-danger/90"
                   : "bg-warning hover:bg-warning/90"
@@ -289,7 +290,7 @@ export default function RepoFilters({
             </button>
             <div className="relative" ref={actionDropdownRef}>
               <button
-                className={`px-2 py-2 rounded-r-lg border-l border-white/20 transition-colors text-white ${
+                className={`h-10 px-2 py-2 rounded-r-lg border-l border-white/20 transition-colors text-white ${
                   isDeleteAction
                     ? "bg-danger hover:bg-danger/90"
                     : "bg-warning hover:bg-warning/90"

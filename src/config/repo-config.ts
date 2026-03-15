@@ -28,6 +28,7 @@ export const PER_PAGE_OPTIONS = [5, 10, 20, 50, 100] as const;
  * Each key corresponds to a boolean property on the Repository type
  */
 export const REPO_TYPES = [
+  { key: "isSource", label: "Sources" },
   { key: "isPrivate", label: "Private" },
   { key: "isInOrganization", label: "Organization" },
   { key: "isFork", label: "Forked" },
