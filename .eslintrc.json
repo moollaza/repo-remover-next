@@ -3,29 +3,30 @@
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended-type-checked",
     "plugin:@typescript-eslint/stylistic-type-checked",
-    "prettier"
+    "prettier",
+    "plugin:perfectionist/recommended-alphabetical-legacy"
   ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "project": "./tsconfig.app.json"
   },
-  "ignorePatterns": [
-    "node_modules/",
-    "dist/",
-    ".vscode/",
-    "out/",
-    "vitest.setup.ts",
-    "vite.config.ts",
-    "vitest.config.ts",
-    "playwright.config.ts",
-    "e2e/",
-    "**/*.test.ts",
-    "**/*.test.tsx",
-    "**/*.spec.ts",
-    "**/*.spec.tsx",
-    "public/mockServiceWorker.js"
-  ],
-  "rules": {},
+  "ignorePatterns": ["node_modules/", "dist/", ".vscode/", "out/"],
+  "rules": {
+    "perfectionist/sort-imports": [
+      "error",
+      {
+        "internalPattern": [
+          "@/.+",
+          "@/components/.+",
+          "@/contexts/.+",
+          "@/graphql/.+",
+          "@/hooks/.+",
+          "@/providers/.+",
+          "@/utils/.+"
+        ]
+      }
+    ]
+  },
   "overrides": [
     {
       "files": [

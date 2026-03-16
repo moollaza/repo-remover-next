@@ -1,13 +1,9 @@
 name: CI
 on:
   push:
-    branches: [main]
+    branches: [main, master]
   pull_request:
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
+    branches: [main, master]
 jobs:
   lint-and-test:
     runs-on: ubuntu-latest
@@ -73,6 +69,29 @@ jobs:
           name: playwright-results-shard-${{ matrix.shardIndex }}
           path: test-results/
           retention-days: 30
+
+  chromatic:
+    runs-on: ubuntu-latest
+    env:
+      HAS_CHROMATIC_TOKEN: ${{ secrets.CHROMATIC_PROJECT_TOKEN != '' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+      - name: Publish to Chromatic
+        if: ${{ env.HAS_CHROMATIC_TOKEN == 'true' }}
+        uses: chromaui/action@latest
+        with:
+          projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+          exitOnceUploaded: true
+          skip: "dependabot/**"
+          autoAcceptChanges: "main"
+          exitZeroOnChanges: false
 
   build:
     runs-on: ubuntu-latest

@@ -80,33 +80,30 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
   // Derived authentication state
   const isAuthenticated = Boolean(isInitialized && Boolean(pat));
 
-  // Stable SWR key: only depends on PAT (not login, which loads async and would cause refetch)
-  // Login is passed to the fetcher separately via closure
+  // Now we can properly type our SWR hook
   const { data, error, mutate } = useSWR<
     GitHubFetcherResult,
     Error,
     GitHubFetcherKey | null
   >(
-    pat ? (["repos", pat] as GitHubFetcherKey) : null,
-    // Use the progress-aware fetcher — login comes from closure, not the SWR key
-    async ([, pat]): Promise<GitHubFetcherResult> => {
-      const result = await fetchGitHubDataWithProgress(
-        [login ?? "", pat],
-        (progressUpdate) => {
-          // Update progress state
-          setProgress(progressUpdate);
+    // We only fetch when we have a PAT, login is optional and will be determined from the API if not provided
+    pat ? ([login ?? "", pat] as GitHubFetcherKey) : null,
+    // Use the progress-aware fetcher
+    async ([login, pat]): Promise<GitHubFetcherResult> => {
+      const result = await fetchGitHubDataWithProgress([login, pat], (progressUpdate) => {
+        // Update progress state
+        setProgress(progressUpdate);
 
-          // Update SWR cache immediately with partial data!
-          void mutate(
-            {
-              error: null,
-              repos: progressUpdate.repos,
-              user: progressUpdate.user as null | User,
-            },
-            false, // false = don't revalidate
-          );
-        },
-      );
+        // Update SWR cache immediately with partial data!
+        void mutate(
+          {
+            error: null,
+            repos: progressUpdate.repos,
+            user: progressUpdate.user as null | User,
+          },
+          false, // false = don't revalidate
+        );
+      });
 
       // Cast the result to match GitHubFetcherResult type
       return {
@@ -121,7 +118,10 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
         // Clear progress on error
         setProgress(null);
         // If error is authentication related, consider clearing credentials
-        if (err.message.includes("401") || err.message.includes("auth")) {
+        if (
+          err.message.includes("401") ||
+          err.message.includes("auth")
+        ) {
           console.warn("Authentication error detected, consider logging out");
         }
       },
@@ -149,9 +149,6 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
   const repos = data?.repos ?? null;
   const user = data?.user ?? null;
 
-  // Derive login from API user data if state is null (storage may fail to load it)
-  const effectiveLogin = login ?? (user?.login as null | string) ?? null;
-
   // Track if we have partial data with an error
   const hasPartialData = Boolean(data?.error && (data.repos ?? data.user));
 
@@ -170,21 +167,17 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
     }
   }, []);
 
-  const setPat = useCallback((newPat: string, remember = true) => {
+  const setPat = useCallback((newPat: string) => {
     if (!newPat || typeof newPat !== "string") {
       console.error("Invalid Personal Access Token format");
       return;
     }
 
     setPatState(newPat);
-    if (remember && typeof window !== "undefined") {
+    if (typeof window !== "undefined") {
       secureStorage.setItem("pat", newPat).catch((error) => {
         console.warn("Failed to save PAT to secure storage:", error);
       });
-    } else if (!remember && typeof window !== "undefined") {
-      // Clear any previously stored token
-      secureStorage.removeItem("pat");
-      secureStorage.removeItem("login");
     }
   }, []);
 
@@ -237,7 +230,7 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
     isError,
     isInitialized,
     isLoading,
-    login: effectiveLogin,
+    login,
     logout,
     mutate,
     pat,

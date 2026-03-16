@@ -1,5 +1,5 @@
 ---
-globs: ["src/components/**", "*.tsx"]
+globs: ["src/components/**", "*.tsx", "*.stories.tsx"]
 description: HeroUI patterns, theme system, component complexity guidelines
 ---
 
@@ -34,6 +34,7 @@ Uses HeroUI's semantic color system for proper light/dark theme support.
 ### Testing Dark Theme
 
 - Use `npm run test:e2e:fast theme-basic.spec.ts` for quick theme testing
+- Storybook stories include Chromatic modes for visual regression testing
 - Always test both light and dark modes when making UI changes
 
 ## React Patterns in Use
@@ -56,7 +57,7 @@ Uses HeroUI's semantic color system for proper light/dark theme support.
 - **Presentational components**: Pure UI, minimal logic
 - **Container components**: Business logic, context consumers
 - **Complex components >200 LOC**: Extract custom hooks
-- Co-locate tests (`.test.tsx`)
+- Co-locate tests (`.test.tsx`) and stories (`.stories.tsx`)
 
 ## Component Complexity Guidelines
 
@@ -76,7 +77,7 @@ Uses HeroUI's semantic color system for proper light/dark theme support.
 ## File Organization
 
 - `src/app/` — Next.js app router pages and layouts
-- `src/components/` — reusable UI components with co-located tests
+- `src/components/` — reusable UI components with co-located stories and tests
 - `src/contexts/` — React contexts for state management
 - `src/providers/` — data providers and higher-order components
 - `src/utils/` — utility functions including GitHub API helpers
@@ -104,6 +105,36 @@ Uses HeroUI's semantic color system for proper light/dark theme support.
 - Lift state only to closest common parent
 - Use Context for truly global state (auth, theme)
 
+## Storybook Best Practices
+
+### Story Structure
+
+```typescript
+const meta: Meta<typeof Component> = {
+  component: Component,
+  decorators: [/* Order matters! */],
+  parameters: {
+    msw: { handlers: authenticatedHandlers }
+  }
+};
+
+export default meta;
+
+export const Default: Story = { args: { ... } };
+export const Loading: Story = { parameters: { msw: { handlers: loadingHandlers } } };
+export const Error: Story = { parameters: { msw: { handlers: errorHandlers } } };
+```
+
+### Decorator Composition Order (Important!)
+
+```typescript
+decorators: [
+  PageDecorator, // Outermost: Layout wrapper
+  GitHubDataDecorator, // Middle: Providers
+  AuthenticatedUserDecorator, // Innermost: Data setup
+];
+```
+
 ## Common Pitfalls
 
 **Don't:**
@@ -119,6 +150,6 @@ Uses HeroUI's semantic color system for proper light/dark theme support.
 
 - Use HeroUI semantic colors for theme compatibility
 - Extract hooks from components >200 LOC
-- Write tests for all new components
+- Write tests for all new components (unit + story)
 - Use type-only imports for `@octokit/graphql-schema` types
 - Check official React docs before using useEffect

@@ -18,6 +18,7 @@ description: MSW patterns, E2E with real GitHub API, Playwright, testing strateg
 
 - **Unit Tests**: Use MSW to mock GitHub API responses in `src/mocks/handlers.ts`
 - **E2E Tests**: Require real GitHub token in `.env.test` file (`GITHUB_TEST_TOKEN`)
+- **Storybook**: Component documentation and visual testing
 - **Test Utilities**: Custom render function in `src/utils/test-utils` wraps components with providers
 
 ## Test Commands
@@ -52,12 +53,14 @@ The custom `render` function:
 
 - Use operation-based handlers: `graphql.query('GetRepositories', ...)`
 - Avoid string matching: `if (body.query.includes(...))`
+- Extract reusable handler sets in `src/mocks/story-handlers.ts`
 - Use named scenarios for error cases
 
 ## New Component Checklist
 
 - [ ] Create component file (`.tsx`)
 - [ ] Create test file (`.test.tsx`) — required, not optional
+- [ ] Create story file (`.stories.tsx`) — required for UI components
 - [ ] Use custom render utility: `import { render } from '@/utils/test-utils'`
 - [ ] Follow RTL query priority: `getByRole` > `getByLabelText` > `getByTestId`
 - [ ] Test user behavior, not implementation details

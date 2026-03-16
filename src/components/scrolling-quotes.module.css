@@ -15,13 +15,14 @@
   animation-play-state: paused;
 }
 
-/* Respect user's motion preferences */
-@media (prefers-reduced-motion: reduce) {
+/* Respect user's motion preferences and disable animations in testing/Storybook */
+@media (prefers-reduced-motion: reduce), (storybook) {
   .scrolling {
     animation: none;
   }
 }
 
+/* Disable animations in Storybook environment */
 .no-animations .scrolling {
   animation: none;
 }

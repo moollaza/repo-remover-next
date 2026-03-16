@@ -99,10 +99,8 @@ export interface GitHubContextType {
 
   /**
    * Sets the personal access token of the user.
-   * @param pat The personal access token
-   * @param remember Whether to persist the token in encrypted localStorage (default: true)
    */
-  setPat: (pat: string, remember?: boolean) => void;
+  setPat: (pat: string) => void;
 
   /**
    * The user.
