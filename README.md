@@ -3,7 +3,6 @@
 ## Try it now at https://next.reporemover.xyz
 
 ✅ **Production Ready** - The application is now fully production-ready with:
-
 - Privacy-first analytics and error monitoring
 - Zero-knowledge security architecture
 - Comprehensive testing coverage
@@ -59,7 +58,7 @@ Before any changes are made, you will be asked to review the list of selected re
 - [Sentry.io](https://sentry.io/) - Privacy-first error monitoring
 - [Fathom Analytics](https://usefathom.com/ref/E83PFO) - Privacy-focused analytics
   - Want to know how many repos have been deleted? [Checkout the public analytics dashboard](https://app.usefathom.com/share/ikjnvhai/repo+remover)
-- Hosted on [Cloudflare Workers](https://workers.cloudflare.com/)
+- Hosted on [Vercel](https://vercel.com/)
 
 ## Author
 

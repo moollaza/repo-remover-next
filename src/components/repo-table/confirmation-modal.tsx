@@ -1,7 +1,16 @@
+import {
+  Button,
+  Input,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  Progress,
+  Spacer,
+} from "@heroui/react";
 import { type Repository } from "@octokit/graphql-schema";
-import { RequestError } from "@octokit/request-error";
-import { useCallback, useEffect, useReducer, useRef } from "react";
-import { createPortal } from "react-dom";
+import { useReducer } from "react";
 
 import { useGitHubData } from "@/hooks/use-github-data";
 import { analytics } from "@/utils/analytics";
@@ -49,7 +58,6 @@ interface RepoActionProgressProps {
   action: "archive" | "delete";
   count: number;
   currentRepo: string;
-  onStop: () => void;
   progress: number;
 }
 
@@ -88,14 +96,23 @@ export default function ConfirmationModal({
 
   // Use reducer for state management
   const [state, dispatch] = useReducer(modalReducer, initialState);
-  const abortRef = useRef(false);
 
   async function handleConfirm() {
     debug.log("handleConfirm called");
 
-    if (!octokit || state.confirming) return;
+    debug.log("State before confirmation:", state);
 
-    abortRef.current = false;
+    if (!octokit) {
+      debug.error("Octokit is not initialized or already processing");
+      return;
+    }
+
+    if (state.confirming) {
+      debug.warn("Already processing, ignoring confirmation");
+      return;
+    }
+
+    // Single dispatch to handle the full state transition
     dispatch({ type: "START_PROCESSING" });
 
     // Track bulk action submission
@@ -105,57 +122,50 @@ export default function ConfirmationModal({
       analytics.trackDeleteActionSubmitted(repos.length);
     }
 
+    // Record the start time to ensure minimum progress display time
     const startTime = Date.now();
 
     for (const repo of repos) {
-      // Check abort flag before each repo
-      if (abortRef.current) break;
-
       try {
         await processRepo(octokit, repo, action);
       } catch (error) {
         if (error instanceof Error) {
-          debug.error(`Failed to ${action} the repo:`, error);
+          console.error(`Failed to ${action} the repo:`, error);
           dispatch({
             payload: { error, repository: repo },
             type: "ADD_ERROR",
           });
-
-          // Detect authentication failure — stop the batch early
-          // All remaining repos will also fail with the same expired token
-          if (error instanceof RequestError && error.status === 401) {
-            debug.error(
-              "Authentication failed — stopping batch early. Token may have expired.",
-            );
-            break;
-          }
         } else {
-          debug.error("An unknown error occurred");
+          console.error("An unknown error occurred");
         }
       } finally {
         dispatch({
           payload: { increment: 1, repo: repo.name },
           type: "UPDATE_PROGRESS",
         });
-        // Brief pause for visual feedback
+        // Ensure each repo takes at least 1 second to process (for visual feedback)
         await new Promise((resolve) => setTimeout(resolve, 1000));
       }
     }
 
-    // Minimum display time for UX
+    // Ensure we show the progress screen for at least 3 seconds total
+    // This helps with testing and provides better UX
     const elapsedTime = Date.now() - startTime;
-    if (elapsedTime < 2000) {
-      await new Promise((resolve) => setTimeout(resolve, 2000 - elapsedTime));
+    const minimumProgressTime = 3000; // 3 seconds
+
+    if (elapsedTime < minimumProgressTime) {
+      await new Promise((resolve) =>
+        setTimeout(resolve, minimumProgressTime - elapsedTime),
+      );
     }
 
+    // Now complete the processing
     dispatch({ type: "COMPLETE_PROCESSING" });
+
+    // Call the onConfirm callback after state is updated and with a slight delay
     setTimeout(() => {
       onConfirm();
     }, 100);
-  }
-
-  function handleStop() {
-    abortRef.current = true;
   }
 
   function resetState() {
@@ -190,109 +200,57 @@ export default function ConfirmationModal({
 
   const isDismissable = state.mode === "confirmation";
 
-  if (!isOpen) return null;
-
-  return createPortal(
-    <ModalOverlay
-      isDismissable={isDismissable}
-      onClose={isDismissable ? handleOnClose : undefined}
-    >
-      <div
-        className="relative w-full max-w-xl max-h-[80vh] overflow-y-auto rounded-xl bg-background border border-divider shadow-2xl"
-        data-testid={`confirmation-modal-${state.mode}`}
-      >
-        {state.mode === "confirmation" && (
-          <RepoActionConfirmation
-            action={action}
-            count={count}
-            handleConfirm={() => void handleConfirm()}
-            isCorrectUsername={state.isCorrectUsername}
-            onClose={handleOnClose}
-            repos={repos}
-            setUsername={handleSetUsername}
-            username={state.username}
-          />
-        )}
-
-        {state.mode === "progress" && (
-          <RepoActionProgress
-            action={action}
-            count={count}
-            currentRepo={state.currentRepo}
-            onStop={handleStop}
-            progress={state.progress}
-          />
-        )}
-
-        {state.mode === "result" && (
-          <RepoActionResult
-            action={action}
-            count={count}
-            errors={state.errors}
-            onClose={handleOnClose}
-          />
-        )}
-      </div>
-    </ModalOverlay>,
-    document.body,
-  );
-}
-
-/**
- * Modal overlay that handles backdrop click and Escape key dismissal.
- * Also prevents body scroll while open.
- */
-function ModalOverlay({
-  children,
-  isDismissable,
-  onClose,
-}: {
-  children: React.ReactNode;
-  isDismissable: boolean;
-  onClose?: () => void;
-}) {
-  const overlayRef = useRef<HTMLDivElement>(null);
-
-  // Prevent body scroll while modal is open
-  useEffect(() => {
-    const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = originalOverflow;
-    };
-  }, []);
-
-  // Handle Escape key
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isDismissable && onClose) {
-        onClose();
-      }
-    },
-    [isDismissable, onClose],
-  );
-
-  useEffect(() => {
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [handleKeyDown]);
-
-  // Handle backdrop click
-  function handleBackdropClick(e: React.MouseEvent<HTMLDivElement>) {
-    if (e.target === overlayRef.current && isDismissable && onClose) {
-      onClose();
-    }
-  }
-
   return (
-    <div
-      ref={overlayRef}
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+    <Modal
+      backdrop="blur"
       data-testid="repo-confirmation-modal"
-      onClick={handleBackdropClick}
+      isDismissable={isDismissable}
+      isOpen={isOpen}
+      onClose={
+        isDismissable
+          ? handleOnClose
+          : () => {
+              /* noop*/
+            }
+      }
+      scrollBehavior="inside"
+      size="xl"
     >
-      {children}
-    </div>
+      <ModalContent data-testid={`confirmation-modal-${state.mode}`}>
+        <>
+          {state.mode === "confirmation" && (
+            <RepoActionConfirmation
+              action={action}
+              count={count}
+              handleConfirm={() => void handleConfirm()}
+              isCorrectUsername={state.isCorrectUsername}
+              onClose={handleOnClose}
+              repos={repos}
+              setUsername={handleSetUsername}
+              username={state.username}
+            />
+          )}
+
+          {state.mode === "progress" && (
+            <RepoActionProgress
+              action={action}
+              count={count}
+              currentRepo={state.currentRepo}
+              progress={state.progress}
+            />
+          )}
+
+          {state.mode === "result" && (
+            <RepoActionResult
+              action={action}
+              count={count}
+              errors={state.errors}
+              onClose={handleOnClose}
+            />
+          )}
+        </>
+      </ModalContent>
+    </Modal>
   );
 }
 
@@ -363,18 +321,10 @@ function RepoActionConfirmation({
 }: RepoActionConfirmationProps) {
   return (
     <>
-      <div
-        className="px-6 py-4 border-b border-divider"
-        data-testid="confirmation-modal-header"
-      >
-        <h3 className="text-lg font-semibold text-foreground">
-          Confirm {action === "archive" ? "Archival" : "Deletion"}
-        </h3>
-      </div>
-      <div
-        className="px-6 py-4 text-foreground"
-        data-testid="confirmation-modal-body"
-      >
+      <ModalHeader data-testid="confirmation-modal-header">
+        <h3>Confirm {action === "archive" ? "Archival" : "Deletion"}</h3>
+      </ModalHeader>
+      <ModalBody data-testid="confirmation-modal-body">
         <p>
           Are you sure you want to <b>{action}</b> the following {count}{" "}
           repositor{count > 1 ? "ies" : "y"}?
@@ -384,15 +334,15 @@ function RepoActionConfirmation({
             <li key={index}>{repo.name}</li>
           ))}
         </ol>
-        <div className="mt-4" />
+        <Spacer y={1} />
         <strong>Please type your GitHub username to confirm:</strong>
-        <input
+        <Input
           autoCapitalize="none"
           autoComplete="off"
           autoCorrect="off"
           autoFocus
-          className="mt-2 w-full rounded-lg border border-divider bg-content2 px-3 py-2 text-foreground placeholder:text-default-400 outline-none focus:ring-2 focus:ring-primary"
           data-testid="confirmation-modal-input"
+          fullWidth
           id="username"
           name="username"
           onChange={(e) => setUsername(e.target.value)}
@@ -400,34 +350,28 @@ function RepoActionConfirmation({
           type="text"
           value={username}
         />
-      </div>
-      <div className="flex justify-end gap-2 px-6 py-4 border-t border-divider">
-        <button
-          className="rounded-lg border border-divider bg-transparent px-4 py-2 text-sm font-medium text-foreground hover:bg-default-100 transition-colors"
+      </ModalBody>
+      <ModalFooter>
+        <Button
           data-testid="confirmation-modal-cancel"
-          onClick={onClose}
-          type="button"
+          onPress={onClose}
+          variant="bordered"
         >
           Cancel
-        </button>
-        <button
-          className={`rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-            action === "archive"
-              ? "bg-amber-500 hover:bg-amber-600"
-              : "bg-red-500 hover:bg-red-600"
-          }`}
+        </Button>
+        <Button
+          color={action === "archive" ? "warning" : "danger"}
           data-testid="confirmation-modal-confirm"
-          disabled={!isCorrectUsername}
+          isDisabled={!isCorrectUsername}
           name="confirm"
-          onClick={() => {
+          onPress={() => {
             void handleConfirm();
           }}
-          type="button"
         >
           I understand the consequences, {action} the repositor
           {count > 1 ? "ies" : "y"}
-        </button>
-      </div>
+        </Button>
+      </ModalFooter>
     </>
   );
 }
@@ -436,54 +380,24 @@ function RepoActionProgress({
   action,
   count,
   currentRepo,
-  onStop,
   progress,
 }: RepoActionProgressProps) {
-  const percentage = count > 0 ? Math.round((progress / count) * 100) : 0;
-  const actionVerb = action === "archive" ? "Archiving" : "Deleting";
-
   return (
     <>
-      <div
-        className="px-6 py-4 border-b border-divider"
-        data-testid="progress-modal-header"
-      >
-        <h3 className="text-lg font-semibold text-foreground">
-          {actionVerb} Repositories
-        </h3>
-      </div>
-      <div className="px-6 py-6 text-foreground space-y-5">
-        <div className="flex items-center justify-between text-sm">
-          <span className="text-default-500">
-            {actionVerb}{" "}
-            <span className="font-medium text-foreground">{currentRepo}</span>
-          </span>
-          <span className="font-medium tabular-nums">
-            {progress} / {count}
-          </span>
-        </div>
-
-        <div>
-          <div className="h-2.5 w-full overflow-hidden rounded-full bg-default-200">
-            <div
-              className="h-full rounded-full bg-[var(--brand-blue)] transition-all duration-300"
-              style={{ width: `${percentage}%` }}
-            />
-          </div>
-          <p className="mt-2 text-xs text-default-400 text-right">
-            {percentage}%
-          </p>
-        </div>
-      </div>
-      <div className="flex justify-end px-6 py-4 border-t border-divider">
-        <button
-          className="rounded-lg border border-divider bg-transparent px-4 py-2 text-sm font-medium text-foreground hover:bg-default-100 transition-colors"
-          onClick={onStop}
-          type="button"
-        >
-          Stop
-        </button>
-      </div>
+      <ModalHeader data-testid="progress-modal-header">
+        <h3>{action === "archive" ? "Archiving" : "Deleting"} Repositories</h3>
+      </ModalHeader>
+      <ModalBody>
+        <p>Current Repo: {currentRepo}</p>
+        <p>Progress: {progress}</p>
+        <Progress
+          color="success"
+          label={`${action === "archive" ? "Archiving" : "Deleting"} repositories...`}
+          maxValue={count}
+          minValue={0}
+          value={progress}
+        />
+      </ModalBody>
     </>
   );
 }
@@ -498,21 +412,16 @@ function RepoActionResult({
 
   return (
     <>
-      <div
-        className="px-6 py-4 border-b border-divider"
-        data-testid="result-modal-header"
-      >
-        <h3 className="text-lg font-semibold text-foreground">
-          {action === "archive" ? "Archival" : "Deletion"} Complete
-        </h3>
-      </div>
-      <div className="px-6 py-4 text-foreground">
+      <ModalHeader data-testid="result-modal-header">
+        <h3>{action === "archive" ? "Archival" : "Deletion"} Complete</h3>
+      </ModalHeader>
+      <ModalBody>
         <p>
           {count - errorCount} out of {count} repos{" "}
           {action === "archive" ? "archived" : "deleted"} successfully!
         </p>
 
-        <div className="mt-4" />
+        <Spacer y={1} />
 
         {/* Report Errors */}
         {errorCount > 0 && (
@@ -532,17 +441,16 @@ function RepoActionResult({
             </ol>
           </>
         )}
-      </div>
-      <div className="flex justify-end gap-2 px-6 py-4 border-t border-divider">
-        <button
-          className="rounded-lg border border-divider bg-transparent px-4 py-2 text-sm font-medium text-foreground hover:bg-default-100 transition-colors"
+      </ModalBody>
+      <ModalFooter>
+        <Button
           data-testid="repo-action-result-close"
-          onClick={onClose}
-          type="button"
+          onPress={onClose}
+          variant="bordered"
         >
           Close
-        </button>
-      </div>
+        </Button>
+      </ModalFooter>
     </>
   );
 }

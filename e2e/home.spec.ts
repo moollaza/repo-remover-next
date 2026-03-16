@@ -21,18 +21,22 @@ test.describe("Home Page", () => {
     await expect(home.navbar.getByText("Repo Remover")).toBeVisible();
     await expect(home.navbar.getByText("Test User")).not.toBeVisible();
 
-    await home.expectHeading("Archive or Delete Multiple GitHub Repos,");
+    await home.expectHeading(
+      "Archive or Delete Multiple GitHub Repos, Instantly.",
+    );
 
-    // Token form is now in the "Get Started" section further down the page
-    // Scroll down to verify it's there
-    await home.page.getByText("Ready to start?").scrollIntoViewIfNeeded();
     await home.expectSubmitDisabled();
   });
 
   test("should show error for invalid token format", async () => {
-    // Test invalid format (wrong prefix, long enough to trigger error)
+    // Test invalid format (too short)
+    await home.fillToken("short");
+    await home.expectErrorMessage("Invalid GitHub token format");
+    await home.expectSubmitDisabled();
+
+    // Test invalid format (wrong prefix)
     await home.fillToken("invalid_token_123456789012345678901234567890123456");
-    await home.expectErrorMessage("Invalid token format");
+    await home.expectErrorMessage("Invalid GitHub token format");
     await home.expectSubmitDisabled();
 
     // Test empty input

@@ -1,8 +1,7 @@
+import { type Selection } from "@heroui/react";
 import { useCallback, useMemo, useState } from "react";
 
 import { PER_PAGE_OPTIONS } from "@/config/repo-config";
-
-import { type Selection } from "./use-repo-filters";
 
 export interface UseRepoPaginationProps<T> {
   /**
@@ -73,23 +72,17 @@ export function useRepoPagination<T>({
   // Calculate total pages
   const totalPages = Math.ceil(items.length / perPage);
 
-  // Auto-clamp page if it exceeds total pages (e.g. after filtering).
-  // Note: internal currentPage state may diverge from effectivePage, but this
-  // is acceptable since pagination buttons prevent navigating beyond bounds.
-  const effectivePage =
-    currentPage > totalPages && totalPages > 0 ? 1 : currentPage;
-
   // Get the current page of items
   const paginatedItems = useMemo(() => {
-    const start = (effectivePage - 1) * perPage;
+    const start = (currentPage - 1) * perPage;
     const end = start + perPage;
 
     return items.slice(start, end);
-  }, [items, effectivePage, perPage]);
+  }, [items, currentPage, perPage]);
 
-  // Handle per page change with Selection type
+  // Handle per page change with Selection type from HeroUI
   const setPerPage = useCallback((keys: Selection) => {
-    const newPerPage = Number(Array.from(keys as Set<string>)[0]);
+    const newPerPage = Number(Array.from(keys)[0]);
     setPerPageState(newPerPage);
     setCurrentPage(1); // Reset to first page when changing items per page
   }, []);
@@ -99,8 +92,16 @@ export function useRepoPagination<T>({
     setCurrentPage(1);
   }, []);
 
+  // Auto-reset page if current page exceeds total pages
+  // This handles the case where items are filtered and current page becomes invalid
+  useMemo(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(1);
+    }
+  }, [currentPage, totalPages]);
+
   return {
-    currentPage: effectivePage,
+    currentPage,
     paginatedItems,
     perPage,
     resetPage,

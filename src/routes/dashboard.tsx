@@ -1,5 +1,5 @@
-import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 import DashboardComponent from "@/components/dashboard";
 import { ErrorBoundary } from "@/components/error-boundary";
@@ -31,11 +31,11 @@ export function Dashboard() {
     if (!isInitialized) return;
 
     if (!pat) {
-      void navigate("/");
+      navigate("/");
+    } else {
+      refetchData();
     }
-    // Don't force refetch on mount — SWR caches data and will
-    // revalidate automatically. Use the Refresh button for manual refresh.
-  }, [pat, navigate, isInitialized]);
+  }, [pat, navigate, refetchData, isInitialized]);
 
   // Render presentational component with all data
   return (

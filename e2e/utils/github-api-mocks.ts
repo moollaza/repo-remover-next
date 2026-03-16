@@ -1,3 +1,4 @@
+import { type GraphQlQueryResponseData } from "@octokit/graphql";
 import { type Page } from "@playwright/test";
 
 import {
@@ -11,27 +12,44 @@ export async function mockArchiveRepo(
   repoName: string,
   options: { delay?: number; error?: string; success?: boolean } = {},
 ) {
-  await page.route(`**/repos/**/${repoName}`, (route) => {
-    if (route.request().method() !== "PATCH") {
-      void route.continue();
-      return;
-    }
+  await page.route(`**/repos/testuser/${repoName}`, (route) => {
+    // Only handle PATCH requests for archiving
+    if (route.request().method() === "PATCH") {
+      // Add delay if specified for testing loading states
+      if (options.delay) {
+        return setTimeout(() => {
+          if (options.success === false) {
+            void route.fulfill({
+              json: {
+                message: options.error ?? "Repository archiving failed",
+              },
+              status: 403,
+            });
+          } else {
+            void route.fulfill({
+              json: { archived: true },
+              status: 200,
+            });
+          }
+        }, options.delay);
+      }
 
-    const fulfill = () => {
       if (options.success === false) {
         void route.fulfill({
-          json: { message: options.error ?? "Repository archiving failed" },
+          json: {
+            message: options.error ?? "Repository archiving failed",
+          },
           status: 403,
         });
       } else {
-        void route.fulfill({ json: { archived: true }, status: 200 });
+        void route.fulfill({
+          json: { archived: true },
+          status: 200,
+        });
       }
-    };
-
-    if (options.delay) {
-      setTimeout(fulfill, options.delay);
     } else {
-      fulfill();
+      // Continue for non-PATCH requests
+      void route.continue();
     }
   });
 }
@@ -40,10 +58,12 @@ export async function mockBulkActions(
   page: Page,
   options: { error?: string; success?: boolean } = {},
 ) {
-  await page.route("**/repos/**", (route) => {
+  await page.route("**/repos/testuser/**", (route) => {
     if (options.success === false) {
       void route.fulfill({
-        json: { message: options.error ?? "Bulk action failed" },
+        json: {
+          message: options.error ?? "Bulk action failed",
+        },
         status: 403,
       });
     } else {
@@ -57,133 +77,62 @@ export async function mockDeleteRepo(
   repoName: string,
   options: { error?: string; success?: boolean } = {},
 ) {
-  await page.route(`**/repos/**/${repoName}`, (route) => {
-    if (route.request().method() !== "DELETE") {
-      void route.continue();
-      return;
-    }
-
-    if (options.success === false) {
-      void route.fulfill({
-        json: { message: options.error ?? "Repository deletion failed" },
-        status: 403,
-      });
-    } else {
-      void route.fulfill({ status: 204 });
+  await page.route(`**/repos/testuser/${repoName}`, (route) => {
+    if (route.request().method() === "DELETE") {
+      if (options.success === false) {
+        void route.fulfill({
+          json: {
+            message: options.error ?? "Repository deletion failed",
+          },
+          status: 403,
+        });
+      } else {
+        void route.fulfill({ status: 204 });
+      }
     }
   });
 }
 
 export async function mockGraphQLRepos(page: Page): Promise<void> {
-  await page.route("https://api.github.com/graphql", async (route) => {
-    const body = (await route.request().postDataJSON()) as {
-      query: string;
-      variables?: Record<string, unknown>;
+  await page.route("https://api.github.com/graphql", (route) => {
+    const json: GraphQlQueryResponseData = {
+      data: {
+        user: {
+          ...mockUser,
+          repositories: {
+            nodes: mockRepos,
+            pageInfo: {
+              endCursor: "blah",
+              hasNextPage: false,
+            },
+          },
+        },
+      },
     };
 
-    if (body.query.includes("getCurrentUser")) {
-      return void route.fulfill({
-        json: { data: { viewer: mockUser } },
-      });
-    }
-
-    if (body.query.includes("getRepositories")) {
-      return void route.fulfill({
-        json: {
-          data: {
-            user: {
-              ...mockUser,
-              repositories: {
-                nodes: mockRepos,
-                pageInfo: { endCursor: null, hasNextPage: false },
-              },
-            },
-          },
-        },
-      });
-    }
-
-    if (body.query.includes("getOrganizations")) {
-      return void route.fulfill({
-        json: {
-          data: {
-            user: {
-              organizations: {
-                nodes: [
-                  { login: "testorg", url: "https://github.com/testorg" },
-                ],
-                pageInfo: { endCursor: null, hasNextPage: false },
-              },
-            },
-          },
-        },
-      });
-    }
-
-    if (body.query.includes("getOrgRepositories")) {
-      const orgRepos = mockRepos.filter((r) => r.isInOrganization);
-      return void route.fulfill({
-        json: {
-          data: {
-            organization: {
-              login: "testorg",
-              repositories: {
-                nodes: orgRepos,
-                pageInfo: { endCursor: null, hasNextPage: false },
-              },
-              url: "https://github.com/testorg",
-            },
-          },
-        },
-      });
-    }
-
-    void route.fulfill({ json: { data: {} } });
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    void route.fulfill({ json });
   });
 }
 
 export async function mockGraphQLReposEmpty(page: Page): Promise<void> {
-  await page.route("https://api.github.com/graphql", async (route) => {
-    const body = (await route.request().postDataJSON()) as { query: string };
-
-    if (body.query.includes("getCurrentUser")) {
-      return void route.fulfill({
-        json: { data: { viewer: mockUser } },
-      });
-    }
-
-    if (body.query.includes("getRepositories")) {
-      return void route.fulfill({
-        json: {
-          data: {
-            user: {
-              ...mockUser,
-              repositories: {
-                nodes: [],
-                pageInfo: { endCursor: null, hasNextPage: false },
-              },
+  await page.route("https://api.github.com/graphql", (route) => {
+    const json: GraphQlQueryResponseData = {
+      data: {
+        user: {
+          ...mockUser,
+          repositories: {
+            nodes: [],
+            pageInfo: {
+              endCursor: null,
+              hasNextPage: false,
             },
           },
         },
-      });
-    }
-
-    if (body.query.includes("getOrganizations")) {
-      return void route.fulfill({
-        json: {
-          data: {
-            user: {
-              organizations: {
-                nodes: [],
-                pageInfo: { endCursor: null, hasNextPage: false },
-              },
-            },
-          },
-        },
-      });
-    }
-
-    void route.fulfill({ json: { data: {} } });
+      },
+    };
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    void route.fulfill({ json });
   });
 }
 
