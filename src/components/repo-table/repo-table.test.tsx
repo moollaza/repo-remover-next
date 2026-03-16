@@ -1,23 +1,10 @@
 import { type Repository } from "@octokit/graphql-schema";
-import { render, screen } from "@testing-library/react";
+import { render, screen } from "@/utils/test-utils";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
 import { createMockRepo } from "@/mocks/static-fixtures";
 
 import RepoTable from "./repo-table";
-
-// Mock dependencies
-vi.mock("@heroui/react", async () => {
-  const actual = await vi.importActual("@heroui/react");
-  return {
-    ...(actual as Record<string, unknown>),
-    useDisclosure: vi.fn().mockReturnValue({
-      isOpen: true,
-      onClose: vi.fn(),
-      onOpen: vi.fn(),
-    }),
-  };
-});
 
 // Mock ConfirmationModal
 vi.mock("./confirmation-modal", () => ({
@@ -96,13 +83,49 @@ describe("RepoTable", () => {
 
     // The archived repo should be disabled when archive action is selected (which is the default)
     // Check for disabled styling on the archived repo row
-    const archivedRepoRow = screen.getByText("archived-repo").closest('[data-testid="repo-row"]');
+    const archivedRepoRow = screen
+      .getByText("archived-repo")
+      .closest('[data-testid="repo-row"]');
     expect(archivedRepoRow).toHaveClass("pointer-events-none");
     expect(archivedRepoRow).toHaveClass("opacity-50");
 
     // Active repo should not have these classes
-    const activeRepoRow = screen.getByText("active-repo").closest('[data-testid="repo-row"]');
+    const activeRepoRow = screen
+      .getByText("active-repo")
+      .closest('[data-testid="repo-row"]');
     expect(activeRepoRow).not.toHaveClass("opacity-50");
     expect(activeRepoRow).not.toHaveClass("pointer-events-none");
+  });
+
+  test("disables locked repos in the table", () => {
+    const mockReposWithLocked: Repository[] = [
+      createMockRepo({
+        description: "Normal repo",
+        id: "normal-repo",
+        name: "normal-repo",
+      }),
+      createMockRepo({
+        description: "Locked repo",
+        id: "locked-repo",
+        isLocked: true,
+        name: "locked-repo",
+      }),
+    ];
+
+    render(<RepoTable login={mockLogin} repos={mockReposWithLocked} />);
+
+    // The locked repo should have disabled styling
+    const lockedRepoRow = screen
+      .getByText("locked-repo")
+      .closest('[data-testid="repo-row"]');
+    expect(lockedRepoRow).toHaveClass("pointer-events-none");
+    expect(lockedRepoRow).toHaveClass("opacity-50");
+
+    // Normal repo should not have disabled styling
+    const normalRepoRow = screen
+      .getByText("normal-repo")
+      .closest('[data-testid="repo-row"]');
+    expect(normalRepoRow).not.toHaveClass("opacity-50");
+    expect(normalRepoRow).not.toHaveClass("pointer-events-none");
   });
 });

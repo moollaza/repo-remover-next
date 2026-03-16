@@ -1,6 +1,5 @@
-import { Navigate, Route, Routes } from "react-router-dom";
-
 import { config } from "@fortawesome/fontawesome-svg-core";
+import { Navigate, Route, Routes } from "react-router-dom";
 import "@fortawesome/fontawesome-svg-core/styles.css";
 
 import { ErrorBoundary } from "@/components/error-boundary";
@@ -19,25 +18,25 @@ export function App() {
       <ErrorBoundary>
         <FathomAnalytics />
         <div className="min-h-full">
-          <div className="border-b border-divider">
-            <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-              <Header />
-            </div>
-          </div>
-          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <main>
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </main>
-          </div>
-          <div className="bg-content1">
-            <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-              <Footer />
-            </div>
-          </div>
+          {/* Header renders its own sticky/border/blur per route */}
+          <Header />
+          <main>
+            <Routes>
+              {/* Home is full-width — sections handle their own max-width */}
+              <Route element={<Home />} path="/" />
+              {/* Dashboard is constrained */}
+              <Route
+                element={
+                  <div className="max-w-7xl mx-auto px-6">
+                    <Dashboard />
+                  </div>
+                }
+                path="/dashboard"
+              />
+              <Route element={<Navigate replace to="/" />} path="*" />
+            </Routes>
+          </main>
+          <Footer />
         </div>
       </ErrorBoundary>
     </Providers>

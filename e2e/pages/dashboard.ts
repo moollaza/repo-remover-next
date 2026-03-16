@@ -89,14 +89,19 @@ export class DashboardPage extends BasePage {
     await this.selectArchiveAction();
     await this.archiveButton.click();
     await this.fillConfirmationInput(username);
-    await this.confirmationModalConfirm.click();
+    await this.confirmationModalConfirm.evaluate((el) =>
+      (el as HTMLElement).click(),
+    );
   }
 
   /**
    * Cancels the confirmation dialog
    */
   async cancelConfirmation() {
-    await this.confirmationModalCancel.click();
+    // HeroUI modal footer buttons can be outside Playwright's viewport detection
+    await this.confirmationModalCancel.evaluate((el) =>
+      (el as HTMLElement).click(),
+    );
   }
 
   async clearConfirmationInput() {
@@ -111,7 +116,9 @@ export class DashboardPage extends BasePage {
    * Closes the confirmation modal result by clicking the close button
    */
   async closeModalResult() {
-    await this.confirmationModalResultClose.click();
+    await this.confirmationModalResultClose.evaluate((el) =>
+      (el as HTMLElement).click(),
+    );
   }
 
   /**
@@ -120,7 +127,9 @@ export class DashboardPage extends BasePage {
    */
   async confirmAction(username: string) {
     await this.fillConfirmationInput(username);
-    await this.confirmationModalConfirm.click();
+    await this.confirmationModalConfirm.evaluate((el) =>
+      (el as HTMLElement).click(),
+    );
   }
 
   async deleteSelectedRepos(username: string) {
@@ -170,8 +179,8 @@ export class DashboardPage extends BasePage {
   }
 
   async expectProgressVisible(count: number) {
-    await expect(this.progressBar).toBeVisible();
-    await expect(this.page.getByText(`Progress: ${count}`)).toBeVisible();
+    await expect(this.progressModalHeader).toBeVisible();
+    await expect(this.page.getByText(`${count} /`)).toBeVisible();
   }
 
   /**
@@ -224,10 +233,14 @@ export class DashboardPage extends BasePage {
       has: this.page.getByTestId("repo-name").filter({ hasText: repoName }),
     });
 
-    // Then within that row, check for the tag in the repo-tags section
-    const tagLocator = repoRow.getByTestId("repo-tags").filter({
-      hasText: tagName,
-    });
+    // Both mobile (lg:hidden) and desktop (hidden lg:table-cell) have repo-tags testid.
+    // Use last() to get the desktop version which is visible at our test viewport (1280px).
+    const tagLocator = repoRow
+      .getByTestId("repo-tags")
+      .filter({
+        hasText: tagName,
+      })
+      .last();
 
     await expect(tagLocator).toBeVisible();
   }
@@ -334,7 +347,13 @@ export class DashboardPage extends BasePage {
   }
 
   async selectAll() {
-    await this.selectAllCheckbox.check();
+    // HeroUI Table: use dispatchEvent to trigger the checkbox since
+    // the visual <span> overlay intercepts normal clicks
+    await this.selectAllCheckbox.dispatchEvent("click");
+  }
+
+  async deselectAll() {
+    await this.selectAllCheckbox.dispatchEvent("click");
   }
 
   /**
@@ -370,7 +389,9 @@ export class DashboardPage extends BasePage {
   }
 
   async selectRepository(name: string) {
-    await this.page.getByRole("checkbox", { name }).check();
+    // HeroUI checkbox: the visual <span> overlay intercepts normal clicks.
+    // Use dispatchEvent to trigger the click on the underlying input.
+    await this.page.getByRole("checkbox", { name }).dispatchEvent("click");
   }
 
   async setupMocks() {

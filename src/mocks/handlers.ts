@@ -1,129 +1,94 @@
-import { http, HttpResponse } from "msw";
+import { graphql, http, HttpResponse } from "msw";
 
-import { getValidPersonalAccessToken, MOCK_ORGANIZATIONS, MOCK_REPOS, MOCK_USER } from "@/mocks/static-fixtures";
+import {
+  getValidPersonalAccessToken,
+  MOCK_ORGANIZATIONS,
+  MOCK_REPOS,
+  MOCK_USER,
+} from "@/mocks/static-fixtures";
+
+const github = graphql.link("https://api.github.com/graphql");
 
 export const handlers = [
-  // Handle GraphQL requests - User repositories
-  http.post("https://api.github.com/graphql", async ({ request }) => {
-    const authHeader = request.headers.get("Authorization");
-    
-    // Check for valid token
-    if (!authHeader?.includes(getValidPersonalAccessToken())) {
-      return HttpResponse.json(
-        { message: "Bad credentials" },
-        { status: 401 }
-      );
-    }
+  // --- GraphQL handlers (operation-name matched) ---
 
-    const body = await request.json() as { query: string; variables?: unknown };
-    
-    // Handle different GraphQL queries
-    if (body.query.includes("getCurrentUser")) {
-      return HttpResponse.json({
-        data: {
-          viewer: MOCK_USER,
-        },
-      });
-    }
-
-    if (body.query.includes("getRepositories")) {
-      return HttpResponse.json({
-        data: {
-          user: {
-            ...MOCK_USER,
-            repositories: {
-              nodes: MOCK_REPOS,
-              pageInfo: {
-                endCursor: null,
-                hasNextPage: false,
-              },
-            },
-          },
-        },
-      });
-    }
-
-    if (body.query.includes("getOrganizations")) {
-      return HttpResponse.json({
-        data: {
-          user: {
-            organizations: {
-              nodes: MOCK_ORGANIZATIONS,
-              pageInfo: {
-                endCursor: null,
-                hasNextPage: false,
-              },
-            },
-          },
-        },
-      });
-    }
-
-    if (body.query.includes("getOrgRepositories")) {
-      // Return org repos for testorg
-      const orgRepos = MOCK_REPOS.filter(repo => repo.isInOrganization);
-      return HttpResponse.json({
-        data: {
-          organization: {
-            login: "testorg",
-            repositories: {
-              nodes: orgRepos,
-              pageInfo: {
-                endCursor: null,
-                hasNextPage: false,
-              },
-            },
-            url: "https://github.com/testorg",
-          },
-        },
-      });
-    }
-
-    // Default response
+  github.query("getCurrentUser", () => {
     return HttpResponse.json({
-      data: {},
+      data: { viewer: MOCK_USER },
     });
   }),
 
-  // Handle REST API repository operations
+  github.query("getRepositories", () => {
+    return HttpResponse.json({
+      data: {
+        user: {
+          ...MOCK_USER,
+          repositories: {
+            nodes: MOCK_REPOS,
+            pageInfo: { endCursor: null, hasNextPage: false },
+          },
+        },
+      },
+    });
+  }),
+
+  github.query("getOrganizations", () => {
+    return HttpResponse.json({
+      data: {
+        user: {
+          organizations: {
+            nodes: MOCK_ORGANIZATIONS,
+            pageInfo: { endCursor: null, hasNextPage: false },
+          },
+        },
+      },
+    });
+  }),
+
+  github.query("getOrgRepositories", () => {
+    const orgRepos = MOCK_REPOS.filter((repo) => repo.isInOrganization);
+    return HttpResponse.json({
+      data: {
+        organization: {
+          login: "testorg",
+          repositories: {
+            nodes: orgRepos,
+            pageInfo: { endCursor: null, hasNextPage: false },
+          },
+          url: "https://github.com/testorg",
+        },
+      },
+    });
+  }),
+
+  // --- REST handlers (unchanged pattern) ---
+
   http.patch("https://api.github.com/repos/:owner/:repo", () => {
-    return HttpResponse.json({ 
+    return HttpResponse.json({
       archived: true,
-      message: "Repository archived successfully" 
+      message: "Repository archived successfully",
     });
   }),
 
   http.delete("https://api.github.com/repos/:owner/:repo", () => {
-    return HttpResponse.json({ 
-      message: "Repository deleted successfully" 
+    return HttpResponse.json({
+      message: "Repository deleted successfully",
     });
   }),
 
-  // Handle user authentication
   http.get("https://api.github.com/user", ({ request }) => {
     const authHeader = request.headers.get("Authorization");
-    
     if (!authHeader?.includes(getValidPersonalAccessToken())) {
-      return HttpResponse.json(
-        { message: "Bad credentials" },
-        { status: 401 }
-      );
+      return HttpResponse.json({ message: "Bad credentials" }, { status: 401 });
     }
-
     return HttpResponse.json(MOCK_USER);
   }),
 
-  // Handle user by username
   http.get("https://api.github.com/users/:username", ({ params }) => {
     const { username } = params;
-    
     if (username === "testuser") {
       return HttpResponse.json(MOCK_USER);
     }
-    
-    return HttpResponse.json(
-      { message: "Not Found" },
-      { status: 404 }
-    );
+    return HttpResponse.json({ message: "Not Found" }, { status: 404 });
   }),
 ];

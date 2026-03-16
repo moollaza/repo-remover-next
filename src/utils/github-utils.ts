@@ -4,21 +4,45 @@ import { throttling } from "@octokit/plugin-throttling";
 import { Octokit } from "@octokit/rest";
 
 import { analytics } from "@/utils/analytics";
+import { debug } from "@/utils/debug";
 
 // Create a custom Octokit class with the throttling plugin and pagination
 export const ThrottledOctokit = Octokit.plugin(throttling, paginateGraphQL);
 
 export type ThrottledOctokitType = InstanceType<typeof ThrottledOctokit>;
 
-const DEBUG = false;
-
 // Static test repository data for generation
 const REPO_TEMPLATES = [
-  { description: "A test project for demos", homepage: "https://example.com", name: "test-project-1", private: false },
-  { description: "Sample application for testing", homepage: "https://demo.com", name: "sample-app-2", private: true },
-  { description: "Demo repository", homepage: "https://test.com", name: "demo-repo-3", private: false },
-  { description: "Test library project", homepage: "https://lib.com", name: "test-lib-4", private: true },
-  { description: "Example project", homepage: "https://sample.com", name: "example-5", private: false },
+  {
+    description: "A test project for demos",
+    homepage: "https://example.com",
+    name: "test-project-1",
+    private: false,
+  },
+  {
+    description: "Sample application for testing",
+    homepage: "https://demo.com",
+    name: "sample-app-2",
+    private: true,
+  },
+  {
+    description: "Demo repository",
+    homepage: "https://test.com",
+    name: "demo-repo-3",
+    private: false,
+  },
+  {
+    description: "Test library project",
+    homepage: "https://lib.com",
+    name: "test-lib-4",
+    private: true,
+  },
+  {
+    description: "Example project",
+    homepage: "https://sample.com",
+    name: "example-5",
+    private: false,
+  },
 ];
 
 export async function generateRepos(
@@ -26,12 +50,12 @@ export async function generateRepos(
   setLoading: (loading: boolean) => void,
   numberOfRepos = 10,
 ): Promise<void> {
-  DEBUG && console.log("Generating test repos...");
+  debug.log("Generating test repos...");
   setLoading(true);
 
   try {
     for (let i = 0; i < numberOfRepos; i++) {
-      DEBUG && console.log(`Creating repo ${i + 1}...`);
+      debug.log(`Creating repo ${i + 1}...`);
       const template = REPO_TEMPLATES[i % REPO_TEMPLATES.length];
       await octokit.rest.repos.createForAuthenticatedUser({
         description: template.description,
@@ -43,7 +67,7 @@ export async function generateRepos(
     }
   } catch (error) {
     const errorMessage = (error as Error).message;
-    console.error(errorMessage);
+    debug.error(errorMessage);
     throw new Error(`Failed to create repositories: ${errorMessage}`);
   } finally {
     setLoading(false);
@@ -87,7 +111,7 @@ export const archiveRepo = async (
     });
   } catch (error) {
     const errorMessage = (error as Error).message;
-    console.error(errorMessage);
+    debug.error(errorMessage);
     throw new Error(
       `Failed to archive ${repo.name}: ${(error as Error).message}`,
     );
@@ -105,7 +129,7 @@ export const deleteRepo = async (
     });
   } catch (error) {
     const errorMessage = (error as Error).message;
-    console.error(errorMessage);
+    debug.error(errorMessage);
     throw new Error(
       `Failed to delete ${repo.name}: ${(error as Error).message}`,
     );
@@ -129,7 +153,7 @@ export const processRepo = async (
     throw new Error("Action is required");
   }
 
-  console.log(`Processing ${action} for ${repo.name}...`);
+  debug.log(`Processing ${action} for ${repo.name}...`);
 
   if (action === "archive") {
     await archiveRepo(octokit, repo);
@@ -157,18 +181,15 @@ export function createThrottledOctokit(
       onRateLimit: (_retryAfter, _options, _octokitInstance, retryCount) => {
         // Otherwise retry once, then give up
         if (retryCount < 1) {
-          if (DEBUG) console.log("[Throttle] Rate limited - retrying once");
+          debug.log("[Throttle] Rate limited - retrying once");
           return true;
         }
-        if (DEBUG) console.log("[Throttle] Rate limited - giving up");
+        debug.log("[Throttle] Rate limited - giving up");
         return false;
       },
       onSecondaryRateLimit: () => {
         // Don't retry secondary rate limits (abuse detection)
-        if (DEBUG)
-          console.log(
-            "[Throttle] Secondary rate limit detected - not retrying",
-          );
+        debug.log("[Throttle] Secondary rate limit detected - not retrying");
         return false;
       },
     },

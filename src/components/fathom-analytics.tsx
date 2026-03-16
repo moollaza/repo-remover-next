@@ -6,7 +6,7 @@ export function FathomAnalytics() {
   const location = useLocation();
 
   useEffect(() => {
-    const siteId = import.meta.env.VITE_FATHOM_SITE_ID;
+    const siteId = import.meta.env.VITE_FATHOM_SITE_ID as string | undefined;
     if (!siteId) {
       if (import.meta.env.DEV) {
         console.warn("Fathom Analytics: VITE_FATHOM_SITE_ID not set");
@@ -24,8 +24,8 @@ export function FathomAnalytics() {
   useEffect(() => {
     const url = location.pathname + location.search;
     Fathom.trackPageview({
-      url,
       referrer: document.referrer,
+      url,
     });
   }, [location.pathname, location.search]);
 
