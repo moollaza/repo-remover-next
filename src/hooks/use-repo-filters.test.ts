@@ -119,8 +119,18 @@ describe("useRepoFilters", () => {
 
   it("should filter repos by type (isPrivate)", () => {
     const repos = [
-      createMockRepo({ id: "1", isPrivate: false, key: "1", name: "public-repo" }),
-      createMockRepo({ id: "2", isPrivate: true, key: "2", name: "private-repo" }),
+      createMockRepo({
+        id: "1",
+        isPrivate: false,
+        key: "1",
+        name: "public-repo",
+      }),
+      createMockRepo({
+        id: "2",
+        isPrivate: true,
+        key: "2",
+        name: "private-repo",
+      }),
     ];
 
     const { result } = renderHook(() =>
@@ -133,7 +143,14 @@ describe("useRepoFilters", () => {
     // Deselect private repos
     act(() => {
       result.current.setTypeFilters(
-        new Set(["isArchived", "isDisabled", "isFork", "isInOrganization", "isMirror", "isTemplate"]),
+        new Set([
+          "isArchived",
+          "isDisabled",
+          "isFork",
+          "isInOrganization",
+          "isMirror",
+          "isTemplate",
+        ]),
       );
     });
 
@@ -144,8 +161,18 @@ describe("useRepoFilters", () => {
 
   it("should filter repos by type (isArchived)", () => {
     const repos = [
-      createMockRepo({ id: "1", isArchived: false, key: "1", name: "active-repo" }),
-      createMockRepo({ id: "2", isArchived: true, key: "2", name: "archived-repo" }),
+      createMockRepo({
+        id: "1",
+        isArchived: false,
+        key: "1",
+        name: "active-repo",
+      }),
+      createMockRepo({
+        id: "2",
+        isArchived: true,
+        key: "2",
+        name: "archived-repo",
+      }),
     ];
 
     const { result } = renderHook(() =>
@@ -155,7 +182,14 @@ describe("useRepoFilters", () => {
     // Deselect archived repos
     act(() => {
       result.current.setTypeFilters(
-        new Set(["isDisabled", "isFork", "isInOrganization", "isMirror", "isPrivate", "isTemplate"]),
+        new Set([
+          "isDisabled",
+          "isFork",
+          "isInOrganization",
+          "isMirror",
+          "isPrivate",
+          "isTemplate",
+        ]),
       );
     });
 
@@ -220,7 +254,7 @@ describe("useRepoFilters", () => {
     );
 
     act(() => {
-      result.current.setSortDescriptor({
+      result.current.handleSortChange({
         column: COLUMNS.name.key,
         direction: "ascending",
       });
@@ -243,7 +277,7 @@ describe("useRepoFilters", () => {
     );
 
     act(() => {
-      result.current.setSortDescriptor({
+      result.current.handleSortChange({
         column: COLUMNS.name.key,
         direction: "descending",
       });
@@ -281,7 +315,7 @@ describe("useRepoFilters", () => {
     );
 
     act(() => {
-      result.current.setSortDescriptor({
+      result.current.handleSortChange({
         column: COLUMNS.updatedAt.key,
         direction: "ascending",
       });
@@ -319,7 +353,7 @@ describe("useRepoFilters", () => {
     );
 
     act(() => {
-      result.current.setSortDescriptor({
+      result.current.handleSortChange({
         column: COLUMNS.updatedAt.key,
         direction: "descending",
       });

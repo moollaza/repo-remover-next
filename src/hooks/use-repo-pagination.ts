@@ -16,6 +16,10 @@ export interface UseRepoPaginationReturn<T> {
    */
   currentPage: number;
   /**
+   * Array of page numbers [1, 2, ..., totalPages]
+   */
+  pageNumbers: number[];
+  /**
    * Current page of items
    */
   paginatedItems: T[];
@@ -100,8 +104,14 @@ export function useRepoPagination<T>({
     }
   }, [currentPage, totalPages]);
 
+  // Build array of page numbers [1, 2, ..., totalPages]
+  const pageNumbers = useMemo(() => {
+    return Array.from({ length: totalPages }, (_, i) => i + 1);
+  }, [totalPages]);
+
   return {
     currentPage,
+    pageNumbers,
     paginatedItems,
     perPage,
     resetPage,

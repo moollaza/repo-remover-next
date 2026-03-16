@@ -3,6 +3,7 @@ import { type Repository } from "@octokit/graphql-schema";
 import { useCallback, useMemo, useState } from "react";
 
 import { COLUMNS, REPO_TYPES } from "@/config/repo-config";
+import { type RepositoryWithKey } from "@/hooks/use-repo-selection";
 
 export interface UseRepoFiltersProps {
   /**
@@ -21,6 +22,10 @@ export interface UseRepoFiltersReturn {
    */
   filteredRepos: RepositoryWithKey[];
   /**
+   * Handle sort change from HeroUI Table's onSortChange
+   */
+  handleSortChange: (descriptor: SortDescriptor) => void;
+  /**
    * Current search query for filtering by name/description
    */
   nameFilter: string;
@@ -28,10 +33,6 @@ export interface UseRepoFiltersReturn {
    * Update the search query
    */
   setNameFilter: (query: string) => void;
-  /**
-   * Update the sort configuration
-   */
-  setSortDescriptor: (descriptor: SortDescriptor) => void;
   /**
    * Update the type filters and reset pagination
    */
@@ -44,10 +45,6 @@ export interface UseRepoFiltersReturn {
    * Set of selected repository type filters
    */
   typeFilters: SelectionSet;
-}
-
-interface RepositoryWithKey extends Repository {
-  key: string;
 }
 
 // Remove unused `all` type from the Selection type
@@ -66,13 +63,16 @@ type SelectionSet = Exclude<Selection, "all">;
  * ```tsx
  * const {
  *   filteredRepos,
+ *   handleSortChange,
  *   nameFilter,
  *   setNameFilter,
  *   typeFilters,
  *   setTypeFilters,
- *   sortDescriptor,
- *   setSortDescriptor
+ *   sortDescriptor
  * } = useRepoFilters({ repos: reposWithKeys, login: user.login });
+ *
+ * // Pass handleSortChange to HeroUI Table's onSortChange
+ * <Table onSortChange={handleSortChange} sortDescriptor={sortDescriptor} />
  * ```
  */
 export function useRepoFilters({
@@ -91,6 +91,11 @@ export function useRepoFilters({
   // Callback for type filter changes that can trigger pagination reset in parent
   const setTypeFilters = useCallback((keys: Selection) => {
     setTypeFiltersState(keys as SelectionSet);
+  }, []);
+
+  // Handle sort change from HeroUI Table's onSortChange
+  const handleSortChange = useCallback((descriptor: SortDescriptor) => {
+    setSortDescriptor(descriptor);
   }, []);
 
   // First filter repos by search query, selected types, and admin permissions
@@ -146,9 +151,9 @@ export function useRepoFilters({
 
   return {
     filteredRepos,
+    handleSortChange,
     nameFilter,
     setNameFilter,
-    setSortDescriptor,
     setTypeFilters,
     sortDescriptor,
     typeFilters,

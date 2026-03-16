@@ -8,7 +8,7 @@
   ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
-    "project": "./tsconfig.app.json"
+    "project": "./tsconfig.eslint.json"
   },
   "ignorePatterns": ["node_modules/", "dist/", ".vscode/", "out/"],
   "rules": {
@@ -35,7 +35,6 @@
         "**/__tests__/**/*.ts",
         "**/__tests__/**/*.tsx"
       ],
-
       "rules": {
         "@typescript-eslint/no-unsafe-assignment": "off",
         "@typescript-eslint/no-unsafe-member-access": "off",
