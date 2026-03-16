@@ -1,5 +1,4 @@
-import { ArrowPathIcon } from "@heroicons/react/16/solid";
-import { Progress } from "@heroui/react";
+import { RefreshCw as ArrowPathIcon } from "lucide-react";
 
 interface RepoLoadingProgressProps {
   currentOrg?: string;
@@ -31,7 +30,7 @@ export default function RepoLoadingProgress({
   const subtitle = currentOrg ? `Currently loading: ${currentOrg}` : "";
 
   return (
-    <div className="mb-6 p-4 bg-content2 rounded-lg border border-divider">
+    <div className="mb-6 p-4 bg-content1 rounded-xl border border-divider shadow-sm">
       <div className="flex items-center gap-3 mb-2">
         <ArrowPathIcon className="h-5 w-5 text-primary animate-spin" />
         <div className="flex-1">
@@ -46,13 +45,20 @@ export default function RepoLoadingProgress({
           )}
         </div>
       </div>
-      <Progress
+      {/* Progress bar */}
+      <div
         aria-label="Loading progress"
-        className="w-full"
-        color="primary"
-        size="sm"
-        value={percentage}
-      />
+        aria-valuemax={100}
+        aria-valuemin={0}
+        aria-valuenow={percentage}
+        className="w-full h-1.5 bg-default-200 rounded-full overflow-hidden"
+        role="progressbar"
+      >
+        <div
+          className="h-full bg-[var(--brand-blue)] rounded-full transition-all duration-300"
+          style={{ width: `${percentage}%` }}
+        />
+      </div>
     </div>
   );
 }

@@ -1,4 +1,3 @@
-import { Button } from "@heroui/react";
 import * as Sentry from "@sentry/react";
 import { Component, type ErrorInfo, type ReactNode } from "react";
 
@@ -71,24 +70,23 @@ export class ErrorBoundary extends Component<
               An unexpected error occurred. Please try again or refresh the
               page.
             </p>
-            {import.meta.env.DEV &&
-              this.state.error && (
-                <div className="mb-6 rounded bg-danger-50 p-4 text-left">
-                  <p className="mb-2 text-sm font-semibold text-danger">
-                    Error Details (Development Only):
-                  </p>
-                  <pre className="overflow-auto text-xs text-danger-600">
-                    {this.state.error.message}
-                  </pre>
-                </div>
-              )}
-            <Button
-              className="font-semibold"
-              color="primary"
-              onPress={this.handleReset}
+            {import.meta.env.DEV && this.state.error && (
+              <div className="mb-6 rounded bg-danger-50 p-4 text-left">
+                <p className="mb-2 text-sm font-semibold text-danger">
+                  Error Details (Development Only):
+                </p>
+                <pre className="overflow-auto text-xs text-danger-600">
+                  {this.state.error.message}
+                </pre>
+              </div>
+            )}
+            <button
+              className="inline-flex items-center justify-center rounded-lg bg-primary px-6 py-2.5 text-sm font-semibold text-white hover:bg-primary/90 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+              onClick={this.handleReset}
+              type="button"
             >
               Try Again
-            </Button>
+            </button>
           </div>
         </div>
       );

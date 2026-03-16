@@ -33,8 +33,6 @@ yarn-error.log*
 /playwright/.cache/
 .playwright-mcp/
 
-*storybook.log
-storybook-static
-
 # Claude Code local files
 .claude/settings.local.json
+.superpowers/

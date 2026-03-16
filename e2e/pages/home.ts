@@ -4,23 +4,13 @@ import { expect, type Locator, type Page } from "@playwright/test";
 import { BasePage } from "./base-page";
 
 export class HomePage extends BasePage {
-  readonly rememberCheckbox: Locator;
-  readonly tokenForm: Locator;
-  readonly tokenFormError: Locator;
-  readonly tokenFormHelp: Locator;
   readonly tokenFormInput: Locator;
   readonly tokenFormSubmit: Locator;
-  readonly tokenFormSuccess: Locator;
 
   constructor(page: Page) {
     super(page);
-    this.tokenForm = page.getByTestId("github-token-form");
     this.tokenFormInput = page.getByTestId("github-token-input");
     this.tokenFormSubmit = page.getByTestId("github-token-submit");
-    this.rememberCheckbox = page.getByTestId("github-token-remember");
-    this.tokenFormError = this.tokenForm.locator('[data-slot="error-message"]');
-    this.tokenFormHelp = this.tokenForm.locator('[data-slot="helper-wrapper"]');
-    this.tokenFormSuccess = this.tokenForm.locator('[data-slot="description"]');
   }
 
   async clearToken() {
@@ -28,8 +18,8 @@ export class HomePage extends BasePage {
   }
 
   async expectErrorMessage(message: string) {
-    await expect(this.tokenFormError).toBeVisible();
-    await expect(this.tokenFormError).toHaveText(message);
+    // The inline form renders errors as a <p> with text-danger class
+    await expect(this.page.getByText(message)).toBeVisible({ timeout: 5000 });
   }
 
   async expectHeading(text: string) {
@@ -46,11 +36,9 @@ export class HomePage extends BasePage {
     await expect(this.tokenFormSubmit).toBeEnabled();
   }
 
-  async expectSubmitLoading() {
-    await expect(this.tokenFormSubmit).toHaveAttribute("data-loading", "true");
-  }
-
   async fillToken(token: string) {
+    // Scroll to the form first since it's far down the page
+    await this.tokenFormInput.scrollIntoViewIfNeeded();
     await this.tokenFormInput.fill(token);
   }
 
@@ -65,9 +53,5 @@ export class HomePage extends BasePage {
 
   async submit() {
     await this.tokenFormSubmit.click();
-  }
-
-  async toggleRememberMe() {
-    await this.rememberCheckbox.click();
   }
 }

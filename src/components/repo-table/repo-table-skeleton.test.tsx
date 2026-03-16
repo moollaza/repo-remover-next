@@ -31,16 +31,13 @@ describe("RepoTableSkeleton", () => {
     expect(screen.getByLabelText("Loading repositories")).toBeInTheDocument();
   });
 
-  it("uses correct column headers from COLUMN_ORDER", () => {
+  it("uses correct column headers", () => {
     render(<RepoTableSkeleton />);
 
-    // Should use title case from COLUMN_ORDER
-    expect(screen.getByText("Name")).toBeInTheDocument();
+    expect(screen.getByText("Repository")).toBeInTheDocument();
     expect(screen.getByText("Last Updated")).toBeInTheDocument();
-
-    // Should NOT have uppercase versions
-    expect(screen.queryByText("NAME")).not.toBeInTheDocument();
-    expect(screen.queryByText("LAST UPDATED")).not.toBeInTheDocument();
+    expect(screen.getByText("Owner")).toBeInTheDocument();
+    expect(screen.getByText("Status")).toBeInTheDocument();
   });
 
   it("renders skeleton container with correct test id", () => {
@@ -74,25 +71,24 @@ describe("RepoTableSkeleton", () => {
     const table = container.querySelector("table");
     const wrapper = table?.closest(".border");
     expect(wrapper).toBeInTheDocument();
-    expect(wrapper).toHaveClass("rounded-lg");
+    expect(wrapper).toHaveClass("rounded-xl");
   });
 
-  it("renders with striped rows enabled", () => {
+  it("renders table element", () => {
     render(<RepoTableSkeleton rows={3} />);
 
-    // HeroUI uses grid role when selectionMode is enabled
-    const table = screen.getByRole("grid");
+    const table = screen.getByRole("table");
     expect(table).toBeInTheDocument();
-    // Table should have striped mode enabled (HeroUI handles the actual striping)
   });
 
-  it("renders checkbox column for selection", () => {
-    render(<RepoTableSkeleton />);
+  it("renders skeleton rows with pulse animation", () => {
+    render(<RepoTableSkeleton rows={3} />);
 
-    // HeroUI uses grid role when selectionMode is enabled
-    const table = screen.getByRole("grid");
+    const table = screen.getByRole("table");
     expect(table).toBeInTheDocument();
-    // HeroUI will render checkboxes with selection mode
+    // Skeleton rows should exist
+    const rows = screen.getAllByRole("row");
+    expect(rows.length).toBeGreaterThan(1);
   });
 
   it("renders pagination skeleton in bottom content", () => {

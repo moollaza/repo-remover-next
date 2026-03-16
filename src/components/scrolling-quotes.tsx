@@ -1,6 +1,4 @@
-import { Card, CardBody, CardFooter } from "@heroui/react";
 import clsx from "clsx";
-
 import { useEffect, useState } from "react";
 
 import styles from "./scrolling-quotes.module.css";
@@ -50,15 +48,12 @@ export function ScrollingQuotes() {
   }, []);
 
   useEffect(() => {
-    // Check for reduced motion preference or Storybook environment
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const isStorybook = typeof window !== 'undefined' && (
-      window.location.href.includes('storybook') ||
-      window.parent !== window ||
-      !!document.querySelector('#storybook-root')
-    );
+    // Check for reduced motion preference
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
 
-    setReduceMotion(prefersReducedMotion || isStorybook);
+    setReduceMotion(prefersReducedMotion);
   }, []);
 
   return (
@@ -82,15 +77,16 @@ export function ScrollingQuotes() {
           <a
             className={clsx(
               "w-72 flex-shrink-0 cursor-pointer",
-              !reduceMotion && "transition-transform duration-300 ease-in-out hover:scale-105"
+              !reduceMotion &&
+                "transition-transform duration-300 ease-in-out hover:scale-105",
             )}
             href={quote.source}
             key={index}
             rel="noopener noreferrer"
             target="_blank"
           >
-            <Card className="h-full bg-success-50 text-success-900 shadow-md">
-              <CardBody className="relative">
+            <div className="h-full rounded-lg bg-success-50 text-success-900 shadow-md flex flex-col">
+              <div className="relative p-3 flex-grow">
                 <div className="absolute top-2 left-2 text-8xl text-success opacity-10 font-serif">
                   &ldquo;
                 </div>
@@ -102,13 +98,13 @@ export function ScrollingQuotes() {
                     — <cite>{quote.author}</cite>
                   </footer>
                 </blockquote>
-              </CardBody>
-              <CardFooter className="justify-between items-center">
+              </div>
+              <div className="flex justify-between items-center px-3 py-2 border-t border-success-200">
                 <span className="text-xs text-success-700 opacity-50">
                   {quote.sourceName}
                 </span>
-              </CardFooter>
-            </Card>
+              </div>
+            </div>
           </a>
         ))}
       </div>

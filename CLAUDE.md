@@ -24,7 +24,6 @@ npm run test:unit        # unit tests (vitest)
 npm run test:e2e         # playwright E2E tests
 npm run test:e2e:fast    # E2E with fast-fail
 npm run test:all         # unit + E2E
-npm run storybook        # storybook (port 6006)
 ```
 
 Run `npm run lint && npm run test:unit && npm run build` before every commit.

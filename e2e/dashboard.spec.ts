@@ -1,5 +1,5 @@
 import { DashboardPage } from "@e2e/pages/dashboard";
-import { mockArchiveRepo } from "@e2e/utils/github-api-mocks";
+import { mockArchiveRepo, mockDeleteRepo } from "@e2e/utils/github-api-mocks";
 import { expect, test } from "@playwright/test";
 
 import { mockRepos } from "@/mocks/static-fixtures";
@@ -22,7 +22,7 @@ test.describe("Dashboard Page", () => {
 
     // Check for the page header
     await expect(
-      dashboard.page.getByText("Select Repos to Modify"),
+      dashboard.page.getByText("Repository Management"),
     ).toBeVisible();
 
     // Check if the repository table is visible
@@ -46,7 +46,7 @@ test.describe("Dashboard Page", () => {
 
     // Check that the "Name" header is visible and sortable and not sorted
     const nameHeader = dashboard.page.getByRole("columnheader", {
-      name: "Name",
+      name: "Repository",
     });
     await expect(nameHeader).toBeVisible();
     await expect(nameHeader).toHaveAttribute("data-sortable", "true");
@@ -110,7 +110,7 @@ test.describe("Dashboard Page", () => {
       }
 
       if (template.isInOrganization) {
-        await dashboard.expectRepoHasTag(template.name, "Organization");
+        await dashboard.expectRepoHasTag(template.name, "Org");
       }
 
       // Verify owner information when it's not the current user
@@ -184,12 +184,16 @@ test.describe("Dashboard Page", () => {
     await dashboard.expectRepoVisible("repo-1");
 
     // Sort by name
-    await dashboard.page.getByRole("columnheader", { name: "Name" }).click();
+    await dashboard.page
+      .getByRole("columnheader", { name: "Repository" })
+      .click();
     // Verify ascending sort
     await dashboard.expectRepoAtPosition(1, "repo-1");
 
     // Sort by name in reverse
-    await dashboard.page.getByRole("columnheader", { name: "Name" }).click();
+    await dashboard.page
+      .getByRole("columnheader", { name: "Repository" })
+      .click();
     // Verify descending sort
     await dashboard.expectRepoAtPosition(1, "repo-9");
 
@@ -254,7 +258,7 @@ test.describe("Dashboard Page", () => {
     await expect(dashboard.tableRows.first()).toBeVisible();
 
     // Select all repositories
-    await dashboard.selectAllCheckbox.click();
+    await dashboard.selectAll();
 
     // Verify page 1 has 5 rows
     await expect(dashboard.tableRows).toHaveCount(5);
@@ -270,7 +274,7 @@ test.describe("Dashboard Page", () => {
     await expect(dashboard.archiveButton).toBeEnabled();
 
     // Uncheck all - archive button should disable again
-    await dashboard.selectAllCheckbox.click();
+    await dashboard.deselectAll();
     await expect(dashboard.archiveButton).toBeDisabled();
 
     // Go back to page 1
@@ -398,7 +402,7 @@ test.describe("Dashboard Page", () => {
     });
 
     test("shows different text for delete action", async () => {
-      await dashboard.selectRepository("repo-1");
+      // repo-1 already selected in beforeEach
       await dashboard.selectDeleteAction();
       await dashboard.deleteButton.click();
       await dashboard.expectModalInMode("confirmation");
@@ -455,6 +459,55 @@ test.describe("Dashboard Page", () => {
 
       // Modal should be gone
       await dashboard.expectModalNotVisible();
+    });
+
+    test("should handle delete flow end-to-end", async () => {
+      // Switch to delete action
+      await dashboard.selectDeleteAction();
+
+      // Open delete confirmation modal
+      await dashboard.deleteButton.click();
+      await dashboard.expectModalInMode("confirmation");
+      await dashboard.expectModalTitle(/Confirm Deletion/i);
+      await dashboard.expectRepoInConfirmationModal("repo-1");
+
+      // Confirm button should mention "delete"
+      await dashboard.expectText(/I understand the consequences, delete/i);
+
+      // Mock the delete API call
+      await mockDeleteRepo(dashboard.page, "repo-1");
+
+      // Confirm the deletion
+      await dashboard.confirmAction("testuser");
+
+      // Should show progress
+      await dashboard.expectModalInMode("progress");
+      await expect(dashboard.progressModalHeader).toContainText(
+        /Deleting Repositories/i,
+      );
+
+      // Should show result
+      await dashboard.expectModalInMode("result");
+      await expect(dashboard.resultModalHeader).toContainText(
+        /Deletion Complete/i,
+      );
+      await dashboard.expectSuccessMessage("deleted");
+    });
+
+    test("should handle delete errors", async () => {
+      await dashboard.selectDeleteAction();
+      await dashboard.deleteButton.click();
+
+      await mockDeleteRepo(dashboard.page, "repo-1", {
+        error: "You do not have permission to delete this repository",
+        success: false,
+      });
+
+      await dashboard.confirmAction("testuser");
+      await dashboard.expectModalInMode("result");
+      await expect(
+        dashboard.page.getByText(/1 error occurred while deleting/i),
+      ).toBeVisible();
     });
   });
 });

@@ -1,4 +1,3 @@
-import { Button, Checkbox, Input, type InputProps } from "@heroui/react";
 import clsx from "clsx";
 import { useEffect, useState } from "react";
 
@@ -99,19 +98,26 @@ export default function GitHubTokenForm({
       ? "Invalid GitHub token format"
       : null);
 
-  // Determine input color and description based on state
-  let inputColor: InputProps["color"] = undefined;
+  // Determine description based on state
   let inputDescription =
     "Token should start with 'ghp_' or other GitHub prefixes";
 
   if (isValidating) {
     inputDescription = "Validating token...";
   } else if (isTokenValid && username) {
-    inputColor = "success";
     inputDescription = `Token is valid. Welcome ${username}, click submit to continue!`;
-  } else if (showValidationError) {
-    inputColor = "danger";
   }
+
+  // Border/ring color based on state
+  const inputBorderClass = showValidationError
+    ? "border-danger focus:ring-danger"
+    : isTokenValid && username
+      ? "border-success focus:ring-success"
+      : "border-default-300 focus:ring-primary";
+
+  // Description text color based on state
+  const descriptionColorClass =
+    isTokenValid && username ? "text-success" : "text-default-400";
 
   return (
     <form
@@ -122,44 +128,124 @@ export default function GitHubTokenForm({
       }}
     >
       <div className="flex flex-col gap-4">
-        <Input
-          autoComplete="off"
-          className={"w-1/2"}
-          color={inputColor}
-          data-testid="github-token-input"
-          description={inputDescription}
-          errorMessage={validationMessage}
-          isClearable
-          isInvalid={showValidationError}
-          label="Please enter your Personal Access Token"
-          name="personal-access-token"
-          onChange={(e) => {
-            handleChange(e.target.value);
-          }}
-          onClear={() => {
-            handleChange("");
-          }}
-          required
-          type="text"
-          value={value}
-        />
+        {/* Token input */}
+        <div className="flex flex-col gap-1.5">
+          <label
+            className="text-sm font-medium text-foreground"
+            htmlFor="personal-access-token"
+          >
+            Please enter your Personal Access Token
+          </label>
+          <div className="relative">
+            <input
+              autoComplete="off"
+              className={clsx(
+                "w-full rounded-lg border bg-default-100 px-3 py-2.5 text-sm text-foreground",
+                "placeholder:text-default-400",
+                "focus:outline-none focus:ring-2",
+                "transition-colors",
+                inputBorderClass,
+              )}
+              data-testid="github-token-input"
+              id="personal-access-token"
+              name="personal-access-token"
+              onChange={(e) => {
+                handleChange(e.target.value);
+              }}
+              required
+              type="text"
+              value={value}
+            />
+            {/* Clear button */}
+            {value && (
+              <button
+                aria-label="Clear token"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-default-400 hover:text-default-600 transition-colors p-1"
+                onClick={() => {
+                  handleChange("");
+                }}
+                type="button"
+              >
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M6 18L18 6M6 6l12 12"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
+            )}
+          </div>
+          {/* Validation error */}
+          {showValidationError && validationMessage && (
+            <p className="text-xs text-danger">{validationMessage}</p>
+          )}
+          {/* Description */}
+          <p className={clsx("text-xs", descriptionColorClass)}>
+            {inputDescription}
+          </p>
+        </div>
 
         {/* TODO: Set to false */}
-        <Checkbox data-testid="github-token-remember" isSelected={true}>
-          Remember me (token is stored locally, on your device)
-        </Checkbox>
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            checked={true}
+            className="h-4 w-4 rounded border-default-300 text-primary focus:ring-primary"
+            data-testid="github-token-remember"
+            readOnly
+            type="checkbox"
+          />
+          <span className="text-sm text-foreground">
+            Remember me (token is stored locally, on your device)
+          </span>
+        </label>
       </div>
 
-      <Button
-        className="w-20"
-        color="primary"
+      <button
+        className={clsx(
+          "w-full rounded-lg px-4 py-2.5 text-sm font-medium transition-colors",
+          "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
+          !isTokenValid || isValidating
+            ? "bg-primary/50 text-white/70 cursor-not-allowed"
+            : "bg-primary text-white hover:bg-primary/90",
+        )}
         data-testid="github-token-submit"
-        isDisabled={!isTokenValid || isValidating}
-        isLoading={isValidating}
+        disabled={!isTokenValid || isValidating}
         type="submit"
       >
-        Submit
-      </Button>
+        {isValidating ? (
+          <span className="inline-flex items-center gap-2">
+            <svg
+              className="h-4 w-4 animate-spin"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
+              <path
+                className="opacity-75"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                fill="currentColor"
+              />
+            </svg>
+            Validating...
+          </span>
+        ) : (
+          "Submit"
+        )}
+      </button>
     </form>
   );
 }

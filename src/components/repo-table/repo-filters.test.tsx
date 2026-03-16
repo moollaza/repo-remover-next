@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen } from "@/utils/test-utils";
 import userEvent from "@testing-library/user-event";
 import { vi } from "vitest";
 
@@ -9,11 +9,7 @@ import RepoFilters, {
   type SelectionSet,
 } from "@/components/repo-table/repo-filters";
 
-// Mock the heroicons
-vi.mock("@heroicons/react/16/solid", () => ({
-  ChevronDownIcon: () => <div data-testid="chevron-down-icon" />,
-  MagnifyingGlassIcon: () => <div data-testid="magnifying-glass-icon" />,
-}));
+// No icon mocks needed — component uses lucide-react which renders inline SVGs
 
 describe("RepoFilters", () => {
   // Default props for most tests
@@ -42,7 +38,7 @@ describe("RepoFilters", () => {
     // Check if all main components are rendered
     expect(screen.getByTestId("per-page-select")).toBeInTheDocument();
 
-    expect(screen.getAllByText("Repo types to show")[0]).toBeInTheDocument();
+    expect(screen.getByTestId("repo-type-select")).toBeInTheDocument();
     expect(screen.getByTestId("repo-search-input")).toBeInTheDocument();
     expect(screen.getAllByText(REPO_ACTIONS[0].label)[0]).toBeInTheDocument();
   });
@@ -79,10 +75,9 @@ describe("RepoFilters", () => {
   it("renders repo type filter with options", async () => {
     render(<RepoFilters {...defaultProps} />);
 
-    // Verify repo type select button is rendered
+    // Verify repo type select is rendered
     const repoTypeSelect = screen.getByTestId("repo-type-select");
     expect(repoTypeSelect).toBeInTheDocument();
-    expect(repoTypeSelect).toHaveTextContent("Repo types to show");
 
     // Click the repo type select button
     await userEvent.click(repoTypeSelect);
@@ -172,9 +167,7 @@ describe("RepoFilters", () => {
     render(<RepoFilters {...defaultProps} />);
 
     // Find and click the dropdown trigger
-    const dropdownTrigger = screen
-      .getByTestId("chevron-down-icon")
-      .closest("button");
+    const dropdownTrigger = screen.getByTestId("repo-action-dropdown-trigger");
     if (!dropdownTrigger) throw new Error("Dropdown trigger not found");
 
     await userEvent.click(dropdownTrigger);
@@ -191,9 +184,7 @@ describe("RepoFilters", () => {
     render(<RepoFilters {...defaultProps} />);
 
     // Find and click the dropdown trigger
-    const dropdownTrigger = screen
-      .getByTestId("chevron-down-icon")
-      .closest("button");
+    const dropdownTrigger = screen.getByTestId("repo-action-dropdown-trigger");
     if (!dropdownTrigger) throw new Error("Dropdown trigger not found");
 
     await userEvent.click(dropdownTrigger);

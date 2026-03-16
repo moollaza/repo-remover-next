@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen } from "@/utils/test-utils";
 import userEvent from "@testing-library/user-event";
 import { vi } from "vitest";
 
@@ -17,22 +17,24 @@ describe("Dashboard", () => {
   it("renders heading", () => {
     render(<Dashboard {...defaultProps} />);
 
-    expect(screen.getByText(/select repos to modify/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/select repositories to archive or delete/i),
+    ).toBeInTheDocument();
   });
 
   it("shows error alert when isError is true", () => {
     render(<Dashboard {...defaultProps} isError={true} />);
 
-    expect(
-      screen.getByText(/error loading repositories/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/error loading repositories/i)).toBeInTheDocument();
   });
 
   it("shows permission warning when provided", () => {
     const warning = "Some organizations are not accessible due to SSO";
     render(<Dashboard {...defaultProps} permissionWarning={warning} />);
 
-    expect(screen.getByText(/limited access/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/some repositories may be missing/i),
+    ).toBeInTheDocument();
     expect(screen.getByText(warning)).toBeInTheDocument();
   });
 
@@ -59,11 +61,11 @@ describe("Dashboard", () => {
 
   it("hides refresh button when loading", () => {
     render(
-      <Dashboard {...defaultProps} isLoading={true} onRefresh={vi.fn()} />
+      <Dashboard {...defaultProps} isLoading={true} onRefresh={vi.fn()} />,
     );
 
     expect(
-      screen.queryByRole("button", { name: /refresh repository data/i })
+      screen.queryByRole("button", { name: /refresh repository data/i }),
     ).not.toBeInTheDocument();
   });
 
@@ -71,26 +73,32 @@ describe("Dashboard", () => {
     render(<Dashboard {...defaultProps} />);
 
     expect(
-      screen.queryByRole("button", { name: /refresh repository data/i })
+      screen.queryByRole("button", { name: /refresh repository data/i }),
     ).not.toBeInTheDocument();
   });
 
   it("handles null repos gracefully", () => {
     render(<Dashboard {...defaultProps} repos={null} />);
 
-    expect(screen.getByText(/select repos to modify/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/select repositories to archive or delete/i),
+    ).toBeInTheDocument();
   });
 
   it("handles empty repos array", () => {
     render(<Dashboard {...defaultProps} repos={[]} />);
 
-    expect(screen.getByText(/select repos to modify/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/select repositories to archive or delete/i),
+    ).toBeInTheDocument();
   });
 
   it("shows loading state", () => {
     render(<Dashboard {...defaultProps} isLoading={true} repos={null} />);
 
-    expect(screen.getByText(/select repos to modify/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/select repositories to archive or delete/i),
+    ).toBeInTheDocument();
     // RepoTable handles loading indicator internally
   });
 
@@ -102,13 +110,13 @@ describe("Dashboard", () => {
         {...defaultProps}
         isError={true}
         permissionWarning={warning}
-      />
+      />,
     );
 
+    expect(screen.getByText(/error loading repositories/i)).toBeInTheDocument();
     expect(
-      screen.getByText(/error loading repositories/i)
+      screen.getByText(/some repositories may be missing/i),
     ).toBeInTheDocument();
-    expect(screen.getByText(/limited access/i)).toBeInTheDocument();
     expect(screen.getByText(warning)).toBeInTheDocument();
   });
 });
