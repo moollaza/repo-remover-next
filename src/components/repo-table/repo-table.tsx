@@ -3,22 +3,20 @@ import { formatDistanceToNow } from "date-fns";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Checkbox } from "@/components/ui/checkbox";
-import { REPO_ACTIONS } from "@/config/repo-config";
 import {
   type Selection,
-  type SelectionSet,
   type SortDescriptor,
   useRepoFilters,
 } from "@/hooks/use-repo-filters";
 import { useRepoPagination } from "@/hooks/use-repo-pagination";
+import {
+  type RepositoryWithKey,
+  useRepoSelection,
+} from "@/hooks/use-repo-selection";
 import { debug } from "@/utils/debug";
 
 import ConfirmationModal from "./confirmation-modal";
 import RepoFilters from "./repo-filters";
-
-interface RepositoryWithKey extends Repository {
-  key: string;
-}
 
 interface RepoTableProps {
   login: null | string;
@@ -29,13 +27,6 @@ export default function RepoTable({
   login,
   repos,
 }: RepoTableProps): JSX.Element {
-  const [selectedRepoKeys, setSelectedRepoKeys] = useState<Selection>(
-    new Set(),
-  );
-  const [selectedRepoAction, setSelectedRepoAction] = useState<SelectionSet>(
-    new Set([REPO_ACTIONS[0].key]),
-  );
-
   // For the confirmation modal
   const [isOpen, setIsOpen] = useState(false);
   const onOpen = useCallback(() => setIsOpen(true), []);
@@ -61,7 +52,7 @@ export default function RepoTable({
     }));
   }, [repos]);
 
-  // Use custom hooks for filtering and pagination
+  // Use custom hooks for filtering, pagination, and selection
   const {
     filteredRepos,
     nameFilter,
@@ -82,13 +73,17 @@ export default function RepoTable({
     totalPages,
   } = useRepoPagination({ items: filteredRepos });
 
-  // Build the list of selected repos based on the keys
-  const selectedRepos = useMemo(() => {
-    if (selectedRepoKeys === "all") {
-      return filteredRepos;
-    }
-    return filteredRepos.filter((repo) => selectedRepoKeys.has(repo.id));
-  }, [filteredRepos, selectedRepoKeys]);
+  const {
+    allSelectableSelected,
+    handleRepoActionChange,
+    handleRowSelect,
+    handleSelectAll,
+    isRepoDisabled,
+    selectableRepos,
+    selectedRepoAction,
+    selectedRepoKeys,
+    selectedRepos,
+  } = useRepoSelection({ filteredRepos, paginatedRepos });
 
   const handleRepoTypesFilterChange = useCallback(
     (keys: Selection) => {
@@ -122,79 +117,9 @@ export default function RepoTable({
     onOpen();
   };
 
-  const handleRepoActionChange = useCallback(
-    (keys: Selection) => {
-      setSelectedRepoAction(keys as SelectionSet);
-    },
-    [setSelectedRepoAction],
-  );
-
-  // Helper function to determine if a repo should be disabled for selection
-  const isRepoDisabled = useCallback(
-    (repo: Repository): boolean => {
-      // Locked repos cannot be archived or deleted — they will 403/422
-      if (repo.isLocked) return true;
-      // If archive action is selected and repo is already archived, disable it
-      return selectedRepoAction.has("archive") && repo.isArchived;
-    },
-    [selectedRepoAction],
-  );
-
-  // Get disabled repo keys for the table
-  const disabledKeys = useMemo(() => {
-    return new Set(
-      paginatedRepos.filter(isRepoDisabled).map((repo) => repo.id),
-    );
-  }, [paginatedRepos, isRepoDisabled]);
-
   const handleConfirm = useCallback(() => {
     // TODO: Record # of repos deleted/archived?
   }, []);
-
-  // --- Selection handlers ---
-  const selectableRepos = useMemo(
-    () => paginatedRepos.filter((r) => !disabledKeys.has(r.id)),
-    [paginatedRepos, disabledKeys],
-  );
-
-  const allSelectableSelected = useMemo(() => {
-    if (selectedRepoKeys === "all") return true;
-    if (selectableRepos.length === 0) return false;
-    return selectableRepos.every((r) => selectedRepoKeys.has(r.id));
-  }, [selectedRepoKeys, selectableRepos]);
-
-  const handleSelectAll = useCallback(() => {
-    if (allSelectableSelected) {
-      // Deselect all
-      setSelectedRepoKeys(new Set());
-    } else {
-      // Select all filteredRepos (not just current page) to match HeroUI "all" behavior
-      const allIds = new Set(
-        filteredRepos.filter((r) => !isRepoDisabled(r)).map((r) => r.id),
-      );
-      setSelectedRepoKeys(allIds);
-    }
-  }, [allSelectableSelected, filteredRepos, isRepoDisabled]);
-
-  const handleRowSelect = useCallback(
-    (repoId: string) => {
-      if (disabledKeys.has(repoId)) return;
-
-      setSelectedRepoKeys((prev) => {
-        const prevSet =
-          prev === "all"
-            ? new Set(filteredRepos.map((r) => r.id))
-            : new Set(prev);
-        if (prevSet.has(repoId)) {
-          prevSet.delete(repoId);
-        } else {
-          prevSet.add(repoId);
-        }
-        return prevSet;
-      });
-    },
-    [disabledKeys, filteredRepos],
-  );
 
   // --- Sort handler ---
   const handleSortChange = useCallback(

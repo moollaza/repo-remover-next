@@ -2,6 +2,7 @@ import { type Repository } from "@octokit/graphql-schema";
 import { useCallback, useMemo, useState } from "react";
 
 import { COLUMNS, REPO_TYPES } from "@/config/repo-config";
+import { type RepositoryWithKey } from "@/hooks/use-repo-selection";
 
 /**
  * Local replacement for HeroUI's Selection type.
@@ -64,10 +65,6 @@ export interface UseRepoFiltersReturn {
    * Set of selected repository type filters
    */
   typeFilters: SelectionSet;
-}
-
-interface RepositoryWithKey extends Repository {
-  key: string;
 }
 
 /**
