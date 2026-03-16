@@ -1,12 +1,13 @@
 import { Button, Link } from "@heroui/react";
 
+import { ErrorBoundary } from "@/components/error-boundary";
 import ScrollButton from "@/components/scroll-button";
 import { ScrollingQuotes } from "@/components/scrolling-quotes";
 import TokenFormSection from "@/components/token-form-section";
 
 export function Home() {
   return (
-    <>
+    <ErrorBoundary>
       <section>
         <div className="container mx-auto max-w-6xl py-10 px-6 text-center text-pretty justify-center">
           <h1 className="font-extrabold tracking-tight text-[84px] leading-none">
@@ -149,6 +150,6 @@ export function Home() {
           <TokenFormSection />
         </section>
       </div>
-    </>
+    </ErrorBoundary>
   );
 }
