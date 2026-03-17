@@ -15,6 +15,7 @@
     "dist/",
     ".vscode/",
     "out/",
+    "e2e/",
     "**/*.test.ts",
     "**/*.test.tsx",
     "**/*.spec.ts",

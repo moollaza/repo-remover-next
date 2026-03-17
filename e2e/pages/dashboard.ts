@@ -85,13 +85,6 @@ export class DashboardPage extends BasePage {
     this.resultModalHeader = page.getByTestId("result-modal-header");
   }
 
-  async archiveSelectedRepos(username: string) {
-    await this.selectArchiveAction();
-    await this.archiveButton.click();
-    await this.fillConfirmationInput(username);
-    await this.confirmationModalConfirm.click();
-  }
-
   /**
    * Cancels the confirmation dialog
    */
@@ -121,12 +114,6 @@ export class DashboardPage extends BasePage {
   async confirmAction(username: string) {
     await this.fillConfirmationInput(username);
     await this.confirmationModalConfirm.click();
-  }
-
-  async deleteSelectedRepos(username: string) {
-    await this.selectDeleteAction();
-    await this.deleteButton.click();
-    await this.fillConfirmationInput(username);
   }
 
   async expectConfirmationInputEmpty() {
@@ -285,26 +272,6 @@ export class DashboardPage extends BasePage {
     return await this.pagination.locator('[aria-current="true"]').textContent();
   }
 
-  /**
-   * Gets the current sort direction for a column
-   * @param column The column to check: 'name' or 'updatedAt'
-   * @returns The current sort direction or null if not sorted
-   */
-  async getSortDirection(
-    column: "name" | "updatedAt",
-  ): Promise<"ascending" | "descending" | null> {
-    const columnName = column === "name" ? "Name" : "Last Updated";
-    const columnHeader = this.page.getByRole("columnheader", {
-      name: columnName,
-    });
-
-    const sortDirection = await columnHeader.getAttribute("aria-sort");
-    if (sortDirection === "ascending" || sortDirection === "descending") {
-      return sortDirection;
-    }
-    return null;
-  }
-
   // Override the base method to use the dashboard path
   async goto() {
     await this.page.goto("/dashboard");
@@ -377,43 +344,5 @@ export class DashboardPage extends BasePage {
     await mockLocalStorage(this.page);
     await mockOctokitInit(this.page);
     await mockGraphQLRepos(this.page);
-  }
-
-  /**
-   * Sorts the repository table by the specified column
-   * @param column The column to sort by: 'name' or 'updatedAt'
-   * @param direction Optional direction to sort by. If not provided, it toggles the current direction
-   */
-  async sortBy(
-    column: "name" | "updatedAt",
-    direction?: "ascending" | "descending",
-  ) {
-    const columnName = column === "name" ? "Name" : "Last Updated";
-    const columnHeader = this.page.getByRole("columnheader", {
-      name: columnName,
-    });
-
-    // If a specific direction is requested, we may need to click twice
-    if (direction) {
-      // First click to ensure we're sorting by the right column
-      await columnHeader.click();
-
-      // Get the current sort direction from the aria-sort attribute
-      const currentDirection = await columnHeader.getAttribute("aria-sort");
-
-      // If current direction doesn't match the requested direction, click again to toggle
-      if (
-        (currentDirection === "descending" && direction === "ascending") ||
-        (currentDirection === "ascending" && direction === "descending")
-      ) {
-        await columnHeader.click();
-      }
-    } else {
-      // Simple toggle sort - just click once
-      await columnHeader.click();
-    }
-
-    // Wait for the table to update
-    await this.page.waitForTimeout(100);
   }
 }

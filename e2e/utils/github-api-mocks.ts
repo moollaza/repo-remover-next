@@ -54,24 +54,6 @@ export async function mockArchiveRepo(
   });
 }
 
-export async function mockBulkActions(
-  page: Page,
-  options: { error?: string; success?: boolean } = {},
-) {
-  await page.route("**/repos/testuser/**", (route) => {
-    if (options.success === false) {
-      void route.fulfill({
-        json: {
-          message: options.error ?? "Bulk action failed",
-        },
-        status: 403,
-      });
-    } else {
-      void route.fulfill({ status: 204 });
-    }
-  });
-}
-
 export async function mockDeleteRepo(
   page: Page,
   repoName: string,
