@@ -118,7 +118,7 @@ Migrate all raw `console.*` calls to the `debug` utility and add lint rules to p
   - Impact: In production, error details (including potential API response snippets) leak to browser DevTools; violates `security.md` ("Do NOT add console.log in production — use `debug` utility"). Line 706 specifically logs a raw `GraphqlResponseError.message`.
   - Fix: Replace all `console.*` calls with `debug.log()` / `debug.warn()` / `debug.error()` from `@/utils/debug`
 
-- [ ] **[BUG-008] severity:low** — 8 raw `console.*` calls instead of the `debug` utility
+- [x] **[BUG-008] severity:low** — 8 raw `console.*` calls instead of the `debug` utility
 
   - File: `src/providers/github-data-provider.tsx` lines 66, 120, 125, 161, 169, 176, 182, 199, 212
   - Impact: Violates `security.md` ("Do NOT add console.log in production — use `debug` utility"). Line 120 (`console.error("GitHub API error:", err)`) is the most dangerous — SWR errors can include response bodies that may contain token fragments in error messages.

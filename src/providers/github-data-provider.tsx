@@ -9,6 +9,7 @@ import React, {
 import useSWR from "swr";
 
 import { GitHubContext, GitHubContextType } from "@/contexts/github-context";
+import { debug } from "@/utils/debug";
 import {
   fetchGitHubDataWithProgress,
   type LoadingProgress,
@@ -63,7 +64,7 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
           setLoginState(storedLogin);
         if (storedPat && typeof storedPat === "string") setPatState(storedPat);
       } catch (error) {
-        console.warn("Error accessing secure storage:", error);
+        debug.warn("Error accessing secure storage:", error);
       } finally {
         setIsInitialized(true);
       }
@@ -90,20 +91,23 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
     pat ? ([login ?? "", pat] as GitHubFetcherKey) : null,
     // Use the progress-aware fetcher
     async ([login, pat]): Promise<GitHubFetcherResult> => {
-      const result = await fetchGitHubDataWithProgress([login, pat], (progressUpdate) => {
-        // Update progress state
-        setProgress(progressUpdate);
+      const result = await fetchGitHubDataWithProgress(
+        [login, pat],
+        (progressUpdate) => {
+          // Update progress state
+          setProgress(progressUpdate);
 
-        // Update SWR cache immediately with partial data!
-        void mutate(
-          {
-            error: null,
-            repos: progressUpdate.repos,
-            user: progressUpdate.user as null | User,
-          },
-          false, // false = don't revalidate
-        );
-      });
+          // Update SWR cache immediately with partial data!
+          void mutate(
+            {
+              error: null,
+              repos: progressUpdate.repos,
+              user: progressUpdate.user as null | User,
+            },
+            false, // false = don't revalidate
+          );
+        },
+      );
 
       // Cast the result to match GitHubFetcherResult type
       return {
@@ -114,15 +118,12 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
     {
       dedupingInterval: 60000, // 1 minute
       onError: (err: Error) => {
-        console.error("GitHub API error:", err);
+        debug.error("GitHub API error:", err);
         // Clear progress on error
         setProgress(null);
         // If error is authentication related, consider clearing credentials
-        if (
-          err.message.includes("401") ||
-          err.message.includes("auth")
-        ) {
-          console.warn("Authentication error detected, consider logging out");
+        if (err.message.includes("401") || err.message.includes("auth")) {
+          debug.warn("Authentication error detected, consider logging out");
         }
       },
       onSuccess: (data: GitHubFetcherResult) => {
@@ -155,28 +156,28 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
   // Actions with localStorage persistence
   const setLogin = useCallback((newLogin: string) => {
     if (!newLogin || typeof newLogin !== "string") {
-      console.error("Invalid login format");
+      debug.error("Invalid login format");
       return;
     }
 
     setLoginState(newLogin);
     if (typeof window !== "undefined") {
       secureStorage.setItem("login", newLogin).catch((error) => {
-        console.warn("Failed to save login to secure storage:", error);
+        debug.warn("Failed to save login to secure storage:", error);
       });
     }
   }, []);
 
   const setPat = useCallback((newPat: string) => {
     if (!newPat || typeof newPat !== "string") {
-      console.error("Invalid Personal Access Token format");
+      debug.error("Invalid Personal Access Token format");
       return;
     }
 
     setPatState(newPat);
     if (typeof window !== "undefined") {
       secureStorage.setItem("pat", newPat).catch((error) => {
-        console.warn("Failed to save PAT to secure storage:", error);
+        debug.warn("Failed to save PAT to secure storage:", error);
       });
     }
   }, []);
@@ -189,7 +190,7 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
         secureStorage.removeItem("login");
         secureStorage.removeItem("pat");
       } catch (error) {
-        console.warn("Failed to clear secure storage during logout:", error);
+        debug.warn("Failed to clear secure storage during logout:", error);
       }
     }
   }, []);
@@ -202,7 +203,7 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
       lastFetchTimeRef.current = now;
       void mutate();
     } else {
-      console.warn("Rate limiting refetch attempts");
+      debug.warn("Rate limiting refetch attempts");
     }
   }, [mutate]);
 
@@ -210,7 +211,7 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
   // Use useEffect for logging to avoid excessive console output
   useEffect(() => {
     if (IS_DEV) {
-      console.debug("GitHub Provider state updated:", {
+      debug.log("GitHub Provider state updated:", {
         hasLogin: !!login,
         hasPartialData,
         hasRepos: repos?.length ?? 0,
