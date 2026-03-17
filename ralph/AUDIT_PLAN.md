@@ -130,7 +130,7 @@ Migrate all raw `console.*` calls to the `debug` utility and add lint rules to p
   - Impact: Violates `security.md` ("Do NOT add console.log in production — use `debug` utility"). Line 36 logs the raw decryption error object; line 95 logs the encryption error. In production these appear in DevTools for any observer.
   - Fix: Replace all `console.*` with `debug.warn()` / `debug.error()` from `@/utils/debug`
 
-- [ ] **[BUG-045] severity:low** — `console.warn` on error fires in production (line 29)
+- [x] **[BUG-045] severity:low** — `console.warn` on error fires in production (line 29)
 
   - File: `src/utils/analytics.ts:29`
   - Impact: Users with ad blockers (who block Fathom) will see "Failed to track event:" warnings in the browser console on every tracked action. Violates project rule: "Do NOT add console.log in production — use `debug` utility". Fathom is frequently blocked, so this fires often for real users.
