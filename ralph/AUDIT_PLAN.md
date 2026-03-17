@@ -112,7 +112,7 @@ Remove dead code before fixing anything — reduces surface area for all subsequ
 
 Migrate all raw `console.*` calls to the `debug` utility and add lint rules to prevent regressions.
 
-- [ ] **[BUG-004] severity:low** — 14 raw `console.error/warn/log` calls instead of the `debug` utility
+- [x] **[BUG-004] severity:low** — 14 raw `console.error/warn/log` calls instead of the `debug` utility
 
   - File: `src/utils/github-api.ts` lines 249, 256, 307, 314, 321, 372, 398, 454, 461, 499, 506, 512, 601, 657, 703, 706
   - Impact: In production, error details (including potential API response snippets) leak to browser DevTools; violates `security.md` ("Do NOT add console.log in production — use `debug` utility"). Line 706 specifically logs a raw `GraphqlResponseError.message`.
