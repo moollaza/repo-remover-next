@@ -22,6 +22,7 @@
     "**/*.spec.tsx"
   ],
   "rules": {
+    "no-console": "warn",
     "perfectionist/sort-imports": [
       "error",
       {

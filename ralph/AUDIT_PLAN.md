@@ -141,7 +141,7 @@ Migrate all raw `console.*` calls to the `debug` utility and add lint rules to p
   - File: `src/components/error-boundary.tsx:45`
   - Inconsistent with the project's `debug` utility pattern. Using `debug.error()` would be more coherent, though functionally equivalent since both are dev-only here.
 
-- [ ] **[SIMP-035] severity:medium** — No `no-console` rule — the project convention to use `debug.*` instead of `console.*` is never enforced automatically
+- [x] **[SIMP-035] severity:medium** — No `no-console` rule — the project convention to use `debug.*` instead of `console.*` is never enforced automatically
 
   - File: `.eslintrc.json:28` (`"rules": {}`)
   - The project's own CLAUDE.md rule ("Do NOT add console.log in production — use `debug` utility") is unenforced by lint. BUG-004, BUG-008, BUG-019, BUG-042, BUG-045, SIMP-020 were all `console.*` violations found by manual audit — none would have been flagged by ESLint. Future contributors can add raw console calls without any automated check.
