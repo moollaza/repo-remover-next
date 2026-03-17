@@ -79,7 +79,7 @@ Remove dead code before fixing anything — reduces surface area for all subsequ
   - File: `src/components/repo-table/repo-table.tsx:96-101`
   - Detail: `useCallback(() => { setPerPage(keys); }, [setPerPage])` adds a function allocation for zero benefit — `setPerPage` is already a stable reference from a `useCallback` inside `useRepoPagination`. Remove the wrapper and pass `setPerPage` directly as `onPerPageChange`.
 
-- [ ] **[SIMP-022] severity:low** — `http.get('/users/:username')` handler appears to be dead code
+- [x] **[SIMP-022] severity:low** — `http.get('/users/:username')` handler appears to be dead code
 
   - File: `src/mocks/handlers.ts:87-93`
   - No production code calls `GET /api.github.com/users/:username` directly; `getCurrentUser` uses GraphQL and `GET /user` serves the auth flow. This handler adds noise to the mock surface and could mask unexpected requests that should trigger `onUnhandledRequest: "error"`.
