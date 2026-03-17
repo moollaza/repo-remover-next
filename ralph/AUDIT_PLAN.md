@@ -158,7 +158,7 @@ Migrate all raw `console.*` calls to the `debug` utility and add lint rules to p
 
 Fix mock/fixture issues that would block reliable test writing in later phases.
 
-- [ ] **[TEST-065] severity:high** — No error scenario handlers — rate limit, scope, server error, network failure not mockable
+- [x] **[TEST-065] severity:high** — No error scenario handlers — rate limit, scope, server error, network failure not mockable
 
   - File: `src/mocks/handlers.ts`
   - What to test: Tests need `server.use()` overrides for: 401 (bad token), 403 with scope error body, 429 rate-limit (with `Retry-After` header), 500 server error, network-level failure (MSW passthrough/network error). Without these, the error handling paths in `github-api.ts`, `github-utils.ts`, and `github-data-provider.tsx` are completely untested.

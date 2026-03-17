@@ -7,6 +7,109 @@ import {
   MOCK_USER,
 } from "@/mocks/static-fixtures";
 
+// --- Error scenario handler factories ---
+// Use these with server.use() in individual tests to override default handlers.
+
+/** Returns a GraphQL handler that responds with a 403 insufficient scopes error */
+export function graphqlForbiddenHandler(
+  message = "Your token has not been granted the required scopes to execute this query.",
+) {
+  return http.post("https://api.github.com/graphql", () => {
+    return HttpResponse.json(
+      {
+        data: null,
+        errors: [{ message, type: "INSUFFICIENT_SCOPES" }],
+      },
+      { status: 200 },
+    );
+  });
+}
+
+/** Returns a GraphQL handler that simulates a network failure */
+export function graphqlNetworkErrorHandler() {
+  return http.post("https://api.github.com/graphql", () => {
+    return HttpResponse.error();
+  });
+}
+
+/** Returns a GraphQL handler that responds with a 429 rate limit error */
+export function graphqlRateLimitHandler(retryAfter = "60") {
+  return http.post("https://api.github.com/graphql", () => {
+    return HttpResponse.json(
+      { message: "API rate limit exceeded" },
+      {
+        headers: { "Retry-After": retryAfter },
+        status: 429,
+      },
+    );
+  });
+}
+
+/** Returns a GraphQL handler that responds with a 500 server error */
+export function graphqlServerErrorHandler() {
+  return http.post("https://api.github.com/graphql", () => {
+    return HttpResponse.json(
+      { message: "Internal Server Error" },
+      { status: 500 },
+    );
+  });
+}
+
+/** Returns a GraphQL handler that responds with a 401 Bad credentials error */
+export function graphqlUnauthorizedHandler() {
+  return http.post("https://api.github.com/graphql", () => {
+    return HttpResponse.json({ message: "Bad credentials" }, { status: 401 });
+  });
+}
+
+/** Returns a REST handler that responds with a 403 for repo operations */
+export function restForbiddenHandler() {
+  return [
+    http.patch("https://api.github.com/repos/:owner/:repo", () => {
+      return HttpResponse.json(
+        { message: "Must have admin rights to Repository." },
+        { status: 403 },
+      );
+    }),
+    http.delete("https://api.github.com/repos/:owner/:repo", () => {
+      return HttpResponse.json(
+        { message: "Must have admin rights to Repository." },
+        { status: 403 },
+      );
+    }),
+  ];
+}
+
+/** Returns REST handlers that simulate a 500 server error for repo operations */
+export function restServerErrorHandler() {
+  return [
+    http.patch("https://api.github.com/repos/:owner/:repo", () => {
+      return HttpResponse.json(
+        { message: "Internal Server Error" },
+        { status: 500 },
+      );
+    }),
+    http.delete("https://api.github.com/repos/:owner/:repo", () => {
+      return HttpResponse.json(
+        { message: "Internal Server Error" },
+        { status: 500 },
+      );
+    }),
+  ];
+}
+
+/** Returns a REST handler that responds with a 401 for repo operations (PATCH/DELETE) */
+export function restUnauthorizedHandler() {
+  return [
+    http.patch("https://api.github.com/repos/:owner/:repo", () => {
+      return HttpResponse.json({ message: "Bad credentials" }, { status: 401 });
+    }),
+    http.delete("https://api.github.com/repos/:owner/:repo", () => {
+      return HttpResponse.json({ message: "Bad credentials" }, { status: 401 });
+    }),
+  ];
+}
+
 export const handlers = [
   // Handle GraphQL requests - User repositories
   http.post("https://api.github.com/graphql", async ({ request }) => {
