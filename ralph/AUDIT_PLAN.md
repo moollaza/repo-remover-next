@@ -124,7 +124,7 @@ Migrate all raw `console.*` calls to the `debug` utility and add lint rules to p
   - Impact: Violates `security.md` ("Do NOT add console.log in production — use `debug` utility"). Line 120 (`console.error("GitHub API error:", err)`) is the most dangerous — SWR errors can include response bodies that may contain token fragments in error messages.
   - Fix: Replace all `console.*` calls with `debug.log()` / `debug.warn()` / `debug.error()` from `@/utils/debug`
 
-- [ ] **[BUG-019] severity:low** — 5 raw `console.*` calls instead of the `debug` utility
+- [x] **[BUG-019] severity:low** — 5 raw `console.*` calls instead of the `debug` utility
 
   - File: `src/utils/secure-storage.ts:36, 95, 158, 182, 193`
   - Impact: Violates `security.md` ("Do NOT add console.log in production — use `debug` utility"). Line 36 logs the raw decryption error object; line 95 logs the encryption error. In production these appear in DevTools for any observer.
