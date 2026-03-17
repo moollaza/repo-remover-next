@@ -1,0 +1,83 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git checkout:*)",
+      "WebSearch",
+      "Bash(npm run test:unit:*)",
+      "Bash(npm run build-storybook:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git reset:*)",
+      "Bash(git cherry-pick:*)",
+      "Bash(npm run test:e2e:*)",
+      "Bash(git push:*)",
+      "Bash(git pull:*)",
+      "Bash(npm run lint)",
+      "Bash(npm run lint:*)",
+      "WebFetch(domain:heroui.com)",
+      "Bash(npm run test:e2e:fast:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(gh pr:*)",
+      "Bash(gh run list:*)",
+      "Bash(gh run view:*)",
+      "Bash(node:*)",
+      "Bash(npm:*)",
+      "Bash(gh api:*)",
+      "Bash(npx playwright test:*)",
+      "Bash(claude mcp add:*)",
+      "Bash(claude mcp:*)",
+      "Bash(gh run download:*)",
+      "Read(//var/folders/tl/y3m7v5fn3fv_gbfrt_3k2rz00000gn/T/TemporaryItems/NSIRD_screencaptureui_pAjRKY/**)",
+      "WebFetch(domain:storybook.js.org)",
+      "mcp__playwright-mcp-server__playwright_navigate",
+      "Bash(npx playwright install:*)",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_click",
+      "mcp__playwright__browser_snapshot",
+      "mcp__playwright__browser_take_screenshot",
+      "Bash(lsof:*)",
+      "Bash(xargs kill:*)",
+      "mcp__playwright__browser_close",
+      "mcp__playwright__browser_console_messages",
+      "mcp__playwright__browser_wait_for",
+      "Bash(tree:*)",
+      "Bash(while read file)",
+      "Bash(do basename=\"$file%.tsx\")",
+      "Bash(test_file=\"$file%.tsx.test.tsx\")",
+      "Bash(story_file=\"$file%.tsx.stories.tsx\")",
+      "Bash(if [ ! -f \"$test_file\" ])",
+      "Bash([ ! -f \"$story_file\" ])",
+      "Bash(then echo \"$file\")",
+      "Bash(fi)",
+      "Bash(done)",
+      "Bash(grep:*)",
+      "Bash(find:*)",
+      "WebFetch(domain:testing-library.com)",
+      "WebFetch(domain:docs.github.com)",
+      "Bash(npx tsc:*)",
+      "Bash(cat:*)",
+      "Bash(curl:*)",
+      "Bash(for file in docs/*.md)",
+      "Bash(head:*)",
+      "Bash(do echo \"=== $file ===\")",
+      "Bash(npx playwright:*)",
+      "Read(//Users/zaahirmoolla/Library/Caches/ms-playwright/**)",
+      "Bash(git restore:*)"
+    ],
+    "deny": [],
+    "ask": []
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if echo \"$INPUT\" | grep -qE '\"command\"\\s*:\\s*\"[^\"]*\\b(bun (install|i |ci|run|exec|test|start|add|remove|x )|bunx |pnpm (install|run|add|exec|test|start|i )|pnpx |yarn (install|add|run|start))'; then echo 'Use npm, not bun/pnpm/yarn. This project uses npm as its package manager.' >&2; exit 2; fi"
+          }
+        ]
+      }
+    ]
+  }
+}

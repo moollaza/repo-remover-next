@@ -28,6 +28,11 @@ npm run test:all         # unit + E2E
 
 Run `npm run lint && npm run test:unit && npm run build` before every commit.
 
+## Known Issues
+
+- `@vercel/og` only works with Next.js — use satori for OG image generation on Vite/CF Workers
+- Lock file (`package-lock.json`) must be committed for CF Workers builds
+
 ## Workflow
 
 Uses superpowers workflow. For cross-project standards, see ~/projects/project-hub/standards/.
