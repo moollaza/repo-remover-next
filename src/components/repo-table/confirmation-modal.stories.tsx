@@ -14,7 +14,6 @@ const meta: Meta<typeof ConfirmationModal> = {
     isOpen: true,
     login: "testuser",
     onClose: fn(),
-    onConfirm: fn(),
     repos: fewRepos,
   },
   component: ConfirmationModal,
@@ -36,4 +35,3 @@ export const Delete: Story = {
 
 // Visual states for progress and result modals can be added later if needed
 // These complex interaction flows are fully covered by Playwright E2E tests
-

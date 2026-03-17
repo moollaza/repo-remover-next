@@ -17,7 +17,6 @@ const mockProps = {
   isOpen: true,
   login: "testuser",
   onClose: vi.fn(),
-  onConfirm: vi.fn(),
   repos: mockRepos,
 };
 

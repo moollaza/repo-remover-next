@@ -22,7 +22,6 @@ interface ConfirmationModalProps {
   isOpen: boolean;
   login: string;
   onClose: () => void;
-  onConfirm: () => void;
   repos: Repository[];
 }
 
@@ -83,7 +82,6 @@ export default function ConfirmationModal({
   isOpen,
   login,
   onClose,
-  onConfirm,
   repos,
 }: ConfirmationModalProps) {
   const count = repos.length;
@@ -161,11 +159,6 @@ export default function ConfirmationModal({
 
     // Now complete the processing
     dispatch({ type: "COMPLETE_PROCESSING" });
-
-    // Call the onConfirm callback after state is updated and with a slight delay
-    setTimeout(() => {
-      onConfirm();
-    }, 100);
   }
 
   function resetState() {

@@ -148,10 +148,6 @@ export default function RepoTable({
     );
   }, [paginatedRepos, isRepoDisabled]);
 
-  const handleConfirm = useCallback(() => {
-    // TODO: Record # of repos deleted/archived?
-  }, []);
-
   return (
     <div className="space-y-4" data-testid="repo-table-container">
       <RepoFilters
@@ -203,105 +199,112 @@ export default function RepoTable({
           selectionMode="multiple"
           sortDescriptor={sortDescriptor}
         >
-        <TableHeader columns={[...COLUMN_ORDER]}>
-          {(column) => (
-            <TableColumn
-              allowsSorting
-              className={column.className}
-              key={column.key}
-            >
-              {column.label}
-            </TableColumn>
-          )}
-        </TableHeader>
+          <TableHeader columns={[...COLUMN_ORDER]}>
+            {(column) => (
+              <TableColumn
+                allowsSorting
+                className={column.className}
+                key={column.key}
+              >
+                {column.label}
+              </TableColumn>
+            )}
+          </TableHeader>
 
-        {/* TABLE BODY */}
-        <TableBody
-          emptyContent={"No repos to display."}
-          isLoading={false}
-          items={paginatedRepos}
-          loadingContent={<Spinner label="Loading..." />}
-        >
-          {(repo) => (
-            <TableRow
-              className={isRepoDisabled(repo) ? "pointer-events-none opacity-50" : ""}
-              data-testid="repo-row"
-              key={repo.id}
-            >
-              <TableCell>
-                <div data-testid="repo-details">
-                  <div className="mb-1.5" data-testid="repo-name">
-                    <Link
-                      className="font-medium text-base"
-                      href={repo.url as string}
-                      isExternal
-                    >
-                      {repo.name}
-                    </Link>
-                  </div>
-                  <div className="flex gap-2 mb-2" data-testid="repo-tags">
-                    {repo.isPrivate && (
-                      <Chip radius="sm" size="sm" variant="bordered">
-                        Private
-                      </Chip>
-                    )}
-                    {repo.isInOrganization && (
-                      <Chip radius="sm" size="sm" variant="bordered">
-                        Organization
-                      </Chip>
-                    )}
-                    {repo.isFork && (
-                      <Chip radius="sm" size="sm" variant="bordered">
-                        Fork
-                      </Chip>
-                    )}
-                    {repo.isArchived && (
-                      <Chip color="warning" radius="sm" size="sm" variant="bordered">
-                        Archived
-                      </Chip>
-                    )}
-                  </div>
-
-                  {repo.owner.login !== login && (
-                    <div
-                      className="mb-1 text-default-500 text-sm"
-                      data-testid="repo-owner"
-                    >
-                      Owned by{" "}
+          {/* TABLE BODY */}
+          <TableBody
+            emptyContent={"No repos to display."}
+            isLoading={false}
+            items={paginatedRepos}
+            loadingContent={<Spinner label="Loading..." />}
+          >
+            {(repo) => (
+              <TableRow
+                className={
+                  isRepoDisabled(repo) ? "pointer-events-none opacity-50" : ""
+                }
+                data-testid="repo-row"
+                key={repo.id}
+              >
+                <TableCell>
+                  <div data-testid="repo-details">
+                    <div className="mb-1.5" data-testid="repo-name">
                       <Link
-                        className="text-sm"
-                        href={repo.owner.url as string}
+                        className="font-medium text-base"
+                        href={repo.url as string}
                         isExternal
                       >
-                        {repo.owner.login}
+                        {repo.name}
                       </Link>
                     </div>
-                  )}
+                    <div className="flex gap-2 mb-2" data-testid="repo-tags">
+                      {repo.isPrivate && (
+                        <Chip radius="sm" size="sm" variant="bordered">
+                          Private
+                        </Chip>
+                      )}
+                      {repo.isInOrganization && (
+                        <Chip radius="sm" size="sm" variant="bordered">
+                          Organization
+                        </Chip>
+                      )}
+                      {repo.isFork && (
+                        <Chip radius="sm" size="sm" variant="bordered">
+                          Fork
+                        </Chip>
+                      )}
+                      {repo.isArchived && (
+                        <Chip
+                          color="warning"
+                          radius="sm"
+                          size="sm"
+                          variant="bordered"
+                        >
+                          Archived
+                        </Chip>
+                      )}
+                    </div>
 
-                  <div className="text-sm" data-testid="repo-description">
-                    {repo.description ?? <i>No description</i>}
+                    {repo.owner.login !== login && (
+                      <div
+                        className="mb-1 text-default-500 text-sm"
+                        data-testid="repo-owner"
+                      >
+                        Owned by{" "}
+                        <Link
+                          className="text-sm"
+                          href={repo.owner.url as string}
+                          isExternal
+                        >
+                          {repo.owner.login}
+                        </Link>
+                      </div>
+                    )}
+
+                    <div className="text-sm" data-testid="repo-description">
+                      {repo.description ?? <i>No description</i>}
+                    </div>
                   </div>
-                </div>
-              </TableCell>
-              <TableCell>
-                <span
-                  data-testid="repo-updated-at"
-                  title={new Date(repo.updatedAt as string).toLocaleString(
-                    navigator.language,
-                    {
-                      day: "numeric",
-                      month: "short",
-                      year: "numeric",
-                    },
-                  )}
-                >
-                  {formatDistanceToNow(new Date(repo.updatedAt as string))}
-                </span>
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+                </TableCell>
+                <TableCell>
+                  <span
+                    data-testid="repo-updated-at"
+                    title={new Date(repo.updatedAt as string).toLocaleString(
+                      navigator.language,
+                      {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      },
+                    )}
+                  >
+                    {formatDistanceToNow(new Date(repo.updatedAt as string))}
+                  </span>
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
       </div>
 
       {/* PAGINATION - Outside table border */}
@@ -326,7 +329,6 @@ export default function RepoTable({
           isOpen={isOpen}
           login={login}
           onClose={onClose}
-          onConfirm={handleConfirm}
           repos={selectedRepos}
         />
       )}
