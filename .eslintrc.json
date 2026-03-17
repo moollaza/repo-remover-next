@@ -10,17 +10,7 @@
   "parserOptions": {
     "project": "./tsconfig.app.json"
   },
-  "ignorePatterns": [
-    "node_modules/",
-    "dist/",
-    ".vscode/",
-    "out/",
-    "e2e/",
-    "**/*.test.ts",
-    "**/*.test.tsx",
-    "**/*.spec.ts",
-    "**/*.spec.tsx"
-  ],
+  "ignorePatterns": ["node_modules/", "dist/", ".vscode/", "out/", "e2e/"],
   "rules": {
     "no-console": "warn",
     "perfectionist/sort-imports": [
@@ -43,14 +33,19 @@
       "files": [
         "**/*.test.ts",
         "**/*.test.tsx",
+        "**/*.spec.ts",
+        "**/*.spec.tsx",
         "**/__tests__/**/*.ts",
         "**/__tests__/**/*.tsx"
       ],
-
+      "parserOptions": {
+        "project": "./tsconfig.test.json"
+      },
       "rules": {
         "@typescript-eslint/no-unsafe-assignment": "off",
         "@typescript-eslint/no-unsafe-member-access": "off",
-        "@typescript-eslint/no-unsafe-call": "off"
+        "@typescript-eslint/no-unsafe-call": "off",
+        "no-console": "off"
       }
     }
   ]

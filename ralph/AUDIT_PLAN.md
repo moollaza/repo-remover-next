@@ -147,7 +147,7 @@ Migrate all raw `console.*` calls to the `debug` utility and add lint rules to p
   - The project's own CLAUDE.md rule ("Do NOT add console.log in production — use `debug` utility") is unenforced by lint. BUG-004, BUG-008, BUG-019, BUG-042, BUG-045, SIMP-020 were all `console.*` violations found by manual audit — none would have been flagged by ESLint. Future contributors can add raw console calls without any automated check.
   - Fix: Add `"no-console": "warn"` to `"rules"` (allowing E2E and test files to continue using console via the existing `overrides` pattern).
 
-- [ ] **[SIMP-034] severity:medium** — All test files are in `ignorePatterns`, making the `overrides` block for test files dead code and leaving test files completely unlinted
+- [x] **[SIMP-034] severity:medium** — All test files are in `ignorePatterns`, making the `overrides` block for test files dead code and leaving test files completely unlinted
   - File: `.eslintrc.json:12-27` (ignorePatterns) vs `:29-44` (overrides)
   - ESLint v8 `ignorePatterns` excludes files from processing entirely, before `overrides` is evaluated. `**/*.test.ts`, `**/*.test.tsx`, `**/*.spec.ts`, `**/*.spec.tsx`, and `e2e/` are all in `ignorePatterns`, so the `overrides` block that disables `@typescript-eslint/no-unsafe-*` for test files is dead code — those files never reach the override stage. More practically, test files receive zero linting: unused imports, unsafe casts, and type errors in test code go unchecked.
   - Fix: Remove test file patterns from `ignorePatterns` and keep them only in the `overrides` section (with the unsafe rules turned off). The E2E folder can stay ignored since Playwright tests use a different tsconfig.

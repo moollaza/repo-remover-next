@@ -1,8 +1,8 @@
 import { type Repository } from "@octokit/graphql-schema";
-import { render, screen } from "@/utils/test-utils";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
 import { createMockRepo } from "@/mocks/static-fixtures";
+import { render, screen } from "@/utils/test-utils";
 
 import RepoTable from "./repo-table";
 

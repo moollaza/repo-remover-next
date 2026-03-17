@@ -1,4 +1,3 @@
-import { render, screen } from "@/utils/test-utils";
 import userEvent from "@testing-library/user-event";
 import { vi } from "vitest";
 
@@ -8,6 +7,7 @@ import RepoFilters, {
   REPO_TYPES,
   type SelectionSet,
 } from "@/components/repo-table/repo-filters";
+import { render, screen } from "@/utils/test-utils";
 
 // Mock the heroicons
 vi.mock("@heroicons/react/16/solid", () => ({

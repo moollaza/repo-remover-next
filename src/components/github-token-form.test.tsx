@@ -1,6 +1,7 @@
-import { render, screen, waitFor } from "@/utils/test-utils";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, test, vi } from "vitest";
+
+import { render, screen, waitFor } from "@/utils/test-utils";
 
 import GitHubTokenForm from "./github-token-form";
 

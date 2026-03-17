@@ -1,8 +1,8 @@
-import { render, screen } from "@/utils/test-utils";
 import userEvent from "@testing-library/user-event";
 import { vi } from "vitest";
 
 import { MOCK_REPOS, MOCK_USER } from "@/mocks/static-fixtures";
+import { render, screen } from "@/utils/test-utils";
 
 import Dashboard, { type DashboardProps } from "./dashboard";
 

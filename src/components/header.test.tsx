@@ -6,7 +6,13 @@ vi.mock("react-router-dom", async () => {
   const actual = await vi.importActual("react-router-dom");
   return {
     ...actual,
-    useLocation: vi.fn(() => ({ pathname: "/", search: "", hash: "", state: null, key: "default" })),
+    useLocation: vi.fn(() => ({
+      hash: "",
+      key: "default",
+      pathname: "/",
+      search: "",
+      state: null,
+    })),
     useNavigate: vi.fn(() => vi.fn()),
   };
 });
