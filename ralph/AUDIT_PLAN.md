@@ -74,7 +74,7 @@ Remove dead code before fixing anything — reduces surface area for all subsequ
   - File: `src/components/repo-table/repo-table.tsx:120-122`
   - Detail: The `TODO` comment has been there since the component was extracted. The actual confirmation logic lives inside `useConfirmationModal` (within `ConfirmationModal`). The `onConfirm` prop passed to `ConfirmationModal` is never called back into `RepoTable`. Remove the callback and check whether `ConfirmationModal`'s `onConfirm` prop is wired up at all; if so, rename it to clarify its purpose.
 
-- [ ] **[SIMP-012] severity:low** — `handlePerPageChange` is a trivial passthrough wrapper
+- [x] **[SIMP-012] severity:low** — `handlePerPageChange` is a trivial passthrough wrapper
 
   - File: `src/components/repo-table/repo-table.tsx:96-101`
   - Detail: `useCallback(() => { setPerPage(keys); }, [setPerPage])` adds a function allocation for zero benefit — `setPerPage` is already a stable reference from a `useCallback` inside `useRepoPagination`. Remove the wrapper and pass `setPerPage` directly as `onPerPageChange`.

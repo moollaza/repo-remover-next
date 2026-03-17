@@ -107,13 +107,6 @@ export default function RepoTable({
     [setTypeFilters, resetPage],
   );
 
-  const handlePerPageChange = useCallback(
-    (keys: Selection) => {
-      setPerPage(keys);
-    },
-    [setPerPage],
-  );
-
   const handleRepoActionClick = () => {
     if (selectedRepoAction.has("delete")) {
       debug.log("Deleting selected repos:", Array.from(selectedRepoKeys));
@@ -151,7 +144,7 @@ export default function RepoTable({
   return (
     <div className="space-y-4" data-testid="repo-table-container">
       <RepoFilters
-        onPerPageChange={handlePerPageChange}
+        onPerPageChange={setPerPage}
         onRepoActionChange={handleRepoActionChange}
         onRepoActionClick={handleRepoActionClick}
         onRepoTypesFilterChange={handleRepoTypesFilterChange}
