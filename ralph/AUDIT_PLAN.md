@@ -136,7 +136,7 @@ Migrate all raw `console.*` calls to the `debug` utility and add lint rules to p
   - Impact: Users with ad blockers (who block Fathom) will see "Failed to track event:" warnings in the browser console on every tracked action. Violates project rule: "Do NOT add console.log in production — use `debug` utility". Fathom is frequently blocked, so this fires often for real users.
   - Fix: Replace `console.warn('Failed to track event:', error)` with `debug.warn('Failed to track event:', error)` so it's suppressed in production
 
-- [ ] **[SIMP-020] severity:low** — Raw `console.error` in `componentDidCatch` dev block instead of `debug.error()`
+- [x] **[SIMP-020] severity:low** — Raw `console.error` in `componentDidCatch` dev block instead of `debug.error()`
 
   - File: `src/components/error-boundary.tsx:45`
   - Inconsistent with the project's `debug` utility pattern. Using `debug.error()` would be more coherent, though functionally equivalent since both are dev-only here.
