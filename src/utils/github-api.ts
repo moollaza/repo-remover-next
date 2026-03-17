@@ -194,6 +194,7 @@ export interface UserRepositoriesResponse {
 
 interface FetchResult {
   error: Error | null;
+  permissionWarning?: string;
   repos: null | Repository[];
   user: null | User;
 }
