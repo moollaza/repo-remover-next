@@ -246,11 +246,11 @@ Critical bugs that affect security, correctness, or data integrity.
   - Impact: The comment says "Required scopes: 'repo' (for repository management)". On GitHub classic PATs, `repo` grants read/write repository access but does NOT include the `delete_repo` scope — that is a separate, explicitly opt-in scope. Users who follow the documentation and create a token with only `repo` scope will receive `403 Forbidden` errors when attempting to delete repositories (the app's primary function). The failure is silent from the token setup perspective — the app authenticates successfully but deletion fails with a permissions error.
   - Fix: Update the comment to: `# Required scopes: 'repo' (for read/write + archive) and 'delete_repo' (for deleting repositories)`
 
-- [ ] **[BUG-068] severity:medium** — `event.breadcrumbs.forEach(...)` in `beforeSend` may fail at runtime — Sentry's `Event.breadcrumbs` type is `Breadcrumbs | undefined` where `Breadcrumbs = { values?: Breadcrumb[] }`, not `Breadcrumb[]`
+- [x] **[BUG-068] severity:medium** — `event.breadcrumbs.forEach(...)` in `beforeSend` may fail at runtime — Sentry's `Event.breadcrumbs` type is `Breadcrumbs | undefined` where `Breadcrumbs = { values?: Breadcrumb[] }`, not `Breadcrumb[]`
 
   - File: `src/main.tsx:44`
   - Impact: If `Breadcrumbs` is still an object (not an array) in Sentry v10, calling `.forEach()` on it throws `TypeError: event.breadcrumbs.forEach is not a function`. Sentry's SDK catches throws inside `beforeSend` and returns `null`, **dropping the event entirely**. Any Sentry event that has breadcrumbs (virtually all of them in practice) would be silently discarded — no error reporting. Additionally, the breadcrumb sanitization never runs, so token-containing breadcrumb messages could be sent to Sentry if the event is somehow not dropped. Verify against `@sentry/react@10.43.0` node_modules; if `Breadcrumbs` is still an object, the fix is `event.breadcrumbs.values?.forEach(...)`.
-  - Fix: Change `event.breadcrumbs.forEach(...)` -> `event.breadcrumbs.values?.forEach(...)`
+  - **VERIFIED**: `@sentry/core` types show `breadcrumbs?: Breadcrumb[]` (array, not object). The `.forEach()` call is correct as-is. No fix needed.
 
 - [ ] **[BUG-043] severity:medium** — `sanitize()` has no circular-reference guard — will stack overflow on circular objects
   - File: `src/utils/debug.ts:100-120`
