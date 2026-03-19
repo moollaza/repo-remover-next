@@ -164,7 +164,7 @@ Fix mock/fixture issues that would block reliable test writing in later phases.
   - What to test: Tests need `server.use()` overrides for: 401 (bad token), 403 with scope error body, 429 rate-limit (with `Retry-After` header), 500 server error, network-level failure (MSW passthrough/network error). Without these, the error handling paths in `github-api.ts`, `github-utils.ts`, and `github-data-provider.tsx` are completely untested.
   - Test type: unit (via `server.use()` in individual tests)
 
-- [ ] **[TEST-066] severity:high** — Pagination never exercised — `hasNextPage: true` scenario has no handler
+- [x] **[TEST-066] severity:high** — Pagination never exercised — `hasNextPage: true` scenario has no handler
 
   - File: `src/mocks/handlers.ts:21-33`
   - What to test: `getRepositories` and `getOrgRepositories` always return `hasNextPage: false`. The pagination loop in `fetchGitHubDataWithProgress` accumulates pages until `hasNextPage` is false — but this second iteration is never tested. A bug where the cursor is not threaded correctly, or the accumulation logic is wrong, would never be caught.
