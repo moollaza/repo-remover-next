@@ -270,7 +270,7 @@ Functional bugs, UX issues, hardcoded colors, and accessibility problems.
   - Fix: Either `await` both calls (make `logout` async or use `.catch()`) or convert to `.catch((err) => debug.warn(...))` pattern used elsewhere in this file (e.g., lines 167-170)
   - **VERIFIED**: `secureStorage.removeItem()` is synchronous (returns `void`, not `Promise`) — it calls `localStorage.removeItem()` directly. The try/catch correctly handles synchronous exceptions. No fix needed.
 
-- [ ] **[BUG-012] severity:medium** — Stale-closure double-submit: confirm button not disabled during `state.confirming`
+- [x] **[BUG-012] severity:medium** — Stale-closure double-submit: confirm button not disabled during `state.confirming`
 
   - File: `src/hooks/use-confirmation-modal.ts:87` / `src/components/repo-table/confirmation-modal.tsx:227`
   - Impact: The guard `if (!octokit || state.confirming) return` reads render-time state. If the user double-clicks the confirm button before React re-renders to unmount it (mode switches to "progress"), both clicks see `state.confirming = false` and spawn two parallel processing loops, archiving/deleting each repo twice.

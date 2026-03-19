@@ -10,7 +10,7 @@ import {
   Spacer,
 } from "@heroui/react";
 import { type Repository } from "@octokit/graphql-schema";
-import { useReducer } from "react";
+import { useReducer, useRef } from "react";
 
 import { useGitHubData } from "@/hooks/use-github-data";
 import { analytics } from "@/utils/analytics";
@@ -46,6 +46,7 @@ interface ModalState {
 
 interface RepoActionConfirmationProps
   extends Pick<ConfirmationModalProps, "action" | "onClose" | "repos"> {
+  confirming: boolean;
   count: number;
   handleConfirm: () => void;
   isCorrectUsername: boolean;
@@ -95,6 +96,9 @@ export default function ConfirmationModal({
   // Use reducer for state management
   const [state, dispatch] = useReducer(modalReducer, initialState);
 
+  // Ref guard prevents double-submit from stale closures (two clicks before re-render)
+  const processingRef = useRef(false);
+
   async function handleConfirm() {
     debug.log("handleConfirm called");
 
@@ -105,10 +109,12 @@ export default function ConfirmationModal({
       return;
     }
 
-    if (state.confirming) {
+    // Synchronous ref check prevents stale-closure double-submit
+    if (processingRef.current) {
       debug.warn("Already processing, ignoring confirmation");
       return;
     }
+    processingRef.current = true;
 
     // Single dispatch to handle the full state transition
     dispatch({ type: "START_PROCESSING" });
@@ -128,13 +134,13 @@ export default function ConfirmationModal({
         await processRepo(octokit, repo, action);
       } catch (error) {
         if (error instanceof Error) {
-          console.error(`Failed to ${action} the repo:`, error);
+          debug.error(`Failed to ${action} the repo:`, error);
           dispatch({
             payload: { error, repository: repo },
             type: "ADD_ERROR",
           });
         } else {
-          console.error("An unknown error occurred");
+          debug.error("An unknown error occurred");
         }
       } finally {
         dispatch({
@@ -162,6 +168,7 @@ export default function ConfirmationModal({
   }
 
   function resetState() {
+    processingRef.current = false;
     dispatch({ type: "RESET" });
   }
 
@@ -214,6 +221,7 @@ export default function ConfirmationModal({
           {state.mode === "confirmation" && (
             <RepoActionConfirmation
               action={action}
+              confirming={state.confirming}
               count={count}
               handleConfirm={() => void handleConfirm()}
               isCorrectUsername={state.isCorrectUsername}
@@ -304,6 +312,7 @@ function modalReducer(state: ModalState, action: ModalAction): ModalState {
 
 function RepoActionConfirmation({
   action,
+  confirming,
   count,
   handleConfirm,
   isCorrectUsername,
@@ -355,7 +364,7 @@ function RepoActionConfirmation({
         <Button
           color={action === "archive" ? "warning" : "danger"}
           data-testid="confirmation-modal-confirm"
-          isDisabled={!isCorrectUsername}
+          isDisabled={!isCorrectUsername || confirming}
           name="confirm"
           onPress={() => {
             void handleConfirm();

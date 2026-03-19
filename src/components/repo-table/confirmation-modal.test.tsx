@@ -7,6 +7,18 @@ import { fireEvent, render, screen } from "@/utils/test-utils";
 
 import ConfirmationModal from "./confirmation-modal";
 
+vi.mock("@/utils/github-utils", async () => {
+  const actual = await vi.importActual("@/utils/github-utils");
+  return {
+    ...actual,
+    createThrottledOctokit: vi.fn(() => ({ request: vi.fn() })),
+    processRepo: vi.fn().mockResolvedValue(undefined),
+  };
+});
+
+// Import after mock setup so we can reference the mocked functions
+const { processRepo } = await import("@/utils/github-utils");
+
 const mockRepos: Repository[] = [
   createMockRepo({ id: "1", name: "repo1" }),
   createMockRepo({ id: "2", name: "repo2" }),
@@ -82,5 +94,56 @@ describe("ConfirmationModal", () => {
     // Enter correct username
     fireEvent.change(usernameInput, { target: { value: "testuser" } });
     expect(confirmButton).not.toBeDisabled();
+  });
+
+  it("transitions to progress mode on confirm and processes each repo exactly once", async () => {
+    vi.mocked(processRepo).mockReset();
+    vi.mocked(processRepo).mockResolvedValue(undefined);
+
+    render(
+      <GitHubContext.Provider value={mockContextValue}>
+        <ConfirmationModal {...mockProps} />
+      </GitHubContext.Provider>,
+    );
+
+    // Type correct username
+    const input = screen.getByTestId("confirmation-modal-input");
+    fireEvent.change(input, { target: { value: "testuser" } });
+
+    // Click confirm — START_PROCESSING dispatch is synchronous before the first await
+    const confirmButton = screen.getByTestId("confirmation-modal-confirm");
+    fireEvent.click(confirmButton);
+
+    // Advance timers to complete processing (1s per repo + 3s minimum)
+    await vi.advanceTimersByTimeAsync(10000);
+
+    // Each repo should be processed exactly once
+    expect(processRepo).toHaveBeenCalledTimes(2);
+  });
+
+  it("prevents double-submit when confirm is clicked rapidly", async () => {
+    vi.mocked(processRepo).mockReset();
+    vi.mocked(processRepo).mockResolvedValue(undefined);
+
+    render(
+      <GitHubContext.Provider value={mockContextValue}>
+        <ConfirmationModal {...mockProps} />
+      </GitHubContext.Provider>,
+    );
+
+    // Type correct username
+    const input = screen.getByTestId("confirmation-modal-input");
+    fireEvent.change(input, { target: { value: "testuser" } });
+
+    // Click confirm button twice rapidly
+    const confirmButton = screen.getByTestId("confirmation-modal-confirm");
+    fireEvent.click(confirmButton);
+    fireEvent.click(confirmButton);
+
+    // Advance timers to complete all processing
+    await vi.advanceTimersByTimeAsync(10000);
+
+    // Should still only process each repo once (2 repos = 2 calls, not 4)
+    expect(processRepo).toHaveBeenCalledTimes(2);
   });
 });
