@@ -193,7 +193,7 @@ Critical bugs that affect security, correctness, or data integrity.
   - Impact: Every time repos load in production, the full repo list (including private repo names, descriptions, and owner logins) is assigned to `window.repos`. Any injected script, browser extension, or XSS payload can read `window.repos` for the entire session. The surrounding `debug.group/table/groupEnd` calls are no-ops in production, but the `window` assignment has no `isDevelopment` guard.
   - Fix: Wrap the `window.repos` assignment inside a dev guard: `if (import.meta.env.DEV) { (window as ...).repos = repos; }`
 
-- [ ] **[BUG-042] severity:high** — `sanitize()` converts `Error` objects to empty `{}`, silently destroying error context
+- [x] **[BUG-042] severity:high** — `sanitize()` converts `Error` objects to empty `{}`, silently destroying error context
 
   - File: `src/utils/debug.ts:104-120`
   - Impact: `Object.entries(new Error("details"))` returns `[]` because Error properties (`message`, `stack`, `name`) are non-enumerable. Any call like `debug.error("oops", new Error("PAT: ghp_xxx"))` logs `{}` instead of the error — the original error is completely lost, making debugging impossible. Worse, this is the path that's supposed to protect against token leaks in errors, so it silently fails at its primary job.

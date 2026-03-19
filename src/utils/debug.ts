@@ -101,6 +101,13 @@ function sanitize(value: unknown): unknown {
     return value.map(sanitize);
   }
 
+  if (value instanceof Error) {
+    return {
+      message: sanitize(value.message) as string,
+      name: value.name,
+    };
+  }
+
   if (value && typeof value === "object") {
     const sanitized: Record<string, unknown> = {};
     for (const [key, val] of Object.entries(value)) {
