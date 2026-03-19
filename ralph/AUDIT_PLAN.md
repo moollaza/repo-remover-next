@@ -435,7 +435,7 @@ Functional bugs, UX issues, hardcoded colors, and accessibility problems.
   - Impact: `getOrgRepositories` handler filters by `isInOrganization`, so `repo-2` appears in org repo results but has `owner.login = "testuser"`. Any code distinguishing org repos by owner login (e.g. `repo.owner.login !== viewer.login`) will behave differently for `repo-2` vs real data, masking filtering bugs.
   - Fix: Either set `isInOrganization: false` on `repo-2` (it's a user repo being archived) or change `ownerType` to `"organization"` and set `owner` accordingly
 
-- [ ] **[BUG-051] severity:low** — `createMockRepo()` shallow-merges `owner` from personal repo base — org overrides get wrong `id` and `url`
+- [x] **[BUG-051] severity:low** — `createMockRepo()` shallow-merges `owner` from personal repo base — org overrides get wrong `id` and `url`
 
   - File: `src/mocks/static-fixtures.ts:161-171`
   - Impact: `createMockRepo({ ownerType: 'organization' })` still produces `owner.id = 'user-123456'` and `owner.url = 'https://github.com/testuser'` because the base is always `MOCK_REPOS[0]` (a personal repo). Tests asserting on `owner.id` or `owner.url` for org repos will produce wrong results silently.

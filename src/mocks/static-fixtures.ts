@@ -198,11 +198,16 @@ export function createMockRepo(
   overrides: Partial<MockRepository> = {},
 ): MockRepository {
   const baseRepo = MOCK_REPOS[0];
+  const isOrgOwned = overrides.ownerType === "organization";
+  const derivedOwner = isOrgOwned
+    ? { id: "org-456789", login: "testorg", url: "https://github.com/testorg" }
+    : baseRepo.owner;
+
   return {
     ...baseRepo,
     ...overrides,
     owner: {
-      ...baseRepo.owner,
+      ...derivedOwner,
       ...overrides.owner,
     },
   } as MockRepository;
