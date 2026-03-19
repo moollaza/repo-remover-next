@@ -294,11 +294,12 @@ Functional bugs, UX issues, hardcoded colors, and accessibility problems.
   - Impact: After a valid token is confirmed (green state), clicking the clear button resets `value` to `""` via `onValueChange("")`. The `useEffect` bails early at `!value`, so `isTokenValid` and `username` are never reset. The description still reads "Token is valid. Welcome X, click submit to continue!" and the submit button remains visually enabled (`!isTokenValid || isValidating` -> `false`). `handleSubmit` guards `!value` so clicking does nothing — but the enabled-looking button causes confusion.
   - Fix: In `handleChange`, reset validation state when the value becomes empty: `if (!newValue) { setIsTokenValid(false); setUsername(null); setLastValidatedToken(null); }`
 
-- [ ] **[BUG-037] severity:medium** — Error and permission-warning alerts use hardcoded Tailwind colors instead of HeroUI semantic colors
+- [x] **[BUG-037] severity:medium** — Error and permission-warning alerts use hardcoded Tailwind colors instead of HeroUI semantic colors
 
   - File: `src/components/dashboard.tsx:92-97` (error alert), `:99-119` (warning alert)
   - Impact: Alert backgrounds/borders are hardcoded (`bg-red-50`, `dark:bg-red-900/20`, `text-red-700`, `bg-amber-50`, `text-amber-700`, etc.) and will not adapt if the HeroUI theme is changed. Same class of issue as BUG-028 in `confirmation-modal.tsx`. The `border-divider` class is correctly used on the refresh button but inconsistently skipped on the alerts.
   - Fix: Use HeroUI semantic classes (`bg-danger-50 text-danger border-danger-200` / `bg-warning-50 text-warning border-warning-200`) or add them as CSS variables in the theme config
+  - **VERIFIED**: Already fixed — dashboard.tsx uses HeroUI `<Alert>` component with semantic `color="danger"` and `color="warning"` props. No hardcoded Tailwind colors exist.
 
 - [ ] **[BUG-039] severity:low** — `handleLogout` in `Header` duplicates auth cleanup outside the context
 
