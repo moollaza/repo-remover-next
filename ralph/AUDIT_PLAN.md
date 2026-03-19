@@ -515,17 +515,15 @@ Functional bugs, UX issues, hardcoded colors, and accessibility problems.
   - Impact: The pageview `useEffect` runs on every route change regardless of whether `Fathom.load()` was called (i.e., regardless of whether `VITE_FATHOM_SITE_ID` is set). Calling `Fathom.trackPageview()` before `Fathom.load()` queues the event in the fathom-client buffer but it is never flushed — pageviews are silently lost on the initial route. On subsequent navigations after `load()` completes, tracking resumes. The initial pageview is reliably missed.
   - Fix: Gate the pageview effect on whether `siteId` is set, or use a ref to track initialization state: `if (!initializedRef.current) return;` before calling `trackPageview`.
 
-- [ ] **[BUG-066] severity:low** — `text-muted-foreground` CSS variable undefined — chevron icon inherits full-contrast parent color instead of being muted
+- [x] **[BUG-066] severity:low** — `text-muted-foreground` CSS variable undefined — chevron icon inherits full-contrast parent color instead of being muted
 
   - File: `src/components/ui/accordion.tsx:36`
-  - Impact: `**:data-[slot=accordion-trigger-icon]:text-muted-foreground` applied to the chevron icons references `--color-muted-foreground` (Tailwind v4) / `--muted-foreground` (shadcn), neither of which is defined in `globals.css` or by HeroUI. The chevron renders at full text contrast rather than grayed-out, making it harder to visually distinguish from the label text.
-  - Fix: Replace `text-muted-foreground` with `text-default-400` (HeroUI semantic muted gray)
+  - **MOOT**: File was deleted in commit df37785 (revert of deps update). No accordion component exists in src/. No fix needed.
 
-- [ ] **[BUG-074] severity:low** — `theme.spec.ts` `beforeEach` navigates to `/dashboard` without auth mocks — first three tests pass only because the unauthenticated redirect lands on home (which also has a theme switcher)
+- [x] **[BUG-074] severity:low** — `theme.spec.ts` `beforeEach` navigates to `/dashboard` without auth mocks — first three tests pass only because the unauthenticated redirect lands on home (which also has a theme switcher)
 
   - File: `e2e/theme.spec.ts:10-16`
-  - Impact: The `beforeEach` calls `page.goto("/dashboard")` with no `mockLocalStorage`/`mockOctokitInit`. If the app's unauthenticated redirect behavior changes (e.g., redirects to `/login` or shows an error page instead of `/`), the first three tests ("theme switcher displays proper icons", "can switch between themes", "persistence") will break in an opaque way. Tests for these scenarios already exist in `theme-basic.spec.ts` against `/`, making these implicitly-routed dashboard tests redundant and fragile.
-  - Fix: Either add `await mockLocalStorage(page); await mockOctokitInit(page);` to the `beforeEach`, or remove the three duplicate tests and rely on `theme-basic.spec.ts` (which explicitly uses `/`).
+  - Fix applied: Removed the three duplicate tests (switcher icons, toggle, persistence) and the unauthenticated `beforeEach` — these are already covered by `theme-basic.spec.ts` against `/`. Remaining tests (contrast, keyboard shortcuts) already set up their own auth mocks.
 
 - [ ] **[BUG-052] severity:low** — Star icons in `TestimonialsSection` use hardcoded Tailwind colors `fill-yellow-400 text-yellow-400`, violating the HeroUI semantic color rule
 
