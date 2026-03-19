@@ -230,4 +230,16 @@ export const MOCK_ORGANIZATIONS = [
 export const mockUser = MOCK_USER;
 export const mockRepos = MOCK_REPOS;
 export const mockUsers = [MOCK_USER]; // For compatibility
-export const manyMockRepos = [...MOCK_REPOS, ...MOCK_REPOS]; // For large dataset tests
+export const manyMockRepos: MockRepository[] = [
+  ...MOCK_REPOS,
+  ...Array.from({ length: 10 }, (_, i) =>
+    createMockRepository({
+      description: `Generated repo ${i + 1}`,
+      id: `repo-gen-${i + 1}`,
+      isPrivate: i % 3 === 0,
+      name: `repo-gen-${i + 1}`,
+      ownerType: i % 2 === 0 ? "current-user" : "organization",
+      updatedAt: `2022-${String(12 - i).padStart(2, "0")}-01T00:00:00Z`,
+    }),
+  ),
+];

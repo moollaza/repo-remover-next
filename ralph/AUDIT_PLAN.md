@@ -176,7 +176,7 @@ Fix mock/fixture issues that would block reliable test writing in later phases.
   - What to test: These three flags are hardcoded `false` in `createMockRepository`. The app may filter, display, or warn differently for locked/template/mirror repos. Tests for those branches cannot be written without inline fixture construction, which is verbose and error-prone.
   - Test type: unit (add at least one fixture variant per flag)
 
-- [ ] **[SIMP-023] severity:low** — `manyMockRepos` contains duplicate repo IDs (items 0-9 repeat as 10-19)
+- [x] **[SIMP-023] severity:low** — `manyMockRepos` contains duplicate repo IDs (items 0-9 repeat as 10-19)
   - File: `src/mocks/static-fixtures.ts:194`
   - `[...MOCK_REPOS, ...MOCK_REPOS]` produces 20 repos where IDs `repo-1` through `repo-10` appear twice. React uses keys for reconciliation — duplicate IDs will cause key collision warnings and non-deterministic rendering. Any deduplication logic in production code would silently drop half the list.
   - Fix: If large datasets are needed, use a factory that generates unique IDs (e.g. `Array.from({length: 20}, (_, i) => createMockRepository({id: \`repo-\${i+1}\`, ...}))`)
