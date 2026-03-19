@@ -186,12 +186,7 @@ export const secureStorage = {
       return;
     }
 
-    try {
-      const encrypted = await encryptData(value);
-      localStorage.setItem(STORAGE_KEY_PREFIX + key, encrypted);
-    } catch (error) {
-      debug.warn("Encryption failed, falling back to plain storage:", error);
-      localStorage.setItem(STORAGE_KEY_PREFIX + key, value);
-    }
+    const encrypted = await encryptData(value);
+    localStorage.setItem(STORAGE_KEY_PREFIX + key, encrypted);
   },
 };

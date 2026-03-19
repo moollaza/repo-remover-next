@@ -216,13 +216,13 @@ Critical bugs that affect security, correctness, or data integrity.
   - Impact: `dashboard.page.getByText("1 error occurred...").isVisible()` returns a `Promise<boolean>` that is never awaited or checked. The result is discarded. The test marks as "passed" even if the error message is completely absent from the UI. Any regression in the error display path goes undetected by this test.
   - Fix: Replace `.isVisible()` with `await expect(...).toBeVisible()` on both lines.
 
-- [ ] **[BUG-001] severity:high** — `permissionWarning` returned from both functions but absent from `FetchResult` interface
+- [x] **[BUG-001] severity:high** — `permissionWarning` returned from both functions but absent from `FetchResult` interface (already fixed — verified interface has field, tests exist)
 
   - File: `src/utils/github-api.ts:195-199` (interface) / `:391-396` and `:650-655` (return sites)
   - Impact: Callers typed as `FetchResult` silently drop the permission warning string; the UI warning path may never fire because the data is structurally invisible to TypeScript consumers
   - Fix: Add `permissionWarning?: string` to the `FetchResult` interface
 
-- [ ] **[BUG-020] severity:high** — `setItem` silently falls back to plaintext storage when encryption fails
+- [x] **[BUG-020] severity:high** — `setItem` silently falls back to plaintext storage when encryption fails
 
   - File: `src/utils/secure-storage.ts:192-195`
   - Impact: If `encryptData` throws (e.g., transient Web Crypto failure, memory pressure), the catch block writes the GitHub PAT **in cleartext** to localStorage with only a `console.warn`. All security guarantees are silently lost — the user believes their token is encrypted but it is not. On next load `getItem` tries to decrypt a plaintext string, fails, and returns the raw string (see BUG-022), accidentally working but only because of the fallback-on-failure in `getItem`.
