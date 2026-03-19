@@ -285,6 +285,74 @@ describe("useRepoPagination", () => {
     expect(result.current.paginatedItems[0].name).toBe("Item 0");
   });
 
+  it("should ignore setPerPage with empty Set (produces NaN)", () => {
+    const items = createItems(20);
+    const { result } = renderHook(() => useRepoPagination({ items }));
+
+    expect(result.current.perPage).toBe(5);
+    expect(result.current.totalPages).toBe(4);
+
+    // Empty Set: Array.from(new Set())[0] is undefined, Number(undefined) is NaN
+    act(() => {
+      result.current.setPerPage(new Set([]));
+    });
+
+    // perPage should remain unchanged — NaN must not be accepted
+    expect(result.current.perPage).toBe(5);
+    expect(result.current.totalPages).toBe(4);
+    expect(result.current.paginatedItems).toHaveLength(5);
+  });
+
+  it('should ignore setPerPage with "all" string (HeroUI sentinel)', () => {
+    const items = createItems(20);
+    const { result } = renderHook(() => useRepoPagination({ items }));
+
+    expect(result.current.perPage).toBe(5);
+
+    // HeroUI emits "all" as a Selection value — Number("a") is NaN
+    act(() => {
+      result.current.setPerPage("all" as unknown as Set<string>);
+    });
+
+    // perPage should remain unchanged
+    expect(result.current.perPage).toBe(5);
+    expect(result.current.totalPages).toBe(4);
+    expect(result.current.paginatedItems).toHaveLength(5);
+  });
+
+  it("should ignore setPerPage with non-numeric string value", () => {
+    const items = createItems(20);
+    const { result } = renderHook(() => useRepoPagination({ items }));
+
+    expect(result.current.perPage).toBe(5);
+
+    // A Set with a non-numeric string
+    act(() => {
+      result.current.setPerPage(new Set(["abc"]));
+    });
+
+    // perPage should remain unchanged
+    expect(result.current.perPage).toBe(5);
+    expect(result.current.totalPages).toBe(4);
+  });
+
+  it("should ignore setPerPage with zero or negative value", () => {
+    const items = createItems(20);
+    const { result } = renderHook(() => useRepoPagination({ items }));
+
+    expect(result.current.perPage).toBe(5);
+
+    act(() => {
+      result.current.setPerPage(new Set(["0"]));
+    });
+    expect(result.current.perPage).toBe(5);
+
+    act(() => {
+      result.current.setPerPage(new Set(["-5"]));
+    });
+    expect(result.current.perPage).toBe(5);
+  });
+
   it("should handle items array changing", () => {
     let items = createItems(10);
     const { rerender, result } = renderHook(

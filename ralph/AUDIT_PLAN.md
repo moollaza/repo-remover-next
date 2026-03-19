@@ -348,7 +348,7 @@ Functional bugs, UX issues, hardcoded colors, and accessibility problems.
   - Impact: User navigates to page 4 (20 items), applies a filter that reduces to 5 items (`totalPages=1`). The hook returns `currentPage: 1` (clamped). User removes the filter (20 items, `totalPages=4`). Internal `currentPage` was never cleared — `effectivePage` unclamped back to 4, silently jumping the user to page 4 instead of staying at page 1. No pagination button was clicked; the jump is invisible and unexpected.
   - Fix: Sync the actual state via `useEffect`: when `totalPages > 0 && currentPage > totalPages`, call `setCurrentPage(1)` to permanently reset the state, eliminating the divergence.
 
-- [ ] **[BUG-018] severity:low** — `setPerPage` with empty Set or `"all"` produces `NaN`, silently breaking pagination
+- [x] **[BUG-018] severity:low** — `setPerPage` with empty Set or `"all"` produces `NaN`, silently breaking pagination
 
   - File: `src/hooks/use-repo-pagination.ts:92`
   - Impact: `Array.from(new Set())[0]` is `undefined`; `Number(undefined)` is `NaN`. `setPerPageState(NaN)` causes `Math.ceil(n / NaN) = NaN` total pages and `items.slice(NaN, NaN) = []`, showing an empty list with no recoverable UI. If `keys === "all"`, `Array.from("all") = ["a","l","l"]` and `Number("a") = NaN`. Same crash.

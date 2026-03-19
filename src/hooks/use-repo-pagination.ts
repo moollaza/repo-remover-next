@@ -94,7 +94,8 @@ export function useRepoPagination<T>({
 
   // Handle per page change with Selection type from HeroUI
   const setPerPage = useCallback((keys: Selection) => {
-    const newPerPage = Number(Array.from(keys)[0]);
+    const newPerPage = Number(Array.from(keys as Set<string>)[0]);
+    if (!Number.isFinite(newPerPage) || newPerPage <= 0) return;
     setPerPageState(newPerPage);
     setCurrentPage(1); // Reset to first page when changing items per page
   }, []);
