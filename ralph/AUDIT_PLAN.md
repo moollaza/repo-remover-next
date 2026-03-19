@@ -411,7 +411,7 @@ Functional bugs, UX issues, hardcoded colors, and accessibility problems.
   - Impact: Object keys such as `"monkey"`, `"jockey"`, `"foreignKey"`, `"primaryKey"`, `"keyboard"`, `"apiKey"` all contain `"key"` and will have their values silently replaced with `"[REDACTED]"`. This could hide useful debugging information for non-sensitive fields.
   - Fix: Use exact-match or whole-word check: `key === "key" || key.endsWith("Key") || key.endsWith("_key")`
 
-- [ ] **[BUG-046] severity:low** — Default fallback UI missing `role="alert"` — screen readers won't announce the error state
+- [x] **[BUG-046] severity:low** — Default fallback UI missing `role="alert"` — screen readers won't announce the error state
 
   - File: `src/components/error-boundary.tsx:62`
   - Impact: When an error boundary catches an error and replaces content with the fallback, assistive technology users get no notification that something went wrong. The content changes silently from their perspective.

@@ -62,7 +62,10 @@ export class ErrorBoundary extends Component<
 
       // Default fallback UI
       return (
-        <div className="flex min-h-[400px] items-center justify-center px-4">
+        <div
+          className="flex min-h-[400px] items-center justify-center px-4"
+          role="alert"
+        >
           <div className="w-full max-w-md rounded-lg bg-content1 p-8 text-center shadow-lg">
             <div className="mb-4">
               <h2 className="text-2xl font-bold text-foreground">
