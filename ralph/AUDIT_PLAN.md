@@ -228,7 +228,7 @@ Critical bugs that affect security, correctness, or data integrity.
   - Impact: If `encryptData` throws (e.g., transient Web Crypto failure, memory pressure), the catch block writes the GitHub PAT **in cleartext** to localStorage with only a `console.warn`. All security guarantees are silently lost — the user believes their token is encrypted but it is not. On next load `getItem` tries to decrypt a plaintext string, fails, and returns the raw string (see BUG-022), accidentally working but only because of the fallback-on-failure in `getItem`.
   - Fix: Do not fall back to plaintext; re-throw the error and surface it to the user with a clear message that storage failed.
 
-- [ ] **[BUG-021] severity:high** — `navigator.userAgent` in the fingerprint changes on every browser auto-update, silently invalidating all stored tokens
+- [x] **[BUG-021] severity:high** — `navigator.userAgent` in the fingerprint changes on every browser auto-update, silently invalidating all stored tokens
 
   - File: `src/utils/secure-storage.ts:117`
   - Impact: `navigator.userAgent` includes the browser version string (e.g., `Chrome/132.0.6834.110`). Major browsers auto-update every 4-6 weeks. After any browser update the fingerprint changes, PBKDF2 derives a different key, AES-GCM decryption of the stored blob fails, and `getItem` falls through to returning the raw base64 ciphertext (see BUG-022). The user's session appears broken with no explanation — they see an invalid-token error even though they stored a valid one. The comment at lines 111-113 explicitly flags screen dimensions as unstable but misses the equally unstable `userAgent`.

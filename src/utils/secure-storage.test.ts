@@ -17,6 +17,23 @@ describe("secureStorage", () => {
   });
 
   describe("setItem (production mode — encrypted storage)", () => {
+    it("survives browser userAgent change (e.g. auto-update)", async () => {
+      // Switch to production mode so real encryption is used
+      vi.stubEnv("MODE", "production");
+
+      // Store a value with current userAgent
+      await secureStorage.setItem("pat", "ghp_stable_token");
+
+      // Simulate a browser auto-update changing the userAgent string
+      vi.spyOn(navigator, "userAgent", "get").mockReturnValue(
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/999.0.0.0",
+      );
+
+      // Should still decrypt successfully — fingerprint must not depend on userAgent
+      const result = await secureStorage.getItem("pat");
+      expect(result).toBe("ghp_stable_token");
+    });
+
     it("does NOT fall back to plaintext when encryption fails", async () => {
       // Switch to production mode so isWebCryptoAvailable() returns true
       vi.stubEnv("MODE", "production");

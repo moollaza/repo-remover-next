@@ -111,14 +111,17 @@ function generateSalt(): Uint8Array {
 
 // Get a deterministic password based on the browser/device
 async function getBrowserFingerprint(): Promise<string> {
-  // Create a fingerprint based on available browser characteristics
+  // Create a fingerprint based on stable browser characteristics.
+  // Deliberately excludes navigator.userAgent — it contains the browser
+  // version string which changes on every auto-update, silently
+  // invalidating all encrypted tokens (see BUG-021).
   const fingerprint = [
-    navigator.userAgent,
     navigator.language,
+    navigator.hardwareConcurrency,
+    navigator.platform,
     screen.width,
     screen.height,
     Intl.DateTimeFormat().resolvedOptions().timeZone,
-    // Add more stable browser characteristics as needed
   ].join("|");
 
   // Hash the fingerprint to create a more uniform key
