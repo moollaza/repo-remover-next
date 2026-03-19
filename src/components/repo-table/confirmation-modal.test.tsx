@@ -146,4 +146,36 @@ describe("ConfirmationModal", () => {
     // Should still only process each repo once (2 repos = 2 calls, not 4)
     expect(processRepo).toHaveBeenCalledTimes(2);
   });
+
+  it("shows correct success count on result screen (BUG-030: processedCount, not total)", async () => {
+    vi.mocked(processRepo).mockReset();
+    // First repo succeeds, second repo fails
+    vi.mocked(processRepo)
+      .mockResolvedValueOnce(undefined)
+      .mockRejectedValueOnce(new Error("403 Forbidden"));
+
+    render(
+      <GitHubContext.Provider value={mockContextValue}>
+        <ConfirmationModal {...mockProps} />
+      </GitHubContext.Provider>,
+    );
+
+    // Type correct username and confirm
+    const input = screen.getByTestId("confirmation-modal-input");
+    fireEvent.change(input, { target: { value: "testuser" } });
+    const confirmButton = screen.getByTestId("confirmation-modal-confirm");
+    fireEvent.click(confirmButton);
+
+    // Advance timers to complete processing (1s per repo + 3s minimum)
+    await vi.advanceTimersByTimeAsync(10000);
+
+    // Result screen should show: 1 success out of 2 processed
+    // BUG-030: previously showed "count - errorCount" using repos.length as count
+    // which would be wrong if processing was stopped early (skipped repos counted as successes)
+    expect(screen.getByTestId("result-modal-header")).toBeInTheDocument();
+    expect(
+      screen.getByText(/1 out of 2 repos archived successfully/),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/1 error/)).toBeInTheDocument();
+  });
 });

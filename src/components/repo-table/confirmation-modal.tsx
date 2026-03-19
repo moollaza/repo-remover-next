@@ -66,6 +66,7 @@ interface RepoActionResultProps {
   count: number;
   errors?: { error: Error; repository?: Repository }[];
   onClose: () => void;
+  processedCount: number;
 }
 
 const initialState: ModalState = {
@@ -247,6 +248,7 @@ export default function ConfirmationModal({
               count={count}
               errors={state.errors}
               onClose={handleOnClose}
+              processedCount={state.progress}
             />
           )}
         </>
@@ -409,8 +411,11 @@ function RepoActionResult({
   count,
   errors,
   onClose,
+  processedCount,
 }: RepoActionResultProps) {
   const errorCount = errors ? errors.length : 0;
+  const successCount = processedCount - errorCount;
+  const skippedCount = count - processedCount;
 
   return (
     <>
@@ -419,9 +424,15 @@ function RepoActionResult({
       </ModalHeader>
       <ModalBody>
         <p>
-          {count - errorCount} out of {count} repos{" "}
+          {successCount} out of {processedCount} repos{" "}
           {action === "archive" ? "archived" : "deleted"} successfully!
         </p>
+
+        {skippedCount > 0 && (
+          <p>
+            {skippedCount} repo{skippedCount > 1 ? "s" : ""} skipped.
+          </p>
+        )}
 
         <Spacer y={1} />
 

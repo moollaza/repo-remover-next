@@ -282,7 +282,7 @@ Functional bugs, UX issues, hardcoded colors, and accessibility problems.
   - Impact: `Array.from(selectedRepoAction)[0] as "archive" | "delete"` — if `selectedRepoAction` is an empty `Set` (which cannot happen via the UI today but is not structurally impossible), `Array.from(...)[0]` is `undefined`. The `as` cast silences TypeScript. `ConfirmationModal` receives `undefined` as `action` and likely renders incorrect UI or crashes. The actual initial value is always `"archive"`, so this is latent but fragile.
   - Fix: Use a fallback: `(Array.from(selectedRepoAction)[0] ?? "archive") as "archive" | "delete"`; or derive the action from `selectedRepoAction` more robustly (e.g., `selectedRepoAction.has("delete") ? "delete" : "archive"`).
 
-- [ ] **[BUG-030] severity:medium** — `RepoActionResult` counts skipped repos as successes after a user Stop
+- [x] **[BUG-030] severity:medium** — `RepoActionResult` counts skipped repos as successes after a user Stop
 
   - File: `src/components/repo-table/confirmation-modal.tsx:318`
   - Impact: `count` is `repos.length` (total submitted). `errorCount` is failures among actually-processed repos. After stopping mid-way (e.g., 2 of 5 processed, 0 errors), the display shows "5 out of 5 repos archived successfully" — wrong. 3 repos were never touched.
