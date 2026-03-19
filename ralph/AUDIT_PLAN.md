@@ -263,11 +263,12 @@ Critical bugs that affect security, correctness, or data integrity.
 
 Functional bugs, UX issues, hardcoded colors, and accessibility problems.
 
-- [ ] **[BUG-009] severity:medium** — `logout` wraps async `removeItem` calls in a synchronous try/catch — rejection is unhandled
+- [x] **[BUG-009] severity:medium** — `logout` wraps async `removeItem` calls in a synchronous try/catch — rejection is unhandled
 
   - File: `src/providers/github-data-provider.tsx:194-201`
   - Impact: `secureStorage.removeItem` returns a Promise. The try/catch block only catches synchronous throws; async rejections are silently swallowed. If storage clearing fails after logout (e.g., IndexedDB lock), the old PAT stays in encrypted storage — user thinks they logged out but token persists across browser restarts.
   - Fix: Either `await` both calls (make `logout` async or use `.catch()`) or convert to `.catch((err) => debug.warn(...))` pattern used elsewhere in this file (e.g., lines 167-170)
+  - **VERIFIED**: `secureStorage.removeItem()` is synchronous (returns `void`, not `Promise`) — it calls `localStorage.removeItem()` directly. The try/catch correctly handles synchronous exceptions. No fix needed.
 
 - [ ] **[BUG-012] severity:medium** — Stale-closure double-submit: confirm button not disabled during `state.confirming`
 
