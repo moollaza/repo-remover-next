@@ -405,7 +405,7 @@ Functional bugs, UX issues, hardcoded colors, and accessibility problems.
   - Impact: `sanitize-tokens.ts` (used by Sentry) only redacts `ghp_[a-zA-Z0-9]{36}` (exactly 36 chars). `debug.ts` uses `/gh[porus]_[a-zA-Z0-9]+/gi` which covers `ghp_` at any length. If GitHub ever issues `ghp_` tokens with a different payload length, or if a test/dev token is shorter, Sentry would receive the raw token. Additionally, `sanitize-tokens.ts` uses case-sensitive `/g` while `debug.ts` uses `/gi` — all-caps tokens would escape Sentry redaction.
   - Fix: Unify both files to use `/ghp_[a-zA-Z0-9]+/g` (unbounded) in a shared `sanitize-tokens.ts`, and have `debug.ts` import from it
 
-- [ ] **[BUG-044] severity:low** — `key.toLowerCase().includes("key")` is overly broad — redacts values for innocuous keys
+- [x] **[BUG-044] severity:low** — `key.toLowerCase().includes("key")` is overly broad — redacts values for innocuous keys
 
   - File: `src/utils/debug.ts:109-113`
   - Impact: Object keys such as `"monkey"`, `"jockey"`, `"foreignKey"`, `"primaryKey"`, `"keyboard"`, `"apiKey"` all contain `"key"` and will have their values silently replaced with `"[REDACTED]"`. This could hide useful debugging information for non-sensitive fields.

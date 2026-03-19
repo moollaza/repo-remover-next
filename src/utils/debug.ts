@@ -113,11 +113,16 @@ function sanitizeInner(value: unknown, seen: WeakSet<object>): unknown {
     const sanitized: Record<string, unknown> = {};
     for (const [key, val] of Object.entries(value)) {
       // Redact known sensitive keys entirely
+      // Use case-sensitive endsWith("Key") for camelCase (apiKey, accessKey)
+      // and case-insensitive for exact "key" and snake_case "_key" variants
+      const lk = key.toLowerCase();
       if (
-        key.toLowerCase().includes("token") ||
-        key.toLowerCase().includes("password") ||
-        key.toLowerCase().includes("secret") ||
-        key.toLowerCase().includes("key")
+        lk.includes("token") ||
+        lk.includes("password") ||
+        lk.includes("secret") ||
+        lk === "key" ||
+        key.endsWith("Key") ||
+        lk.endsWith("_key")
       ) {
         sanitized[key] = "[REDACTED]";
       } else {

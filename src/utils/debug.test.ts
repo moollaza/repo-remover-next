@@ -53,6 +53,42 @@ describe("debug.sanitize", () => {
     });
   });
 
+  it("does not redact innocuous keys that happen to contain 'key' substring", () => {
+    const result = debug.sanitize({
+      hotkey: "ctrl+c",
+      jockey: "rider",
+      keyboard: "qwerty",
+      monkey: "banana",
+    });
+    expect(result).toEqual({
+      hotkey: "ctrl+c",
+      jockey: "rider",
+      keyboard: "qwerty",
+      monkey: "banana",
+    });
+  });
+
+  it("redacts actual sensitive key-related fields", () => {
+    const result = debug.sanitize({
+      access_key: "access-456",
+      accessKey: "access-123",
+      api_key: "my-key",
+      apiKey: "my-api-key",
+      key: "secret-value",
+      private_key: "priv-012",
+      privateKey: "priv-789",
+    });
+    expect(result).toEqual({
+      access_key: "[REDACTED]",
+      accessKey: "[REDACTED]",
+      api_key: "[REDACTED]",
+      apiKey: "[REDACTED]",
+      key: "[REDACTED]",
+      private_key: "[REDACTED]",
+      privateKey: "[REDACTED]",
+    });
+  });
+
   it("handles circular references without stack overflow", () => {
     const obj: Record<string, unknown> = { name: "test" };
     obj.self = obj;
