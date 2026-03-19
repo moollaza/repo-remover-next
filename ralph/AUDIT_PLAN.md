@@ -301,7 +301,7 @@ Functional bugs, UX issues, hardcoded colors, and accessibility problems.
   - Fix: Use HeroUI semantic classes (`bg-danger-50 text-danger border-danger-200` / `bg-warning-50 text-warning border-warning-200`) or add them as CSS variables in the theme config
   - **VERIFIED**: Already fixed — dashboard.tsx uses HeroUI `<Alert>` component with semantic `color="danger"` and `color="warning"` props. No hardcoded Tailwind colors exist.
 
-- [ ] **[BUG-039] severity:low** — `handleLogout` in `Header` duplicates auth cleanup outside the context
+- [x] **[BUG-039] severity:low** — `handleLogout` in `Header` duplicates auth cleanup outside the context
 
   - File: `src/components/header.tsx:237-242`
   - Impact: Calls `secureStorage.removeItem("pat")` and `secureStorage.removeItem("login")` directly rather than delegating to the provider's logout function (BUG-009 context). If the provider's logout gains additional cleanup steps (token revocation, SWR cache invalidation, etc.), this header path will silently miss them. Two code paths doing the same thing will diverge over time.

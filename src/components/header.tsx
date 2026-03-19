@@ -25,18 +25,15 @@ const homeLinks = [
 
 export default function Header() {
   const { pathname } = useLocation();
-  const { isAuthenticated, user } = useGitHubData();
+  const { isAuthenticated, logout, user } = useGitHubData();
 
   const isDashboard = pathname === "/dashboard";
   const isDevelopment = import.meta.env.DEV;
 
-  // Clear the localStorage and redirect to the homepage
   function handleLogout() {
-    if (typeof localStorage !== "undefined") {
-      localStorage.clear();
-      // Force a reload to clear the cache
-      window.location.href = "/";
-    }
+    logout();
+    // Force a full reload to clear SWR cache and React state
+    window.location.href = "/";
   }
 
   return (
@@ -79,7 +76,7 @@ export default function Header() {
 
       <NavbarContent justify="end">
         <ThemeSwitcher />
-        
+
         {isDashboard ? (
           <>
             {isDevelopment && <GenerateReposButton />}

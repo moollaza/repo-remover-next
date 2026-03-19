@@ -1,4 +1,8 @@
+import { userEvent } from "@testing-library/user-event";
+import { useLocation } from "react-router-dom";
+
 import Header from "@/components/header";
+import { useGitHubData } from "@/hooks/use-github-data";
 import { render, screen } from "@/utils/test-utils";
 
 // Mock react-router-dom
@@ -17,7 +21,90 @@ vi.mock("react-router-dom", async () => {
   };
 });
 
+// Mock useGitHubData hook
+vi.mock("@/hooks/use-github-data", async () => {
+  const actual = await vi.importActual("@/hooks/use-github-data");
+  return {
+    ...actual,
+    useGitHubData: vi.fn(),
+  };
+});
+
+const mockUseGitHubData = vi.mocked(useGitHubData);
+const mockUseLocation = vi.mocked(useLocation);
+
+function setupDashboardWithAuth(overrides = {}) {
+  mockUseLocation.mockReturnValue({
+    hash: "",
+    key: "default",
+    pathname: "/dashboard",
+    search: "",
+    state: null,
+  });
+
+  const mockLogout = vi.fn();
+  mockUseGitHubData.mockReturnValue({
+    error: null,
+    hasPartialData: false,
+    isAuthenticated: true,
+    isError: false,
+    isInitialized: true,
+    isLoading: false,
+    login: "testuser",
+    logout: mockLogout,
+    mutate: vi.fn(),
+    pat: "ghp_test",
+    progress: null,
+    refetchData: vi.fn(),
+    repos: [],
+    setLogin: vi.fn(),
+    setPat: vi.fn(),
+    user: {
+      avatarUrl: "",
+      login: "testuser",
+      name: "Test User",
+      url: "https://github.com/testuser",
+    } as ReturnType<typeof useGitHubData>["user"],
+    ...overrides,
+  });
+
+  return { mockLogout };
+}
+
+function setupDefaultContext(overrides = {}) {
+  mockUseGitHubData.mockReturnValue({
+    error: null,
+    hasPartialData: false,
+    isAuthenticated: false,
+    isError: false,
+    isInitialized: true,
+    isLoading: false,
+    login: null,
+    logout: vi.fn(),
+    mutate: vi.fn(),
+    pat: null,
+    progress: null,
+    refetchData: vi.fn(),
+    repos: null,
+    setLogin: vi.fn(),
+    setPat: vi.fn(),
+    user: null,
+    ...overrides,
+  });
+}
+
 describe("Header", () => {
+  beforeEach(() => {
+    mockUseLocation.mockReturnValue({
+      hash: "",
+      key: "default",
+      pathname: "/",
+      search: "",
+      state: null,
+    });
+    setupDefaultContext();
+  });
+
   describe("Authentication states", () => {
     it("shows logo on all pages", () => {
       render(<Header />);
@@ -62,6 +149,29 @@ describe("Header", () => {
 
       const navbar = screen.getByRole("navigation");
       expect(navbar).toBeInTheDocument();
+    });
+  });
+
+  describe("Logout", () => {
+    it("calls context logout function instead of directly clearing localStorage", async () => {
+      const { mockLogout } = setupDashboardWithAuth();
+      const localStorageClearSpy = vi.spyOn(Storage.prototype, "clear");
+      const user = userEvent.setup();
+
+      render(<Header />);
+
+      // Open the dropdown menu
+      const userAvatar = screen.getByText("Test User");
+      await user.click(userAvatar);
+
+      // Click logout
+      const logoutButton = await screen.findByText("Log Out");
+      await user.click(logoutButton);
+
+      expect(mockLogout).toHaveBeenCalledOnce();
+      expect(localStorageClearSpy).not.toHaveBeenCalled();
+
+      localStorageClearSpy.mockRestore();
     });
   });
 });
