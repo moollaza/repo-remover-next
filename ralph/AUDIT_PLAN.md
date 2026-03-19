@@ -240,7 +240,7 @@ Critical bugs that affect security, correctness, or data integrity.
   - Impact: The `TODO: Set to false` comment reveals this was intended to be a real preference toggle. Currently it is permanently checked and the user cannot change it — false affordance. Users who do not want their token stored have no opt-out path. The preference is never passed to the parent, so even if it were interactive it would do nothing.
   - Fix: Either remove the checkbox (and document that storage is always on), or wire up a real `useState(true)` flag and pass it through `onSubmit(token, rememberMe)`.
 
-- [ ] **[BUG-071] severity:high** — Scope documentation is incomplete: `delete_repo` scope is required for deletion but not mentioned
+- [x] **[BUG-071] severity:high** — Scope documentation is incomplete: `delete_repo` scope is required for deletion but not mentioned
 
   - File: `.env.example:5`
   - Impact: The comment says "Required scopes: 'repo' (for repository management)". On GitHub classic PATs, `repo` grants read/write repository access but does NOT include the `delete_repo` scope — that is a separate, explicitly opt-in scope. Users who follow the documentation and create a token with only `repo` scope will receive `403 Forbidden` errors when attempting to delete repositories (the app's primary function). The failure is silent from the token setup perspective — the app authenticates successfully but deletion fails with a permissions error.
