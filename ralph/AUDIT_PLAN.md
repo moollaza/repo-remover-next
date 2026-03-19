@@ -307,7 +307,7 @@ Functional bugs, UX issues, hardcoded colors, and accessibility problems.
   - Impact: Calls `secureStorage.removeItem("pat")` and `secureStorage.removeItem("login")` directly rather than delegating to the provider's logout function (BUG-009 context). If the provider's logout gains additional cleanup steps (token revocation, SWR cache invalidation, etc.), this header path will silently miss them. Two code paths doing the same thing will diverge over time.
   - Fix: Expose a `logout` function from `useGitHubData()` (it may already exist in the provider) and call it here; keep `window.location.href = "/"` for the full-reload behavior
 
-- [ ] **[BUG-063] severity:medium** — `VITE_FATHOM_SITE_ID` env var name is documented incorrectly in multiple files as `NEXT_PUBLIC_FATHOM_SITE_ID`
+- [x] **[BUG-063] severity:medium** — `VITE_FATHOM_SITE_ID` env var name is documented incorrectly in multiple files as `NEXT_PUBLIC_FATHOM_SITE_ID`
 
   - File: `src/components/fathom-analytics.tsx:9` (correct) vs `docs/ROADMAP.md:32`, `.claude/rules/architecture.md:95` (wrong)
   - Impact: If an operator sets `NEXT_PUBLIC_FATHOM_SITE_ID` in Cloudflare Workers following the docs, Fathom analytics silently loads nothing — no error is raised because the code just returns early on missing `siteId`. All analytics events and pageviews are lost in production with no indication.

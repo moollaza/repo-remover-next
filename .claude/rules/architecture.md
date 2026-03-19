@@ -112,8 +112,8 @@ No environment variables required. The app uses:
 
 Configure optional monitoring services:
 
-1. **Sentry.io** — add `NEXT_PUBLIC_SENTRY_DSN` to `.env.local`
-2. **Fathom Analytics** — add `NEXT_PUBLIC_FATHOM_SITE_ID` to `.env.local`
+1. **Sentry.io** — add `VITE_SENTRY_DSN` to `.env.local`
+2. **Fathom Analytics** — add `VITE_FATHOM_SITE_ID` to `.env.local`
 
 ## Documentation Links
 
