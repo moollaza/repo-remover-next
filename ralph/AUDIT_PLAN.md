@@ -170,7 +170,7 @@ Fix mock/fixture issues that would block reliable test writing in later phases.
   - What to test: `getRepositories` and `getOrgRepositories` always return `hasNextPage: false`. The pagination loop in `fetchGitHubDataWithProgress` accumulates pages until `hasNextPage` is false — but this second iteration is never tested. A bug where the cursor is not threaded correctly, or the accumulation logic is wrong, would never be caught.
   - Test type: unit (handler override returning `hasNextPage: true` on first call, `false` on second)
 
-- [ ] **[TEST-067] severity:medium** — No fixtures with `isLocked`, `isTemplate`, or `isMirror` set to `true`
+- [x] **[TEST-067] severity:medium** — No fixtures with `isLocked`, `isTemplate`, or `isMirror` set to `true`
 
   - File: `src/mocks/static-fixtures.ts` (all `createMockRepository` calls)
   - What to test: These three flags are hardcoded `false` in `createMockRepository`. The app may filter, display, or warn differently for locked/template/mirror repos. Tests for those branches cannot be written without inline fixture construction, which is verbose and error-prone.
