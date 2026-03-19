@@ -417,7 +417,7 @@ Functional bugs, UX issues, hardcoded colors, and accessibility problems.
   - Impact: When an error boundary catches an error and replaces content with the fallback, assistive technology users get no notification that something went wrong. The content changes silently from their perspective.
   - Fix: Add `role="alert"` to the outermost `<div>` of the default fallback (line 62)
 
-- [ ] **[BUG-048] severity:low** — `useGitHubData()` silently returns no-op defaults when called outside `<GitHubDataProvider>`
+- [x] **[BUG-048] severity:low** — `useGitHubData()` silently returns no-op defaults when called outside `<GitHubDataProvider>`
 
   - File: `src/hooks/use-github-data.ts:15`
   - Impact: Components accidentally rendered outside the provider tree (e.g. in isolated tests or mis-placed routes) receive `isAuthenticated: false`, `repos: null`, and all mutation functions are no-ops — no error or warning is raised, making the failure invisible. The defensive pattern (`createContext<T | undefined>(undefined)` + throw in hook) would surface this at render time.
