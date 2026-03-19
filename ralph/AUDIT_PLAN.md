@@ -288,7 +288,7 @@ Functional bugs, UX issues, hardcoded colors, and accessibility problems.
   - Impact: `count` is `repos.length` (total submitted). `errorCount` is failures among actually-processed repos. After stopping mid-way (e.g., 2 of 5 processed, 0 errors), the display shows "5 out of 5 repos archived successfully" — wrong. 3 repos were never touched.
   - Fix: Pass `state.progress` (processed count) to `RepoActionResult` alongside `count`. Display `state.progress - errorCount out of state.progress processed (N skipped)` or similar. Requires adding `processedCount` to the `RepoActionResultProps` interface.
 
-- [ ] **[BUG-035] severity:medium** — Stale `isTokenValid`/`username` state persists after clearing the input
+- [x] **[BUG-035] severity:medium** — Stale `isTokenValid`/`username` state persists after clearing the input
 
   - File: `src/components/github-token-form.tsx:107-109, 160-167, 213-219`
   - Impact: After a valid token is confirmed (green state), clicking the clear button resets `value` to `""` via `onValueChange("")`. The `useEffect` bails early at `!value`, so `isTokenValid` and `username` are never reset. The description still reads "Token is valid. Welcome X, click submit to continue!" and the submit button remains visually enabled (`!isTokenValid || isValidating` -> `false`). `handleSubmit` guards `!value` so clicking does nothing — but the enabled-looking button causes confusion.

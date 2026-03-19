@@ -89,6 +89,39 @@ describe("GitHubTokenForm", () => {
     expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
   });
 
+  test("resets validation state when input is cleared after successful validation", async () => {
+    const { rerender } = render(
+      <GitHubTokenForm
+        onSubmit={mockOnSubmit}
+        onValueChange={mockOnValueChange}
+        value="ghp_abcdefghijklmnopqrstuvwxyz1234567890"
+      />,
+    );
+
+    const submitButton = screen.getByRole("button", { name: /submit/i });
+
+    // Wait for validation to succeed
+    await waitFor(() => expect(submitButton).not.toBeDisabled(), {
+      timeout: 2000,
+    });
+    expect(screen.getByText(/Token is valid\. Welcome/i)).toBeInTheDocument();
+
+    // Simulate clearing — parent re-renders with empty value
+    rerender(
+      <GitHubTokenForm
+        onSubmit={mockOnSubmit}
+        onValueChange={mockOnValueChange}
+        value=""
+      />,
+    );
+
+    // Validation state should be reset (after debounce)
+    await waitFor(() => expect(submitButton).toBeDisabled());
+    expect(
+      screen.queryByText(/Token is valid\. Welcome/i),
+    ).not.toBeInTheDocument();
+  });
+
   test("doesn't call onSubmit when token is invalid", async () => {
     const { submitButton } = setupForm({
       value: "invalid-token",

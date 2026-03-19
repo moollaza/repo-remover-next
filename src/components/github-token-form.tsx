@@ -32,17 +32,25 @@ export default function GitHubTokenForm({
   const handleChange = (newValue: string) => {
     onValueChange(newValue);
     if (error) setError(null);
+    if (!newValue) {
+      setIsTokenValid(false);
+      setUsername(null);
+      setLastValidatedToken(null);
+    }
   };
 
   useEffect(() => {
     let isMounted = true;
 
     const validateToken = async () => {
-      if (
-        !value ||
-        !isValidGitHubToken(value) ||
-        value === lastValidatedToken
-      ) {
+      if (!value) {
+        setIsTokenValid(false);
+        setUsername(null);
+        setLastValidatedToken(null);
+        return;
+      }
+
+      if (!isValidGitHubToken(value) || value === lastValidatedToken) {
         return;
       }
 
