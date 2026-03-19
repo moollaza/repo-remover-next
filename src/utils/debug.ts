@@ -7,20 +7,12 @@
  * - Provides consistent logging interface across the application
  */
 
+import { SENSITIVE_PATTERNS } from "./sanitize-tokens";
+
 /**
  * Check if we're in development mode
  */
 const isDevelopment = import.meta.env.DEV;
-
-/**
- * Patterns to detect and sanitize sensitive data
- */
-const SENSITIVE_PATTERNS = [
-  /github_pat_[a-zA-Z0-9_]+/gi, // Fine-grained PATs
-  /gh[porus]_[a-zA-Z0-9]+/gi, // Standard GitHub tokens
-  /Bearer\s+[a-zA-Z0-9_-]+/gi, // Bearer tokens
-  /token[:\s]+[a-zA-Z0-9_-]+/gi, // Generic token patterns
-] as const;
 
 /**
  * Log an error message

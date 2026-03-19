@@ -1,27 +1,16 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+import * as Sentry from "@sentry/react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
-import * as Sentry from "@sentry/react";
 
 import { App } from "./app";
-
+import { sanitizeTokens } from "./utils/sanitize-tokens";
 import "./globals.css";
 
 // Sentry initialization — privacy-first (ported from instrumentation-client.ts)
 const SENTRY_DSN = import.meta.env.VITE_SENTRY_DSN;
 if (SENTRY_DSN && import.meta.env.PROD) {
-  const sanitizeTokens = (text: string): string => {
-    return text
-      .replace(/ghp_[a-zA-Z0-9]{36}/g, "[REDACTED_PAT]")
-      .replace(/github_pat_[a-zA-Z0-9_]+/g, "[REDACTED_PAT]")
-      .replace(/Bearer\s+[a-zA-Z0-9_.-]+/g, "Bearer [REDACTED]");
-  };
-
   Sentry.init({
-    dsn: SENTRY_DSN,
-    enabled: import.meta.env.PROD,
-    environment: import.meta.env.MODE,
-    tracesSampleRate: 0.1,
-    maxBreadcrumbs: 10,
     beforeSend(event) {
       if (event.user?.ip_address) {
         delete event.user.ip_address;
@@ -68,6 +57,11 @@ if (SENTRY_DSN && import.meta.env.PROD) {
       }
       return event;
     },
+    dsn: SENTRY_DSN,
+    enabled: import.meta.env.PROD,
+    environment: import.meta.env.MODE,
+    maxBreadcrumbs: 10,
+    tracesSampleRate: 0.1,
   });
 }
 

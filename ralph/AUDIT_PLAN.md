@@ -399,7 +399,7 @@ Functional bugs, UX issues, hardcoded colors, and accessibility problems.
   - Impact: Any user who submits a syntactically valid but semantically invalid token (wrong scopes, expired, revoked) gets a "token validated" analytics event recorded, skewing funnel metrics. The actual API validation happens asynchronously in `GitHubDataProvider` after navigation; this component has no knowledge of the outcome.
   - Fix: Move `analytics.trackTokenValidated()` into `GitHubDataProvider` after a successful API response (or wire a success callback from the provider to the form section)
 
-- [ ] **[BUG-041] severity:medium** — `sanitize-tokens.ts` uses exact `{36}` length for `ghp_` but no fallback — diverges from `debug.ts` coverage
+- [x] **[BUG-041] severity:medium** — `sanitize-tokens.ts` uses exact `{36}` length for `ghp_` but no fallback — diverges from `debug.ts` coverage
 
   - File: `src/utils/sanitize-tokens.ts:7` vs `src/utils/debug.ts:20`
   - Impact: `sanitize-tokens.ts` (used by Sentry) only redacts `ghp_[a-zA-Z0-9]{36}` (exactly 36 chars). `debug.ts` uses `/gh[porus]_[a-zA-Z0-9]+/gi` which covers `ghp_` at any length. If GitHub ever issues `ghp_` tokens with a different payload length, or if a test/dev token is shorter, Sentry would receive the raw token. Additionally, `sanitize-tokens.ts` uses case-sensitive `/g` while `debug.ts` uses `/gi` — all-caps tokens would escape Sentry redaction.
