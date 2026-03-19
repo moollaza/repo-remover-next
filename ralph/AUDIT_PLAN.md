@@ -210,7 +210,7 @@ Critical bugs that affect security, correctness, or data integrity.
   - Impact: `vite build` uses `esbuild` under the hood, which strips TypeScript types but does not perform type checking. A PR with a real type error (wrong prop type, missing required field, unsafe cast) can pass lint, unit tests, and build without any CI failure. The only TypeScript validation is the developer's local `tsc --noEmit`, which CLAUDE.md recommends but is not enforced.
   - Fix: Add a type-check step to `lint-and-test`: `- name: Type check\n  run: bunx tsc --noEmit` (or add a `"type-check": "tsc --noEmit"` script to `package.json`)
 
-- [ ] **[BUG-072] severity:high** — `dashboard.spec.ts` "handles repository processing errors" test (lines 385-393) uses `.isVisible()` instead of `expect(...).toBeVisible()` — the assertions are silently no-ops
+- [x] **[BUG-072] severity:high** — `dashboard.spec.ts` "handles repository processing errors" test (lines 385-393) uses `.isVisible()` instead of `expect(...).toBeVisible()` — the assertions are silently no-ops
 
   - File: `e2e/dashboard.spec.ts:385-393`
   - Impact: `dashboard.page.getByText("1 error occurred...").isVisible()` returns a `Promise<boolean>` that is never awaited or checked. The result is discarded. The test marks as "passed" even if the error message is completely absent from the UI. Any regression in the error display path goes undetected by this test.

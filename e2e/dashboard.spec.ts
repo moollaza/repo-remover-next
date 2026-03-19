@@ -378,15 +378,17 @@ test.describe("Dashboard Page", () => {
       });
       await dashboard.confirmAction("testuser");
       await dashboard.expectModalInMode("result");
-      await dashboard.page
-        .getByText("1 error occurred while archiving the following repository:")
-        .isVisible();
+      await expect(
+        dashboard.page.getByText(
+          "1 error occurred while archiving the following repository:",
+        ),
+      ).toBeVisible();
 
-      await dashboard.page
-        .getByText(
+      await expect(
+        dashboard.page.getByText(
           'repo-1: Failed to archive repo-1:  {"message":"Processing failed"}',
-        )
-        .isVisible();
+        ),
+      ).toBeVisible();
     });
 
     test("handles modal close", async () => {
