@@ -373,19 +373,21 @@ Functional bugs, UX issues, hardcoded colors, and accessibility problems.
   - Impact: Canceling on the confirmation screen (no repos touched) unconditionally fires a full SWR refetch — an expensive GitHub API call for no reason. On slow connections or when near rate limits, this wastes quota.
   - Fix: Guard with `if (state.mode === "result") void mutate();` — only refetch after operations actually ran
 
-- [ ] **[BUG-031] severity:medium** — Per-page and repo-type dropdown triggers are `<div>` elements — keyboard inaccessible
+- [x] **[BUG-031] severity:medium** — Per-page and repo-type dropdown triggers are `<div>` elements — keyboard inaccessible
 
   - File: `src/components/repo-table/repo-filters.tsx:160-163` (per-page), `:207-211` (repo-type)
   - Impact: Keyboard-only users cannot Tab to these dropdowns and activate them with Enter/Space. Only mouse users can access per-page and repo-type filtering. WCAG 2.1 SC 2.1.1 failure. The action dropdown's chevron IS a `<button>`, but the two filter triggers are not.
   - Fix: Replace the `<div className="relative cursor-pointer" onClick=...>` wrappers with `<button type="button">` elements so they are keyboard-reachable via Tab and activatable via Enter/Space.
+  - **VERIFIED**: Already fixed — both per-page and repo-type filters now use HeroUI `<Select>` components which are natively keyboard-accessible. No custom `<div>` wrappers exist.
 
-- [ ] **[BUG-033] severity:low** — `aria-labelledby` is on the wrong element — not associated with the listbox
+- [x] **[BUG-033] severity:low** — `aria-labelledby` is on the wrong element — not associated with the listbox
 
   - File: `src/components/repo-table/repo-filters.tsx:169`
   - Impact: `aria-labelledby="per-page-label"` is on the display `<div>`, not on the `<ul role="listbox">` at line 176. Screen readers read the label text for the div but do not announce "Repos per page" as the accessible name of the listbox widget.
   - Fix: Move `aria-labelledby="per-page-label"` from the display `<div>` to the `<ul role="listbox">` element.
+  - **VERIFIED**: Already fixed — per-page filter now uses HeroUI `<Select label="Repos per page">` which handles ARIA labelling natively. No custom `aria-labelledby` on `<div>` elements.
 
-- [ ] **[BUG-036] severity:low** — All API errors (network failure, 5xx, rate-limit 403) shown as "Invalid or expired token"
+- [x] **[BUG-036] severity:low** — All API errors (network failure, 5xx, rate-limit 403) shown as "Invalid or expired token"
 
   - File: `src/components/github-token-form.tsx:63-65`
   - Impact: During a GitHub outage or after hitting rate limits, users see the same message as for a genuinely invalid token. They may unnecessarily revoke and regenerate a working PAT.

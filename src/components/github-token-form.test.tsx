@@ -1,6 +1,12 @@
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
+import {
+  restUserNetworkErrorHandler,
+  restUserServerErrorHandler,
+  restUserUnauthorizedHandler,
+} from "@/mocks/handlers";
+import { server } from "@/mocks/server";
 import { render, screen, waitFor } from "@/utils/test-utils";
 
 import GitHubTokenForm from "./github-token-form";
@@ -135,5 +141,66 @@ describe("GitHubTokenForm", () => {
 
     // onSubmit should not be called
     expect(mockOnSubmit).not.toHaveBeenCalled();
+  });
+
+  test("shows 'Invalid or expired token' for 401 errors", async () => {
+    server.use(restUserUnauthorizedHandler());
+
+    setupForm({
+      value: "ghp_abcdefghijklmnopqrstuvwxyz1234567890",
+    });
+
+    await waitFor(
+      () => {
+        expect(
+          screen.getByText(/Invalid or expired token/i),
+        ).toBeInTheDocument();
+      },
+      { timeout: 2000 },
+    );
+  });
+
+  test("shows server error message for 500 errors instead of 'Invalid or expired token'", async () => {
+    server.use(restUserServerErrorHandler());
+
+    setupForm({
+      value: "ghp_abcdefghijklmnopqrstuvwxyz1234567890",
+    });
+
+    await waitFor(
+      () => {
+        expect(
+          screen.getByText(/GitHub API is unavailable/i),
+        ).toBeInTheDocument();
+      },
+      { timeout: 2000 },
+    );
+
+    // Should NOT show "Invalid or expired token"
+    expect(
+      screen.queryByText(/Invalid or expired token/i),
+    ).not.toBeInTheDocument();
+  });
+
+  test("shows network error message for network failures instead of 'Invalid or expired token'", async () => {
+    server.use(restUserNetworkErrorHandler());
+
+    setupForm({
+      value: "ghp_abcdefghijklmnopqrstuvwxyz1234567890",
+    });
+
+    await waitFor(
+      () => {
+        expect(
+          screen.getByText(/GitHub API is unavailable/i),
+        ).toBeInTheDocument();
+      },
+      { timeout: 2000 },
+    );
+
+    // Should NOT show "Invalid or expired token"
+    expect(
+      screen.queryByText(/Invalid or expired token/i),
+    ).not.toBeInTheDocument();
   });
 });

@@ -70,7 +70,24 @@ export default function GitHubTokenForm({
         if (isMounted) {
           setIsTokenValid(false);
           setUsername(null);
-          setError("Invalid or expired token");
+
+          // Differentiate 401 (bad token) from server/network errors
+          const status =
+            err instanceof Error && "status" in err
+              ? (err as { status: number }).status
+              : undefined;
+
+          if (status === 401) {
+            setError("Invalid or expired token");
+          } else if (status !== undefined && status >= 500) {
+            setError("GitHub API is unavailable — please try again later");
+          } else {
+            // Network errors, timeouts, and other non-HTTP failures
+            setError(
+              "GitHub API is unavailable — please check your connection",
+            );
+          }
+
           setLastValidatedToken(value);
         }
       } finally {

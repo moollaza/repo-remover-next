@@ -110,6 +110,30 @@ export function restUnauthorizedHandler() {
   ];
 }
 
+/** Returns a REST handler that simulates a network failure for GET /user */
+export function restUserNetworkErrorHandler() {
+  return http.get("https://api.github.com/user", () => {
+    return HttpResponse.error();
+  });
+}
+
+/** Returns a REST handler that responds with a 500 for GET /user (token validation) */
+export function restUserServerErrorHandler() {
+  return http.get("https://api.github.com/user", () => {
+    return HttpResponse.json(
+      { message: "Internal Server Error" },
+      { status: 500 },
+    );
+  });
+}
+
+/** Returns a REST handler that responds with a 401 for GET /user (token validation) */
+export function restUserUnauthorizedHandler() {
+  return http.get("https://api.github.com/user", () => {
+    return HttpResponse.json({ message: "Bad credentials" }, { status: 401 });
+  });
+}
+
 export const handlers = [
   // Handle GraphQL requests - User repositories
   http.post("https://api.github.com/graphql", async ({ request }) => {
