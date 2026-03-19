@@ -441,11 +441,12 @@ Functional bugs, UX issues, hardcoded colors, and accessibility problems.
   - Impact: `createMockRepo({ ownerType: 'organization' })` still produces `owner.id = 'user-123456'` and `owner.url = 'https://github.com/testuser'` because the base is always `MOCK_REPOS[0]` (a personal repo). Tests asserting on `owner.id` or `owner.url` for org repos will produce wrong results silently.
   - Fix: Derive `owner` from `ownerType` in `createMockRepo` (same logic as in `createMockRepository`)
 
-- [ ] **[BUG-025] severity:low** — `aria-current="true"` on pagination buttons should be `aria-current="page"`
+- [!] **[BUG-025] severity:low** — `aria-current="true"` on pagination buttons should be `aria-current="page"`
 
   - File: `src/components/repo-table/repo-table.tsx:443`
   - Impact: Screen readers announce "true" instead of "page" for the active pagination button. `aria-current="true"` is generic and valid HTML, but `aria-current="page"` is the semantically correct value for pagination — it announces "current page" to assistive technologies.
   - Fix: Change to `aria-current={page === currentPage ? "page" : undefined}`
+  - **BLOCKED**: `aria-current="true"` is hardcoded inside HeroUI's `PaginationItem` via `dataAttr(isActive)` in `use-pagination-item.js`. No prop or API exists to override this. Fixing requires either DOM manipulation hacks or reimplementing all pagination item styling from scratch. `aria-current="true"` is valid ARIA — less semantic than `"page"` but functionally correct.
 
 - [ ] **[BUG-026] severity:low** — Duplicate `data-testid="repo-tags"` on mobile and desktop cells within the same row
 
