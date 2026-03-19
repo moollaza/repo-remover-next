@@ -206,6 +206,13 @@ describe("RepoFilters", () => {
     expect(defaultProps.onRepoActionChange).toHaveBeenCalled();
   });
 
+  it("has an accessible label on the action dropdown trigger", () => {
+    render(<RepoFilters {...defaultProps} />);
+
+    const dropdownTrigger = screen.getByTestId("repo-action-dropdown-trigger");
+    expect(dropdownTrigger).toHaveAttribute("aria-label", "Choose action type");
+  });
+
   it("shows danger color for delete action", () => {
     const propsWithDeleteAction = {
       ...defaultProps,

@@ -461,13 +461,14 @@ Functional bugs, UX issues, hardcoded colors, and accessibility problems.
   - Impact: Both the repo list (confirmation screen) and error list (result screen) are `<ol>` elements styled with `list-disc` (bullets). Ordered lists signal enumeration to screen readers ("item 1, item 2...") but visually render bullets. Use `<ul>` for unordered bullet lists or `list-decimal` for numbered `<ol>`.
   - Fix applied: Changed both `<ol>` to `<ul>` at lines 341 and 452. Added test verifying no `<ol>` elements in confirmation body.
 
-- [ ] **[BUG-028] severity:low** — Confirm button uses hardcoded Tailwind colors — violates HeroUI semantic color rule
+- [x] **[BUG-028] severity:low** — Confirm button uses hardcoded Tailwind colors — violates HeroUI semantic color rule
 
   - File: `src/components/repo-table/confirmation-modal.tsx:222-225`
   - Impact: `bg-amber-500 hover:bg-amber-600` (archive) and `bg-red-500 hover:bg-red-600` (delete) do not adapt to the HeroUI theme system. Text contrast may break in dark mode. Violates `components.md`: "DO NOT use hardcoded Tailwind colors".
   - Fix: Use HeroUI `Button` component with `color="warning"` / `color="danger"` props, or map to HeroUI CSS variables (`bg-warning`, `bg-danger`).
+  - **VERIFIED**: Already fixed — Button uses `color={action === "archive" ? "warning" : "danger"}` prop. No hardcoded Tailwind colors in the file.
 
-- [ ] **[BUG-032] severity:low** — Action dropdown chevron button has no accessible label
+- [x] **[BUG-032] severity:low** — Action dropdown chevron button has no accessible label
 
   - File: `src/components/repo-table/repo-filters.tsx:294-305`
   - Impact: The button contains only a `ChevronDownIcon` SVG with no text. Screen readers announce "button" with no context — users of VoiceOver/NVDA cannot distinguish it from the main action button adjacent to it. WCAG 2.1 SC 4.1.2 failure.

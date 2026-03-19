@@ -73,15 +73,15 @@ export default function RepoFilters({
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       // Check for Cmd+K (Mac) or Ctrl+K (Windows/Linux)
-      if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
+      if ((event.metaKey || event.ctrlKey) && event.key === "k") {
         event.preventDefault();
         searchInputRef.current?.focus();
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
     return () => {
-      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener("keydown", handleKeyDown);
     };
   }, []);
 
@@ -167,6 +167,7 @@ export default function RepoFilters({
           <Dropdown placement="bottom-end" size="md">
             <DropdownTrigger>
               <Button
+                aria-label="Choose action type"
                 color={selectedRepoAction.has("delete") ? "danger" : "warning"}
                 data-testid="repo-action-dropdown-trigger"
                 isIconOnly
