@@ -10,7 +10,7 @@ import {
   Spacer,
 } from "@heroui/react";
 import { type Repository } from "@octokit/graphql-schema";
-import { useReducer, useRef } from "react";
+import { useMemo, useReducer, useRef } from "react";
 
 import { useGitHubData } from "@/hooks/use-github-data";
 import { analytics } from "@/utils/analytics";
@@ -91,8 +91,11 @@ export default function ConfirmationModal({
   // Get the PAT from the new provider
   const { mutate, pat } = useGitHubData();
 
-  // Create an Octokit instance with the PAT
-  const octokit = pat ? createThrottledOctokit(pat) : null;
+  // Memoize Octokit so rate-limit state persists across re-renders (BUG-011)
+  const octokit = useMemo(
+    () => (pat ? createThrottledOctokit(pat) : null),
+    [pat],
+  );
 
   // Use reducer for state management
   const [state, dispatch] = useReducer(modalReducer, initialState);

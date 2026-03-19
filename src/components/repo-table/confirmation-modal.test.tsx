@@ -17,7 +17,9 @@ vi.mock("@/utils/github-utils", async () => {
 });
 
 // Import after mock setup so we can reference the mocked functions
-const { processRepo } = await import("@/utils/github-utils");
+const { createThrottledOctokit, processRepo } = await import(
+  "@/utils/github-utils"
+);
 
 const mockRepos: Repository[] = [
   createMockRepo({ id: "1", name: "repo1" }),
@@ -177,5 +179,28 @@ describe("ConfirmationModal", () => {
       screen.getByText(/1 out of 2 repos archived successfully/),
     ).toBeInTheDocument();
     expect(screen.getByText(/1 error/)).toBeInTheDocument();
+  });
+
+  it("memoizes octokit instance — does not recreate on re-render (BUG-011)", () => {
+    vi.mocked(createThrottledOctokit).mockClear();
+
+    const { rerender } = render(
+      <GitHubContext.Provider value={mockContextValue}>
+        <ConfirmationModal {...mockProps} />
+      </GitHubContext.Provider>,
+    );
+
+    // Should create exactly one instance on initial render
+    expect(createThrottledOctokit).toHaveBeenCalledTimes(1);
+
+    // Re-render with same pat — should NOT create a new instance
+    rerender(
+      <GitHubContext.Provider value={mockContextValue}>
+        <ConfirmationModal {...mockProps} />
+      </GitHubContext.Provider>,
+    );
+
+    // Still only one call — memoized
+    expect(createThrottledOctokit).toHaveBeenCalledTimes(1);
   });
 });

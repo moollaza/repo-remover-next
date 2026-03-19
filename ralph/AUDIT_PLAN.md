@@ -324,7 +324,7 @@ Functional bugs, UX issues, hardcoded colors, and accessibility problems.
   - Impact: `token.length >= 40` means the prefix (11 chars) + only 29 chars of payload passes. Real fine-grained PATs are 80-120 chars. A synthetically short `github_pat_abcdefghijklmnopqrstuvwxyzabc` (40 chars total) would pass client-side validation and confusingly return a 401 from GitHub — making the user think their valid-looking token is wrong.
   - Fix: Raise the minimum: `token.length >= 72` (GitHub's documented minimum for fine-grained PATs) or `token.length >= 50` as a conservative safe floor.
 
-- [ ] **[BUG-011] severity:medium** — `octokit` not memoized — new `ThrottledOctokit` instance per render
+- [x] **[BUG-011] severity:medium** — `octokit` not memoized — new `ThrottledOctokit` instance per render
 
   - File: `src/hooks/use-confirmation-modal.ts:78`
   - Impact: Every `dispatch` call during processing (one per repo + error events) triggers a re-render that constructs a new `ThrottledOctokit`, discarding its internal rate-limit counter state. The running `handleConfirm` loop is unaffected (it captured the original instance), but ~10-20 wasted constructions per batch. On a second modal open, the user gets a fresh rate-limit window, potentially masking 429s.
