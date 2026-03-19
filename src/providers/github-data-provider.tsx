@@ -1,11 +1,5 @@
 import { type Repository, type User } from "@octokit/graphql-schema";
-import React, {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import useSWR from "swr";
 
 import { GitHubContext, GitHubContextType } from "@/contexts/github-context";
@@ -56,7 +50,7 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
   const tokenValidatedRef = useRef<null | string>(null);
 
   // Load from secure storage on mount
-  useLayoutEffect(() => {
+  useEffect(() => {
     async function loadStoredData() {
       try {
         const storedLogin = await secureStorage.getItem("login");
@@ -73,11 +67,6 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
     }
 
     void loadStoredData();
-
-    // Cleanup function
-    return () => {
-      // Any cleanup needed when component unmounts
-    };
   }, []);
 
   // Derived authentication state

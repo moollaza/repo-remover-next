@@ -576,7 +576,7 @@ Non-critical code quality improvements and simplifications.
   - File: `src/utils/github-utils.ts:158-166`
   - Detail: `action` is a union of two literals; removing the dead guards (BUG-006) makes the exhaustive `if/else` pattern clearer. Use `if (action === "archive") { ... } else { ... }` so the compiler flags any future third action that doesn't have a branch.
 
-- [ ] **[SIMP-003] severity:low** — `useLayoutEffect` is semantically wrong for async storage hydration; empty cleanup body is dead code
+- [x] **[SIMP-003] severity:low** — `useLayoutEffect` is semantically wrong for async storage hydration; empty cleanup body is dead code
 
   - File: `src/providers/github-data-provider.tsx:56-78`
   - Detail: The callback is `async` — `useLayoutEffect` fires before browser paint but the async part (storage read) resolves asynchronously regardless. The timing guarantee of `useLayoutEffect` is lost entirely. `useEffect` is the correct hook here. Additionally, the cleanup body (lines 74-77) is an empty function with a comment — pure dead code.
