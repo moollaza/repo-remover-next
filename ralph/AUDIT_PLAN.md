@@ -474,37 +474,42 @@ Functional bugs, UX issues, hardcoded colors, and accessibility problems.
   - Impact: The button contains only a `ChevronDownIcon` SVG with no text. Screen readers announce "button" with no context — users of VoiceOver/NVDA cannot distinguish it from the main action button adjacent to it. WCAG 2.1 SC 4.1.2 failure.
   - Fix: Add `aria-label="Choose action type"` (or similar) to the chevron `<button>`.
 
-- [ ] **[BUG-047] severity:low** — Hardcoded CSS variable `bg-[var(--brand-blue)]` on progress bar fill (line 58)
+- [x] **[BUG-047] severity:low** — Hardcoded CSS variable `bg-[var(--brand-blue)]` on progress bar fill (line 58)
 
   - File: `src/components/repo-loading-progress.tsx:58`
   - Impact: Uses an arbitrary Tailwind CSS variable override instead of a HeroUI semantic color. Violates project convention ("DO NOT use hardcoded Tailwind colors — use HeroUI semantic colors"). If `--brand-blue` is not defined or changes, the progress bar fill becomes transparent. Should be `bg-primary`.
   - Fix: Replace `bg-[var(--brand-blue)]` with `bg-primary`
+  - **VERIFIED**: Already fixed — uses HeroUI `<Progress>` component with `color="primary"` prop. No hardcoded CSS variables.
 
-- [ ] **[BUG-055] severity:low** — `InlinePATForm` uses hardcoded Tailwind colors `border-emerald-600` (line 139) and `text-emerald-700 dark:text-emerald-400` (line 158) for the "valid" state, violating the HeroUI semantic color convention
+- [x] **[BUG-055] severity:low** — `InlinePATForm` uses hardcoded Tailwind colors `border-emerald-600` (line 139) and `text-emerald-700 dark:text-emerald-400` (line 158) for the "valid" state, violating the HeroUI semantic color convention
 
   - File: `src/components/landing/get-started-section.tsx:139,158`
   - Impact: Valid-state styling does not adapt correctly to custom themes; `text-emerald-700` is hardcoded light-mode only (the manual dark override `dark:text-emerald-400` is fragile).
   - Fix: Replace with `border-success` / `text-success`, consistent with how other success states are styled across the app.
+  - **VERIFIED**: File deleted — `src/components/landing/` directory no longer exists. No fix needed.
 
-- [ ] **[BUG-056] severity:low** — `Archive Selected` button uses `text-black` hardcoded (line 97), violating the HeroUI semantic color convention
+- [x] **[BUG-056] severity:low** — `Archive Selected` button uses `text-black` hardcoded (line 97), violating the HeroUI semantic color convention
 
   - File: `src/components/landing/product-showcase.tsx:97`
   - Impact: `text-black` does not adapt to theme; in custom or high-contrast themes, black text on `amber-500` may fail contrast checks. Inconsistent with the rest of the codebase which avoids hardcoded colors.
   - Fix: Replace `text-black` with `text-foreground` or HeroUI's warning color foreground.
+  - **VERIFIED**: File deleted — `src/components/landing/` directory no longer exists. No fix needed.
 
-- [ ] **[BUG-057] severity:low** — Status badges use hardcoded `bg-amber-*` / `bg-emerald-*` Tailwind colors (lines 165, 170), same pattern as BUG-052/BUG-055
+- [x] **[BUG-057] severity:low** — Status badges use hardcoded `bg-amber-*` / `bg-emerald-*` Tailwind colors (lines 165, 170), same pattern as BUG-052/BUG-055
 
   - File: `src/components/landing/product-showcase.tsx:165,170`
   - Impact: Badge colors don't adapt to custom themes; dark-mode overrides are manual and fragile.
   - Fix: Replace with `bg-warning-100 text-warning-700` (archived) and `bg-success-100 text-success-700` (public), consistent with HeroUI semantic conventions used elsewhere.
+  - **VERIFIED**: File deleted — `src/components/landing/` directory no longer exists. No fix needed.
 
-- [ ] **[BUG-058] severity:medium** — Icon-only social links (GitHub and Bluesky, lines 36-52) have no accessible text label — screen readers announce nothing meaningful
+- [x] **[BUG-058] severity:medium** — Icon-only social links (GitHub and Bluesky, lines 36-52) have no accessible text label — screen readers announce nothing meaningful
 
   - File: `src/components/footer.tsx:36-52`
   - Impact: Screen reader users cannot identify or navigate to these links. WCAG 2.1 SC 2.4.4 (Link Purpose) and 4.1.2 (Name, Role, Value) are violated.
   - Fix: Add `aria-label="GitHub"` and `aria-label="Bluesky"` to the respective `<a>` elements.
+  - **VERIFIED**: Already fixed — all social links have `aria-label` attributes (GitHub, Bluesky, Reddit, X, LinkedIn).
 
-- [ ] **[BUG-064] severity:low** — `FathomAnalytics` pageview effect fires unconditionally — does not guard on Fathom being initialized
+- [x] **[BUG-064] severity:low** — `FathomAnalytics` pageview effect fires unconditionally — does not guard on Fathom being initialized
 
   - File: `src/components/fathom-analytics.tsx:24-30`
   - Impact: The pageview `useEffect` runs on every route change regardless of whether `Fathom.load()` was called (i.e., regardless of whether `VITE_FATHOM_SITE_ID` is set). Calling `Fathom.trackPageview()` before `Fathom.load()` queues the event in the fathom-client buffer but it is never flushed — pageviews are silently lost on the initial route. On subsequent navigations after `load()` completes, tracking resumes. The initial pageview is reliably missed.
