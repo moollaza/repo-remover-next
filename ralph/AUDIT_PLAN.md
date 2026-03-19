@@ -429,7 +429,7 @@ Functional bugs, UX issues, hardcoded colors, and accessibility problems.
   - Impact: The handler filters by `isInOrganization` and hardcodes `login: "testorg"` in the response. When tests (or the real data provider) call `getOrgRepositories` for `anotherorg`, they still receive `testorg` repos with `login: "testorg"`. Org isolation bugs in `fetchGitHubDataWithProgress` are invisible in unit tests because all orgs look identical.
   - Fix: Capture the `org` variable from the GraphQL request body and filter `MOCK_REPOS` by matching `owner.login` (or add a `orgLogin` param to the handler context)
 
-- [ ] **[BUG-050] severity:medium** — `repo-2` is `isInOrganization: true` with `ownerType: "current-user"` — contradictory fixture data
+- [x] **[BUG-050] severity:medium** — `repo-2` is `isInOrganization: true` with `ownerType: "current-user"` — contradictory fixture data
 
   - File: `src/mocks/static-fixtures.ts:71-82`
   - Impact: `getOrgRepositories` handler filters by `isInOrganization`, so `repo-2` appears in org repo results but has `owner.login = "testuser"`. Any code distinguishing org repos by owner login (e.g. `repo.owner.login !== viewer.login`) will behave differently for `repo-2` vs real data, masking filtering bugs.

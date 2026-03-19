@@ -79,7 +79,6 @@ export const MOCK_REPOS: MockRepository[] = [
     description: "Second test repo",
     id: "repo-2",
     isArchived: true,
-    isInOrganization: true,
     isPrivate: true,
     name: "repo-2",
     ownerType: "current-user",
