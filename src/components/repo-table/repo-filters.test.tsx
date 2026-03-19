@@ -213,6 +213,34 @@ describe("RepoFilters", () => {
     expect(dropdownTrigger).toHaveAttribute("aria-label", "Choose action type");
   });
 
+  it("shows Ctrl shortcut hint on non-Mac platforms", () => {
+    // jsdom defaults navigator.platform to "" (non-Mac)
+    render(<RepoFilters {...defaultProps} />);
+
+    // HeroUI Kbd renders <abbr title="Control">⌃</abbr> for ctrl key
+    const abbr = screen.getByTitle("Control");
+    expect(abbr).toBeInTheDocument();
+  });
+
+  it("shows Command shortcut hint on Mac platform", () => {
+    const originalPlatform = navigator.platform;
+    Object.defineProperty(navigator, "platform", {
+      configurable: true,
+      value: "MacIntel",
+    });
+
+    render(<RepoFilters {...defaultProps} />);
+
+    // HeroUI Kbd renders <abbr title="Command">⌘</abbr> for command key
+    const abbr = screen.getByTitle("Command");
+    expect(abbr).toBeInTheDocument();
+
+    Object.defineProperty(navigator, "platform", {
+      configurable: true,
+      value: originalPlatform,
+    });
+  });
+
   it("shows danger color for delete action", () => {
     const propsWithDeleteAction = {
       ...defaultProps,

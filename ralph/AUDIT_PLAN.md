@@ -603,7 +603,7 @@ Non-critical code quality improvements and simplifications.
   - File: `src/utils/secure-storage.ts:35-38` (decryptData) + `:157-159` (getItem); `:94-97` (encryptData) + `:192-194` (setItem)
   - Detail: `decryptData` calls `console.error(...)` then `throw new Error(...)`. `getItem` catches that re-thrown error and calls `console.warn(...)` again. Every decryption failure generates two separate console entries. Same pattern in `encryptData` -> `setItem`. Either remove logging from the inner helpers and let callers log, or remove the outer catches.
 
-- [ ] **[SIMP-015] severity:low** — Keyboard shortcut hint hardcoded as `command-K` — incorrect on Windows/Linux
+- [x] **[SIMP-015] severity:low** — Keyboard shortcut hint hardcoded as `command-K` — incorrect on Windows/Linux
 
   - File: `src/components/repo-table/repo-filters.tsx:267`
   - Detail: The handler fires on both `Ctrl+K` (line 71) and `Cmd+K`, but the hint `command-K` is hardcoded. Windows/Linux users see a Mac-only symbol with no hint that the shortcut works for them. Fix: detect `navigator.platform.includes('Mac')` and render `Ctrl K` otherwise.

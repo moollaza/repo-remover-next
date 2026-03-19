@@ -15,7 +15,7 @@ import {
   type Selection,
   SelectItem,
 } from "@heroui/react";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 
 const PER_PAGE_OPTIONS = [5, 10, 20, 50, 100];
 const REPO_TYPES = [
@@ -69,6 +69,10 @@ export default function RepoFilters({
   selectedRepoKeys,
 }: RepoFiltersProps): JSX.Element {
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const isMac = useMemo(
+    () => /Mac|iPod|iPhone|iPad/.test(navigator.platform),
+    [],
+  );
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -138,7 +142,7 @@ export default function RepoFilters({
       <div className="col-span-4">
         <Input
           data-testid="repo-search-input"
-          endContent={<Kbd keys={["command"]}>K</Kbd>}
+          endContent={<Kbd keys={[isMac ? "command" : "ctrl"]}>K</Kbd>}
           label="Search"
           onValueChange={onSearchChange}
           placeholder="Search by name or description"
