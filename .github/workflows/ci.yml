@@ -16,6 +16,8 @@ jobs:
         run: bun install --frozen-lockfile
       - name: Lint code
         run: bun run lint
+      - name: Type check
+        run: bunx tsc --noEmit
       - name: Run unit tests
         run: bun run test:unit
       - name: Upload test results

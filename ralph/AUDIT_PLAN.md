@@ -199,13 +199,12 @@ Critical bugs that affect security, correctness, or data integrity.
   - Impact: `Object.entries(new Error("details"))` returns `[]` because Error properties (`message`, `stack`, `name`) are non-enumerable. Any call like `debug.error("oops", new Error("PAT: ghp_xxx"))` logs `{}` instead of the error — the original error is completely lost, making debugging impossible. Worse, this is the path that's supposed to protect against token leaks in errors, so it silently fails at its primary job.
   - Fix: Before the generic object branch, add `if (value instanceof Error) return { message: sanitize(value.message), name: value.name }`
 
-- [ ] **[BUG-065] severity:high** — `outline-none` removes browser focus ring, and the replacement `focus-visible:ring-ring/50` references undefined `--color-ring` CSS variable — keyboard focus is completely invisible
+- [x] **[BUG-065] severity:high** — `outline-none` removes browser focus ring, and the replacement `focus-visible:ring-ring/50` references undefined `--color-ring` CSS variable — keyboard focus is completely invisible
 
   - File: `src/components/ui/accordion.tsx:36`
-  - Impact: The trigger explicitly removes the browser default outline (`outline-none`) and relies on `focus-visible:ring-3 focus-visible:ring-ring/50` as the replacement. However, `--color-ring` (Tailwind v4) / `--ring` (shadcn) is not defined in `globals.css` and HeroUI does not define it, so the computed ring color is transparent. Keyboard users navigating the FAQ accordion have zero visible focus state. WCAG 2.1 SC 2.4.7 (Focus Visible) violation. Same issue affects `focus-visible:border-ring` and `focus-visible:after:border-ring`.
-  - Fix: Replace `focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:after:border-ring` with `focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)]` to match the project's established focus-ring pattern, or define `--color-ring: var(--brand-blue)` in `globals.css`
+  - **MOOT**: File was deleted in commit df37785 (revert of deps update). No accordion component exists in src/. No fix needed.
 
-- [ ] **[BUG-069] severity:high** — No TypeScript type-check step in CI — `bun run build` uses Vite/esbuild which transpiles without type-checking
+- [x] **[BUG-069] severity:high** — No TypeScript type-check step in CI — `bun run build` uses Vite/esbuild which transpiles without type-checking
 
   - File: `.github/workflows/ci.yml:22-24` (lint-and-test job)
   - Impact: `vite build` uses `esbuild` under the hood, which strips TypeScript types but does not perform type checking. A PR with a real type error (wrong prop type, missing required field, unsafe cast) can pass lint, unit tests, and build without any CI failure. The only TypeScript validation is the developer's local `tsc --noEmit`, which CLAUDE.md recommends but is not enforced.
