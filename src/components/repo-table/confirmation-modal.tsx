@@ -50,7 +50,7 @@ interface RepoActionConfirmationProps
   count: number;
   handleConfirm: () => void;
   isCorrectUsername: boolean;
-  setUsername: React.Dispatch<React.SetStateAction<string>>;
+  setUsername: (value: string) => void;
   username: string;
 }
 
@@ -189,19 +189,8 @@ export default function ConfirmationModal({
     resetState();
   }
 
-  function handleSetUsername(value: React.SetStateAction<string>) {
-    if (typeof value === "function") {
-      // If it's a function that updates based on previous state
-      const updater = value as (prevState: string) => string;
-      const newValue = updater(state.username);
-      dispatch({
-        payload: { login, username: newValue },
-        type: "SET_USERNAME",
-      });
-    } else {
-      // If it's a direct value
-      dispatch({ payload: { login, username: value }, type: "SET_USERNAME" });
-    }
+  function handleSetUsername(value: string) {
+    dispatch({ payload: { login, username: value }, type: "SET_USERNAME" });
   }
 
   const isDismissable = state.mode === "confirmation";

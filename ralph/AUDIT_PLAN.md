@@ -588,7 +588,7 @@ Non-critical code quality improvements and simplifications.
   - Detail: This is a client-side-only Vite app — `window` is always defined. The guards are SSR boilerplate that adds noise.
   - Fix: Remove all four `typeof window !== "undefined"` checks.
 
-- [ ] **[SIMP-005] severity:low** — `handleSetUsername` functional updater is overcomplicated for a plain text input
+- [x] **[SIMP-005] severity:low** — `handleSetUsername` functional updater is overcomplicated for a plain text input
 
   - File: `src/hooks/use-confirmation-modal.ts:167-180`
   - Detail: The `React.Dispatch<React.SetStateAction<string>>` signature + updater branch adds ~10 lines for a case that never occurs in the single caller (which always passes `e.target.value` directly). Worse, the functional updater path uses render-time `state.username` as "prev state" — stale if called multiple times before a re-render. A simple `(value: string) => void` type would be correct and half the code.
