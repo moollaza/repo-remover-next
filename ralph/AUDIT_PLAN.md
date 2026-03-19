@@ -330,7 +330,7 @@ Functional bugs, UX issues, hardcoded colors, and accessibility problems.
   - Impact: Every `dispatch` call during processing (one per repo + error events) triggers a re-render that constructs a new `ThrottledOctokit`, discarding its internal rate-limit counter state. The running `handleConfirm` loop is unaffected (it captured the original instance), but ~10-20 wasted constructions per batch. On a second modal open, the user gets a fresh rate-limit window, potentially masking 429s.
   - Fix: `const octokit = useMemo(() => pat ? createThrottledOctokit(pat) : null, [pat]);`
 
-- [ ] **[BUG-015] severity:medium** — Action change leaves stale disabled repos in `selectedRepoKeys`
+- [x] **[BUG-015] severity:medium** — Action change leaves stale disabled repos in `selectedRepoKeys`
 
   - File: `src/hooks/use-repo-selection.ts:106-111` (`handleRepoActionChange`)
   - Impact: User can select archived repos while "delete" action is active, then switch back to "archive" action. The archived repo IDs remain in `selectedRepoKeys` — `selectedRepos` (line 103) still includes them and they are passed to the confirmation modal and processed. GitHub will receive a redundant archive request for an already-archived repo, potentially causing errors or silent waste.

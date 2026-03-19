@@ -1,4 +1,5 @@
 import { type Repository } from "@octokit/graphql-schema";
+import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 import { createMockRepo } from "@/mocks/static-fixtures";
@@ -129,6 +130,61 @@ describe("RepoTable", () => {
     // ConfirmationModal should receive "archive" as default action, never undefined
     const modal = screen.getByTestId("repo-confirmation-modal");
     expect(modal).toHaveAttribute("data-action", "archive");
+  });
+
+  test("removes archived repos from selection when switching from delete to archive action", async () => {
+    const user = userEvent.setup();
+
+    const activeRepo = createMockRepo({
+      id: "active-repo",
+      isArchived: false,
+      name: "active-repo",
+    });
+    const archivedRepo = createMockRepo({
+      id: "archived-repo",
+      isArchived: true,
+      name: "archived-repo",
+    });
+
+    render(<RepoTable login={mockLogin} repos={[activeRepo, archivedRepo]} />);
+
+    // Step 1: Switch to "delete" action so archived repos are selectable
+    const dropdownTrigger = screen.getByTestId("repo-action-dropdown-trigger");
+    await user.click(dropdownTrigger);
+    const deleteOption = await screen.findByTestId(
+      "repo-action-dropdown-item-delete",
+    );
+    await user.click(deleteOption);
+
+    // Step 2: Select all repos (including the archived one, now selectable in delete mode)
+    const checkboxes = screen.getAllByRole("checkbox");
+    await user.click(checkboxes[0]); // select-all checkbox
+
+    // Verify both repos are selected (archived repo is in the selection)
+    const callsBeforeSwitch = MockConfirmationModal.mock.calls;
+    const propsBeforeSwitch =
+      callsBeforeSwitch[callsBeforeSwitch.length - 1][0];
+    expect(
+      propsBeforeSwitch.repos.some((r: Repository) => r.id === "archived-repo"),
+    ).toBe(true);
+
+    // Step 3: Switch back to "archive" action
+    await user.click(dropdownTrigger);
+    const archiveOption = await screen.findByTestId(
+      "repo-action-dropdown-item-archive",
+    );
+    await user.click(archiveOption);
+
+    // Step 4: Verify the archived repo is removed from selection
+    const callsAfterSwitch = MockConfirmationModal.mock.calls;
+    const propsAfterSwitch = callsAfterSwitch[callsAfterSwitch.length - 1][0];
+    expect(
+      propsAfterSwitch.repos.some((r: Repository) => r.id === "archived-repo"),
+    ).toBe(false);
+    // Active repo should still be selected
+    expect(
+      propsAfterSwitch.repos.some((r: Repository) => r.id === "active-repo"),
+    ).toBe(true);
   });
 
   test("does not expose repos on window in production mode", () => {

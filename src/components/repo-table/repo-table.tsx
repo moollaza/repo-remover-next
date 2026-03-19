@@ -122,9 +122,31 @@ export default function RepoTable({
 
   const handleRepoActionChange = useCallback(
     (keys: Selection) => {
-      setSelectedRepoAction(keys as SelectionSet);
+      const newAction = keys as SelectionSet;
+      setSelectedRepoAction(newAction);
+
+      // BUG-015: When switching to "archive", remove archived repos from selection
+      // since they become disabled and shouldn't remain selected
+      if (newAction.has("archive") && repos) {
+        const archivedIds = new Set(
+          repos.filter((r) => r.isArchived).map((r) => r.id),
+        );
+        if (archivedIds.size > 0) {
+          setSelectedRepoKeys((prevKeys) => {
+            if (prevKeys === "all") {
+              return new Set(
+                repos.filter((r) => !r.isArchived).map((r) => r.id),
+              );
+            }
+            const filtered = new Set(
+              [...prevKeys].filter((key) => !archivedIds.has(key as string)),
+            );
+            return filtered;
+          });
+        }
+      }
     },
-    [setSelectedRepoAction],
+    [repos],
   );
 
   // Helper function to determine if a repo should be disabled for selection
