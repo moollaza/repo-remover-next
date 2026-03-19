@@ -158,22 +158,34 @@ describe("GitHub Utils", () => {
       expect(isValidGitHubToken(undefined as unknown as string)).toBe(false);
     });
 
-    // Test github_pat_ tokens
+    // Test github_pat_ tokens (fine-grained PATs are 82+ chars)
     it("should validate github_pat_ tokens correctly", () => {
-      // Valid github_pat_ tokens
+      // Valid github_pat_ token (realistic length ~82 chars)
+      expect(
+        isValidGitHubToken(
+          "github_pat_11AABBCCDDEEFFGGHH0011_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVW",
+        ),
+      ).toBe(true);
+
+      // Too short — prefix only
+      expect(isValidGitHubToken("github_pat_short")).toBe(false);
+
+      // Too short — 40 chars total (only 29 chars of payload, not a real PAT)
+      expect(
+        isValidGitHubToken("github_pat_12345678901234567890123456789"),
+      ).toBe(false);
+
+      // Too short — 56 chars (still below 72-char minimum)
       expect(
         isValidGitHubToken(
           "github_pat_11AABBCCDDEEFFGGHH0011223344556677889900_abcDEF",
         ),
-      ).toBe(true);
-
-      // Too short
-      expect(isValidGitHubToken("github_pat_short")).toBe(false);
+      ).toBe(false);
 
       // Invalid characters
       expect(
         isValidGitHubToken(
-          "github_pat_11AABBCCDDEEFFGGHH0011223344556677889900_abc$%^",
+          "github_pat_11AABBCCDDEEFFGGHH0011_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRST$%^",
         ),
       ).toBe(false);
     });

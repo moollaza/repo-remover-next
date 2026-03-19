@@ -14,11 +14,36 @@ const DEBUG = false;
 
 // Static test repository data for generation
 const REPO_TEMPLATES = [
-  { description: "A test project for demos", homepage: "https://example.com", name: "test-project-1", private: false },
-  { description: "Sample application for testing", homepage: "https://demo.com", name: "sample-app-2", private: true },
-  { description: "Demo repository", homepage: "https://test.com", name: "demo-repo-3", private: false },
-  { description: "Test library project", homepage: "https://lib.com", name: "test-lib-4", private: true },
-  { description: "Example project", homepage: "https://sample.com", name: "example-5", private: false },
+  {
+    description: "A test project for demos",
+    homepage: "https://example.com",
+    name: "test-project-1",
+    private: false,
+  },
+  {
+    description: "Sample application for testing",
+    homepage: "https://demo.com",
+    name: "sample-app-2",
+    private: true,
+  },
+  {
+    description: "Demo repository",
+    homepage: "https://test.com",
+    name: "demo-repo-3",
+    private: false,
+  },
+  {
+    description: "Test library project",
+    homepage: "https://lib.com",
+    name: "test-lib-4",
+    private: true,
+  },
+  {
+    description: "Example project",
+    homepage: "https://sample.com",
+    name: "example-5",
+    private: false,
+  },
 ];
 
 export async function generateRepos(
@@ -55,9 +80,9 @@ export async function generateRepos(
 export function isValidGitHubToken(token: string): boolean {
   if (!token) return false;
 
-  // Special case for github_pat_ tokens
+  // Special case for github_pat_ (fine-grained) tokens — real tokens are 82+ chars
   if (token.startsWith("github_pat_")) {
-    return token.length >= 40 && /^[a-zA-Z0-9_]+$/.test(token.slice(11));
+    return token.length >= 72 && /^[a-zA-Z0-9_]+$/.test(token.slice(11));
   }
 
   // All other tokens start with 3-letter prefix + underscore

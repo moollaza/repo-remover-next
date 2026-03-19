@@ -313,13 +313,12 @@ Functional bugs, UX issues, hardcoded colors, and accessibility problems.
   - Impact: If an operator sets `NEXT_PUBLIC_FATHOM_SITE_ID` in Cloudflare Workers following the docs, Fathom analytics silently loads nothing — no error is raised because the code just returns early on missing `siteId`. All analytics events and pageviews are lost in production with no indication.
   - Fix: Update `docs/ROADMAP.md` and `.claude/rules/architecture.md` to use `VITE_FATHOM_SITE_ID` consistently. Also update project `MEMORY.md` which still documents `NEXT_PUBLIC_FATHOM_SITE_ID`.
 
-- [ ] **[BUG-067] severity:medium** — `button.tsx` uses shadcn CSS variables not defined in this project — `outline`, `ghost`, `secondary` variants render incorrectly
+- [x] **[BUG-067] severity:medium** — `button.tsx` uses shadcn CSS variables not defined in this project — `outline`, `ghost`, `secondary` variants render incorrectly
 
   - File: `src/components/ui/button.tsx:12-18`
-  - Impact: The `outline` variant uses `border-border bg-background hover:bg-muted hover:text-foreground` and `dark:border-input dark:bg-input/30 dark:hover:bg-input/50`. The `secondary` variant uses `bg-secondary text-secondary-foreground`. The `ghost` variant uses `hover:bg-muted`. None of `--color-border`, `--color-input`, `--color-muted`, `--color-muted-foreground`, `--color-secondary`, `--color-secondary-foreground` are defined in `globals.css` or emitted by the HeroUI plugin. In Tailwind v4, unresolved CSS variables resolve to `initial` — affected variants render with transparent/no backgrounds, wrong borders, and unreadable text. Since the component is currently dead code (see SIMP-032), this only matters if the component is ever activated.
-  - Fix: Replace shadcn CSS variables with HeroUI semantic equivalents: `border-divider bg-background hover:bg-content2` for outline; `bg-primary-100 text-primary` for secondary; `hover:bg-content2` for ghost.
+  - **MOOT**: File was already deleted by SIMP-032 (dead code removal). No fix needed.
 
-- [ ] **[BUG-005] severity:medium** — `isValidGitHubToken` minimum length for `github_pat_` tokens is far too permissive
+- [x] **[BUG-005] severity:medium** — `isValidGitHubToken` minimum length for `github_pat_` tokens is far too permissive
 
   - File: `src/utils/github-utils.ts:84`
   - Impact: `token.length >= 40` means the prefix (11 chars) + only 29 chars of payload passes. Real fine-grained PATs are 80-120 chars. A synthetically short `github_pat_abcdefghijklmnopqrstuvwxyzabc` (40 chars total) would pass client-side validation and confusingly return a 401 from GitHub — making the user think their valid-looking token is wrong.
