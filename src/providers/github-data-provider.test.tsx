@@ -1,27 +1,60 @@
 import "@testing-library/jest-dom";
+import { type Repository, type User } from "@octokit/graphql-schema";
 import { act, renderHook, waitFor } from "@testing-library/react";
-import {
-  afterEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from "vitest";
+import React from "react";
+import { SWRConfig } from "swr";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { useGitHubData } from "@/hooks/use-github-data";
-import { getValidPersonalAccessToken } from "@/mocks/static-fixtures";
+import {
+  getValidPersonalAccessToken,
+  MOCK_REPOS,
+  MOCK_USER,
+} from "@/mocks/static-fixtures";
+import { analytics } from "@/utils/analytics";
+import { fetchGitHubDataWithProgress } from "@/utils/github-api";
 import { secureStorage } from "@/utils/secure-storage";
 
 import { GitHubDataProvider } from "./github-data-provider";
 
+vi.mock("@/utils/analytics", () => ({
+  analytics: {
+    trackTokenValidated: vi.fn(),
+  },
+}));
+
+vi.mock("@/utils/github-api", () => ({
+  fetchGitHubDataWithProgress: vi.fn(),
+}));
+
+const mockFetch = vi.mocked(fetchGitHubDataWithProgress);
+
 const validToken = getValidPersonalAccessToken();
+
+/** Wrapper that isolates SWR cache per test */
+function IsolatedProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <SWRConfig value={{ provider: () => new Map() }}>
+      <GitHubDataProvider>{children}</GitHubDataProvider>
+    </SWRConfig>
+  );
+}
+
+// Default mock: successful API response
+function setupSuccessfulFetch() {
+  mockFetch.mockResolvedValue({
+    error: null,
+    repos: MOCK_REPOS as Repository[],
+    user: MOCK_USER as unknown as User,
+  });
+}
 
 // Test cleanup
 afterEach(() => {
   localStorage.clear();
   // Clear secure storage prefixed keys
-  Object.keys(localStorage).forEach(key => {
-    if (key.startsWith('secure_')) {
+  Object.keys(localStorage).forEach((key) => {
+    if (key.startsWith("secure_")) {
       localStorage.removeItem(key);
     }
   });
@@ -153,5 +186,62 @@ describe("GitHubDataProvider", () => {
       });
     });
   });
-});
 
+  describe("Analytics", () => {
+    it("tracks token_validated only after successful API response", async () => {
+      setupSuccessfulFetch();
+
+      const { result } = renderHook(() => useGitHubData(), {
+        wrapper: IsolatedProvider,
+      });
+
+      // Set PAT — this triggers SWR fetch
+      act(() => {
+        result.current.setPat(validToken);
+      });
+
+      // Analytics should NOT fire immediately on setPat
+      expect(analytics.trackTokenValidated).not.toHaveBeenCalled();
+
+      // Wait for SWR to complete successfully (repos loaded = API success)
+      await waitFor(() => {
+        expect(result.current.repos).not.toBeNull();
+      });
+
+      // Now analytics should have fired after successful API response
+      expect(analytics.trackTokenValidated).toHaveBeenCalledTimes(1);
+    });
+
+    it("does not fire trackTokenValidated twice on SWR revalidation", async () => {
+      setupSuccessfulFetch();
+
+      const { result } = renderHook(() => useGitHubData(), {
+        wrapper: IsolatedProvider,
+      });
+
+      act(() => {
+        result.current.setPat(validToken);
+      });
+
+      // Wait for initial fetch
+      await waitFor(() => {
+        expect(result.current.repos).not.toBeNull();
+      });
+
+      expect(analytics.trackTokenValidated).toHaveBeenCalledTimes(1);
+
+      // Trigger a refetch (simulates SWR revalidation)
+      act(() => {
+        result.current.refetchData();
+      });
+
+      // Wait for refetch to complete
+      await waitFor(() => {
+        expect(result.current.repos).not.toBeNull();
+      });
+
+      // Should still be called only once — ref guards against duplicates
+      expect(analytics.trackTokenValidated).toHaveBeenCalledTimes(1);
+    });
+  });
+});

@@ -393,7 +393,7 @@ Functional bugs, UX issues, hardcoded colors, and accessibility problems.
   - Impact: During a GitHub outage or after hitting rate limits, users see the same message as for a genuinely invalid token. They may unnecessarily revoke and regenerate a working PAT.
   - Fix: Inspect `err` for HTTP status: show "Invalid or expired token" for 401 only; show a "GitHub API unavailable, please try again" message for network errors, 5xx, and 403.
 
-- [ ] **[BUG-040] severity:medium** — `analytics.trackTokenValidated()` fires on form submission, not on confirmed API success
+- [x] **[BUG-040] severity:medium** — `analytics.trackTokenValidated()` fires on form submission, not on confirmed API success
 
   - File: `src/components/token-form-section.tsx:21`
   - Impact: Any user who submits a syntactically valid but semantically invalid token (wrong scopes, expired, revoked) gets a "token validated" analytics event recorded, skewing funnel metrics. The actual API validation happens asynchronously in `GitHubDataProvider` after navigation; this component has no knowledge of the outcome.

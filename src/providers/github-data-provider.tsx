@@ -9,6 +9,7 @@ import React, {
 import useSWR from "swr";
 
 import { GitHubContext, GitHubContextType } from "@/contexts/github-context";
+import { analytics } from "@/utils/analytics";
 import { debug } from "@/utils/debug";
 import {
   fetchGitHubDataWithProgress,
@@ -52,6 +53,7 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
   const [isInitialized, setIsInitialized] = useState(false);
   const [progress, setProgress] = useState<LoadingProgress | null>(null);
   const lastFetchTimeRef = useRef<number>(0);
+  const tokenValidatedRef = useRef<null | string>(null);
 
   // Load from secure storage on mount
   useLayoutEffect(() => {
@@ -131,6 +133,11 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
         if (data.user?.login && !login) {
           setLogin(data.user.login);
         }
+        // Track token validation once per token (not on revalidation)
+        if (pat && tokenValidatedRef.current !== pat) {
+          tokenValidatedRef.current = pat;
+          analytics.trackTokenValidated();
+        }
         // Clear progress when complete
         setProgress(null);
       },
@@ -185,6 +192,7 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
   const logout = useCallback(() => {
     setLoginState(null);
     setPatState(null);
+    tokenValidatedRef.current = null;
     if (typeof window !== "undefined") {
       try {
         secureStorage.removeItem("login");
