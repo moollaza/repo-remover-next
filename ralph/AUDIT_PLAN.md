@@ -608,7 +608,7 @@ Non-critical code quality improvements and simplifications.
   - File: `src/components/repo-table/repo-filters.tsx:267`
   - Detail: The handler fires on both `Ctrl+K` (line 71) and `Cmd+K`, but the hint `command-K` is hardcoded. Windows/Linux users see a Mac-only symbol with no hint that the shortcut works for them. Fix: detect `navigator.platform.includes('Mac')` and render `Ctrl K` otherwise.
 
-- [ ] **[SIMP-016] severity:low** — Redundant arrow-function wrapper on form `onSubmit`
+- [x] **[SIMP-016] severity:low** — Redundant arrow-function wrapper on form `onSubmit`
 
   - File: `src/components/github-token-form.tsx:126`
   - Detail: `onSubmit={(e) => { handleSubmit(e); }}` is identical to `onSubmit={handleSubmit}`. Allocates an extra function on every render with no benefit.

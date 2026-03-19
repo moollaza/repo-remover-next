@@ -142,9 +142,7 @@ export default function GitHubTokenForm({
     <form
       className={clsx("flex flex-col gap-10", className)}
       data-testid="github-token-form"
-      onSubmit={(e) => {
-        handleSubmit(e);
-      }}
+      onSubmit={handleSubmit}
     >
       <div className="flex flex-col gap-4">
         <Input
