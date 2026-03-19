@@ -613,12 +613,13 @@ Non-critical code quality improvements and simplifications.
   - File: `src/components/github-token-form.tsx:126`
   - Detail: `onSubmit={(e) => { handleSubmit(e); }}` is identical to `onSubmit={handleSubmit}`. Allocates an extra function on every render with no benefit.
 
-- [ ] **[SIMP-017] severity:low** — `handleLogout` could delegate to context instead of calling storage directly
+- [x] **[SIMP-017] severity:low** — `handleLogout` could delegate to context instead of calling storage directly
 
   - File: `src/components/header.tsx:237-242`
   - Note: See BUG-039; this is the simplification aspect of the same issue
+  - **VERIFIED**: Already fixed by BUG-039 — header now calls `logout()` from context, not `secureStorage` directly.
 
-- [ ] **[SIMP-018] severity:low** — Redundant `if (sanitizedData.length > 0)` branch in `log()`, `warn()`, `error()`
+- [x] **[SIMP-018] severity:low** — Redundant `if (sanitizedData.length > 0)` branch in `log()`, `warn()`, `error()`
 
   - File: `src/utils/debug.ts:33-39, 76-82, 148-155`
   - Spreading an empty array (`console.log("msg", ...[])`) is identical to `console.log("msg")` in all JS engines. The if/else adds ~6 lines of dead branching per function for no benefit.

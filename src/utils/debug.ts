@@ -21,14 +21,8 @@ const isDevelopment = import.meta.env.DEV;
  * @param data - Optional data to log with the error
  */
 function error(message: string, ...data: unknown[]): void {
-  const sanitizedData = data.map(sanitize);
-  if (sanitizedData.length > 0) {
-    // eslint-disable-next-line no-console
-    console.error(`[ERROR] ${message}`, ...sanitizedData);
-  } else {
-    // eslint-disable-next-line no-console
-    console.error(`[ERROR] ${message}`);
-  }
+  // eslint-disable-next-line no-console
+  console.error(`[ERROR] ${message}`, ...data.map(sanitize));
 }
 
 /**
@@ -65,14 +59,8 @@ function groupEnd(): void {
 function log(message: string, ...data: unknown[]): void {
   if (!isDevelopment) return;
 
-  const sanitizedData = data.map(sanitize);
-  if (sanitizedData.length > 0) {
-    // eslint-disable-next-line no-console
-    console.log(`[DEBUG] ${message}`, ...sanitizedData);
-  } else {
-    // eslint-disable-next-line no-console
-    console.log(`[DEBUG] ${message}`);
-  }
+  // eslint-disable-next-line no-console
+  console.log(`[DEBUG] ${message}`, ...data.map(sanitize));
 }
 
 /**
@@ -159,14 +147,8 @@ function table(data: unknown): void {
 function warn(message: string, ...data: unknown[]): void {
   if (!isDevelopment) return;
 
-  const sanitizedData = data.map(sanitize);
-  if (sanitizedData.length > 0) {
-    // eslint-disable-next-line no-console
-    console.warn(`[WARN] ${message}`, ...sanitizedData);
-  } else {
-    // eslint-disable-next-line no-console
-    console.warn(`[WARN] ${message}`);
-  }
+  // eslint-disable-next-line no-console
+  console.warn(`[WARN] ${message}`, ...data.map(sanitize));
 }
 
 /**
