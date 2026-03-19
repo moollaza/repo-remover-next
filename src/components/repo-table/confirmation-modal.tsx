@@ -338,11 +338,11 @@ function RepoActionConfirmation({
           Are you sure you want to <b>{action}</b> the following {count}{" "}
           repositor{count > 1 ? "ies" : "y"}?
         </p>
-        <ol className="list-disc list-inside">
+        <ul className="list-disc list-inside">
           {repos.map((repo, index) => (
             <li key={index}>{repo.name}</li>
           ))}
-        </ol>
+        </ul>
         <Spacer y={1} />
         <strong>Please type your GitHub username to confirm:</strong>
         <Input
@@ -449,14 +449,14 @@ function RepoActionResult({
               {action === "archive" ? "archiving" : "deleting"} the following{" "}
               repositor{errorCount > 1 ? "ies" : "y"}:
             </p>
-            <ol className="list-disc list-inside">
+            <ul className="list-disc list-inside">
               {errors?.map(({ error, repository }, index) => (
                 <li key={index}>
                   {repository ? repository.name : "Unknown Repository"}:{" "}
                   {error.message}
                 </li>
               ))}
-            </ol>
+            </ul>
           </>
         )}
       </ModalBody>

@@ -448,16 +448,18 @@ Functional bugs, UX issues, hardcoded colors, and accessibility problems.
   - Fix: Change to `aria-current={page === currentPage ? "page" : undefined}`
   - **BLOCKED**: `aria-current="true"` is hardcoded inside HeroUI's `PaginationItem` via `dataAttr(isActive)` in `use-pagination-item.js`. No prop or API exists to override this. Fixing requires either DOM manipulation hacks or reimplementing all pagination item styling from scratch. `aria-current="true"` is valid ARIA — less semantic than `"page"` but functionally correct.
 
-- [ ] **[BUG-026] severity:low** — Duplicate `data-testid="repo-tags"` on mobile and desktop cells within the same row
+- [x] **[BUG-026] severity:low** — Duplicate `data-testid="repo-tags"` on mobile and desktop cells within the same row
 
   - File: `src/components/repo-table/repo-table.tsx:297` (mobile pills) and `:362` (desktop status)
   - Impact: Both `<div>`s within the same `<tr>` share `data-testid="repo-tags"`. Any test calling `getByTestId("repo-tags")` throws "Found multiple elements" because each repo row has two matching elements. Tests calling `getAllByTestId("repo-tags")` get twice as many results as expected.
   - Fix: Rename one: e.g., `data-testid="repo-tags-mobile"` and `data-testid="repo-tags-desktop"`.
+  - **VERIFIED**: Already fixed — only one `data-testid="repo-tags"` exists in the current code (line 257). The mobile/desktop dual-cell layout was removed in a prior refactor.
 
-- [ ] **[BUG-027] severity:low** — `<ol>` elements use `list-disc` CSS class — bullet style on an ordered list
+- [x] **[BUG-027] severity:low** — `<ol>` elements use `list-disc` CSS class — bullet style on an ordered list
 
   - File: `src/components/repo-table/confirmation-modal.tsx:189, 332`
   - Impact: Both the repo list (confirmation screen) and error list (result screen) are `<ol>` elements styled with `list-disc` (bullets). Ordered lists signal enumeration to screen readers ("item 1, item 2...") but visually render bullets. Use `<ul>` for unordered bullet lists or `list-decimal` for numbered `<ol>`.
+  - Fix applied: Changed both `<ol>` to `<ul>` at lines 341 and 452. Added test verifying no `<ol>` elements in confirmation body.
 
 - [ ] **[BUG-028] severity:low** — Confirm button uses hardcoded Tailwind colors — violates HeroUI semantic color rule
 

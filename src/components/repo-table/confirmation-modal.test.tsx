@@ -181,6 +181,26 @@ describe("ConfirmationModal", () => {
     expect(screen.getByText(/1 error/)).toBeInTheDocument();
   });
 
+  it("renders repo list as <ul> not <ol> for bullet-styled lists (BUG-027)", () => {
+    render(
+      <GitHubContext.Provider value={mockContextValue}>
+        <ConfirmationModal {...mockProps} />
+      </GitHubContext.Provider>,
+    );
+
+    // The repo list should be an unordered list since it uses list-disc (bullets)
+    const lists = screen
+      .getByTestId("confirmation-modal-body")
+      .querySelectorAll("ul");
+    expect(lists.length).toBeGreaterThanOrEqual(1);
+
+    // No <ol> elements should exist — bullets belong on <ul>, not <ol>
+    const orderedLists = screen
+      .getByTestId("confirmation-modal-body")
+      .querySelectorAll("ol");
+    expect(orderedLists.length).toBe(0);
+  });
+
   it("does not call mutate when cancelling without processing (BUG-013)", () => {
     render(
       <GitHubContext.Provider value={mockContextValue}>
