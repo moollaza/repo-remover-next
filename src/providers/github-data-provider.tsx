@@ -157,11 +157,9 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
     }
 
     setLoginState(newLogin);
-    if (typeof window !== "undefined") {
-      secureStorage.setItem("login", newLogin).catch((error) => {
-        debug.warn("Failed to save login to secure storage:", error);
-      });
-    }
+    secureStorage.setItem("login", newLogin).catch((error) => {
+      debug.warn("Failed to save login to secure storage:", error);
+    });
   }, []);
 
   const setPat = useCallback((newPat: string) => {
@@ -171,24 +169,20 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
     }
 
     setPatState(newPat);
-    if (typeof window !== "undefined") {
-      secureStorage.setItem("pat", newPat).catch((error) => {
-        debug.warn("Failed to save PAT to secure storage:", error);
-      });
-    }
+    secureStorage.setItem("pat", newPat).catch((error) => {
+      debug.warn("Failed to save PAT to secure storage:", error);
+    });
   }, []);
 
   const logout = useCallback(() => {
     setLoginState(null);
     setPatState(null);
     tokenValidatedRef.current = null;
-    if (typeof window !== "undefined") {
-      try {
-        secureStorage.removeItem("login");
-        secureStorage.removeItem("pat");
-      } catch (error) {
-        debug.warn("Failed to clear secure storage during logout:", error);
-      }
+    try {
+      secureStorage.removeItem("login");
+      secureStorage.removeItem("pat");
+    } catch (error) {
+      debug.warn("Failed to clear secure storage during logout:", error);
     }
   }, []);
 

@@ -582,7 +582,7 @@ Non-critical code quality improvements and simplifications.
   - Detail: The callback is `async` — `useLayoutEffect` fires before browser paint but the async part (storage read) resolves asynchronously regardless. The timing guarantee of `useLayoutEffect` is lost entirely. `useEffect` is the correct hook here. Additionally, the cleanup body (lines 74-77) is an empty function with a comment — pure dead code.
   - Fix: Replace `useLayoutEffect` with `useEffect`; remove the empty cleanup return entirely.
 
-- [ ] **[SIMP-004] severity:low** — `typeof window !== "undefined"` guards are unnecessary in a Vite SPA
+- [x] **[SIMP-004] severity:low** — `typeof window !== "undefined"` guards are unnecessary in a Vite SPA
 
   - File: `src/providers/github-data-provider.tsx:166, 180, 184, 194`
   - Detail: This is a client-side-only Vite app — `window` is always defined. The guards are SSR boilerplate that adds noise.
