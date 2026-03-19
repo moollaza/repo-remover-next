@@ -10,7 +10,7 @@ import {
   Spacer,
 } from "@heroui/react";
 import { type Repository } from "@octokit/graphql-schema";
-import { useMemo, useReducer, useRef } from "react";
+import { useCallback, useMemo, useReducer, useRef } from "react";
 
 import { useGitHubData } from "@/hooks/use-github-data";
 import { analytics } from "@/utils/analytics";
@@ -48,7 +48,7 @@ interface RepoActionConfirmationProps
   extends Pick<ConfirmationModalProps, "action" | "onClose" | "repos"> {
   confirming: boolean;
   count: number;
-  handleConfirm: () => void;
+  handleConfirm: () => Promise<void>;
   isCorrectUsername: boolean;
   setUsername: (value: string) => void;
   username: string;
@@ -103,10 +103,8 @@ export default function ConfirmationModal({
   // Ref guard prevents double-submit from stale closures (two clicks before re-render)
   const processingRef = useRef(false);
 
-  async function handleConfirm() {
+  const handleConfirm = useCallback(async () => {
     debug.log("handleConfirm called");
-
-    debug.log("State before confirmation:", state);
 
     if (!octokit) {
       debug.error("Octokit is not initialized or already processing");
@@ -169,7 +167,7 @@ export default function ConfirmationModal({
 
     // Now complete the processing
     dispatch({ type: "COMPLETE_PROCESSING" });
-  }
+  }, [action, octokit, repos]);
 
   function resetState() {
     processingRef.current = false;
@@ -218,7 +216,7 @@ export default function ConfirmationModal({
               action={action}
               confirming={state.confirming}
               count={count}
-              handleConfirm={() => void handleConfirm()}
+              handleConfirm={handleConfirm}
               isCorrectUsername={state.isCorrectUsername}
               onClose={handleOnClose}
               repos={repos}

@@ -593,7 +593,7 @@ Non-critical code quality improvements and simplifications.
   - File: `src/hooks/use-confirmation-modal.ts:167-180`
   - Detail: The `React.Dispatch<React.SetStateAction<string>>` signature + updater branch adds ~10 lines for a case that never occurs in the single caller (which always passes `e.target.value` directly). Worse, the functional updater path uses render-time `state.username` as "prev state" — stale if called multiple times before a re-render. A simple `(value: string) => void` type would be correct and half the code.
 
-- [ ] **[SIMP-006] severity:low** — `handleConfirm` wrapped in anonymous arrow on every render
+- [x] **[SIMP-006] severity:low** — `handleConfirm` wrapped in anonymous arrow on every render
 
   - File: `src/hooks/use-confirmation-modal.ts:186`
   - Detail: `handleConfirm: () => void handleConfirm()` creates a new function reference on every render. If passed to any `memo`-wrapped child, it invalidates memoization on every dispatch during the progress loop. Should be wrapped with `useCallback` or inlined as a `useCallback`.
