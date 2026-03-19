@@ -276,7 +276,7 @@ Functional bugs, UX issues, hardcoded colors, and accessibility problems.
   - Impact: The guard `if (!octokit || state.confirming) return` reads render-time state. If the user double-clicks the confirm button before React re-renders to unmount it (mode switches to "progress"), both clicks see `state.confirming = false` and spawn two parallel processing loops, archiving/deleting each repo twice.
   - Fix: Add `disabled={!isCorrectUsername || state.confirming}` to the confirm button, or use a `useRef` flag set synchronously before the first `dispatch`
 
-- [ ] **[BUG-024] severity:medium** — `action` prop passed to `ConfirmationModal` can be `undefined` — unsafe cast hides it
+- [x] **[BUG-024] severity:medium** — `action` prop passed to `ConfirmationModal` can be `undefined` — unsafe cast hides it
 
   - File: `src/components/repo-table/repo-table.tsx:472`
   - Impact: `Array.from(selectedRepoAction)[0] as "archive" | "delete"` — if `selectedRepoAction` is an empty `Set` (which cannot happen via the UI today but is not structurally impossible), `Array.from(...)[0]` is `undefined`. The `as` cast silences TypeScript. `ConfirmationModal` receives `undefined` as `action` and likely renders incorrect UI or crashes. The actual initial value is always `"archive"`, so this is latent but fragile.

@@ -319,7 +319,11 @@ export default function RepoTable({
       {/* CONFIRMATION MODAL */}
       {repos && selectedRepos && login && (
         <ConfirmationModal
-          action={Array.from(selectedRepoAction)[0] as "archive" | "delete"}
+          action={
+            (Array.from(selectedRepoAction)[0] ?? "archive") as
+              | "archive"
+              | "delete"
+          }
           data-testid="repo-confirmation-modal"
           isOpen={isOpen}
           login={login}

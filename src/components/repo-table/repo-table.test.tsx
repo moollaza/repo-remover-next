@@ -19,13 +19,20 @@ vi.mock("@heroui/react", async () => {
   };
 });
 
-// Mock ConfirmationModal
-vi.mock("./confirmation-modal", () => ({
-  default: vi
+// Mock ConfirmationModal — capture props so tests can assert on them
+const { MockConfirmationModal } = vi.hoisted(() => {
+  const MockConfirmationModal = vi
     .fn()
-    .mockImplementation(({ isOpen }) =>
-      isOpen ? <div data-testid="repo-confirmation-modal"></div> : null,
-    ),
+    .mockImplementation(
+      ({ action, isOpen }: { action: string; isOpen: boolean }) =>
+        isOpen ? (
+          <div data-action={action} data-testid="repo-confirmation-modal"></div>
+        ) : null,
+    );
+  return { MockConfirmationModal };
+});
+vi.mock("./confirmation-modal", () => ({
+  default: MockConfirmationModal,
 }));
 
 describe("RepoTable", () => {
@@ -114,6 +121,14 @@ describe("RepoTable", () => {
       .closest('[data-testid="repo-row"]');
     expect(activeRepoRow).not.toHaveClass("opacity-50");
     expect(activeRepoRow).not.toHaveClass("pointer-events-none");
+  });
+
+  test("passes a valid action prop to ConfirmationModal (defaults to archive)", () => {
+    render(<RepoTable login={mockLogin} repos={mockRepos} />);
+
+    // ConfirmationModal should receive "archive" as default action, never undefined
+    const modal = screen.getByTestId("repo-confirmation-modal");
+    expect(modal).toHaveAttribute("data-action", "archive");
   });
 
   test("does not expose repos on window in production mode", () => {
