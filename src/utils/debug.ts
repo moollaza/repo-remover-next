@@ -89,6 +89,10 @@ function log(message: string, ...data: unknown[]): void {
  * @returns Sanitized value safe for logging
  */
 function sanitize(value: unknown): unknown {
+  return sanitizeInner(value, new WeakSet<object>());
+}
+
+function sanitizeInner(value: unknown, seen: WeakSet<object>): unknown {
   if (typeof value === "string") {
     let sanitized = value;
     for (const pattern of SENSITIVE_PATTERNS) {
@@ -97,18 +101,23 @@ function sanitize(value: unknown): unknown {
     return sanitized;
   }
 
-  if (Array.isArray(value)) {
-    return value.map(sanitize);
-  }
-
-  if (value instanceof Error) {
-    return {
-      message: sanitize(value.message) as string,
-      name: value.name,
-    };
-  }
-
   if (value && typeof value === "object") {
+    if (seen.has(value)) {
+      return "[Circular]";
+    }
+    seen.add(value);
+
+    if (Array.isArray(value)) {
+      return value.map((item) => sanitizeInner(item, seen));
+    }
+
+    if (value instanceof Error) {
+      return {
+        message: sanitizeInner(value.message, seen) as string,
+        name: value.name,
+      };
+    }
+
     const sanitized: Record<string, unknown> = {};
     for (const [key, val] of Object.entries(value)) {
       // Redact known sensitive keys entirely
@@ -120,7 +129,7 @@ function sanitize(value: unknown): unknown {
       ) {
         sanitized[key] = "[REDACTED]";
       } else {
-        sanitized[key] = sanitize(val);
+        sanitized[key] = sanitizeInner(val, seen);
       }
     }
     return sanitized;

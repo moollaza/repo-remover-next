@@ -252,7 +252,7 @@ Critical bugs that affect security, correctness, or data integrity.
   - Impact: If `Breadcrumbs` is still an object (not an array) in Sentry v10, calling `.forEach()` on it throws `TypeError: event.breadcrumbs.forEach is not a function`. Sentry's SDK catches throws inside `beforeSend` and returns `null`, **dropping the event entirely**. Any Sentry event that has breadcrumbs (virtually all of them in practice) would be silently discarded — no error reporting. Additionally, the breadcrumb sanitization never runs, so token-containing breadcrumb messages could be sent to Sentry if the event is somehow not dropped. Verify against `@sentry/react@10.43.0` node_modules; if `Breadcrumbs` is still an object, the fix is `event.breadcrumbs.values?.forEach(...)`.
   - **VERIFIED**: `@sentry/core` types show `breadcrumbs?: Breadcrumb[]` (array, not object). The `.forEach()` call is correct as-is. No fix needed.
 
-- [ ] **[BUG-043] severity:medium** — `sanitize()` has no circular-reference guard — will stack overflow on circular objects
+- [x] **[BUG-043] severity:medium** — `sanitize()` has no circular-reference guard — will stack overflow on circular objects
   - File: `src/utils/debug.ts:100-120`
   - Impact: `sanitize({ a: null })` is fine, but any object where a nested property eventually references an ancestor (e.g. a DOM node, a SWR cache entry, or React fiber) will recurse infinitely and throw `RangeError: Maximum call stack size exceeded`, crashing the calling code path.
   - Fix: Pass a `seen = new WeakSet()` down the recursion; if `seen.has(value)` return `"[Circular]"`

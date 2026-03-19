@@ -52,6 +52,31 @@ describe("debug.sanitize", () => {
       outer: { apiKey: "[REDACTED]", data: "[REDACTED]" },
     });
   });
+
+  it("handles circular references without stack overflow", () => {
+    const obj: Record<string, unknown> = { name: "test" };
+    obj.self = obj;
+    const result = debug.sanitize(obj) as Record<string, unknown>;
+    expect(result).toEqual({ name: "test", self: "[Circular]" });
+  });
+
+  it("handles deeply nested circular references", () => {
+    const a: Record<string, unknown> = { id: "a" };
+    const b: Record<string, unknown> = { id: "b", parent: a };
+    a.child = b;
+    const result = debug.sanitize(a) as Record<string, unknown>;
+    expect(result).toEqual({
+      child: { id: "b", parent: "[Circular]" },
+      id: "a",
+    });
+  });
+
+  it("handles arrays with circular references", () => {
+    const arr: unknown[] = [1, 2];
+    arr.push(arr);
+    const result = debug.sanitize(arr) as unknown[];
+    expect(result).toEqual([1, 2, "[Circular]"]);
+  });
 });
 
 describe("debug.error", () => {
