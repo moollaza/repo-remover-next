@@ -354,7 +354,7 @@ Functional bugs, UX issues, hardcoded colors, and accessibility problems.
   - Impact: `Array.from(new Set())[0]` is `undefined`; `Number(undefined)` is `NaN`. `setPerPageState(NaN)` causes `Math.ceil(n / NaN) = NaN` total pages and `items.slice(NaN, NaN) = []`, showing an empty list with no recoverable UI. If `keys === "all"`, `Array.from("all") = ["a","l","l"]` and `Number("a") = NaN`. Same crash.
   - Fix: Validate before setting: `const n = Number(Array.from(keys as Set<string>)[0]); if (Number.isFinite(n) && n > 0) setPerPageState(n);`
 
-- [ ] **[BUG-022] severity:medium** — `getItem` returns raw base64 ciphertext when decryption fails, not `null`
+- [x] **[BUG-022] severity:medium** — `getItem` returns raw base64 ciphertext when decryption fails, not `null`
 
   - File: `src/utils/secure-storage.ts:157-159`
   - Impact: When decryption fails (wrong key after browser update, corrupted data), the catch block returns `stored` — the raw base64-encoded AES-GCM ciphertext — to the caller as if it were the plaintext value. `github-data-provider.tsx` then uses this garbage string as a GitHub PAT, which is rejected with 401. The user sees an "invalid token" error with no path to recovery other than manually clearing localStorage. The correct behavior is to return `null` (treat corrupted storage as absent) or throw.

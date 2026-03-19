@@ -65,6 +65,24 @@ describe("secureStorage", () => {
       const result = await secureStorage.getItem("pat");
       expect(result).toBe("ghp_test456");
     });
+
+    it("returns null and clears storage when decryption fails (BUG-022)", async () => {
+      // Switch to production mode so real encryption is used
+      vi.stubEnv("MODE", "production");
+
+      // Store a value (encrypted)
+      await secureStorage.setItem("pat", "ghp_real_token");
+
+      // Corrupt the stored value to simulate decryption failure
+      localStorage.setItem("secure_pat", "corrupted_not_base64_ciphertext");
+
+      // getItem should return null, NOT the corrupted ciphertext
+      const result = await secureStorage.getItem("pat");
+      expect(result).toBeNull();
+
+      // The corrupted key should be removed from localStorage
+      expect(localStorage.getItem("secure_pat")).toBeNull();
+    });
   });
 
   describe("removeItem", () => {

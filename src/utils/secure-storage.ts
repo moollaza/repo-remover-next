@@ -160,8 +160,9 @@ export const secureStorage = {
     try {
       return await decryptData(stored);
     } catch (error) {
-      debug.warn("Decryption failed, treating as plain text:", error);
-      return stored;
+      debug.warn("Decryption failed, clearing corrupted key:", error);
+      localStorage.removeItem(STORAGE_KEY_PREFIX + key);
+      return null;
     }
   },
 
