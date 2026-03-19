@@ -234,7 +234,7 @@ Critical bugs that affect security, correctness, or data integrity.
   - Impact: `navigator.userAgent` includes the browser version string (e.g., `Chrome/132.0.6834.110`). Major browsers auto-update every 4-6 weeks. After any browser update the fingerprint changes, PBKDF2 derives a different key, AES-GCM decryption of the stored blob fails, and `getItem` falls through to returning the raw base64 ciphertext (see BUG-022). The user's session appears broken with no explanation — they see an invalid-token error even though they stored a valid one. The comment at lines 111-113 explicitly flags screen dimensions as unstable but misses the equally unstable `userAgent`.
   - Fix: Replace `navigator.userAgent` with a stable signal (e.g., `navigator.platform`, `navigator.hardwareConcurrency`, or a persisted random device ID stored separately in localStorage unencrypted). Or accept that the fingerprint is a convenience, not a security control, and document the known auto-logout risk clearly.
 
-- [ ] **[BUG-034] severity:high** — "Remember me" checkbox hardcoded `checked={true}` + `readOnly` — TODO never implemented
+- [x] **[BUG-034] severity:high** — "Remember me" checkbox hardcoded `checked={true}` + `readOnly` — TODO never implemented
 
   - File: `src/components/github-token-form.tsx:195-207`
   - Impact: The `TODO: Set to false` comment reveals this was intended to be a real preference toggle. Currently it is permanently checked and the user cannot change it — false affordance. Users who do not want their token stored have no opt-out path. The preference is never passed to the parent, so even if it were interactive it would do nothing.

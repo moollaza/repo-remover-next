@@ -1,4 +1,4 @@
-import { Button, Checkbox, Input, type InputProps } from "@heroui/react";
+import { Button, Input, type InputProps } from "@heroui/react";
 import clsx from "clsx";
 import { useEffect, useState } from "react";
 
@@ -143,11 +143,6 @@ export default function GitHubTokenForm({
           type="text"
           value={value}
         />
-
-        {/* TODO: Set to false */}
-        <Checkbox data-testid="github-token-remember" isSelected={true}>
-          Remember me (token is stored locally, on your device)
-        </Checkbox>
       </div>
 
       <Button

@@ -80,6 +80,15 @@ describe("GitHubTokenForm", () => {
     );
   });
 
+  test("does not render a non-functional remember-me checkbox", () => {
+    setupForm();
+
+    expect(
+      screen.queryByTestId("github-token-remember"),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
+  });
+
   test("doesn't call onSubmit when token is invalid", async () => {
     const { submitButton } = setupForm({
       value: "invalid-token",
