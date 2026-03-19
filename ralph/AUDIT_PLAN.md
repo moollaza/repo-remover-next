@@ -525,28 +525,24 @@ Functional bugs, UX issues, hardcoded colors, and accessibility problems.
   - File: `e2e/theme.spec.ts:10-16`
   - Fix applied: Removed the three duplicate tests (switcher icons, toggle, persistence) and the unauthenticated `beforeEach` — these are already covered by `theme-basic.spec.ts` against `/`. Remaining tests (contrast, keyboard shortcuts) already set up their own auth mocks.
 
-- [ ] **[BUG-052] severity:low** — Star icons in `TestimonialsSection` use hardcoded Tailwind colors `fill-yellow-400 text-yellow-400`, violating the HeroUI semantic color rule
+- [x] **[BUG-052] severity:low** — Star icons in `TestimonialsSection` use hardcoded Tailwind colors `fill-yellow-400 text-yellow-400`, violating the HeroUI semantic color rule
 
   - File: `src/components/landing/testimonials-section.tsx:57`
-  - Impact: Stars remain yellow in both themes instead of adapting. HeroUI's `text-warning` / `fill-warning` are the semantic equivalents and would respect the design token system.
-  - Fix: Replace `fill-yellow-400 text-yellow-400` with `fill-warning text-warning`
+  - **MOOT**: File deleted — `src/components/landing/` directory no longer exists. No fix needed.
 
-- [ ] **[BUG-053] severity:low** — Star rating container in `TestimonialsSection` has no accessible text — screen readers report nothing about the numeric rating
+- [x] **[BUG-053] severity:low** — Star rating container in `TestimonialsSection` has no accessible text — screen readers report nothing about the numeric rating
 
   - File: `src/components/landing/testimonials-section.tsx:53-59`
-  - Impact: Screen reader users cannot determine the rating (e.g., "5 out of 5 stars").
-  - Fix: Add `aria-label={`${t.rating} out of 5 stars`}` on the star container div, and `aria-hidden="true"` on each `<Star>` icon.
+  - **MOOT**: File deleted — `src/components/landing/` directory no longer exists. No fix needed.
 
-- [ ] **[BUG-054] severity:high** — Token validation race condition in `InlinePATForm`: the debounced `getAuthenticated()` call starts inside `setTimeout`, so the cleanup `clearTimeout` only cancels an unfired timer. Once the network call is in flight, clearing the token re-runs the effect and sets `isValid=false`, but the pending promise still resolves and calls `setIsValid(true)` / `setIsValidating(false)`. Result: `token=""` with `canSubmit=true`, so `handleSubmit` passes its guard and calls `setPat("", remember)` then navigates to `/dashboard` with an empty token.
+- [x] **[BUG-054] severity:high** — Token validation race condition in `InlinePATForm`: the debounced `getAuthenticated()` call starts inside `setTimeout`, so the cleanup `clearTimeout` only cancels an unfired timer. Once the network call is in flight, clearing the token re-runs the effect and sets `isValid=false`, but the pending promise still resolves and calls `setIsValid(true)` / `setIsValidating(false)`. Result: `token=""` with `canSubmit=true`, so `handleSubmit` passes its guard and calls `setPat("", remember)` then navigates to `/dashboard` with an empty token.
 
   - File: `src/components/landing/get-started-section.tsx:100-115`
-  - Impact: User ends up on the dashboard with an empty/invalid PAT; all API calls immediately fail. Harder to reproduce on fast connections, reproducible on slow/throttled network.
-  - Fix: Use an `isCancelled` flag or an `AbortController` ref to ignore the response if the token has changed by the time the promise settles — e.g. `let cancelled = false; ... .then(() => { if (!cancelled) { setIsValid(true); ... } }); return () => { cancelled = true; clearTimeout(timeout); };`
+  - **MOOT**: File deleted — `src/components/landing/` directory no longer exists. No fix needed.
 
-- [ ] **[BUG-060] severity:medium** — `variantMap` builds Tailwind classes via string interpolation — not included in JIT CSS bundle
+- [x] **[BUG-060] severity:medium** — `variantMap` builds Tailwind classes via string interpolation — not included in JIT CSS bundle
   - File: `src/components/scroll-button.tsx:42-50`
-  - Impact: Classes like `border-${color}`, `text-${color}`, `bg-${color}/10`, `shadow-${color}/40` are assembled at runtime. Tailwind's JIT compiler scans source for literal class strings only; dynamically constructed strings are never added to the production CSS. Any use of `bordered`, `flat`, `ghost`, `light`, or `shadow` variants will render an unstyled button in production. Only `solid` is safe (it routes through `colorMap` which uses literal strings).
-  - Fix: Either replace with a lookup table of complete literal class strings (one entry per color x variant combination), or replace the entire custom button with HeroUI's `Button` component which already handles all variants natively.
+  - **MOOT**: Already fixed — `scroll-button.tsx` now uses HeroUI `<Button>` component directly with `color` and `variant` props. No `variantMap` or string interpolation exists.
 
 ---
 
@@ -560,16 +556,14 @@ All hardcoded color bugs have been placed in Phase 5. No remaining items.
 
 Accessibility items not already covered in earlier phases.
 
-- [ ] **[BUG-029] severity:medium** — `ModalOverlay` missing `role="dialog"`, `aria-modal`, and `aria-labelledby` — screen readers do not announce as a modal
+- [x] **[BUG-029] severity:medium** — `ModalOverlay` missing `role="dialog"`, `aria-modal`, and `aria-labelledby` — screen readers do not announce as a modal
 
   - File: `src/components/repo-table/confirmation-modal.tsx:149-158`
-  - Impact: Without `role="dialog"` and `aria-modal="true"`, screen readers treat the overlay as ordinary content and do not restrict reading focus to the modal. Users of VoiceOver/NVDA can Tab to background content while the modal is open. WCAG 2.1 SC 4.1.2 failure.
-  - Fix: Add `role="dialog"`, `aria-modal="true"`, and `aria-labelledby` (pointing to the `<h3>` header) to the overlay `<div>`. Also add a focus trap (or use a library like `@radix-ui/react-focus-scope`).
+  - **VERIFIED**: Already handled by HeroUI — `Modal` provides `role="dialog"` (default on `ModalContent`), `aria-modal="true"`, `aria-labelledby` (auto-linked to `ModalHeader`), and focus trapping via `useAriaModalOverlay`. No custom fix needed.
 
-- [ ] **[BUG-038] severity:medium** — User dropdown button missing `aria-expanded` and `aria-label`
+- [x] **[BUG-038] severity:medium** — User dropdown button missing `aria-expanded` and `aria-label`
   - File: `src/components/header.tsx:166-170`
-  - Impact: Screen readers cannot determine whether the dropdown is open or closed. The button conveys no semantic label (the avatar `alt` is on a child `<img>`, not the button itself). Keyboard/AT users cannot tell what the button does or its current state.
-  - Fix: Add `aria-label={`Open user menu for ${user?.name ?? user?.login ?? "User"}`}` and `aria-expanded={dropdownOpen}` to the trigger button; add `aria-haspopup="menu"` if the dropdown is menu-like
+  - Fix applied: Changed `<div>` trigger to `<button>` with `aria-label` for screen reader support. HeroUI `DropdownTrigger` adds `aria-expanded` and `aria-haspopup` automatically. Added test verifying accessible role.
 
 ---
 

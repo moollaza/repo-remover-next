@@ -152,6 +152,18 @@ describe("Header", () => {
     });
   });
 
+  describe("Accessibility", () => {
+    it("user dropdown trigger has aria-label and is a button", () => {
+      setupDashboardWithAuth();
+      render(<Header />);
+
+      const trigger = screen.getByRole("button", {
+        name: /user menu for test user/i,
+      });
+      expect(trigger).toBeInTheDocument();
+    });
+  });
+
   describe("Logout", () => {
     it("calls context logout function instead of directly clearing localStorage", async () => {
       const { mockLogout } = setupDashboardWithAuth();

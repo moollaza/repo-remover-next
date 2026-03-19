@@ -83,7 +83,11 @@ export default function Header() {
 
             <Dropdown placement="bottom-end">
               <DropdownTrigger>
-                <div className="cursor-pointer transition-opacity hover:opacity-80">
+                <button
+                  aria-label={`User menu for ${user?.name ?? user?.login ?? "User"}`}
+                  className="cursor-pointer transition-opacity hover:opacity-80 appearance-none bg-transparent border-none p-0"
+                  type="button"
+                >
                   <User
                     avatarProps={{
                       showFallback: true,
@@ -100,7 +104,7 @@ export default function Header() {
                     }
                     name={user?.name}
                   />
-                </div>
+                </button>
               </DropdownTrigger>
               <DropdownMenu aria-label="Profile Actions" variant="flat">
                 <DropdownItem className="h-14 gap-2" key="profile">
