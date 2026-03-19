@@ -19,7 +19,7 @@ export function track(eventName: string, value?: number): void {
   if (!IS_PRODUCTION) {
     console.log(
       `[DEV] Would track event: ${eventName}`,
-      value ? `(value: ${value})` : "",
+      value !== undefined ? `(value: ${value})` : "",
     );
     return;
   }

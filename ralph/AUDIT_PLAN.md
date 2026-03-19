@@ -625,7 +625,7 @@ Non-critical code quality improvements and simplifications.
   - Spreading an empty array (`console.log("msg", ...[])`) is identical to `console.log("msg")` in all JS engines. The if/else adds ~6 lines of dead branching per function for no benefit.
   - Fix: Remove the conditional; always spread `sanitizedData`
 
-- [ ] **[SIMP-019] severity:low** — Dev log uses `value ? ...` falsy check, silently omits `value=0`
+- [x] **[SIMP-019] severity:low** — Dev log uses `value ? ...` falsy check, silently omits `value=0`
 
   - File: `src/utils/analytics.ts:18`
   - `value ? \`(value: ${value})\` : ''`evaluates to empty string when`value`is`0`. For a theoretical `trackArchiveActionSubmitted(0)`, the dev log would show no value — making it look like a value-less event. Fix: use `value !== undefined ? ...` (already used in the production branch at line 23)
