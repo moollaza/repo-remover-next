@@ -34,8 +34,7 @@ async function decryptData(encryptedData: string): Promise<string> {
     );
 
     return decoder.decode(decrypted);
-  } catch (error) {
-    debug.error("Decryption failed:", error);
+  } catch {
     throw new Error("Failed to decrypt data");
   }
 }
@@ -93,8 +92,7 @@ async function encryptData(data: string): Promise<string> {
 
     // Convert to base64 for storage
     return btoa(String.fromCharCode.apply(null, Array.from(combined)));
-  } catch (error) {
-    debug.error("Encryption failed:", error);
+  } catch {
     throw new Error("Failed to encrypt data");
   }
 }

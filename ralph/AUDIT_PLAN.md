@@ -598,7 +598,7 @@ Non-critical code quality improvements and simplifications.
   - File: `src/hooks/use-confirmation-modal.ts:186`
   - Detail: `handleConfirm: () => void handleConfirm()` creates a new function reference on every render. If passed to any `memo`-wrapped child, it invalidates memoization on every dispatch during the progress loop. Should be wrapped with `useCallback` or inlined as a `useCallback`.
 
-- [ ] **[SIMP-009] severity:low** — Double-logging on crypto failure: inner function logs AND re-throws, outer function catches and logs again
+- [x] **[SIMP-009] severity:low** — Double-logging on crypto failure: inner function logs AND re-throws, outer function catches and logs again
 
   - File: `src/utils/secure-storage.ts:35-38` (decryptData) + `:157-159` (getItem); `:94-97` (encryptData) + `:192-194` (setItem)
   - Detail: `decryptData` calls `console.error(...)` then `throw new Error(...)`. `getItem` catches that re-thrown error and calls `console.warn(...)` again. Every decryption failure generates two separate console entries. Same pattern in `encryptData` -> `setItem`. Either remove logging from the inner helpers and let callers log, or remove the outer catches.
