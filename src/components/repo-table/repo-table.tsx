@@ -50,10 +50,12 @@ export default function RepoTable({
   // For the confirmation modal
   const { isOpen, onClose, onOpen } = useDisclosure();
 
-  // For debugging purposes
+  // For debugging purposes (dev-only to avoid exposing repo data globally in production)
   useEffect(() => {
     if (repos?.length) {
-      (window as unknown as { repos: typeof repos } & Window).repos = repos;
+      if (import.meta.env.DEV) {
+        (window as unknown as { repos: typeof repos } & Window).repos = repos;
+      }
       debug.group("Repos", true);
       debug.table(repos);
       debug.groupEnd();

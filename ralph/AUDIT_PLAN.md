@@ -187,7 +187,7 @@ Fix mock/fixture issues that would block reliable test writing in later phases.
 
 Critical bugs that affect security, correctness, or data integrity.
 
-- [ ] **[BUG-023] severity:high** — `window.repos` assignment runs unconditionally in production, exposing all repo data globally
+- [x] **[BUG-023] severity:high** — `window.repos` assignment runs unconditionally in production, exposing all repo data globally
 
   - File: `src/components/repo-table/repo-table.tsx:38`
   - Impact: Every time repos load in production, the full repo list (including private repo names, descriptions, and owner logins) is assigned to `window.repos`. Any injected script, browser extension, or XSS payload can read `window.repos` for the entire session. The surrounding `debug.group/table/groupEnd` calls are no-ops in production, but the `window` assignment has no `isDevelopment` guard.

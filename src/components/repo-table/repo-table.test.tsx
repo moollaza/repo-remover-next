@@ -1,5 +1,5 @@
 import { type Repository } from "@octokit/graphql-schema";
-import { beforeEach, describe, expect, test, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 import { createMockRepo } from "@/mocks/static-fixtures";
 import { render, screen } from "@/utils/test-utils";
@@ -51,6 +51,12 @@ describe("RepoTable", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    // Clean up window.repos before each test
+    delete (window as unknown as Record<string, unknown>).repos;
+  });
+
+  afterEach(() => {
+    delete (window as unknown as Record<string, unknown>).repos;
   });
 
   test("renders table with repos", () => {
@@ -108,5 +114,20 @@ describe("RepoTable", () => {
       .closest('[data-testid="repo-row"]');
     expect(activeRepoRow).not.toHaveClass("opacity-50");
     expect(activeRepoRow).not.toHaveClass("pointer-events-none");
+  });
+
+  test("does not expose repos on window in production mode", () => {
+    // In production, window.repos must not be set (security: exposes private repo data)
+    const originalDev = import.meta.env.DEV;
+    import.meta.env.DEV = false;
+
+    try {
+      render(<RepoTable login={mockLogin} repos={mockRepos} />);
+      expect(
+        (window as unknown as Record<string, unknown>).repos,
+      ).toBeUndefined();
+    } finally {
+      import.meta.env.DEV = originalDev;
+    }
   });
 });
