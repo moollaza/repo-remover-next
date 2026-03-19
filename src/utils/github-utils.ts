@@ -160,7 +160,7 @@ export const processRepo = async (
     await archiveRepo(octokit, repo);
     // Track individual successful archive
     analytics.trackRepoArchived();
-  } else if (action === "delete") {
+  } else {
     await deleteRepo(octokit, repo);
     // Track individual successful delete
     analytics.trackRepoDeleted();

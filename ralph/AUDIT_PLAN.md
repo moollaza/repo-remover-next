@@ -571,7 +571,7 @@ Accessibility items not already covered in earlier phases.
 
 Non-critical code quality improvements and simplifications.
 
-- [ ] **[SIMP-002] severity:low** — `processRepo` `if/else if` without `else` is needlessly open-ended
+- [x] **[SIMP-002] severity:low** — `processRepo` `if/else if` without `else` is needlessly open-ended
 
   - File: `src/utils/github-utils.ts:158-166`
   - Detail: `action` is a union of two literals; removing the dead guards (BUG-006) makes the exhaustive `if/else` pattern clearer. Use `if (action === "archive") { ... } else { ... }` so the compiler flags any future third action that doesn't have a branch.
