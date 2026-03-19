@@ -423,7 +423,7 @@ Functional bugs, UX issues, hardcoded colors, and accessibility problems.
   - Impact: Components accidentally rendered outside the provider tree (e.g. in isolated tests or mis-placed routes) receive `isAuthenticated: false`, `repos: null`, and all mutation functions are no-ops — no error or warning is raised, making the failure invisible. The defensive pattern (`createContext<T | undefined>(undefined)` + throw in hook) would surface this at render time.
   - Fix: Initialize context with `undefined` and add a guard: `const ctx = useContext(GitHubContext); if (!ctx) throw new Error("useGitHubData must be used within GitHubDataProvider"); return ctx;`
 
-- [ ] **[BUG-049] severity:medium** — `getOrgRepositories` handler ignores which org is queried — always returns `testorg` data
+- [x] **[BUG-049] severity:medium** — `getOrgRepositories` handler ignores which org is queried — always returns `testorg` data
 
   - File: `src/mocks/handlers.ts:48-62`
   - Impact: The handler filters by `isInOrganization` and hardcodes `login: "testorg"` in the response. When tests (or the real data provider) call `getOrgRepositories` for `anotherorg`, they still receive `testorg` repos with `login: "testorg"`. Org isolation bugs in `fetchGitHubDataWithProgress` are invisible in unit tests because all orgs look identical.

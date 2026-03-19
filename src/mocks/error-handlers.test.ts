@@ -144,3 +144,72 @@ describe("REST error scenario handlers", () => {
     });
   });
 });
+
+describe("getOrgRepositories handler org isolation", () => {
+  it("returns only repos owned by the queried org", async () => {
+    const octokit = createThrottledOctokit(VALID_PAT);
+    const testorgReposInFixtures = MOCK_REPOS.filter(
+      (r) => r.owner.login === "testorg",
+    );
+
+    // Query for testorg — should return testorg-owned repos
+    const response = await octokit.graphql<{
+      organization: {
+        login: string;
+        repositories: { nodes: { id: string; owner: { login: string } }[] };
+      };
+    }>(
+      `query getOrgRepositories($org: String!) {
+        organization(login: $org) {
+          login
+          repositories(first: 100) { nodes { id name owner { login } } pageInfo { hasNextPage endCursor } }
+        }
+      }`,
+      { org: "testorg" },
+    );
+
+    expect(response.organization.login).toBe("testorg");
+    expect(response.organization.repositories.nodes).toHaveLength(
+      testorgReposInFixtures.length,
+    );
+    for (const repo of response.organization.repositories.nodes) {
+      expect(repo.owner.login).toBe("testorg");
+    }
+  });
+
+  it("returns empty repos for org with no repos in fixtures", async () => {
+    const octokit = createThrottledOctokit(VALID_PAT);
+
+    // anotherorg exists in MOCK_ORGANIZATIONS but has no repos
+    const response = await octokit.graphql<{
+      organization: {
+        login: string;
+        repositories: { nodes: { id: string }[] };
+      };
+    }>(
+      `query getOrgRepositories($org: String!) {
+        organization(login: $org) {
+          login
+          repositories(first: 100) { nodes { id } pageInfo { hasNextPage endCursor } }
+        }
+      }`,
+      { org: "anotherorg" },
+    );
+
+    expect(response.organization.login).toBe("anotherorg");
+    expect(response.organization.repositories.nodes).toHaveLength(0);
+  });
+
+  it("returns NOT_FOUND error for unknown orgs", async () => {
+    const octokit = createThrottledOctokit(VALID_PAT);
+
+    await expect(
+      octokit.graphql(
+        `query getOrgRepositories($org: String!) {
+          organization(login: $org) { login }
+        }`,
+        { org: "nonexistent-org" },
+      ),
+    ).rejects.toThrow(/nonexistent-org/);
+  });
+});

@@ -192,12 +192,32 @@ export const handlers = [
     }
 
     if (body.query.includes("getOrgRepositories")) {
-      // Return org repos for testorg
-      const orgRepos = MOCK_REPOS.filter((repo) => repo.isInOrganization);
+      const variables = body.variables as { org?: string } | undefined;
+      const orgLogin = variables?.org ?? "testorg";
+      const matchingOrg = MOCK_ORGANIZATIONS.find((o) => o.login === orgLogin);
+
+      if (!matchingOrg) {
+        return HttpResponse.json(
+          {
+            data: null,
+            errors: [
+              {
+                message: `Could not resolve to an Organization with the login of '${orgLogin}'.`,
+                type: "NOT_FOUND",
+              },
+            ],
+          },
+          { status: 200 },
+        );
+      }
+
+      const orgRepos = MOCK_REPOS.filter(
+        (repo) => repo.owner.login === orgLogin,
+      );
       return HttpResponse.json({
         data: {
           organization: {
-            login: "testorg",
+            login: matchingOrg.login,
             repositories: {
               nodes: orgRepos,
               pageInfo: {
@@ -205,7 +225,7 @@ export const handlers = [
                 hasNextPage: false,
               },
             },
-            url: "https://github.com/testorg",
+            url: matchingOrg.url,
           },
         },
       });
