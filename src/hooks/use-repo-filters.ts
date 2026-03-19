@@ -90,7 +90,11 @@ export function useRepoFilters({
 
   // Callback for type filter changes that can trigger pagination reset in parent
   const setTypeFilters = useCallback((keys: Selection) => {
-    setTypeFiltersState(keys as SelectionSet);
+    if (keys === "all") {
+      setTypeFiltersState(new Set(REPO_TYPES.map((t) => t.key)));
+    } else {
+      setTypeFiltersState(keys);
+    }
   }, []);
 
   // First filter repos by search query, selected types, and admin permissions

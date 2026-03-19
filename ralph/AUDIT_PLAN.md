@@ -336,7 +336,7 @@ Functional bugs, UX issues, hardcoded colors, and accessibility problems.
   - Impact: User can select archived repos while "delete" action is active, then switch back to "archive" action. The archived repo IDs remain in `selectedRepoKeys` — `selectedRepos` (line 103) still includes them and they are passed to the confirmation modal and processed. GitHub will receive a redundant archive request for an already-archived repo, potentially causing errors or silent waste.
   - Fix: In `handleRepoActionChange`, after updating `selectedRepoAction`, also call `setSelectedRepoKeys` to remove IDs of repos that would now be disabled under the new action.
 
-- [ ] **[BUG-016] severity:medium** — `setTypeFilters` unsafely casts `"all"` to `SelectionSet` — runtime crash if HeroUI emits `"all"`
+- [x] **[BUG-016] severity:medium** — `setTypeFilters` unsafely casts `"all"` to `SelectionSet` — runtime crash if HeroUI emits `"all"`
 
   - File: `src/hooks/use-repo-filters.ts:107`
   - Impact: HeroUI selection components emit the string `"all"` when the user selects all items via a "select all" control. If that signal reaches `setTypeFilters`, `typeFilters` is set to the string `"all"`. On the next render, `typeFilters.has(type.key)` throws `TypeError: typeFilters.has is not a function`, crashing the filter view.

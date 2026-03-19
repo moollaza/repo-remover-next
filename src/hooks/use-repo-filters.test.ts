@@ -119,8 +119,18 @@ describe("useRepoFilters", () => {
 
   it("should filter repos by type (isPrivate)", () => {
     const repos = [
-      createMockRepo({ id: "1", isPrivate: false, key: "1", name: "public-repo" }),
-      createMockRepo({ id: "2", isPrivate: true, key: "2", name: "private-repo" }),
+      createMockRepo({
+        id: "1",
+        isPrivate: false,
+        key: "1",
+        name: "public-repo",
+      }),
+      createMockRepo({
+        id: "2",
+        isPrivate: true,
+        key: "2",
+        name: "private-repo",
+      }),
     ];
 
     const { result } = renderHook(() =>
@@ -133,7 +143,14 @@ describe("useRepoFilters", () => {
     // Deselect private repos
     act(() => {
       result.current.setTypeFilters(
-        new Set(["isArchived", "isDisabled", "isFork", "isInOrganization", "isMirror", "isTemplate"]),
+        new Set([
+          "isArchived",
+          "isDisabled",
+          "isFork",
+          "isInOrganization",
+          "isMirror",
+          "isTemplate",
+        ]),
       );
     });
 
@@ -144,8 +161,18 @@ describe("useRepoFilters", () => {
 
   it("should filter repos by type (isArchived)", () => {
     const repos = [
-      createMockRepo({ id: "1", isArchived: false, key: "1", name: "active-repo" }),
-      createMockRepo({ id: "2", isArchived: true, key: "2", name: "archived-repo" }),
+      createMockRepo({
+        id: "1",
+        isArchived: false,
+        key: "1",
+        name: "active-repo",
+      }),
+      createMockRepo({
+        id: "2",
+        isArchived: true,
+        key: "2",
+        name: "archived-repo",
+      }),
     ];
 
     const { result } = renderHook(() =>
@@ -155,7 +182,14 @@ describe("useRepoFilters", () => {
     // Deselect archived repos
     act(() => {
       result.current.setTypeFilters(
-        new Set(["isDisabled", "isFork", "isInOrganization", "isMirror", "isPrivate", "isTemplate"]),
+        new Set([
+          "isDisabled",
+          "isFork",
+          "isInOrganization",
+          "isMirror",
+          "isPrivate",
+          "isTemplate",
+        ]),
       );
     });
 
@@ -390,5 +424,49 @@ describe("useRepoFilters", () => {
     );
 
     expect(result.current.filteredRepos).toHaveLength(0);
+  });
+
+  it('should handle HeroUI "all" selection by selecting all type filters', () => {
+    const repos = [
+      createMockRepo({
+        id: "1",
+        isPrivate: true,
+        key: "1",
+        name: "private-repo",
+      }),
+      createMockRepo({
+        id: "2",
+        isPrivate: false,
+        key: "2",
+        name: "public-repo",
+      }),
+    ];
+
+    const { result } = renderHook(() =>
+      useRepoFilters({ login: "testuser", repos }),
+    );
+
+    // First deselect private to narrow the list
+    act(() => {
+      result.current.setTypeFilters(
+        new Set([
+          "isArchived",
+          "isDisabled",
+          "isFork",
+          "isInOrganization",
+          "isMirror",
+          "isTemplate",
+        ]),
+      );
+    });
+    expect(result.current.filteredRepos).toHaveLength(1);
+
+    // Now pass "all" as HeroUI does when user clicks "select all" — should not crash
+    act(() => {
+      result.current.setTypeFilters("all");
+    });
+
+    // All repos should be visible again
+    expect(result.current.filteredRepos).toHaveLength(2);
   });
 });
