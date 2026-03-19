@@ -181,6 +181,24 @@ describe("ConfirmationModal", () => {
     expect(screen.getByText(/1 error/)).toBeInTheDocument();
   });
 
+  it("does not call mutate when cancelling without processing (BUG-013)", () => {
+    render(
+      <GitHubContext.Provider value={mockContextValue}>
+        <ConfirmationModal {...mockProps} />
+      </GitHubContext.Provider>,
+    );
+
+    // Click cancel without confirming any repos
+    const cancelButton = screen.getByTestId("confirmation-modal-cancel");
+    fireEvent.click(cancelButton);
+
+    // mutate() should NOT be called — no repos were processed
+    expect(mockContextValue.mutate).not.toHaveBeenCalled();
+
+    // onClose should still be called
+    expect(mockProps.onClose).toHaveBeenCalled();
+  });
+
   it("memoizes octokit instance — does not recreate on re-render (BUG-011)", () => {
     vi.mocked(createThrottledOctokit).mockClear();
 

@@ -360,13 +360,14 @@ Functional bugs, UX issues, hardcoded colors, and accessibility problems.
   - Impact: When decryption fails (wrong key after browser update, corrupted data), the catch block returns `stored` — the raw base64-encoded AES-GCM ciphertext — to the caller as if it were the plaintext value. `github-data-provider.tsx` then uses this garbage string as a GitHub PAT, which is rejected with 401. The user sees an "invalid token" error with no path to recovery other than manually clearing localStorage. The correct behavior is to return `null` (treat corrupted storage as absent) or throw.
   - Fix: Change the fallback to `return null` after logging, and clear the corrupted key: `localStorage.removeItem(STORAGE_KEY_PREFIX + key);`
 
-- [ ] **[BUG-010] severity:low** — `setPat(remember=false)` `removeItem` calls silently drop errors
+- [x] **[BUG-010] severity:low** — `setPat(remember=false)` `removeItem` calls silently drop errors
 
   - File: `src/providers/github-data-provider.tsx:185-188`
   - Impact: Same class as BUG-009 — `secureStorage.removeItem` is called fire-and-forget with no `.catch()`. Failed clearing goes unnoticed.
   - Fix: Add `.catch()` or `await` on both calls, same as the `.catch()` pattern used for `setItem` calls at lines 167 and 181.
+  - **VERIFIED**: Same as BUG-009 — `secureStorage.removeItem()` is synchronous (returns `void`), and the `logout` function wraps both calls in try/catch. No `setPat(remember=false)` code path exists. No fix needed.
 
-- [ ] **[BUG-013] severity:low** — `handleOnClose` always calls `mutate()`, even on cancel before any processing
+- [x] **[BUG-013] severity:low** — `handleOnClose` always calls `mutate()`, even on cancel before any processing
 
   - File: `src/hooks/use-confirmation-modal.ts:157-165`
   - Impact: Canceling on the confirmation screen (no repos touched) unconditionally fires a full SWR refetch — an expensive GitHub API call for no reason. On slow connections or when near rate limits, this wastes quota.

@@ -177,8 +177,10 @@ export default function ConfirmationModal({
   }
 
   function handleOnClose() {
-    // Refetch all GitHub data after operations are complete
-    void mutate();
+    // Only refetch GitHub data if operations actually ran (BUG-013)
+    if (state.mode === "result") {
+      void mutate();
+    }
 
     // Close the modal
     onClose();
