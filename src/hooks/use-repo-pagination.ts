@@ -1,5 +1,5 @@
 import { type Selection } from "@heroui/react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { PER_PAGE_OPTIONS } from "@/config/repo-config";
 
@@ -72,13 +72,25 @@ export function useRepoPagination<T>({
   // Calculate total pages
   const totalPages = Math.ceil(items.length / perPage);
 
+  // Clamp page inline so returned values are always consistent,
+  // even before the useEffect below syncs the state
+  const effectivePage =
+    totalPages > 0 && currentPage > totalPages ? 1 : currentPage;
+
+  // Sync state when page becomes invalid (after filter/item changes)
+  useEffect(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(1);
+    }
+  }, [currentPage, totalPages]);
+
   // Get the current page of items
   const paginatedItems = useMemo(() => {
-    const start = (currentPage - 1) * perPage;
+    const start = (effectivePage - 1) * perPage;
     const end = start + perPage;
 
     return items.slice(start, end);
-  }, [items, currentPage, perPage]);
+  }, [items, effectivePage, perPage]);
 
   // Handle per page change with Selection type from HeroUI
   const setPerPage = useCallback((keys: Selection) => {
@@ -92,16 +104,8 @@ export function useRepoPagination<T>({
     setCurrentPage(1);
   }, []);
 
-  // Auto-reset page if current page exceeds total pages
-  // This handles the case where items are filtered and current page becomes invalid
-  useMemo(() => {
-    if (currentPage > totalPages && totalPages > 0) {
-      setCurrentPage(1);
-    }
-  }, [currentPage, totalPages]);
-
   return {
-    currentPage,
+    currentPage: effectivePage,
     paginatedItems,
     perPage,
     resetPage,

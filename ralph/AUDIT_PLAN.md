@@ -342,7 +342,7 @@ Functional bugs, UX issues, hardcoded colors, and accessibility problems.
   - Impact: HeroUI selection components emit the string `"all"` when the user selects all items via a "select all" control. If that signal reaches `setTypeFilters`, `typeFilters` is set to the string `"all"`. On the next render, `typeFilters.has(type.key)` throws `TypeError: typeFilters.has is not a function`, crashing the filter view.
   - Fix: Guard against `"all"` in `setTypeFilters`: if `keys === "all"` set the full key set `new Set(REPO_TYPES.map(t => t.key))`; otherwise cast normally.
 
-- [ ] **[BUG-017] severity:medium** — Internal `currentPage` state diverges from `effectivePage` — stale page resurfaces when items expand after clamping
+- [x] **[BUG-017] severity:medium** — Internal `currentPage` state diverges from `effectivePage` — stale page resurfaces when items expand after clamping
 
   - File: `src/hooks/use-repo-pagination.ts:79-80`
   - Impact: User navigates to page 4 (20 items), applies a filter that reduces to 5 items (`totalPages=1`). The hook returns `currentPage: 1` (clamped). User removes the filter (20 items, `totalPages=4`). Internal `currentPage` was never cleared — `effectivePage` unclamped back to 4, silently jumping the user to page 4 instead of staying at page 1. No pagination button was clicked; the jump is invisible and unexpected.

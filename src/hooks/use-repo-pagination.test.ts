@@ -236,6 +236,55 @@ describe("useRepoPagination", () => {
     expect(result.current.paginatedItems[4].id).toBe("item-14");
   });
 
+  it("should not resurface stale page when items expand after clamping", () => {
+    let items = createItems(20); // 4 pages with 5 per page
+    const { rerender, result } = renderHook(
+      ({ items }) => useRepoPagination({ items }),
+      { initialProps: { items } },
+    );
+
+    // Navigate to page 4
+    act(() => {
+      result.current.setCurrentPage(4);
+    });
+    expect(result.current.currentPage).toBe(4);
+
+    // Filter down to 5 items (1 page) — should clamp to page 1
+    items = createItems(5);
+    rerender({ items });
+    expect(result.current.currentPage).toBe(1);
+    expect(result.current.paginatedItems).toHaveLength(5);
+
+    // Expand back to 20 items — should stay on page 1, not jump to 4
+    items = createItems(20);
+    rerender({ items });
+    expect(result.current.currentPage).toBe(1);
+    expect(result.current.paginatedItems).toHaveLength(5);
+    expect(result.current.paginatedItems[0].name).toBe("Item 0");
+  });
+
+  it("should never return currentPage > totalPages", () => {
+    let items = createItems(20); // 4 pages
+    const { rerender, result } = renderHook(
+      ({ items }) => useRepoPagination({ items }),
+      { initialProps: { items } },
+    );
+
+    // Navigate to page 4
+    act(() => {
+      result.current.setCurrentPage(4);
+    });
+
+    // Shrink to 2 items (1 page) — returned currentPage must be 1, not 4
+    items = createItems(2);
+    rerender({ items });
+    expect(result.current.currentPage).toBe(1);
+    expect(result.current.totalPages).toBe(1);
+    // paginatedItems must show page 1 content, not be empty
+    expect(result.current.paginatedItems).toHaveLength(2);
+    expect(result.current.paginatedItems[0].name).toBe("Item 0");
+  });
+
   it("should handle items array changing", () => {
     let items = createItems(10);
     const { rerender, result } = renderHook(
