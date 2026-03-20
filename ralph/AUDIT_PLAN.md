@@ -864,7 +864,7 @@ Unit tests for untested modules and critical paths.
   - Test type: unit
   - Fix applied: Added 2 tests: hasItem returns false after removal, removeItem on non-existent key is a no-op (no throw). The getItem-returns-null case was already covered.
 
-- [ ] **[TEST-031] severity:medium** — Fingerprint instability on `userAgent` change is undocumented by tests
+- [x] **[TEST-031] severity:medium** — Fingerprint instability on `userAgent` change is undocumented by tests
 
   - File: `src/utils/secure-storage.ts:117`
   - What to test: Mock `navigator.userAgent` to a new browser version; verify fingerprint changes (documents the known limitation); contrast with the existing screen-dimension test that verifies stability. This test documents intended vs. actual behaviour so the breakage is visible if BUG-021 is later fixed.

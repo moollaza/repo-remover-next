@@ -141,6 +141,24 @@ describe("secureStorage", () => {
       // The now-undecryptable key should be removed from localStorage
       expect(localStorage.getItem("secure_pat")).toBeNull();
     });
+
+    it("returns null when screen dimensions change (fingerprint instability — TEST-031)", async () => {
+      vi.stubEnv("MODE", "production");
+
+      await secureStorage.setItem("pat", "ghp_screen_test");
+      expect(localStorage.getItem("secure_pat")).not.toBeNull();
+
+      // Simulate connecting an external monitor (screen dimensions change)
+      vi.spyOn(screen, "width", "get").mockReturnValue(3840);
+      vi.spyOn(screen, "height", "get").mockReturnValue(2160);
+
+      // Screen dimensions are part of the fingerprint — decryption fails
+      const result = await secureStorage.getItem("pat");
+      expect(result).toBeNull();
+
+      // Corrupted key is cleared
+      expect(localStorage.getItem("secure_pat")).toBeNull();
+    });
   });
 
   describe("removeItem", () => {
