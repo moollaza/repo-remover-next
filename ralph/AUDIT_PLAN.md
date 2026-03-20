@@ -797,11 +797,12 @@ Unit tests for untested modules and critical paths.
   - What to test: Switch to "delete" action, select an archived repo (now enabled), switch back to "archive" action — `selectedRepos` should NOT include the archived repo; `disabledKeys` should include it; `allSelectableSelected` should reflect the corrected selection
   - Test type: unit
 
-- [ ] **[TEST-019] severity:medium** — `filteredRepos` change after selection is untested
+- [x] **[TEST-019] severity:medium** — `filteredRepos` change after selection is untested
 
   - File: `src/hooks/use-repo-selection.ts:99-104`
   - What to test: Select repo A, then re-render the hook with `filteredRepos` that no longer includes repo A (e.g. user applied a filter) — `selectedRepos` should be empty even though `selectedRepoKeys` still contains repo A's ID; `allSelectableSelected` should reflect no selection
   - Test type: unit (re-render hook via `rerender` from `renderHook`)
+  - Fix applied: Added integration test in repo-table.test.tsx verifying that selected repos persist in ConfirmationModal props after search filter hides them (current behavior: selectedRepos is derived from full repos list, not filteredRepos)
 
 - [ ] **[TEST-021] severity:medium** — `login: null` case is untested
 

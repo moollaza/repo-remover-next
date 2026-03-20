@@ -194,6 +194,58 @@ describe("RepoTable", () => {
     expect(archivedRow).toHaveClass("opacity-50");
   });
 
+  test("selected repos persist after search filter hides them", async () => {
+    const user = userEvent.setup();
+
+    // Create repos with distinct names so search can isolate one
+    const alphaRepo = createMockRepo({
+      description: "Alpha project",
+      id: "alpha-repo",
+      name: "alpha-project",
+    });
+    const betaRepo = createMockRepo({
+      description: "Beta project",
+      id: "beta-repo",
+      name: "beta-project",
+    });
+
+    render(<RepoTable login={mockLogin} repos={[alphaRepo, betaRepo]} />);
+
+    // Step 1: Select all repos
+    const checkboxes = screen.getAllByRole("checkbox");
+    await user.click(checkboxes[0]); // select-all checkbox
+
+    // Verify both repos are passed to ConfirmationModal
+    let calls = MockConfirmationModal.mock.calls;
+    let lastProps = calls[calls.length - 1][0];
+    expect(lastProps.repos).toHaveLength(2);
+    expect(lastProps.repos.some((r: Repository) => r.id === "alpha-repo")).toBe(
+      true,
+    );
+    expect(lastProps.repos.some((r: Repository) => r.id === "beta-repo")).toBe(
+      true,
+    );
+
+    // Step 2: Type in search to filter — only "alpha" should be visible
+    const searchInput = screen.getByTestId("repo-search-input");
+    await user.type(searchInput, "alpha");
+
+    // Verify only alpha-project is visible in the table
+    expect(screen.getByText("alpha-project")).toBeInTheDocument();
+    expect(screen.queryByText("beta-project")).not.toBeInTheDocument();
+
+    // Step 3: Verify that selectedRepos still includes the now-hidden beta repo
+    // (selectedRepos is derived from the full repos list, not filteredRepos)
+    calls = MockConfirmationModal.mock.calls;
+    lastProps = calls[calls.length - 1][0];
+    expect(lastProps.repos.some((r: Repository) => r.id === "alpha-repo")).toBe(
+      true,
+    );
+    expect(lastProps.repos.some((r: Repository) => r.id === "beta-repo")).toBe(
+      true,
+    );
+  });
+
   test("does not expose repos on window in production mode", () => {
     // In production, window.repos must not be set (security: exposes private repo data)
     const originalDev = import.meta.env.DEV;
