@@ -716,11 +716,12 @@ Unit tests for untested modules and critical paths.
   - What to test: Returns an Octokit instance; `onRateLimit` returns `true` on first retry (retryCount=0) and `false` on second (retryCount=1); `onSecondaryRateLimit` always returns `false`; created instance uses the provided token as `auth`
   - Test type: unit (spy on ThrottledOctokit constructor or pass a mock throttle handler)
 
-- [ ] **[TEST-006] severity:medium** — `processRepo` analytics calls are untested
+- [x] **[TEST-006] severity:medium** — `processRepo` analytics calls are untested
 
   - File: `src/utils/github-utils.ts:161-165`
   - What to test: `analytics.trackRepoArchived()` called once after successful archive; `analytics.trackRepoDeleted()` called once after successful delete; neither is called if the API throws
   - Test type: unit (mock `analytics` module)
+  - Fix applied: Added 4 tests: trackRepoArchived on successful archive, trackRepoDeleted on successful delete, no analytics on archive error, no analytics on delete error
 
 - [ ] **[TEST-007] severity:medium** — `isValidGitHubToken` does not cover the underscore-only `github_pat_` edge case
 
