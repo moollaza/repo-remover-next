@@ -710,7 +710,7 @@ Unit tests for untested modules and critical paths.
   - Test type: unit
   - Fix applied: Added 6 tests in `onProgress callback sequence and parallelism` describe block: personal stage fields, orgs stage per-org with currentOrg/orgsTotal, orgsLoaded incrementing, repos accumulating across parallel fetches, complete stage with full repo count, zero-orgs edge case
 
-- [ ] **[TEST-005] severity:high** — `createThrottledOctokit` is completely untested
+- [x] **[TEST-005] severity:high** — `createThrottledOctokit` is completely untested
 
   - File: `src/utils/github-utils.ts:174-197`
   - What to test: Returns an Octokit instance; `onRateLimit` returns `true` on first retry (retryCount=0) and `false` on second (retryCount=1); `onSecondaryRateLimit` always returns `false`; created instance uses the provided token as `auth`
