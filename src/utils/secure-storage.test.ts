@@ -161,5 +161,12 @@ describe("secureStorage", () => {
       await secureStorage.setItem("pat", "ghp_test");
       expect(secureStorage.hasItem("pat")).toBe(true);
     });
+
+    it("returns false again after removeItem", async () => {
+      await secureStorage.setItem("pat", "ghp_test");
+      expect(secureStorage.hasItem("pat")).toBe(true);
+      secureStorage.removeItem("pat");
+      expect(secureStorage.hasItem("pat")).toBe(false);
+    });
   });
 });

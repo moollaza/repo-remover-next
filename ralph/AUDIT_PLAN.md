@@ -850,11 +850,12 @@ Unit tests for untested modules and critical paths.
   - Test type: unit
   - Fix applied: Test already exists — `'does NOT fall back to plaintext when encryption fails'` in `secure-storage.test.ts:75-92` covers the exact scenario: mocks `crypto.subtle.encrypt` to reject, verifies `setItem` rejects, and confirms no plaintext/garbage data in localStorage
 
-- [ ] **[TEST-029] severity:low** — `secureStorage.hasItem` is completely untested
+- [x] **[TEST-029] severity:low** — `secureStorage.hasItem` is completely untested
 
   - File: `src/utils/secure-storage.ts:166-168`
   - What to test: `hasItem` returns `false` before any write; `true` after `setItem`; `false` again after `removeItem`
   - Test type: unit
+  - Fix applied: Two tests already existed (false for missing keys, true after setItem). Added missing lifecycle test: returns false again after removeItem.
 
 - [ ] **[TEST-030] severity:low** — `secureStorage.removeItem` is completely untested
 
