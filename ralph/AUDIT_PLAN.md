@@ -730,11 +730,12 @@ Unit tests for untested modules and critical paths.
   - Test type: unit
   - Fix applied: Added test for underscore-only payloads; fixed regex to require at least one alphanumeric character in the payload portion
 
-- [ ] **[TEST-009] severity:medium** — `setPat(remember=false)` behavior is untested
+- [x] **[TEST-009] severity:medium** — `setPat(remember=false)` behavior is untested
 
   - File: `src/providers/github-data-provider.tsx:173-189`
   - What to test: Calling `setPat(token, false)` should NOT write PAT to storage; should ALSO clear any previously stored login from storage (lines 186-187 — the double-clear side-effect is surprising and important to document via test)
   - Test type: unit
+  - **NOTE**: `setPat(remember=false)` path no longer exists (confirmed by BUG-010). Current `setPat` takes only a string. Fix applied: Added 3 tests covering current behavior — empty string rejection, always-persist-to-storage (no opt-out), and login preservation when setting new token.
 
 - [ ] **[TEST-010] severity:medium** — `refetchData` 5-second rate limiting is untested
 

@@ -161,6 +161,75 @@ describe("GitHubDataProvider", () => {
     });
   });
 
+  describe("setPat behavior", () => {
+    it("rejects empty string and does not update state or storage", async () => {
+      const { result } = renderHook(() => useGitHubData(), {
+        wrapper: IsolatedProvider,
+      });
+
+      // Call setPat with empty string
+      act(() => {
+        result.current.setPat("");
+      });
+
+      // State should remain null
+      expect(result.current.pat).toBeNull();
+      expect(result.current.isAuthenticated).toBe(false);
+
+      // Storage should not have been written
+      expect(await secureStorage.getItem("pat")).toBeNull();
+    });
+
+    it("always persists token to secure storage (no remember=false path)", async () => {
+      const { result } = renderHook(() => useGitHubData(), {
+        wrapper: IsolatedProvider,
+      });
+
+      // Set a valid token
+      act(() => {
+        result.current.setPat(validToken);
+      });
+
+      // State should update
+      await waitFor(() => {
+        expect(result.current.pat).toBe(validToken);
+        expect(result.current.isAuthenticated).toBe(true);
+      });
+
+      // Token should always be persisted — there is no opt-out
+      await waitFor(async () => {
+        expect(await secureStorage.getItem("pat")).toBe(validToken);
+      });
+    });
+
+    it("does not clear previously stored login when setting a new token", async () => {
+      // Pre-store a login
+      await secureStorage.setItem("login", "previoususer");
+
+      const { result } = renderHook(() => useGitHubData(), {
+        wrapper: IsolatedProvider,
+      });
+
+      // Wait for initialization to load the stored login
+      await waitFor(() => {
+        expect(result.current.login).toBe("previoususer");
+      });
+
+      // Set a new token without setting login
+      act(() => {
+        result.current.setPat(validToken);
+      });
+
+      await waitFor(() => {
+        expect(result.current.pat).toBe(validToken);
+      });
+
+      // Login should still be intact in both state and storage
+      expect(result.current.login).toBe("previoususer");
+      expect(await secureStorage.getItem("login")).toBe("previoususer");
+    });
+  });
+
   describe("Data fetching", () => {
     it("validates authentication state changes properly", async () => {
       const { result } = renderHook(() => useGitHubData(), {
