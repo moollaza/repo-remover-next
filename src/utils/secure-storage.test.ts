@@ -121,6 +121,26 @@ describe("secureStorage", () => {
       // The corrupted key should be removed from localStorage
       expect(localStorage.getItem("secure_pat")).toBeNull();
     });
+
+    it("returns null and clears key when fingerprint changes (TEST-027)", async () => {
+      vi.stubEnv("MODE", "production");
+
+      // Store a value encrypted with the current fingerprint
+      await secureStorage.setItem("pat", "ghp_fingerprint_test");
+
+      // Verify the value was stored (encrypted ciphertext exists)
+      expect(localStorage.getItem("secure_pat")).not.toBeNull();
+
+      // Simulate a fingerprint change (e.g. user changes system language)
+      vi.spyOn(navigator, "language", "get").mockReturnValue("fr-FR");
+
+      // Decryption should fail because the derived key is different
+      const result = await secureStorage.getItem("pat");
+      expect(result).toBeNull();
+
+      // The now-undecryptable key should be removed from localStorage
+      expect(localStorage.getItem("secure_pat")).toBeNull();
+    });
   });
 
   describe("removeItem", () => {

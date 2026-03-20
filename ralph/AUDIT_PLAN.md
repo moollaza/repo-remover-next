@@ -837,7 +837,7 @@ Unit tests for untested modules and critical paths.
   - Test type: unit (mock `import.meta.env.MODE` to return `"production"` or mock `isWebCryptoAvailable` to return `true`)
   - Fix applied: Added 3 tests in `secure-storage.test.ts`: encrypted value differs from plaintext, clean encrypt-decrypt round-trip, different ciphertext for same input (random salt/IV)
 
-- [ ] **[TEST-027] severity:medium** — `getItem` decryption-failure fallback behavior is untested
+- [x] **[TEST-027] severity:medium** — `getItem` decryption-failure fallback behavior is untested
 
   - File: `src/utils/secure-storage.ts:155-160`
   - What to test: Store a value encrypted with one key, then call `getItem` after fingerprint changes (mock `getBrowserFingerprint` to return a different value) — should return `null` (after BUG-022 is fixed) rather than raw ciphertext; existing tests should codify the correct behavior so regressions are caught.
