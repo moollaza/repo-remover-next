@@ -763,11 +763,12 @@ Unit tests for untested modules and critical paths.
   - Test type: unit (mock `fetchGitHubDataWithProgress` to throw an Error with "401" in message)
   - Fix applied: Added 4 tests covering: auth warning on "401" error, auth warning on "auth" error, no auth warning for non-auth errors, progress cleared on error
 
-- [ ] **[TEST-014] severity:high** — `handleStop` mid-batch abort is completely untested
+- [!] **[TEST-014] severity:high** — `handleStop` mid-batch abort is completely untested
 
   - File: `src/hooks/use-confirmation-modal.ts:148-150` (handleStop) / `:103` (abortRef check)
   - What to test: Clicking "Stop" mid-loop sets `abortRef.current = true`; the loop breaks after the current repo finishes; remaining repos are not processed; state still transitions to "result" with partial counts
   - Test type: integration (fake timers + MSW; advance timers partway then call stop)
+  - **SKIPPED**: `handleStop` and `abortRef` do not exist in the current codebase. The hook `use-confirmation-modal.ts` was merged into `confirmation-modal.tsx` and the stop/abort feature was removed during refactoring. No stop button exists in the progress UI. Nothing to test.
 
 - [ ] **[TEST-015] severity:high** — 401 early-stop path is untested
 
