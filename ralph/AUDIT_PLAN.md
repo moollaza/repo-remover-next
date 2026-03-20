@@ -723,11 +723,12 @@ Unit tests for untested modules and critical paths.
   - Test type: unit (mock `analytics` module)
   - Fix applied: Added 4 tests: trackRepoArchived on successful archive, trackRepoDeleted on successful delete, no analytics on archive error, no analytics on delete error
 
-- [ ] **[TEST-007] severity:medium** — `isValidGitHubToken` does not cover the underscore-only `github_pat_` edge case
+- [x] **[TEST-007] severity:medium** — `isValidGitHubToken` does not cover the underscore-only `github_pat_` edge case
 
   - File: `src/utils/github-utils.ts:83-85`
   - What to test: `"github_pat_" + "_".repeat(29)` (40 chars, all underscores after prefix) currently returns `true` but should return `false` — underscore-only payloads are not real GitHub tokens
   - Test type: unit
+  - Fix applied: Added test for underscore-only payloads; fixed regex to require at least one alphanumeric character in the payload portion
 
 - [ ] **[TEST-009] severity:medium** — `setPat(remember=false)` behavior is untested
 

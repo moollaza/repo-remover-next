@@ -236,6 +236,21 @@ describe("GitHub Utils", () => {
       ).toBe(false);
     });
 
+    it("should reject github_pat_ tokens with underscore-only payloads", () => {
+      // 72 chars total, all underscores after prefix — not a real token
+      expect(isValidGitHubToken("github_pat_" + "_".repeat(61))).toBe(false);
+
+      // Even longer underscore-only payload
+      expect(isValidGitHubToken("github_pat_" + "_".repeat(100))).toBe(false);
+
+      // Mixed underscores with at least one alphanumeric should still pass
+      expect(
+        isValidGitHubToken(
+          "github_pat_11AABBCCDDEEFFGGHH0011_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVW",
+        ),
+      ).toBe(true);
+    });
+
     // Test standard tokens (ghp_, gho_, etc.)
     it("should validate standard tokens correctly", () => {
       // Valid tokens for each prefix

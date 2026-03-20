@@ -82,7 +82,12 @@ export function isValidGitHubToken(token: string): boolean {
 
   // Special case for github_pat_ (fine-grained) tokens — real tokens are 82+ chars
   if (token.startsWith("github_pat_")) {
-    return token.length >= 72 && /^[a-zA-Z0-9_]+$/.test(token.slice(11));
+    const payload = token.slice(11);
+    return (
+      token.length >= 72 &&
+      /^[a-zA-Z0-9_]+$/.test(payload) &&
+      /[a-zA-Z0-9]/.test(payload)
+    );
   }
 
   // All other tokens start with 3-letter prefix + underscore
