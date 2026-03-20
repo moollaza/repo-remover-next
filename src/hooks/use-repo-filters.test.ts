@@ -418,6 +418,31 @@ describe("useRepoFilters", () => {
     expect(result.current.filteredRepos).toHaveLength(0);
   });
 
+  it("should hide non-admin repos when login is null", () => {
+    const repos = [
+      createMockRepo({
+        id: "1",
+        key: "1",
+        name: "admin-repo",
+        owner: { login: "someuser", url: "https://github.com/someuser" },
+        viewerCanAdminister: true,
+      }),
+      createMockRepo({
+        id: "2",
+        key: "2",
+        name: "non-admin-repo",
+        owner: { login: "someuser", url: "https://github.com/someuser" },
+        viewerCanAdminister: false,
+      }),
+    ];
+
+    const { result } = renderHook(() => useRepoFilters({ login: null, repos }));
+
+    // Only the repo with viewerCanAdminister: true should be visible
+    expect(result.current.filteredRepos).toHaveLength(1);
+    expect(result.current.filteredRepos[0].name).toBe("admin-repo");
+  });
+
   it("should handle empty repo list", () => {
     const { result } = renderHook(() =>
       useRepoFilters({ login: "testuser", repos: [] }),

@@ -804,7 +804,7 @@ Unit tests for untested modules and critical paths.
   - Test type: unit (re-render hook via `rerender` from `renderHook`)
   - Fix applied: Added integration test in repo-table.test.tsx verifying that selected repos persist in ConfirmationModal props after search filter hides them (current behavior: selectedRepos is derived from full repos list, not filteredRepos)
 
-- [ ] **[TEST-021] severity:medium** — `login: null` case is untested
+- [x] **[TEST-021] severity:medium** — `login: null` case is untested
 
   - File: `src/hooks/use-repo-filters.ts:116-117`
   - What to test: When `login` is `null`, `repo.owner.login === null` is always false; repos are only shown if `viewerCanAdminister` is true. Verify that a repo with `viewerCanAdminister: false` is hidden when `login` is null, and one with `viewerCanAdminister: true` is shown.
