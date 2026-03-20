@@ -791,7 +791,7 @@ Unit tests for untested modules and critical paths.
   - Test type: unit
   - Fix applied: Added 3 tests in confirmation-modal.test.tsx: result-screen close calls mutate+onClose, state resets to initial after close (verified by re-opening shows confirmation screen with empty username), cancel from confirmation calls onClose but not mutate
 
-- [ ] **[TEST-018] severity:high** — Stale selection after action change is untested
+- [x] **[TEST-018] severity:high** — Stale selection after action change is untested
 
   - File: `src/hooks/use-repo-selection.ts:106-111`
   - What to test: Switch to "delete" action, select an archived repo (now enabled), switch back to "archive" action — `selectedRepos` should NOT include the archived repo; `disabledKeys` should include it; `allSelectableSelected` should reflect the corrected selection

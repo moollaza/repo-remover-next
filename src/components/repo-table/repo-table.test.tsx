@@ -185,6 +185,13 @@ describe("RepoTable", () => {
     expect(
       propsAfterSwitch.repos.some((r: Repository) => r.id === "active-repo"),
     ).toBe(true);
+
+    // Step 5: Verify disabledKeys — archived repo row should be disabled again
+    const archivedRow = screen
+      .getByText("archived-repo")
+      .closest('[data-testid="repo-row"]');
+    expect(archivedRow).toHaveClass("pointer-events-none");
+    expect(archivedRow).toHaveClass("opacity-50");
   });
 
   test("does not expose repos on window in production mode", () => {
