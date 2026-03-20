@@ -756,11 +756,12 @@ Unit tests for untested modules and critical paths.
   - Test type: unit
   - Fix applied: Added 6 tests covering: isLoading=true when authenticated with no data, isLoading=true during active progress with partial data, isLoading=false after data arrives and progress cleared, isLoading=false after logout, isLoading=false when not authenticated, isLoading=false on error
 
-- [ ] **[TEST-013] severity:low** — SWR `onError` 401/auth detection path is untested
+- [x] **[TEST-013] severity:low** — SWR `onError` 401/auth detection path is untested
 
   - File: `src/providers/github-data-provider.tsx:119-127`
   - What to test: When SWR error message contains "401", the `console.warn` fires (currently no auto-logout happens — but the check at line 124 is a future auto-logout hook; a regression test ensures any future change to that code path is intentional)
   - Test type: unit (mock `fetchGitHubDataWithProgress` to throw an Error with "401" in message)
+  - Fix applied: Added 4 tests covering: auth warning on "401" error, auth warning on "auth" error, no auth warning for non-auth errors, progress cleared on error
 
 - [ ] **[TEST-014] severity:high** — `handleStop` mid-batch abort is completely untested
 

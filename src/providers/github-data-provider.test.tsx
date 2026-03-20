@@ -12,6 +12,7 @@ import {
   MOCK_USER,
 } from "@/mocks/static-fixtures";
 import { analytics } from "@/utils/analytics";
+import { debug } from "@/utils/debug";
 import { fetchGitHubDataWithProgress } from "@/utils/github-api";
 import { secureStorage } from "@/utils/secure-storage";
 
@@ -20,6 +21,18 @@ import { GitHubDataProvider } from "./github-data-provider";
 vi.mock("@/utils/analytics", () => ({
   analytics: {
     trackTokenValidated: vi.fn(),
+  },
+}));
+
+vi.mock("@/utils/debug", () => ({
+  debug: {
+    error: vi.fn(),
+    group: vi.fn(),
+    groupEnd: vi.fn(),
+    log: vi.fn(),
+    sanitize: vi.fn((v: unknown) => v),
+    table: vi.fn(),
+    warn: vi.fn(),
   },
 }));
 
@@ -627,6 +640,108 @@ describe("GitHubDataProvider", () => {
 
       // isLoading should be false because error is present
       expect(result.current.isLoading).toBe(false);
+    });
+  });
+
+  describe("SWR onError 401/auth detection", () => {
+    it("logs auth warning when error contains '401'", async () => {
+      mockFetch.mockRejectedValue(new Error("Request failed with status 401"));
+
+      const { result } = renderHook(() => useGitHubData(), {
+        wrapper: IsolatedProvider,
+      });
+
+      act(() => {
+        result.current.setPat(validToken);
+      });
+
+      await waitFor(() => {
+        expect(result.current.isError).toBe(true);
+      });
+
+      // Should log the general error AND the auth-specific warning
+      expect(debug.error).toHaveBeenCalledWith(
+        "GitHub API error:",
+        expect.any(Error),
+      );
+      expect(debug.warn).toHaveBeenCalledWith(
+        "Authentication error detected, consider logging out",
+      );
+    });
+
+    it("logs auth warning when error contains 'auth'", async () => {
+      mockFetch.mockRejectedValue(new Error("authentication failed for user"));
+
+      const { result } = renderHook(() => useGitHubData(), {
+        wrapper: IsolatedProvider,
+      });
+
+      act(() => {
+        result.current.setPat(validToken);
+      });
+
+      await waitFor(() => {
+        expect(result.current.isError).toBe(true);
+      });
+
+      expect(debug.warn).toHaveBeenCalledWith(
+        "Authentication error detected, consider logging out",
+      );
+    });
+
+    it("does not log auth warning for non-auth errors", async () => {
+      mockFetch.mockRejectedValue(new Error("Network timeout"));
+
+      const { result } = renderHook(() => useGitHubData(), {
+        wrapper: IsolatedProvider,
+      });
+
+      act(() => {
+        result.current.setPat(validToken);
+      });
+
+      await waitFor(() => {
+        expect(result.current.isError).toBe(true);
+      });
+
+      // Should log the general error but NOT the auth warning
+      expect(debug.error).toHaveBeenCalledWith(
+        "GitHub API error:",
+        expect.any(Error),
+      );
+      expect(debug.warn).not.toHaveBeenCalledWith(
+        "Authentication error detected, consider logging out",
+      );
+    });
+
+    it("clears progress on error", async () => {
+      // First set up progress by having fetch call the progress callback before rejecting
+      mockFetch.mockImplementation((_key, onProgress) => {
+        onProgress?.({
+          currentOrg: undefined,
+          orgsLoaded: 0,
+          orgsTotal: 0,
+          repos: [],
+          stage: "personal" as const,
+          user: null,
+        });
+        return Promise.reject(new Error("Request failed with status 401"));
+      });
+
+      const { result } = renderHook(() => useGitHubData(), {
+        wrapper: IsolatedProvider,
+      });
+
+      act(() => {
+        result.current.setPat(validToken);
+      });
+
+      // Wait for error state — progress should be cleared by onError
+      await waitFor(() => {
+        expect(result.current.isError).toBe(true);
+      });
+
+      expect(result.current.progress).toBeNull();
     });
   });
 });
