@@ -784,11 +784,12 @@ Unit tests for untested modules and critical paths.
   - Test type: unit (mock `analytics` module)
   - Fix applied: Added 3 tests in confirmation-modal.test.tsx: trackArchiveActionSubmitted on archive confirm with correct repo count, trackDeleteActionSubmitted on delete confirm with correct repo count, no analytics fired when octokit is null (pat=null)
 
-- [ ] **[TEST-017] severity:medium** — `handleOnClose` behavior on cancel vs post-result is untested
+- [x] **[TEST-017] severity:medium** — `handleOnClose` behavior on cancel vs post-result is untested
 
   - File: `src/hooks/use-confirmation-modal.ts:157-165`
   - What to test: `mutate()` is called when closing from confirmation screen (cancel, no repos processed) — this is the current behavior and it may be unintentional (see BUG-013); `onClose()` is always called; `RESET` dispatched resets state to `initialState`
   - Test type: unit
+  - Fix applied: Added 3 tests in confirmation-modal.test.tsx: result-screen close calls mutate+onClose, state resets to initial after close (verified by re-opening shows confirmation screen with empty username), cancel from confirmation calls onClose but not mutate
 
 - [ ] **[TEST-018] severity:high** — Stale selection after action change is untested
 

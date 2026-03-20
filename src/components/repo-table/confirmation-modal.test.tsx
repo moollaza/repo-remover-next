@@ -300,6 +300,99 @@ describe("ConfirmationModal", () => {
     expect(analytics.trackArchiveActionSubmitted).not.toHaveBeenCalled();
   });
 
+  it("calls mutate and onClose when closing from result screen (TEST-017)", async () => {
+    vi.mocked(processRepo).mockReset();
+    vi.mocked(processRepo).mockResolvedValue(undefined);
+
+    render(
+      <GitHubContext.Provider value={mockContextValue}>
+        <ConfirmationModal {...mockProps} />
+      </GitHubContext.Provider>,
+    );
+
+    // Type correct username and confirm to trigger processing
+    const input = screen.getByTestId("confirmation-modal-input");
+    fireEvent.change(input, { target: { value: "testuser" } });
+    fireEvent.click(screen.getByTestId("confirmation-modal-confirm"));
+
+    // Advance timers to reach the result screen
+    await vi.advanceTimersByTimeAsync(10000);
+
+    // Verify we're on the result screen
+    expect(screen.getByTestId("result-modal-header")).toBeInTheDocument();
+
+    // Click the close button on the result screen
+    fireEvent.click(screen.getByTestId("repo-action-result-close"));
+
+    // mutate() SHOULD be called — operations ran
+    expect(mockContextValue.mutate).toHaveBeenCalledTimes(1);
+
+    // onClose should be called
+    expect(mockProps.onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("resets state to initial after closing from result screen (TEST-017)", async () => {
+    vi.mocked(processRepo).mockReset();
+    vi.mocked(processRepo).mockResolvedValue(undefined);
+
+    const { rerender } = render(
+      <GitHubContext.Provider value={mockContextValue}>
+        <ConfirmationModal {...mockProps} />
+      </GitHubContext.Provider>,
+    );
+
+    // Type correct username and confirm
+    const input = screen.getByTestId("confirmation-modal-input");
+    fireEvent.change(input, { target: { value: "testuser" } });
+    fireEvent.click(screen.getByTestId("confirmation-modal-confirm"));
+
+    // Advance timers to reach the result screen
+    await vi.advanceTimersByTimeAsync(10000);
+    expect(screen.getByTestId("result-modal-header")).toBeInTheDocument();
+
+    // Close the modal from result screen
+    fireEvent.click(screen.getByTestId("repo-action-result-close"));
+
+    // Re-render with isOpen=true to simulate re-opening the modal
+    rerender(
+      <GitHubContext.Provider value={mockContextValue}>
+        <ConfirmationModal {...mockProps} />
+      </GitHubContext.Provider>,
+    );
+
+    // State should be reset — confirmation screen should appear again
+    expect(screen.getByTestId("confirmation-modal-header")).toBeInTheDocument();
+    expect(screen.getByTestId("confirmation-modal-input")).toBeInTheDocument();
+
+    // Username should be cleared (reset to initial state)
+    expect(screen.getByTestId("confirmation-modal-input")).toHaveValue("");
+
+    // Confirm button should be disabled again (username not entered)
+    expect(screen.getByTestId("confirmation-modal-confirm")).toBeDisabled();
+  });
+
+  it("resets state and calls onClose when cancelling from confirmation screen (TEST-017)", () => {
+    render(
+      <GitHubContext.Provider value={mockContextValue}>
+        <ConfirmationModal {...mockProps} />
+      </GitHubContext.Provider>,
+    );
+
+    // Type a username (to prove it gets reset)
+    const input = screen.getByTestId("confirmation-modal-input");
+    fireEvent.change(input, { target: { value: "partial" } });
+    expect(input).toHaveValue("partial");
+
+    // Cancel
+    fireEvent.click(screen.getByTestId("confirmation-modal-cancel"));
+
+    // mutate should NOT be called
+    expect(mockContextValue.mutate).not.toHaveBeenCalled();
+
+    // onClose should be called
+    expect(mockProps.onClose).toHaveBeenCalledTimes(1);
+  });
+
   it("does not fire analytics when octokit is null (TEST-016)", async () => {
     const noPatContext: GitHubContextType = {
       ...mockContextValue,
