@@ -314,6 +314,51 @@ describe("GitHubDataProvider", () => {
     });
   });
 
+  describe("permissionWarning context exposure", () => {
+    it("exposes permissionWarning from fetchGitHubDataWithProgress", async () => {
+      mockFetch.mockResolvedValue({
+        error: null,
+        permissionWarning: "token lacks read:org scope",
+        repos: MOCK_REPOS as Repository[],
+        user: MOCK_USER as unknown as User,
+      });
+
+      const { result } = renderHook(() => useGitHubData(), {
+        wrapper: IsolatedProvider,
+      });
+
+      act(() => {
+        result.current.setPat(validToken);
+      });
+
+      await waitFor(() => {
+        expect(result.current.repos).not.toBeNull();
+      });
+
+      expect(result.current.permissionWarning).toBe(
+        "token lacks read:org scope",
+      );
+    });
+
+    it("permissionWarning is undefined when API returns no warning", async () => {
+      setupSuccessfulFetch();
+
+      const { result } = renderHook(() => useGitHubData(), {
+        wrapper: IsolatedProvider,
+      });
+
+      act(() => {
+        result.current.setPat(validToken);
+      });
+
+      await waitFor(() => {
+        expect(result.current.repos).not.toBeNull();
+      });
+
+      expect(result.current.permissionWarning).toBeUndefined();
+    });
+  });
+
   describe("refetchData rate limiting", () => {
     it("first call triggers mutate", async () => {
       setupSuccessfulFetch();

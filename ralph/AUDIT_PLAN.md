@@ -743,7 +743,7 @@ Unit tests for untested modules and critical paths.
   - What to test: First call triggers `mutate()`; second call within 5s is silently ignored (no error thrown, no return value); call after 5s triggers `mutate()` again
   - Test type: unit (use `vi.useFakeTimers()`)
 
-- [ ] **[TEST-011] severity:medium** — `permissionWarning` context exposure is untested
+- [x] **[TEST-011] severity:medium** — `permissionWarning` context exposure is untested
 
   - File: `src/providers/github-data-provider.tsx:244`
   - What to test: When `fetchGitHubDataWithProgress` resolves with a `permissionWarning` string, the context value exposes it via `context.permissionWarning`; when no warning, `context.permissionWarning` is `undefined`
