@@ -486,4 +486,147 @@ describe("GitHubDataProvider", () => {
       dateNowSpy.mockRestore();
     });
   });
+
+  describe("isLoading state machine", () => {
+    it("isLoading=true when authenticated with no data yet", async () => {
+      // Make fetch hang (never resolve) so data stays null
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      mockFetch.mockReturnValue(new Promise(() => {}));
+
+      const { result } = renderHook(() => useGitHubData(), {
+        wrapper: IsolatedProvider,
+      });
+
+      // Set PAT to become authenticated
+      act(() => {
+        result.current.setPat(validToken);
+      });
+
+      // Wait for isAuthenticated to become true
+      await waitFor(() => {
+        expect(result.current.isAuthenticated).toBe(true);
+      });
+
+      // isLoading should be true: authenticated + no data + no error
+      expect(result.current.isLoading).toBe(true);
+      expect(result.current.repos).toBeNull();
+    });
+
+    it("isLoading=true when progress is active even if data exists", async () => {
+      // Capture the progress callback so we can control it
+      let progressCallback:
+        | ((progress: import("@/utils/github-api").LoadingProgress) => void)
+        | null = null;
+      mockFetch.mockImplementation(async (_key, onProgress) => {
+        progressCallback = onProgress as typeof progressCallback;
+        // Call progress to simulate partial data arriving
+        onProgress?.({
+          currentOrg: "testorg",
+          orgsLoaded: 0,
+          orgsTotal: 1,
+          repos: MOCK_REPOS as Repository[],
+          stage: "orgs",
+          user: MOCK_USER as unknown as User,
+        });
+        // Don't resolve yet — keep progress active
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        return new Promise(() => {});
+      });
+
+      const { result } = renderHook(() => useGitHubData(), {
+        wrapper: IsolatedProvider,
+      });
+
+      act(() => {
+        result.current.setPat(validToken);
+      });
+
+      // Wait for progress to set partial data
+      await waitFor(() => {
+        expect(result.current.repos).not.toBeNull();
+      });
+
+      // Even though data exists, progress is still active → isLoading=true
+      expect(result.current.isLoading).toBe(true);
+      expect(result.current.progress).not.toBeNull();
+      expect(progressCallback).not.toBeNull();
+    });
+
+    it("isLoading=false once data arrives and progress is cleared", async () => {
+      setupSuccessfulFetch();
+
+      const { result } = renderHook(() => useGitHubData(), {
+        wrapper: IsolatedProvider,
+      });
+
+      act(() => {
+        result.current.setPat(validToken);
+      });
+
+      // Wait for data to fully load (onSuccess clears progress)
+      await waitFor(() => {
+        expect(result.current.repos).not.toBeNull();
+        expect(result.current.progress).toBeNull();
+      });
+
+      // isLoading should be false: data arrived, progress cleared
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    it("isLoading=false immediately after logout", async () => {
+      setupSuccessfulFetch();
+
+      const { result } = renderHook(() => useGitHubData(), {
+        wrapper: IsolatedProvider,
+      });
+
+      // Authenticate and wait for data
+      act(() => {
+        result.current.setPat(validToken);
+      });
+
+      await waitFor(() => {
+        expect(result.current.repos).not.toBeNull();
+      });
+
+      // Logout
+      act(() => {
+        result.current.logout();
+      });
+
+      // isLoading should be false: not authenticated → isLoading can't be true
+      expect(result.current.isAuthenticated).toBe(false);
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    it("isLoading=false when not authenticated", () => {
+      const { result } = renderHook(() => useGitHubData(), {
+        wrapper: IsolatedProvider,
+      });
+
+      // Not authenticated, no data, no error → isLoading is still false
+      expect(result.current.isAuthenticated).toBe(false);
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    it("isLoading=false when there is an error", async () => {
+      mockFetch.mockRejectedValue(new Error("GitHub API failure"));
+
+      const { result } = renderHook(() => useGitHubData(), {
+        wrapper: IsolatedProvider,
+      });
+
+      act(() => {
+        result.current.setPat(validToken);
+      });
+
+      // Wait for error state
+      await waitFor(() => {
+        expect(result.current.isError).toBe(true);
+      });
+
+      // isLoading should be false because error is present
+      expect(result.current.isLoading).toBe(false);
+    });
+  });
 });

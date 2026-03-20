@@ -749,11 +749,12 @@ Unit tests for untested modules and critical paths.
   - What to test: When `fetchGitHubDataWithProgress` resolves with a `permissionWarning` string, the context value exposes it via `context.permissionWarning`; when no warning, `context.permissionWarning` is `undefined`
   - Test type: unit (mock `fetchGitHubDataWithProgress` to return `{ permissionWarning: "token lacks read:org" }`)
 
-- [ ] **[TEST-012] severity:medium** — `isLoading` state machine is untested
+- [x] **[TEST-012] severity:medium** — `isLoading` state machine is untested
 
   - File: `src/providers/github-data-provider.tsx:143`
   - What to test: `isLoading=true` when authenticated + no data yet; `isLoading=true` when `progress !== null` even if data exists (progressive loading); `isLoading=false` once data arrives and progress cleared; `isLoading=false` immediately after logout
   - Test type: unit
+  - Fix applied: Added 6 tests covering: isLoading=true when authenticated with no data, isLoading=true during active progress with partial data, isLoading=false after data arrives and progress cleared, isLoading=false after logout, isLoading=false when not authenticated, isLoading=false on error
 
 - [ ] **[TEST-013] severity:low** — SWR `onError` 401/auth detection path is untested
 
