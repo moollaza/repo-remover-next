@@ -313,4 +313,132 @@ describe("GitHubDataProvider", () => {
       expect(analytics.trackTokenValidated).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe("refetchData rate limiting", () => {
+    it("first call triggers mutate", async () => {
+      setupSuccessfulFetch();
+
+      const { result } = renderHook(() => useGitHubData(), {
+        wrapper: IsolatedProvider,
+      });
+
+      // Authenticate so SWR starts fetching
+      act(() => {
+        result.current.setPat(validToken);
+      });
+
+      // Wait for initial fetch to complete
+      await waitFor(() => {
+        expect(result.current.repos).not.toBeNull();
+      });
+
+      // Clear mock to track only refetch calls
+      mockFetch.mockClear();
+      setupSuccessfulFetch();
+
+      // First refetchData call should trigger mutate
+      act(() => {
+        result.current.refetchData();
+      });
+
+      await waitFor(() => {
+        expect(mockFetch).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    it("second call within 5s is silently ignored", async () => {
+      const now = 1000000;
+      const dateNowSpy = vi.spyOn(Date, "now").mockReturnValue(now);
+
+      setupSuccessfulFetch();
+
+      const { result } = renderHook(() => useGitHubData(), {
+        wrapper: IsolatedProvider,
+      });
+
+      act(() => {
+        result.current.setPat(validToken);
+      });
+
+      await waitFor(() => {
+        expect(result.current.repos).not.toBeNull();
+      });
+
+      mockFetch.mockClear();
+      setupSuccessfulFetch();
+
+      // First call at t=1000000 — allowed
+      act(() => {
+        result.current.refetchData();
+      });
+
+      await waitFor(() => {
+        expect(mockFetch).toHaveBeenCalledTimes(1);
+      });
+
+      mockFetch.mockClear();
+      setupSuccessfulFetch();
+
+      // Move time forward 2s (within 5s cooldown)
+      dateNowSpy.mockReturnValue(now + 2000);
+
+      // Second call — should be rate-limited
+      act(() => {
+        result.current.refetchData();
+      });
+
+      // Fetch should NOT have been called again
+      expect(mockFetch).not.toHaveBeenCalled();
+
+      dateNowSpy.mockRestore();
+    });
+
+    it("call after 5s cooldown triggers mutate again", async () => {
+      const now = 2000000;
+      const dateNowSpy = vi.spyOn(Date, "now").mockReturnValue(now);
+
+      setupSuccessfulFetch();
+
+      const { result } = renderHook(() => useGitHubData(), {
+        wrapper: IsolatedProvider,
+      });
+
+      act(() => {
+        result.current.setPat(validToken);
+      });
+
+      await waitFor(() => {
+        expect(result.current.repos).not.toBeNull();
+      });
+
+      mockFetch.mockClear();
+      setupSuccessfulFetch();
+
+      // First call at t=2000000 — allowed
+      act(() => {
+        result.current.refetchData();
+      });
+
+      await waitFor(() => {
+        expect(mockFetch).toHaveBeenCalledTimes(1);
+      });
+
+      mockFetch.mockClear();
+      setupSuccessfulFetch();
+
+      // Move time past the 5-second cooldown
+      dateNowSpy.mockReturnValue(now + 5001);
+
+      // This call should be allowed
+      act(() => {
+        result.current.refetchData();
+      });
+
+      await waitFor(() => {
+        expect(mockFetch).toHaveBeenCalledTimes(1);
+      });
+
+      dateNowSpy.mockRestore();
+    });
+  });
 });

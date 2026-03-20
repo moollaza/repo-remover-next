@@ -737,7 +737,7 @@ Unit tests for untested modules and critical paths.
   - Test type: unit
   - **NOTE**: `setPat(remember=false)` path no longer exists (confirmed by BUG-010). Current `setPat` takes only a string. Fix applied: Added 3 tests covering current behavior — empty string rejection, always-persist-to-storage (no opt-out), and login preservation when setting new token.
 
-- [ ] **[TEST-010] severity:medium** — `refetchData` 5-second rate limiting is untested
+- [x] **[TEST-010] severity:medium** — `refetchData` 5-second rate limiting is untested
 
   - File: `src/providers/github-data-provider.tsx:205-213`
   - What to test: First call triggers `mutate()`; second call within 5s is silently ignored (no error thrown, no return value); call after 5s triggers `mutate()` again
