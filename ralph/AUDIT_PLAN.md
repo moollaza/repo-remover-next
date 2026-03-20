@@ -770,11 +770,12 @@ Unit tests for untested modules and critical paths.
   - Test type: integration (fake timers + MSW; advance timers partway then call stop)
   - **SKIPPED**: `handleStop` and `abortRef` do not exist in the current codebase. The hook `use-confirmation-modal.ts` was merged into `confirmation-modal.tsx` and the stop/abort feature was removed during refactoring. No stop button exists in the progress UI. Nothing to test.
 
-- [ ] **[TEST-015] severity:high** — 401 early-stop path is untested
+- [!] **[TEST-015] severity:high** — 401 early-stop path is untested
 
   - File: `src/hooks/use-confirmation-modal.ts:117-122`
   - What to test: When the first repo returns a 401, the `break` fires immediately; subsequent repos are NOT processed (distinct from 403 which records an error and continues); the error list contains exactly one entry; result shows 1 error, not N
   - Test type: integration (MSW returning 401 on the archive/delete endpoint)
+  - **SKIPPED**: The 401 early-stop `break` does not exist in the current codebase. The hook `use-confirmation-modal.ts` was merged into `confirmation-modal.tsx` and the 401 break was removed during refactoring. The current `handleConfirm` loop treats all errors equally — they are added to the error list and processing continues for remaining repos. Nothing to test.
 
 - [ ] **[TEST-016] severity:medium** — Analytics events at submission are untested
 
