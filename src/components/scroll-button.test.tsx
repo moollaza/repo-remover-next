@@ -1,6 +1,7 @@
-import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, test, vi } from "vitest";
+
+import { render, screen } from "@/utils/test-utils";
 
 import ScrollButton from "./scroll-button";
 
@@ -23,9 +24,7 @@ describe("ScrollButton", () => {
   });
 
   test("renders button with children", () => {
-    render(
-      <ScrollButton targetId="test-section">Click Me</ScrollButton>
-    );
+    render(<ScrollButton targetId="test-section">Click Me</ScrollButton>);
 
     const button = screen.getByRole("button", { name: /click me/i });
     expect(button).toBeInTheDocument();
@@ -35,7 +34,7 @@ describe("ScrollButton", () => {
     render(
       <ScrollButton className="custom-class" targetId="test-section">
         Test
-      </ScrollButton>
+      </ScrollButton>,
     );
 
     const button = screen.getByRole("button", { name: /test/i });
@@ -46,7 +45,7 @@ describe("ScrollButton", () => {
     render(
       <ScrollButton color="danger" targetId="test-section">
         Test
-      </ScrollButton>
+      </ScrollButton>,
     );
 
     const button = screen.getByRole("button", { name: /test/i });
@@ -58,7 +57,7 @@ describe("ScrollButton", () => {
     render(
       <ScrollButton size="sm" targetId="test-section">
         Test
-      </ScrollButton>
+      </ScrollButton>,
     );
 
     const button = screen.getByRole("button", { name: /test/i });
@@ -69,7 +68,7 @@ describe("ScrollButton", () => {
     render(
       <ScrollButton targetId="test-section" variant="bordered">
         Test
-      </ScrollButton>
+      </ScrollButton>,
     );
 
     const button = screen.getByRole("button", { name: /test/i });
@@ -86,9 +85,7 @@ describe("ScrollButton", () => {
     const scrollIntoViewMock = vi.fn();
     targetElement.scrollIntoView = scrollIntoViewMock;
 
-    render(
-      <ScrollButton targetId="target-section">Scroll Down</ScrollButton>
-    );
+    render(<ScrollButton targetId="target-section">Scroll Down</ScrollButton>);
 
     const button = screen.getByRole("button", { name: /scroll down/i });
     await user.click(button);
@@ -98,9 +95,7 @@ describe("ScrollButton", () => {
   });
 
   test("handles non-existent target element gracefully", async () => {
-    render(
-      <ScrollButton targetId="non-existent-id">Click Me</ScrollButton>
-    );
+    render(<ScrollButton targetId="non-existent-id">Click Me</ScrollButton>);
 
     const button = screen.getByRole("button", { name: /click me/i });
 
@@ -118,7 +113,7 @@ describe("ScrollButton", () => {
     document.body.appendChild(targetElement);
 
     render(
-      <ScrollButton targetId="github-token-form">Get Started</ScrollButton>
+      <ScrollButton targetId="github-token-form">Get Started</ScrollButton>,
     );
 
     const button = screen.getByRole("button", { name: /get started/i });
@@ -137,9 +132,7 @@ describe("ScrollButton", () => {
     targetElement.scrollIntoView = vi.fn();
     document.body.appendChild(targetElement);
 
-    render(
-      <ScrollButton targetId="other-section">Click Me</ScrollButton>
-    );
+    render(<ScrollButton targetId="other-section">Click Me</ScrollButton>);
 
     const button = screen.getByRole("button", { name: /click me/i });
     await user.click(button);
@@ -149,9 +142,7 @@ describe("ScrollButton", () => {
   });
 
   test("uses default props when not specified", () => {
-    render(
-      <ScrollButton targetId="test">Default Button</ScrollButton>
-    );
+    render(<ScrollButton targetId="test">Default Button</ScrollButton>);
 
     const button = screen.getByRole("button", { name: /default button/i });
 
@@ -160,9 +151,7 @@ describe("ScrollButton", () => {
   });
 
   test("is accessible with proper button role", () => {
-    render(
-      <ScrollButton targetId="test">Accessible Button</ScrollButton>
-    );
+    render(<ScrollButton targetId="test">Accessible Button</ScrollButton>);
 
     const button = screen.getByRole("button", { name: /accessible button/i });
     expect(button).toBeInTheDocument();

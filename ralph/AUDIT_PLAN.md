@@ -630,27 +630,31 @@ Non-critical code quality improvements and simplifications.
   - File: `src/utils/analytics.ts:18`
   - `value ? \`(value: ${value})\` : ''`evaluates to empty string when`value`is`0`. For a theoretical `trackArchiveActionSubmitted(0)`, the dev log would show no value — making it look like a value-less event. Fix: use `value !== undefined ? ...` (already used in the production branch at line 23)
 
-- [ ] **[SIMP-021] severity:low** — `mutate` default value uses redundant `async/await` wrapper
+- [x] **[SIMP-021] severity:low** — `mutate` default value uses redundant `async/await` wrapper
 
   - File: `src/contexts/github-context.tsx:128-129`
   - `async () => await Promise.resolve(...)` is equivalent to `() => Promise.resolve(...)` — the extra async wrapping adds a tick and is misleading.
+  - **VERIFIED**: Already fixed — context now uses `undefined` initialization (BUG-048 refactor). No default `mutate` value exists.
 
-- [ ] **[SIMP-025] severity:low** — `HeroSection` scroll button at line 30 is missing `type="button"`, inconsistent with the equivalent button in `features-section.tsx:94` which has the attribute
+- [x] **[SIMP-025] severity:low** — `HeroSection` scroll button at line 30 is missing `type="button"`, inconsistent with the equivalent button in `features-section.tsx:94` which has the attribute
 
   - File: `src/components/landing/hero-section.tsx:30`
   - Fix: Add `type="button"` for consistency (no functional impact since the button is outside a form).
+  - **MOOT**: File deleted — `src/components/landing/` directory no longer exists. No fix needed.
 
-- [ ] **[SIMP-026] severity:low** — `CTASection` scroll button (line 22) is missing `type="button"`, the same pattern already flagged as SIMP-025 for `hero-section.tsx`
+- [x] **[SIMP-026] severity:low** — `CTASection` scroll button (line 22) is missing `type="button"`, the same pattern already flagged as SIMP-025 for `hero-section.tsx`
 
   - File: `src/components/landing/cta-section.tsx:22`
   - Fix: Add `type="button"` for consistency and to be explicit about intent.
+  - **MOOT**: File deleted — `src/components/landing/` directory no longer exists. No fix needed.
 
-- [ ] **[SIMP-027] severity:low** — Four `<button>` elements (lines 97, 101, 183, 193) are missing `type="button"`, same pattern as SIMP-025/SIMP-026
+- [x] **[SIMP-027] severity:low** — Four `<button>` elements (lines 97, 101, 183, 193) are missing `type="button"`, same pattern as SIMP-025/SIMP-026
 
   - File: `src/components/landing/product-showcase.tsx:97,101,183,193`
   - Fix: Add `type="button"` to all four. They are decorative mockup elements but the missing attribute is still technically incorrect.
+  - **MOOT**: File deleted — `src/components/landing/` directory no longer exists. No fix needed.
 
-- [ ] **[SIMP-030] severity:low** — `scroll-button.test.tsx` imports `render` from `@testing-library/react` directly instead of `@/utils/test-utils`
+- [x] **[SIMP-030] severity:low** — `scroll-button.test.tsx` imports `render` from `@testing-library/react` directly instead of `@/utils/test-utils`
 
   - File: `src/components/scroll-button.test.tsx:1`
   - Detail: The project convention (`.claude/rules/testing.md`) requires using the custom `render` from `@/utils/test-utils` so components are wrapped with `GitHubDataProvider`. While `ScrollButton` itself doesn't need the provider today, importing bare RTL is inconsistent and will silently break if the component ever gains context dependencies.
@@ -661,10 +665,11 @@ Non-critical code quality improvements and simplifications.
   - File: `src/components/generate-repos-button.tsx:27-30`
   - Detail: Dev-only component but still inconsistent with the project convention to use HeroUI semantic colors. If `--brand-blue` is not defined in a given theme, the button renders with no border, text color, or focus ring. Use `border-primary text-primary hover:bg-primary hover:text-primary-foreground` instead.
 
-- [ ] **[SIMP-033] severity:low** — `[a]:hover:bg-primary/80` in `default` variant is a no-op — `[a]` matches elements with the HTML attribute named `a`, not `<a>` anchor elements
+- [x] **[SIMP-033] severity:low** — `[a]:hover:bg-primary/80` in `default` variant is a no-op — `[a]` matches elements with the HTML attribute named `a`, not `<a>` anchor elements
 
   - File: `src/components/ui/button.tsx:11`
   - Detail: In Tailwind v4, `[a]:hover:*` generates CSS like `[a]:hover .class { ... }` matching elements with attribute named `a`. The intent was likely to apply a different hover tint when the button renders as a link (`<a>`), but the arbitrary variant syntax used is wrong. Fix: Either remove the class (the default `hover:bg-primary/80` would cover all hover cases) or use the correct pattern `[@render=a]:hover:bg-primary/80` if base-ui supports a `render` data attribute.
+  - **MOOT**: File was already deleted by SIMP-032 (dead code removal). No fix needed.
 
 - [ ] **[SIMP-036] severity:low** — `lint-and-test` and `build` jobs have no `timeout-minutes` — can run up to GitHub's 6-hour default if tests hang
   - File: `.github/workflows/ci.yml:13` (`lint-and-test`), `:77` (`build`)
