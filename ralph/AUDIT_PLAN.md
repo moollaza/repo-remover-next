@@ -689,11 +689,12 @@ Unit tests for untested modules and critical paths.
   - Test type: unit (mock Octokit graphql responses via MSW or direct mock)
   - Fix applied: Added 12 new tests covering both `fetchGitHubDataWithProgress` and `fetchGitHubData`: happy path, progress sequence order, empty orgs, PAT guard, login resolution via GET_CURRENT_USER, error handling, user data extraction, complete progress state
 
-- [ ] **[TEST-002] severity:high** — `fetchRepositories` GraphQL partial response path completely untested
+- [x] **[TEST-002] severity:high** — `fetchRepositories` GraphQL partial response path completely untested
 
   - File: `src/utils/github-api.ts:704-735`
   - What to test: When GitHub returns a `GraphqlResponseError` (e.g. SAML enforcement), the function should return partial repos from `error.data.user.repositories.nodes` and partial `userData`; verify partial data is not `null`
   - Test type: unit (throw a `GraphqlResponseError` from Octokit mock)
+  - Fix applied: Added 4 tests (3 in fetchGitHubDataWithProgress, 1 in fetchGitHubData) covering: partial repos + user data from GraphqlResponseError, no user field in error data, null data in error response, and same path via fetchGitHubData
 
 - [ ] **[TEST-003] severity:medium** — Org permission and SAML error handling paths untested
 

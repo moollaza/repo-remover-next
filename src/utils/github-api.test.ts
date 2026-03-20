@@ -451,6 +451,171 @@ describe("fetchGitHubDataWithProgress", () => {
     expect(completeProgress.repos.length).toBeGreaterThan(0);
     expect(completeProgress.orgsLoaded).toBe(completeProgress.orgsTotal);
   });
+
+  describe("GraphQL partial response (fetchRepositories path)", () => {
+    it("returns partial repos and user data from GraphqlResponseError", async () => {
+      const partialRepo = MOCK_REPOS[0];
+      server.use(
+        http.post("https://api.github.com/graphql", async ({ request }) => {
+          const body = (await request.json()) as { query: string };
+
+          if (body.query.includes("getRepositories")) {
+            // Return both errors AND data — Octokit throws GraphqlResponseError
+            // with error.data containing the partial data
+            return HttpResponse.json({
+              data: {
+                user: {
+                  ...MOCK_USER,
+                  repositories: {
+                    nodes: [partialRepo],
+                    pageInfo: { endCursor: null, hasNextPage: false },
+                  },
+                },
+              },
+              errors: [
+                {
+                  message:
+                    "Although you appear to have the correct authorization credentials, the `test-org` organization has enabled OAuth App access restrictions",
+                  type: "FORBIDDEN",
+                },
+              ],
+            });
+          }
+
+          if (body.query.includes("getOrganizations")) {
+            return HttpResponse.json({
+              data: {
+                user: {
+                  organizations: {
+                    nodes: [],
+                    pageInfo: { endCursor: null, hasNextPage: false },
+                  },
+                },
+              },
+            });
+          }
+
+          return HttpResponse.json({ data: {} });
+        }),
+      );
+
+      const onProgress = vi.fn();
+      const result = await fetchGitHubDataWithProgress(
+        ["testuser", VALID_PAT],
+        onProgress,
+      );
+
+      // Should return the partial repos from the error response
+      expect(result.repos).not.toBeNull();
+      expect(result.repos!.length).toBeGreaterThanOrEqual(1);
+      expect(result.repos!.some((r) => r.id === partialRepo.id)).toBe(true);
+
+      // Should return user data extracted from partial response
+      expect(result.user).not.toBeNull();
+      expect(result.user!.login).toBe("testuser");
+
+      // Should have an error set
+      expect(result.error).not.toBeNull();
+    });
+
+    it("returns null repos and null userData when GraphqlResponseError has no user field", async () => {
+      server.use(
+        http.post("https://api.github.com/graphql", async ({ request }) => {
+          const body = (await request.json()) as { query: string };
+
+          if (body.query.includes("getRepositories")) {
+            // Error response where data has no user field at all
+            return HttpResponse.json({
+              data: { viewer: null },
+              errors: [
+                {
+                  message: "Something went wrong with SAML enforcement",
+                  type: "FORBIDDEN",
+                },
+              ],
+            });
+          }
+
+          if (body.query.includes("getOrganizations")) {
+            return HttpResponse.json({
+              data: {
+                user: {
+                  organizations: {
+                    nodes: [],
+                    pageInfo: { endCursor: null, hasNextPage: false },
+                  },
+                },
+              },
+            });
+          }
+
+          return HttpResponse.json({ data: {} });
+        }),
+      );
+
+      const onProgress = vi.fn();
+      const result = await fetchGitHubDataWithProgress(
+        ["testuser", VALID_PAT],
+        onProgress,
+      );
+
+      // No user.repositories in error data — repos fallback to empty via null ?? []
+      expect(result.repos).toEqual([]);
+
+      // No user data available
+      expect(result.user).toBeNull();
+
+      // Should have an error
+      expect(result.error).not.toBeNull();
+    });
+
+    it("returns null repos when GraphqlResponseError has no repo data", async () => {
+      server.use(
+        http.post("https://api.github.com/graphql", async ({ request }) => {
+          const body = (await request.json()) as { query: string };
+
+          if (body.query.includes("getRepositories")) {
+            // Error response with no usable data
+            return HttpResponse.json({
+              data: null,
+              errors: [
+                {
+                  message: "Something went completely wrong",
+                  type: "INTERNAL",
+                },
+              ],
+            });
+          }
+
+          if (body.query.includes("getOrganizations")) {
+            return HttpResponse.json({
+              data: {
+                user: {
+                  organizations: {
+                    nodes: [],
+                    pageInfo: { endCursor: null, hasNextPage: false },
+                  },
+                },
+              },
+            });
+          }
+
+          return HttpResponse.json({ data: {} });
+        }),
+      );
+
+      const onProgress = vi.fn();
+      const result = await fetchGitHubDataWithProgress(
+        ["testuser", VALID_PAT],
+        onProgress,
+      );
+
+      // No partial data available — repos come back as empty array (null ?? [])
+      expect(result.repos).toEqual([]);
+      expect(result.user).toBeNull();
+      expect(result.error).not.toBeNull();
+    });
+  });
 });
 
 describe("fetchGitHubData", () => {
@@ -634,5 +799,59 @@ describe("fetchGitHubData", () => {
     expect(result.permissionWarning).toContain("read:org");
     expect(result.repos).not.toBeNull();
     expect(result.error).toBeNull();
+  });
+
+  describe("GraphQL partial response (fetchRepositories path)", () => {
+    it("returns partial repos and user data from GraphqlResponseError", async () => {
+      const partialRepo = MOCK_REPOS[0];
+      server.use(
+        http.post("https://api.github.com/graphql", async ({ request }) => {
+          const body = (await request.json()) as { query: string };
+
+          if (body.query.includes("getRepositories")) {
+            return HttpResponse.json({
+              data: {
+                user: {
+                  ...MOCK_USER,
+                  repositories: {
+                    nodes: [partialRepo],
+                    pageInfo: { endCursor: null, hasNextPage: false },
+                  },
+                },
+              },
+              errors: [
+                {
+                  message: "SAML enforcement error on some repos",
+                  type: "FORBIDDEN",
+                },
+              ],
+            });
+          }
+
+          if (body.query.includes("getOrganizations")) {
+            return HttpResponse.json({
+              data: {
+                user: {
+                  organizations: {
+                    nodes: [],
+                    pageInfo: { endCursor: null, hasNextPage: false },
+                  },
+                },
+              },
+            });
+          }
+
+          return HttpResponse.json({ data: {} });
+        }),
+      );
+
+      const result = await fetchGitHubData(["testuser", VALID_PAT]);
+
+      expect(result.repos).not.toBeNull();
+      expect(result.repos!.some((r) => r.id === partialRepo.id)).toBe(true);
+      expect(result.user).not.toBeNull();
+      expect(result.user!.login).toBe("testuser");
+      expect(result.error).not.toBeNull();
+    });
   });
 });
