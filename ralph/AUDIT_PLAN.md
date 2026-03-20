@@ -843,11 +843,12 @@ Unit tests for untested modules and critical paths.
   - What to test: Store a value encrypted with one key, then call `getItem` after fingerprint changes (mock `getBrowserFingerprint` to return a different value) — should return `null` (after BUG-022 is fixed) rather than raw ciphertext; existing tests should codify the correct behavior so regressions are caught.
   - Test type: unit
 
-- [ ] **[TEST-028] severity:medium** — Silent plaintext fallback in `setItem` is untested
+- [x] **[TEST-028] severity:medium** — Silent plaintext fallback in `setItem` is untested
 
   - File: `src/utils/secure-storage.ts:192-195`
   - What to test: When `encryptData` throws (mock it to reject), `setItem` either falls back to plaintext (current behavior) or re-throws (after BUG-020 is fixed); verify which behavior is actually implemented after the fix; ensure no partial storage of garbage data.
   - Test type: unit
+  - Fix applied: Test already exists — `'does NOT fall back to plaintext when encryption fails'` in `secure-storage.test.ts:75-92` covers the exact scenario: mocks `crypto.subtle.encrypt` to reject, verifies `setItem` rejects, and confirms no plaintext/garbage data in localStorage
 
 - [ ] **[TEST-029] severity:low** — `secureStorage.hasItem` is completely untested
 
