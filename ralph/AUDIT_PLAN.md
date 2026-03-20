@@ -857,11 +857,12 @@ Unit tests for untested modules and critical paths.
   - Test type: unit
   - Fix applied: Two tests already existed (false for missing keys, true after setItem). Added missing lifecycle test: returns false again after removeItem.
 
-- [ ] **[TEST-030] severity:low** — `secureStorage.removeItem` is completely untested
+- [x] **[TEST-030] severity:low** — `secureStorage.removeItem` is completely untested
 
   - File: `src/utils/secure-storage.ts:173-175`
   - What to test: After `setItem`, `removeItem` makes `getItem` return `null`; `hasItem` returns `false`; calling `removeItem` on a non-existent key is a no-op (no throw)
   - Test type: unit
+  - Fix applied: Added 2 tests: hasItem returns false after removal, removeItem on non-existent key is a no-op (no throw). The getItem-returns-null case was already covered.
 
 - [ ] **[TEST-031] severity:medium** — Fingerprint instability on `userAgent` change is undocumented by tests
 

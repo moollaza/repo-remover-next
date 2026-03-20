@@ -150,6 +150,17 @@ describe("secureStorage", () => {
       const result = await secureStorage.getItem("pat");
       expect(result).toBeNull();
     });
+
+    it("makes hasItem return false after removal", async () => {
+      await secureStorage.setItem("pat", "ghp_test789");
+      expect(secureStorage.hasItem("pat")).toBe(true);
+      secureStorage.removeItem("pat");
+      expect(secureStorage.hasItem("pat")).toBe(false);
+    });
+
+    it("is a no-op when called on a non-existent key (no throw)", () => {
+      expect(() => secureStorage.removeItem("nonexistent")).not.toThrow();
+    });
   });
 
   describe("hasItem", () => {
