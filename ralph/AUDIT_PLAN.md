@@ -696,11 +696,12 @@ Unit tests for untested modules and critical paths.
   - Test type: unit (throw a `GraphqlResponseError` from Octokit mock)
   - Fix applied: Added 4 tests (3 in fetchGitHubDataWithProgress, 1 in fetchGitHubData) covering: partial repos + user data from GraphqlResponseError, no user field in error data, null data in error response, and same path via fetchGitHubData
 
-- [ ] **[TEST-003] severity:medium** — Org permission and SAML error handling paths untested
+- [x] **[TEST-003] severity:medium** — Org permission and SAML error handling paths untested
 
   - File: `src/utils/github-api.ts:576-604`
   - What to test: `required scopes` error -> `permissionWarning` includes 'read:org' message; `SAML enforcement` error -> `permissionWarning` includes SSO message; unknown error -> generic "temporary issue" warning; verify personal repos are still returned despite org fetch failure
   - Test type: unit
+  - Fix applied: Added 6 tests (4 in fetchGitHubDataWithProgress, 2 in fetchGitHubData) covering: required scopes → permissionWarning with read:org, SAML enforcement → silently skips orgs with personal repos returned, unknown/network error → silently skips orgs, progress callbacks fire correctly with personal repos on org failure
 
 - [ ] **[TEST-004] severity:medium** — `onProgress` callback sequence and parallelism untested
 

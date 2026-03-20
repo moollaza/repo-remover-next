@@ -225,6 +225,150 @@ describe("fetchGitHubDataWithProgress", () => {
     });
   });
 
+  describe("org permission and SAML error handling", () => {
+    /**
+     * Helper that returns normal user repos but lets the caller control
+     * what happens when the getOrganizations query fires.
+     */
+    function createOrgErrorHandler(orgErrorResponse: () => Response) {
+      return http.post(
+        "https://api.github.com/graphql",
+        async ({ request }) => {
+          const body = (await request.json()) as { query: string };
+
+          if (body.query.includes("getRepositories")) {
+            return HttpResponse.json({
+              data: {
+                user: {
+                  ...MOCK_USER,
+                  repositories: {
+                    nodes: MOCK_REPOS.slice(0, 3),
+                    pageInfo: { endCursor: null, hasNextPage: false },
+                  },
+                },
+              },
+            });
+          }
+
+          if (body.query.includes("getOrganizations")) {
+            return orgErrorResponse();
+          }
+
+          return HttpResponse.json({ data: {} });
+        },
+      );
+    }
+
+    it("returns permissionWarning with read:org message on required scopes error", async () => {
+      server.use(
+        createOrgErrorHandler(() =>
+          HttpResponse.json({
+            data: null,
+            errors: [
+              {
+                message:
+                  "Your token has not been granted the required scopes to execute this query.",
+                type: "INSUFFICIENT_SCOPES",
+              },
+            ],
+          }),
+        ),
+      );
+
+      const onProgress = vi.fn();
+      const result = await fetchGitHubDataWithProgress(
+        ["testuser", VALID_PAT],
+        onProgress,
+      );
+
+      expect(result.permissionWarning).toBeDefined();
+      expect(result.permissionWarning).toContain("read:org");
+      // Personal repos still returned
+      expect(result.repos).toHaveLength(3);
+      expect(result.error).toBeNull();
+    });
+
+    it("silently skips orgs on SAML enforcement error — personal repos still returned", async () => {
+      server.use(
+        createOrgErrorHandler(() =>
+          HttpResponse.json({
+            data: null,
+            errors: [
+              {
+                message:
+                  "Resource protected by organization SAML enforcement. You must grant your OAuth token access to this organization.",
+                type: "FORBIDDEN",
+              },
+            ],
+          }),
+        ),
+      );
+
+      const onProgress = vi.fn();
+      const result = await fetchGitHubDataWithProgress(
+        ["testuser", VALID_PAT],
+        onProgress,
+      );
+
+      // SAML errors don't match "required scopes" — org fetch silently returns empty
+      expect(result.permissionWarning).toBeUndefined();
+      // Personal repos still returned despite org failure
+      expect(result.repos).toHaveLength(3);
+      expect(result.error).toBeNull();
+      expect(result.user).not.toBeNull();
+    });
+
+    it("silently skips orgs on unknown error — personal repos still returned", async () => {
+      server.use(createOrgErrorHandler(() => HttpResponse.error()));
+
+      const onProgress = vi.fn();
+      const result = await fetchGitHubDataWithProgress(
+        ["testuser", VALID_PAT],
+        onProgress,
+      );
+
+      // Network errors don't match "required scopes" — org fetch silently returns empty
+      expect(result.permissionWarning).toBeUndefined();
+      // Personal repos still returned
+      expect(result.repos).toHaveLength(3);
+      expect(result.error).toBeNull();
+      expect(result.user).not.toBeNull();
+    });
+
+    it("fires complete progress with personal repos even when org fetch fails", async () => {
+      server.use(
+        createOrgErrorHandler(() =>
+          HttpResponse.json({
+            data: null,
+            errors: [
+              {
+                message: "Resource protected by organization SAML enforcement.",
+                type: "FORBIDDEN",
+              },
+            ],
+          }),
+        ),
+      );
+
+      const onProgress = vi.fn();
+      await fetchGitHubDataWithProgress(["testuser", VALID_PAT], onProgress);
+
+      const stages = onProgress.mock.calls.map(
+        ([p]: [{ stage: string }]) => p.stage,
+      );
+      expect(stages).toContain("personal");
+      expect(stages).toContain("complete");
+      // No org progress since org list was empty
+      expect(stages).not.toContain("orgs");
+
+      // Complete progress should have the personal repos
+      const completeCall = onProgress.mock.calls.find(
+        ([p]: [{ stage: string }]) => p.stage === "complete",
+      );
+      expect(completeCall[0].repos).toHaveLength(3);
+    });
+  });
+
   it("throws when PAT is missing", async () => {
     const onProgress = vi.fn();
     await expect(
@@ -755,6 +899,76 @@ describe("fetchGitHubData", () => {
     expect(result.error).not.toBeNull();
     expect(result.repos).toEqual([]);
     expect(result.user).toBeNull();
+  });
+
+  describe("org permission and SAML error handling", () => {
+    function createFetchGitHubDataOrgErrorHandler(
+      orgErrorResponse: () => Response,
+    ) {
+      return http.post(
+        "https://api.github.com/graphql",
+        async ({ request }) => {
+          const body = (await request.json()) as { query: string };
+
+          if (body.query.includes("getRepositories")) {
+            return HttpResponse.json({
+              data: {
+                user: {
+                  ...MOCK_USER,
+                  repositories: {
+                    nodes: MOCK_REPOS.slice(0, 3),
+                    pageInfo: { endCursor: null, hasNextPage: false },
+                  },
+                },
+              },
+            });
+          }
+
+          if (body.query.includes("getOrganizations")) {
+            return orgErrorResponse();
+          }
+
+          return HttpResponse.json({ data: {} });
+        },
+      );
+    }
+
+    it("silently skips orgs on SAML enforcement error — personal repos returned", async () => {
+      server.use(
+        createFetchGitHubDataOrgErrorHandler(() =>
+          HttpResponse.json({
+            data: null,
+            errors: [
+              {
+                message:
+                  "Resource protected by organization SAML enforcement. You must grant your OAuth token access to this organization.",
+                type: "FORBIDDEN",
+              },
+            ],
+          }),
+        ),
+      );
+
+      const result = await fetchGitHubData(["testuser", VALID_PAT]);
+
+      expect(result.permissionWarning).toBeUndefined();
+      expect(result.repos).toHaveLength(3);
+      expect(result.error).toBeNull();
+      expect(result.user).not.toBeNull();
+    });
+
+    it("silently skips orgs on unknown error — personal repos returned", async () => {
+      server.use(
+        createFetchGitHubDataOrgErrorHandler(() => HttpResponse.error()),
+      );
+
+      const result = await fetchGitHubData(["testuser", VALID_PAT]);
+
+      expect(result.permissionWarning).toBeUndefined();
+      expect(result.repos).toHaveLength(3);
+      expect(result.error).toBeNull();
+      expect(result.user).not.toBeNull();
+    });
   });
 
   it("returns permissionWarning when org fetch fails with scope error", async () => {
