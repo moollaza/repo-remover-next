@@ -369,6 +369,229 @@ describe("fetchGitHubDataWithProgress", () => {
     });
   });
 
+  describe("onProgress callback sequence and parallelism", () => {
+    /**
+     * Helper that creates a handler with N orgs, each returning distinct repos.
+     * Personal repos are a fixed set. This lets us verify progress payloads
+     * across parallel org fetches.
+     */
+    function createMultiOrgHandler(orgCount: number) {
+      const orgs = Array.from({ length: orgCount }, (_, i) => ({
+        login: `org-${i + 1}`,
+        url: `https://github.com/org-${i + 1}`,
+      }));
+
+      return http.post(
+        "https://api.github.com/graphql",
+        async ({ request }) => {
+          const authHeader = request.headers.get("Authorization");
+          if (!authHeader?.includes(VALID_PAT)) {
+            return HttpResponse.json(
+              { message: "Bad credentials" },
+              { status: 401 },
+            );
+          }
+
+          const body = (await request.json()) as {
+            query: string;
+            variables?: Record<string, unknown>;
+          };
+
+          if (body.query.includes("getRepositories")) {
+            return HttpResponse.json({
+              data: {
+                user: {
+                  ...MOCK_USER,
+                  repositories: {
+                    nodes: [MOCK_REPOS[0]],
+                    pageInfo: { endCursor: null, hasNextPage: false },
+                  },
+                },
+              },
+            });
+          }
+
+          if (body.query.includes("getOrganizations")) {
+            return HttpResponse.json({
+              data: {
+                user: {
+                  organizations: {
+                    nodes: orgs,
+                    pageInfo: { endCursor: null, hasNextPage: false },
+                  },
+                },
+              },
+            });
+          }
+
+          if (body.query.includes("getOrgRepositories")) {
+            const variables = body.variables as { org?: string } | undefined;
+            const orgLogin = variables?.org ?? "unknown";
+            return HttpResponse.json({
+              data: {
+                organization: {
+                  login: orgLogin,
+                  repositories: {
+                    nodes: [
+                      createMockRepo({
+                        id: `${orgLogin}-repo`,
+                        name: `${orgLogin}-repo`,
+                        owner: {
+                          id: `${orgLogin}-id`,
+                          login: orgLogin,
+                          url: `https://github.com/${orgLogin}`,
+                        },
+                      }),
+                    ],
+                    pageInfo: { endCursor: null, hasNextPage: false },
+                  },
+                  url: `https://github.com/${orgLogin}`,
+                },
+              },
+            });
+          }
+
+          return HttpResponse.json({ data: {} });
+        },
+      );
+    }
+
+    it("personal stage fires with orgsTotal=0 and orgsLoaded=0", async () => {
+      server.use(createMultiOrgHandler(2));
+
+      const onProgress = vi.fn();
+      await fetchGitHubDataWithProgress(["testuser", VALID_PAT], onProgress);
+
+      const personalCall = onProgress.mock.calls.find(
+        ([p]: [{ stage: string }]) => p.stage === "personal",
+      );
+      expect(personalCall).toBeDefined();
+      expect(personalCall[0].orgsLoaded).toBe(0);
+      expect(personalCall[0].orgsTotal).toBe(0);
+      expect(personalCall[0].repos.length).toBeGreaterThan(0);
+      expect(personalCall[0].user).not.toBeNull();
+    });
+
+    it("orgs stage fires once per org with correct currentOrg and orgsTotal", async () => {
+      server.use(createMultiOrgHandler(2));
+
+      const onProgress = vi.fn();
+      await fetchGitHubDataWithProgress(["testuser", VALID_PAT], onProgress);
+
+      const orgCalls = onProgress.mock.calls.filter(
+        ([p]: [{ stage: string }]) => p.stage === "orgs",
+      );
+
+      // One progress call per org
+      expect(orgCalls).toHaveLength(2);
+
+      // All org calls should have correct orgsTotal
+      for (const [progress] of orgCalls) {
+        expect(progress.orgsTotal).toBe(2);
+        expect(progress.currentOrg).toBeDefined();
+      }
+
+      // Each org should appear exactly once in currentOrg
+      const orgNames = orgCalls.map(
+        ([p]: [{ currentOrg: string }]) => p.currentOrg,
+      );
+      expect(orgNames).toContain("org-1");
+      expect(orgNames).toContain("org-2");
+    });
+
+    it("orgsLoaded increments from 1 to N across org progress calls", async () => {
+      server.use(createMultiOrgHandler(2));
+
+      const onProgress = vi.fn();
+      await fetchGitHubDataWithProgress(["testuser", VALID_PAT], onProgress);
+
+      const orgCalls = onProgress.mock.calls.filter(
+        ([p]: [{ stage: string }]) => p.stage === "orgs",
+      );
+
+      const orgsLoadedValues = orgCalls
+        .map(([p]: [{ orgsLoaded: number }]) => p.orgsLoaded)
+        .sort((a: number, b: number) => a - b);
+
+      // Should increment from 1 to 2
+      expect(orgsLoadedValues).toEqual([1, 2]);
+    });
+
+    it("repos accumulate across parallel org fetches", async () => {
+      server.use(createMultiOrgHandler(2));
+
+      const onProgress = vi.fn();
+      await fetchGitHubDataWithProgress(["testuser", VALID_PAT], onProgress);
+
+      const orgCalls = onProgress.mock.calls.filter(
+        ([p]: [{ stage: string }]) => p.stage === "orgs",
+      );
+
+      // Each org progress call should have more repos than personal alone
+      const personalCall = onProgress.mock.calls.find(
+        ([p]: [{ stage: string }]) => p.stage === "personal",
+      );
+      expect(personalCall).toBeDefined();
+      const personalRepoCount: number = personalCall[0].repos.length;
+
+      for (const [progress] of orgCalls) {
+        expect(progress.repos.length).toBeGreaterThan(personalRepoCount);
+      }
+
+      // The last org call should have personal + 2 org repos
+      const sortedOrgCalls = [...orgCalls].sort(
+        ([a]: [{ orgsLoaded: number }], [b]: [{ orgsLoaded: number }]) =>
+          a.orgsLoaded - b.orgsLoaded,
+      );
+      const lastOrgCall = sortedOrgCalls[sortedOrgCalls.length - 1];
+      expect(lastOrgCall[0].repos.length).toBe(personalRepoCount + 2);
+    });
+
+    it("complete stage includes all repos from personal + all orgs", async () => {
+      server.use(createMultiOrgHandler(2));
+
+      const onProgress = vi.fn();
+      const result = await fetchGitHubDataWithProgress(
+        ["testuser", VALID_PAT],
+        onProgress,
+      );
+
+      const completeCall = onProgress.mock.calls.find(
+        ([p]: [{ stage: string }]) => p.stage === "complete",
+      );
+      expect(completeCall).toBeDefined();
+      expect(completeCall[0].orgsLoaded).toBe(2);
+      expect(completeCall[0].orgsTotal).toBe(2);
+
+      // Complete repos should match the returned result
+      expect(completeCall[0].repos.length).toBe(result.repos!.length);
+
+      // Should have personal repo + 2 org repos
+      expect(completeCall[0].repos.length).toBe(3);
+    });
+
+    it("with zero orgs, no orgs-stage progress fires", async () => {
+      server.use(createMultiOrgHandler(0));
+
+      const onProgress = vi.fn();
+      await fetchGitHubDataWithProgress(["testuser", VALID_PAT], onProgress);
+
+      const stages = onProgress.mock.calls.map(
+        ([p]: [{ stage: string }]) => p.stage,
+      );
+      expect(stages).not.toContain("orgs");
+      expect(stages).toContain("personal");
+      expect(stages).toContain("complete");
+
+      // Complete should show 0 orgs
+      const completeCall = onProgress.mock.calls.find(
+        ([p]: [{ stage: string }]) => p.stage === "complete",
+      );
+      expect(completeCall[0].orgsLoaded).toBe(0);
+      expect(completeCall[0].orgsTotal).toBe(0);
+    });
+  });
+
   it("throws when PAT is missing", async () => {
     const onProgress = vi.fn();
     await expect(

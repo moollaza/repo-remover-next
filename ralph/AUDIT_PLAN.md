@@ -703,11 +703,12 @@ Unit tests for untested modules and critical paths.
   - Test type: unit
   - Fix applied: Added 6 tests (4 in fetchGitHubDataWithProgress, 2 in fetchGitHubData) covering: required scopes → permissionWarning with read:org, SAML enforcement → silently skips orgs with personal repos returned, unknown/network error → silently skips orgs, progress callbacks fire correctly with personal repos on org failure
 
-- [ ] **[TEST-004] severity:medium** — `onProgress` callback sequence and parallelism untested
+- [x] **[TEST-004] severity:medium** — `onProgress` callback sequence and parallelism untested
 
   - File: `src/utils/github-api.ts:562-644`
   - What to test: Progress fires with `stage: "personal"` before org fetches begin; fires with `stage: "orgs"` for each completed org; fires with `stage: "complete"` at end with full repo list; `orgsLoaded` increments correctly across parallel org fetches
   - Test type: unit
+  - Fix applied: Added 6 tests in `onProgress callback sequence and parallelism` describe block: personal stage fields, orgs stage per-org with currentOrg/orgsTotal, orgsLoaded incrementing, repos accumulating across parallel fetches, complete stage with full repo count, zero-orgs edge case
 
 - [ ] **[TEST-005] severity:high** — `createThrottledOctokit` is completely untested
 
