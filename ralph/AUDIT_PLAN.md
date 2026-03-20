@@ -683,10 +683,11 @@ Non-critical code quality improvements and simplifications.
 
 Unit tests for untested modules and critical paths.
 
-- [ ] **[TEST-001] severity:high** — No unit tests exist for `src/utils/github-api.ts`
+- [x] **[TEST-001] severity:high** — No unit tests exist for `src/utils/github-api.ts`
 
   - What to test: happy path (`fetchGitHubDataWithProgress` with mocked Octokit returning personal repos + org repos), progress callback sequence (personal -> orgs -> complete stages), empty org list, PAT missing guard, user login resolution via `GET_CURRENT_USER`
   - Test type: unit (mock Octokit graphql responses via MSW or direct mock)
+  - Fix applied: Added 12 new tests covering both `fetchGitHubDataWithProgress` and `fetchGitHubData`: happy path, progress sequence order, empty orgs, PAT guard, login resolution via GET_CURRENT_USER, error handling, user data extraction, complete progress state
 
 - [ ] **[TEST-002] severity:high** — `fetchRepositories` GraphQL partial response path completely untested
 

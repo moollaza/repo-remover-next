@@ -8,7 +8,10 @@ import {
   MOCK_REPOS,
   MOCK_USER,
 } from "@/mocks/static-fixtures";
-import { fetchGitHubDataWithProgress } from "@/utils/github-api";
+import {
+  fetchGitHubData,
+  fetchGitHubDataWithProgress,
+} from "@/utils/github-api";
 
 const VALID_PAT = getValidPersonalAccessToken();
 
@@ -220,5 +223,416 @@ describe("fetchGitHubDataWithProgress", () => {
       expect(completeCalls).toHaveLength(1);
       expect(completeCalls[0][0].repos).toHaveLength(3);
     });
+  });
+
+  it("throws when PAT is missing", async () => {
+    const onProgress = vi.fn();
+    await expect(
+      fetchGitHubDataWithProgress(["testuser", ""], onProgress),
+    ).rejects.toThrow("PAT is required");
+    expect(onProgress).not.toHaveBeenCalled();
+  });
+
+  it("returns personal and org repos on happy path", async () => {
+    const onProgress = vi.fn();
+    const result = await fetchGitHubDataWithProgress(
+      ["testuser", VALID_PAT],
+      onProgress,
+    );
+
+    expect(result.error).toBeNull();
+    expect(result.repos).not.toBeNull();
+    expect(result.repos!.length).toBeGreaterThan(0);
+    expect(result.user).not.toBeNull();
+    expect(result.user!.login).toBe("testuser");
+  });
+
+  it("fires progress callbacks in order: personal -> orgs -> complete", async () => {
+    const onProgress = vi.fn();
+    await fetchGitHubDataWithProgress(["testuser", VALID_PAT], onProgress);
+
+    const stages = onProgress.mock.calls.map(
+      ([p]: [{ stage: string }]) => p.stage,
+    );
+
+    // First call should be personal
+    expect(stages[0]).toBe("personal");
+    // Last call should be complete
+    expect(stages[stages.length - 1]).toBe("complete");
+
+    // Verify ordering: all personal before orgs, all orgs before complete
+    const personalIdx = stages.indexOf("personal");
+    const completeIdx = stages.indexOf("complete");
+    expect(personalIdx).toBeLessThan(completeIdx);
+
+    // If there are org calls, they should be between personal and complete
+    const orgIndices = stages
+      .map((s: string, i: number) => (s === "orgs" ? i : -1))
+      .filter((i: number) => i >= 0);
+    for (const idx of orgIndices) {
+      expect(idx).toBeGreaterThan(personalIdx);
+      expect(idx).toBeLessThan(completeIdx);
+    }
+  });
+
+  it("handles empty org list — returns only personal repos", async () => {
+    server.use(
+      http.post("https://api.github.com/graphql", async ({ request }) => {
+        const authHeader = request.headers.get("Authorization");
+        if (!authHeader?.includes(VALID_PAT)) {
+          return HttpResponse.json(
+            { message: "Bad credentials" },
+            { status: 401 },
+          );
+        }
+
+        const body = (await request.json()) as { query: string };
+
+        if (body.query.includes("getRepositories")) {
+          return HttpResponse.json({
+            data: {
+              user: {
+                ...MOCK_USER,
+                repositories: {
+                  nodes: MOCK_REPOS.slice(0, 2),
+                  pageInfo: { endCursor: null, hasNextPage: false },
+                },
+              },
+            },
+          });
+        }
+
+        if (body.query.includes("getOrganizations")) {
+          return HttpResponse.json({
+            data: {
+              user: {
+                organizations: {
+                  nodes: [],
+                  pageInfo: { endCursor: null, hasNextPage: false },
+                },
+              },
+            },
+          });
+        }
+
+        return HttpResponse.json({ data: {} });
+      }),
+    );
+
+    const onProgress = vi.fn();
+    const result = await fetchGitHubDataWithProgress(
+      ["testuser", VALID_PAT],
+      onProgress,
+    );
+
+    expect(result.error).toBeNull();
+    expect(result.repos).toHaveLength(2);
+
+    // No org progress calls — only personal and complete
+    const stages = onProgress.mock.calls.map(
+      ([p]: [{ stage: string }]) => p.stage,
+    );
+    expect(stages).not.toContain("orgs");
+    expect(stages).toContain("personal");
+    expect(stages).toContain("complete");
+  });
+
+  it("resolves user login via GET_CURRENT_USER when login is empty", async () => {
+    // Explicit handler to ensure getCurrentUser is handled in all suite contexts
+    server.use(
+      http.post("https://api.github.com/graphql", async ({ request }) => {
+        const authHeader = request.headers.get("Authorization");
+        if (!authHeader?.includes(VALID_PAT)) {
+          return HttpResponse.json(
+            { message: "Bad credentials" },
+            { status: 401 },
+          );
+        }
+
+        const body = (await request.json()) as { query: string };
+
+        if (body.query.includes("getCurrentUser")) {
+          return HttpResponse.json({
+            data: { viewer: MOCK_USER },
+          });
+        }
+
+        if (body.query.includes("getRepositories")) {
+          return HttpResponse.json({
+            data: {
+              user: {
+                ...MOCK_USER,
+                repositories: {
+                  nodes: MOCK_REPOS.slice(0, 2),
+                  pageInfo: { endCursor: null, hasNextPage: false },
+                },
+              },
+            },
+          });
+        }
+
+        if (body.query.includes("getOrganizations")) {
+          return HttpResponse.json({
+            data: {
+              user: {
+                organizations: {
+                  nodes: [],
+                  pageInfo: { endCursor: null, hasNextPage: false },
+                },
+              },
+            },
+          });
+        }
+
+        return HttpResponse.json({ data: {} });
+      }),
+    );
+
+    const onProgress = vi.fn();
+    const result = await fetchGitHubDataWithProgress(
+      ["", VALID_PAT],
+      onProgress,
+    );
+
+    // Should resolve login from viewer query and still return data
+    expect(result.user).not.toBeNull();
+    expect(result.user!.login).toBe("testuser");
+    expect(result.repos).not.toBeNull();
+    expect(result.error).toBeNull();
+  }, 30000);
+
+  it("returns error when API calls fail", async () => {
+    server.use(
+      http.post("https://api.github.com/graphql", () => {
+        return HttpResponse.error();
+      }),
+    );
+
+    const onProgress = vi.fn();
+    const result = await fetchGitHubDataWithProgress(
+      ["testuser", VALID_PAT],
+      onProgress,
+    );
+
+    // fetchRepositories returns error + null repos, outer code does repos ?? []
+    // org fetch fails silently (returns empty orgs)
+    expect(result.error).not.toBeNull();
+    expect(result.repos).toEqual([]);
+    expect(result.user).toBeNull();
+  });
+
+  it("returns user data from repo query response", async () => {
+    const onProgress = vi.fn();
+    const result = await fetchGitHubDataWithProgress(
+      ["testuser", VALID_PAT],
+      onProgress,
+    );
+
+    expect(result.user).toEqual({
+      avatarUrl: MOCK_USER.avatarUrl,
+      id: MOCK_USER.id,
+      login: MOCK_USER.login,
+      name: MOCK_USER.name,
+      url: `https://github.com/${MOCK_USER.login}`,
+    });
+  });
+
+  it("complete progress includes all repos and user data", async () => {
+    const onProgress = vi.fn();
+    await fetchGitHubDataWithProgress(["testuser", VALID_PAT], onProgress);
+
+    const completeCalls = onProgress.mock.calls.filter(
+      ([p]: [{ stage: string }]) => p.stage === "complete",
+    );
+    expect(completeCalls).toHaveLength(1);
+
+    const completeProgress = completeCalls[0][0];
+    expect(completeProgress.user).not.toBeNull();
+    expect(completeProgress.repos.length).toBeGreaterThan(0);
+    expect(completeProgress.orgsLoaded).toBe(completeProgress.orgsTotal);
+  });
+});
+
+describe("fetchGitHubData", () => {
+  it("throws when PAT is missing", async () => {
+    await expect(fetchGitHubData(["testuser", ""])).rejects.toThrow(
+      "PAT is required",
+    );
+  });
+
+  it("returns personal and org repos on happy path", async () => {
+    const result = await fetchGitHubData(["testuser", VALID_PAT]);
+
+    expect(result.error).toBeNull();
+    expect(result.repos).not.toBeNull();
+    expect(result.repos!.length).toBeGreaterThan(0);
+    expect(result.user).not.toBeNull();
+    expect(result.user!.login).toBe("testuser");
+  });
+
+  it("resolves user login via GET_CURRENT_USER when login is empty", async () => {
+    server.use(
+      http.post("https://api.github.com/graphql", async ({ request }) => {
+        const authHeader = request.headers.get("Authorization");
+        if (!authHeader?.includes(VALID_PAT)) {
+          return HttpResponse.json(
+            { message: "Bad credentials" },
+            { status: 401 },
+          );
+        }
+
+        const body = (await request.json()) as { query: string };
+
+        if (body.query.includes("getCurrentUser")) {
+          return HttpResponse.json({
+            data: { viewer: MOCK_USER },
+          });
+        }
+
+        if (body.query.includes("getRepositories")) {
+          return HttpResponse.json({
+            data: {
+              user: {
+                ...MOCK_USER,
+                repositories: {
+                  nodes: MOCK_REPOS.slice(0, 2),
+                  pageInfo: { endCursor: null, hasNextPage: false },
+                },
+              },
+            },
+          });
+        }
+
+        if (body.query.includes("getOrganizations")) {
+          return HttpResponse.json({
+            data: {
+              user: {
+                organizations: {
+                  nodes: [],
+                  pageInfo: { endCursor: null, hasNextPage: false },
+                },
+              },
+            },
+          });
+        }
+
+        return HttpResponse.json({ data: {} });
+      }),
+    );
+
+    const result = await fetchGitHubData(["", VALID_PAT]);
+
+    expect(result.user).not.toBeNull();
+    expect(result.user!.login).toBe("testuser");
+    expect(result.repos).not.toBeNull();
+    expect(result.error).toBeNull();
+  }, 30000);
+
+  it("handles empty org list — returns only personal repos", async () => {
+    server.use(
+      http.post("https://api.github.com/graphql", async ({ request }) => {
+        const authHeader = request.headers.get("Authorization");
+        if (!authHeader?.includes(VALID_PAT)) {
+          return HttpResponse.json(
+            { message: "Bad credentials" },
+            { status: 401 },
+          );
+        }
+
+        const body = (await request.json()) as { query: string };
+
+        if (body.query.includes("getRepositories")) {
+          return HttpResponse.json({
+            data: {
+              user: {
+                ...MOCK_USER,
+                repositories: {
+                  nodes: MOCK_REPOS.slice(0, 3),
+                  pageInfo: { endCursor: null, hasNextPage: false },
+                },
+              },
+            },
+          });
+        }
+
+        if (body.query.includes("getOrganizations")) {
+          return HttpResponse.json({
+            data: {
+              user: {
+                organizations: {
+                  nodes: [],
+                  pageInfo: { endCursor: null, hasNextPage: false },
+                },
+              },
+            },
+          });
+        }
+
+        return HttpResponse.json({ data: {} });
+      }),
+    );
+
+    const result = await fetchGitHubData(["testuser", VALID_PAT]);
+
+    expect(result.error).toBeNull();
+    expect(result.repos).toHaveLength(3);
+  });
+
+  it("returns error when API calls fail", async () => {
+    server.use(
+      http.post("https://api.github.com/graphql", () => {
+        return HttpResponse.error();
+      }),
+    );
+
+    const result = await fetchGitHubData(["testuser", VALID_PAT]);
+
+    expect(result.error).not.toBeNull();
+    expect(result.repos).toEqual([]);
+    expect(result.user).toBeNull();
+  });
+
+  it("returns permissionWarning when org fetch fails with scope error", async () => {
+    server.use(
+      http.post("https://api.github.com/graphql", async ({ request }) => {
+        const body = (await request.json()) as { query: string };
+
+        if (body.query.includes("getOrganizations")) {
+          return HttpResponse.json({
+            data: null,
+            errors: [
+              {
+                message:
+                  "Your token has not been granted the required scopes to execute this query.",
+                type: "INSUFFICIENT_SCOPES",
+              },
+            ],
+          });
+        }
+
+        if (body.query.includes("getRepositories")) {
+          return HttpResponse.json({
+            data: {
+              user: {
+                ...MOCK_USER,
+                repositories: {
+                  nodes: MOCK_REPOS.slice(0, 2),
+                  pageInfo: { endCursor: null, hasNextPage: false },
+                },
+              },
+            },
+          });
+        }
+
+        return HttpResponse.json({ data: {} });
+      }),
+    );
+
+    const result = await fetchGitHubData(["testuser", VALID_PAT]);
+
+    expect(result.permissionWarning).toBeDefined();
+    expect(result.permissionWarning).toContain("read:org");
+    expect(result.repos).not.toBeNull();
+    expect(result.error).toBeNull();
   });
 });
