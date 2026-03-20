@@ -6,6 +6,7 @@ on:
     branches: [main, master]
 jobs:
   lint-and-test:
+    timeout-minutes: 15
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -96,6 +97,7 @@ jobs:
           exitZeroOnChanges: false
 
   build:
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     needs: [lint-and-test, e2e-tests]
     steps:

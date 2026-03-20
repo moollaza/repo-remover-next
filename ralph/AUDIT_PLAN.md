@@ -660,10 +660,11 @@ Non-critical code quality improvements and simplifications.
   - Detail: The project convention (`.claude/rules/testing.md`) requires using the custom `render` from `@/utils/test-utils` so components are wrapped with `GitHubDataProvider`. While `ScrollButton` itself doesn't need the provider today, importing bare RTL is inconsistent and will silently break if the component ever gains context dependencies.
   - Fix: Replace `import { render, screen } from "@testing-library/react"` with `import { render, screen } from "@/utils/test-utils"`.
 
-- [ ] **[SIMP-031] severity:low** — `GenerateReposButton` uses hardcoded CSS variables `var(--brand-blue)` for all styling
+- [x] **[SIMP-031] severity:low** — `GenerateReposButton` uses hardcoded CSS variables `var(--brand-blue)` for all styling
 
   - File: `src/components/generate-repos-button.tsx:27-30`
   - Detail: Dev-only component but still inconsistent with the project convention to use HeroUI semantic colors. If `--brand-blue` is not defined in a given theme, the button renders with no border, text color, or focus ring. Use `border-primary text-primary hover:bg-primary hover:text-primary-foreground` instead.
+  - **VERIFIED**: Already fixed — uses HeroUI `<Button color="secondary" variant="ghost">`. No hardcoded CSS variables.
 
 - [x] **[SIMP-033] severity:low** — `[a]:hover:bg-primary/80` in `default` variant is a no-op — `[a]` matches elements with the HTML attribute named `a`, not `<a>` anchor elements
 
@@ -671,7 +672,7 @@ Non-critical code quality improvements and simplifications.
   - Detail: In Tailwind v4, `[a]:hover:*` generates CSS like `[a]:hover .class { ... }` matching elements with attribute named `a`. The intent was likely to apply a different hover tint when the button renders as a link (`<a>`), but the arbitrary variant syntax used is wrong. Fix: Either remove the class (the default `hover:bg-primary/80` would cover all hover cases) or use the correct pattern `[@render=a]:hover:bg-primary/80` if base-ui supports a `render` data attribute.
   - **MOOT**: File was already deleted by SIMP-032 (dead code removal). No fix needed.
 
-- [ ] **[SIMP-036] severity:low** — `lint-and-test` and `build` jobs have no `timeout-minutes` — can run up to GitHub's 6-hour default if tests hang
+- [x] **[SIMP-036] severity:low** — `lint-and-test` and `build` jobs have no `timeout-minutes` — can run up to GitHub's 6-hour default if tests hang
   - File: `.github/workflows/ci.yml:13` (`lint-and-test`), `:77` (`build`)
   - The `e2e-tests` job correctly has `timeout-minutes: 60`. The other two jobs have no limit. A unit test with an unresolved promise or an infinite retry loop would burn Actions minutes for 6 hours before GitHub kills it.
   - Fix: Add `timeout-minutes: 15` to `lint-and-test` and `timeout-minutes: 10` to `build`.
