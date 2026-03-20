@@ -816,23 +816,26 @@ Unit tests for untested modules and critical paths.
   - What to test: Source repo (not fork, not mirror, not template) is shown when `isSource` is in `typeFilters`; same repo is hidden when `isSource` is deselected (removed from the set); a fork is never hidden by the `isSource` filter regardless of selection state (it has its own `isFork` filter).
   - Test type: unit
 
-- [ ] **[TEST-023] severity:low** — `setTypeFilters("all")` crash path untested (see BUG-016)
+- [x] **[TEST-023] severity:low** — `setTypeFilters("all")` crash path untested (see BUG-016)
 
   - File: `src/hooks/use-repo-filters.ts:107`
   - What to test: Calling `setTypeFilters("all")` should not throw; all repos should be visible afterward (equivalent to selecting all type filters)
   - Test type: unit
+  - Fix applied: Test already exists — `'should handle HeroUI "all" selection by selecting all type filters'` in `use-repo-filters.test.ts:578-620` covers the exact scenario: deselects a type, passes `"all"`, verifies no crash and all repos visible
 
-- [ ] **[TEST-024] severity:medium** — Page state divergence after clamp-then-expand is untested (see BUG-017)
+- [x] **[TEST-024] severity:medium** — Page state divergence after clamp-then-expand is untested (see BUG-017)
 
   - File: `src/hooks/use-repo-pagination.ts:79-80`
   - What to test: Navigate to page 4 (20 items), re-render with 5 items (clamp to page 1), re-render with 20 items again — `currentPage` should remain 1, not silently jump back to 4
   - Test type: unit (use `rerender` from `renderHook`)
+  - Fix applied: Test already exists — `'should not resurface stale page when items expand after clamping'` in `use-repo-pagination.test.ts:239-264` covers the exact scenario
 
-- [ ] **[TEST-026] severity:high** — The encrypted (production) code path is never exercised in tests
+- [x] **[TEST-026] severity:high** — The encrypted (production) code path is never exercised in tests
 
   - File: `src/utils/secure-storage.ts:70-98` (encryptData), `:10-39` (decryptData)
   - What to test: `setItem` in a non-test environment actually encrypts (stored value != original); `getItem` round-trips correctly through encrypt -> store -> retrieve -> decrypt; different salt/IV are used on each `setItem` call (verify stored values differ for same input).
   - Test type: unit (mock `import.meta.env.MODE` to return `"production"` or mock `isWebCryptoAvailable` to return `true`)
+  - Fix applied: Added 3 tests in `secure-storage.test.ts`: encrypted value differs from plaintext, clean encrypt-decrypt round-trip, different ciphertext for same input (random salt/IV)
 
 - [ ] **[TEST-027] severity:medium** — `getItem` decryption-failure fallback behavior is untested
 

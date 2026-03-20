@@ -17,6 +17,44 @@ describe("secureStorage", () => {
   });
 
   describe("setItem (production mode — encrypted storage)", () => {
+    it("encrypts values so stored data differs from plaintext", async () => {
+      vi.stubEnv("MODE", "production");
+
+      const token = "ghp_mySecretToken12345";
+      await secureStorage.setItem("pat", token);
+
+      const stored = localStorage.getItem("secure_pat");
+      expect(stored).not.toBeNull();
+      expect(stored).not.toBe(token);
+    });
+
+    it("round-trips through encrypt -> store -> retrieve -> decrypt", async () => {
+      vi.stubEnv("MODE", "production");
+
+      const token = "ghp_roundTripTestToken";
+      await secureStorage.setItem("pat", token);
+      const result = await secureStorage.getItem("pat");
+
+      expect(result).toBe(token);
+    });
+
+    it("produces different ciphertext for the same input (random salt/IV)", async () => {
+      vi.stubEnv("MODE", "production");
+
+      const token = "ghp_sameInputDifferentOutput";
+      await secureStorage.setItem("pat", token);
+      const stored1 = localStorage.getItem("secure_pat");
+
+      await secureStorage.setItem("pat", token);
+      const stored2 = localStorage.getItem("secure_pat");
+
+      // Both should be valid ciphertext, not plaintext
+      expect(stored1).not.toBe(token);
+      expect(stored2).not.toBe(token);
+      // Different salt/IV means different ciphertext each time
+      expect(stored1).not.toBe(stored2);
+    });
+
     it("survives browser userAgent change (e.g. auto-update)", async () => {
       // Switch to production mode so real encryption is used
       vi.stubEnv("MODE", "production");
