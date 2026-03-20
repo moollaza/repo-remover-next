@@ -451,6 +451,130 @@ describe("useRepoFilters", () => {
     expect(result.current.filteredRepos).toHaveLength(0);
   });
 
+  it("should not hide source repos when fork/mirror/template filters are deselected", () => {
+    const repos = [
+      createMockRepo({
+        id: "1",
+        isFork: false,
+        isMirror: false,
+        isTemplate: false,
+        key: "1",
+        name: "source-repo",
+      }),
+      createMockRepo({
+        id: "2",
+        isFork: true,
+        key: "2",
+        name: "forked-repo",
+      }),
+      createMockRepo({
+        id: "3",
+        isMirror: true,
+        key: "3",
+        name: "mirror-repo",
+      }),
+      createMockRepo({
+        id: "4",
+        isTemplate: true,
+        key: "4",
+        name: "template-repo",
+      }),
+    ];
+
+    const { result } = renderHook(() =>
+      useRepoFilters({ login: "testuser", repos }),
+    );
+
+    // Initially all types selected — all repos visible
+    expect(result.current.filteredRepos).toHaveLength(4);
+
+    // Deselect isFork — source repo stays, fork is hidden
+    act(() => {
+      result.current.setTypeFilters(
+        new Set([
+          "isArchived",
+          "isDisabled",
+          "isInOrganization",
+          "isMirror",
+          "isPrivate",
+          "isTemplate",
+        ]),
+      );
+    });
+
+    expect(result.current.filteredRepos).toHaveLength(3);
+    expect(
+      result.current.filteredRepos.find((r) => r.name === "source-repo"),
+    ).toBeDefined();
+    expect(
+      result.current.filteredRepos.find((r) => r.name === "forked-repo"),
+    ).toBeUndefined();
+
+    // Deselect isFork AND isMirror — source repo stays, fork+mirror hidden
+    act(() => {
+      result.current.setTypeFilters(
+        new Set([
+          "isArchived",
+          "isDisabled",
+          "isInOrganization",
+          "isPrivate",
+          "isTemplate",
+        ]),
+      );
+    });
+
+    expect(result.current.filteredRepos).toHaveLength(2);
+    expect(
+      result.current.filteredRepos.find((r) => r.name === "source-repo"),
+    ).toBeDefined();
+    expect(
+      result.current.filteredRepos.find((r) => r.name === "template-repo"),
+    ).toBeDefined();
+
+    // Deselect isFork, isMirror, AND isTemplate — only source repo remains
+    act(() => {
+      result.current.setTypeFilters(
+        new Set(["isArchived", "isDisabled", "isInOrganization", "isPrivate"]),
+      );
+    });
+
+    expect(result.current.filteredRepos).toHaveLength(1);
+    expect(result.current.filteredRepos[0].name).toBe("source-repo");
+  });
+
+  it("should not hide a fork when deselecting unrelated type filters", () => {
+    const repos = [
+      createMockRepo({
+        id: "1",
+        isFork: true,
+        isTemplate: false,
+        key: "1",
+        name: "forked-repo",
+      }),
+    ];
+
+    const { result } = renderHook(() =>
+      useRepoFilters({ login: "testuser", repos }),
+    );
+
+    // Deselect isTemplate — fork should still be visible (it's not a template)
+    act(() => {
+      result.current.setTypeFilters(
+        new Set([
+          "isArchived",
+          "isDisabled",
+          "isFork",
+          "isInOrganization",
+          "isMirror",
+          "isPrivate",
+        ]),
+      );
+    });
+
+    expect(result.current.filteredRepos).toHaveLength(1);
+    expect(result.current.filteredRepos[0].name).toBe("forked-repo");
+  });
+
   it('should handle HeroUI "all" selection by selecting all type filters', () => {
     const repos = [
       createMockRepo({

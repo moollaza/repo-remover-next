@@ -810,7 +810,7 @@ Unit tests for untested modules and critical paths.
   - What to test: When `login` is `null`, `repo.owner.login === null` is always false; repos are only shown if `viewerCanAdminister` is true. Verify that a repo with `viewerCanAdminister: false` is hidden when `login` is null, and one with `viewerCanAdminister: true` is shown.
   - Test type: unit
 
-- [ ] **[TEST-022] severity:medium** — `isSource` type filter is untested
+- [x] **[TEST-022] severity:medium** — `isSource` type filter is untested
 
   - File: `src/hooks/use-repo-filters.ts:127-133`
   - What to test: Source repo (not fork, not mirror, not template) is shown when `isSource` is in `typeFilters`; same repo is hidden when `isSource` is deselected (removed from the set); a fork is never hidden by the `isSource` filter regardless of selection state (it has its own `isFork` filter).
