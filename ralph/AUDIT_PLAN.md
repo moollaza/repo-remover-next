@@ -777,11 +777,12 @@ Unit tests for untested modules and critical paths.
   - Test type: integration (MSW returning 401 on the archive/delete endpoint)
   - **SKIPPED**: The 401 early-stop `break` does not exist in the current codebase. The hook `use-confirmation-modal.ts` was merged into `confirmation-modal.tsx` and the 401 break was removed during refactoring. The current `handleConfirm` loop treats all errors equally — they are added to the error list and processing continues for remaining repos. Nothing to test.
 
-- [ ] **[TEST-016] severity:medium** — Analytics events at submission are untested
+- [x] **[TEST-016] severity:medium** — Analytics events at submission are untested
 
   - File: `src/hooks/use-confirmation-modal.ts:93-97`
   - What to test: `analytics.trackArchiveActionSubmitted(repos.length)` fires once on archive confirm; `analytics.trackDeleteActionSubmitted(repos.length)` fires once on delete confirm; neither fires if `!octokit` guard triggers early return
   - Test type: unit (mock `analytics` module)
+  - Fix applied: Added 3 tests in confirmation-modal.test.tsx: trackArchiveActionSubmitted on archive confirm with correct repo count, trackDeleteActionSubmitted on delete confirm with correct repo count, no analytics fired when octokit is null (pat=null)
 
 - [ ] **[TEST-017] severity:medium** — `handleOnClose` behavior on cancel vs post-result is untested
 

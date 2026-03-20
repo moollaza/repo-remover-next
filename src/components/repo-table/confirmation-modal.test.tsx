@@ -7,6 +7,21 @@ import { fireEvent, render, screen } from "@/utils/test-utils";
 
 import ConfirmationModal from "./confirmation-modal";
 
+vi.mock("@/utils/analytics", async () => {
+  const actual = await vi.importActual("@/utils/analytics");
+  return {
+    ...actual,
+    analytics: {
+      trackArchiveActionSubmitted: vi.fn(),
+      trackDeleteActionSubmitted: vi.fn(),
+      trackGetStartedClick: vi.fn(),
+      trackRepoArchived: vi.fn(),
+      trackRepoDeleted: vi.fn(),
+      trackTokenValidated: vi.fn(),
+    },
+  };
+});
+
 vi.mock("@/utils/github-utils", async () => {
   const actual = await vi.importActual("@/utils/github-utils");
   return {
@@ -20,6 +35,7 @@ vi.mock("@/utils/github-utils", async () => {
 const { createThrottledOctokit, processRepo } = await import(
   "@/utils/github-utils"
 );
+const { analytics } = await import("@/utils/analytics");
 
 const mockRepos: Repository[] = [
   createMockRepo({ id: "1", name: "repo1" }),
@@ -240,5 +256,70 @@ describe("ConfirmationModal", () => {
 
     // Still only one call — memoized
     expect(createThrottledOctokit).toHaveBeenCalledTimes(1);
+  });
+
+  it("fires trackArchiveActionSubmitted on archive confirm (TEST-016)", async () => {
+    vi.mocked(processRepo).mockReset();
+    vi.mocked(processRepo).mockResolvedValue(undefined);
+
+    render(
+      <GitHubContext.Provider value={mockContextValue}>
+        <ConfirmationModal {...mockProps} action="archive" />
+      </GitHubContext.Provider>,
+    );
+
+    const input = screen.getByTestId("confirmation-modal-input");
+    fireEvent.change(input, { target: { value: "testuser" } });
+    fireEvent.click(screen.getByTestId("confirmation-modal-confirm"));
+
+    await vi.advanceTimersByTimeAsync(10000);
+
+    expect(analytics.trackArchiveActionSubmitted).toHaveBeenCalledTimes(1);
+    expect(analytics.trackArchiveActionSubmitted).toHaveBeenCalledWith(2);
+    expect(analytics.trackDeleteActionSubmitted).not.toHaveBeenCalled();
+  });
+
+  it("fires trackDeleteActionSubmitted on delete confirm (TEST-016)", async () => {
+    vi.mocked(processRepo).mockReset();
+    vi.mocked(processRepo).mockResolvedValue(undefined);
+
+    render(
+      <GitHubContext.Provider value={mockContextValue}>
+        <ConfirmationModal {...mockProps} action="delete" />
+      </GitHubContext.Provider>,
+    );
+
+    const input = screen.getByTestId("confirmation-modal-input");
+    fireEvent.change(input, { target: { value: "testuser" } });
+    fireEvent.click(screen.getByTestId("confirmation-modal-confirm"));
+
+    await vi.advanceTimersByTimeAsync(10000);
+
+    expect(analytics.trackDeleteActionSubmitted).toHaveBeenCalledTimes(1);
+    expect(analytics.trackDeleteActionSubmitted).toHaveBeenCalledWith(2);
+    expect(analytics.trackArchiveActionSubmitted).not.toHaveBeenCalled();
+  });
+
+  it("does not fire analytics when octokit is null (TEST-016)", async () => {
+    const noPatContext: GitHubContextType = {
+      ...mockContextValue,
+      pat: null,
+    };
+
+    // createThrottledOctokit won't be called when pat is null, so octokit is null
+    render(
+      <GitHubContext.Provider value={noPatContext}>
+        <ConfirmationModal {...mockProps} />
+      </GitHubContext.Provider>,
+    );
+
+    const input = screen.getByTestId("confirmation-modal-input");
+    fireEvent.change(input, { target: { value: "testuser" } });
+    fireEvent.click(screen.getByTestId("confirmation-modal-confirm"));
+
+    await vi.advanceTimersByTimeAsync(10000);
+
+    expect(analytics.trackArchiveActionSubmitted).not.toHaveBeenCalled();
+    expect(analytics.trackDeleteActionSubmitted).not.toHaveBeenCalled();
   });
 });
