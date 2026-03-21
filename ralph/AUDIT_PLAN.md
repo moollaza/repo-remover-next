@@ -870,7 +870,7 @@ Unit tests for untested modules and critical paths.
   - What to test: Mock `navigator.userAgent` to a new browser version; verify fingerprint changes (documents the known limitation); contrast with the existing screen-dimension test that verifies stability. This test documents intended vs. actual behaviour so the breakage is visible if BUG-021 is later fixed.
   - Test type: unit
 
-- [ ] **[TEST-032] severity:medium** — Sort column click behavior is completely untested
+- [x] **[TEST-032] severity:medium** — Sort column click behavior is completely untested
 
   - File: `src/components/repo-table/repo-table.tsx:125-141, 192-203, 227-238`
   - What to test: Clicking "Repository" column header sorts repos ascending on first click; clicking again reverses to descending (toggle); `aria-sort` attribute updates correctly; clicking "Last Updated" switches the active sort column and resets to ascending.

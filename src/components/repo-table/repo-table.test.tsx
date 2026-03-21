@@ -246,6 +246,104 @@ describe("RepoTable", () => {
     );
   });
 
+  describe("sort column click behavior", () => {
+    // Repos with distinct names and dates for verifiable sort order
+    const sortableRepos: Repository[] = [
+      createMockRepo({
+        description: "Alpha project",
+        id: "alpha-id",
+        name: "alpha-repo",
+        updatedAt: "2023-01-01T00:00:00Z",
+      }),
+      createMockRepo({
+        description: "Charlie project",
+        id: "charlie-id",
+        name: "charlie-repo",
+        updatedAt: "2023-03-01T00:00:00Z",
+      }),
+      createMockRepo({
+        description: "Beta project",
+        id: "beta-id",
+        name: "beta-repo",
+        updatedAt: "2023-02-01T00:00:00Z",
+      }),
+    ];
+
+    function getRepoNameOrder(): string[] {
+      return screen.getAllByTestId("repo-row").map((row) => {
+        const nameEl = row.querySelector('[data-testid="repo-name"]');
+        return nameEl?.textContent ?? "";
+      });
+    }
+
+    test("default sort is by Last Updated descending", () => {
+      render(<RepoTable login={mockLogin} repos={sortableRepos} />);
+
+      // Default: updatedAt descending → charlie (Mar), beta (Feb), alpha (Jan)
+      expect(getRepoNameOrder()).toEqual([
+        "charlie-repo",
+        "beta-repo",
+        "alpha-repo",
+      ]);
+
+      // Last Updated column should have aria-sort="descending"
+      const lastUpdatedHeader = screen.getByRole("columnheader", {
+        name: /last updated/i,
+      });
+      expect(lastUpdatedHeader).toHaveAttribute("aria-sort", "descending");
+    });
+
+    test("clicking Name column sorts ascending, then toggles to descending", async () => {
+      const user = userEvent.setup();
+      render(<RepoTable login={mockLogin} repos={sortableRepos} />);
+
+      const nameHeader = screen.getByRole("columnheader", { name: /^name$/i });
+
+      // Click Name header → ascending
+      await user.click(nameHeader);
+
+      expect(getRepoNameOrder()).toEqual([
+        "alpha-repo",
+        "beta-repo",
+        "charlie-repo",
+      ]);
+      expect(nameHeader).toHaveAttribute("aria-sort", "ascending");
+
+      // Click Name header again → descending
+      await user.click(nameHeader);
+
+      expect(getRepoNameOrder()).toEqual([
+        "charlie-repo",
+        "beta-repo",
+        "alpha-repo",
+      ]);
+      expect(nameHeader).toHaveAttribute("aria-sort", "descending");
+    });
+
+    test("clicking Last Updated after Name switches sort column back", async () => {
+      const user = userEvent.setup();
+      render(<RepoTable login={mockLogin} repos={sortableRepos} />);
+
+      const nameHeader = screen.getByRole("columnheader", { name: /^name$/i });
+      const lastUpdatedHeader = screen.getByRole("columnheader", {
+        name: /last updated/i,
+      });
+
+      // Sort by name first
+      await user.click(nameHeader);
+      expect(nameHeader).toHaveAttribute("aria-sort", "ascending");
+
+      // Switch to Last Updated
+      await user.click(lastUpdatedHeader);
+
+      // aria-sort should move to the Last Updated column
+      expect(lastUpdatedHeader).toHaveAttribute("aria-sort");
+      // Name column should no longer have aria-sort
+      expect(nameHeader).not.toHaveAttribute("aria-sort", "ascending");
+      expect(nameHeader).not.toHaveAttribute("aria-sort", "descending");
+    });
+  });
+
   test("does not expose repos on window in production mode", () => {
     // In production, window.repos must not be set (security: exposes private repo data)
     const originalDev = import.meta.env.DEV;
