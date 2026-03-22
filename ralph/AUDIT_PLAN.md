@@ -921,7 +921,7 @@ Unit tests for untested modules and critical paths.
   - Test type: unit (use `fireEvent.mouseDown(document.body)`)
   - Fix applied: Added 3 tests verifying click-outside dismissal for per-page select, repo-type select, and action dropdown
 
-- [ ] **[TEST-042] severity:low** — Delete action color test has a conditional skip — no assertion fires if button is not found
+- [x] **[TEST-042] severity:low** — Delete action color test has a conditional skip — no assertion fires if button is not found
 
   - File: `src/components/repo-table/repo-filters.test.tsx:200-221`
   - What to test: The `if (actionButton)` guard silently skips the `expect` if `closest("button")` returns `null` — the test always passes regardless. Fix: add `expect(actionButton).not.toBeNull()` before the color check, or rewrite as a behavior test: verify the accessible name of the button is "Delete Selected Repos" when the delete action is active.
