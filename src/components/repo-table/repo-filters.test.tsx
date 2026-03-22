@@ -7,7 +7,7 @@ import RepoFilters, {
   REPO_TYPES,
   type SelectionSet,
 } from "@/components/repo-table/repo-filters";
-import { fireEvent, render, screen } from "@/utils/test-utils";
+import { fireEvent, render, screen, waitFor } from "@/utils/test-utils";
 
 // Mock the heroicons
 vi.mock("@heroicons/react/16/solid", () => ({
@@ -372,6 +372,83 @@ describe("RepoFilters", () => {
 
       addSpy.mockRestore();
       removeSpy.mockRestore();
+    });
+  });
+
+  describe("click-outside-to-close behavior", () => {
+    it("closes per-page dropdown when clicking outside", async () => {
+      render(<RepoFilters {...defaultProps} />);
+
+      // Open the per-page dropdown
+      const perPageSelect = screen.getByTestId("per-page-select");
+      await userEvent.click(perPageSelect);
+
+      // Verify dropdown is open — options are visible
+      expect(
+        screen.getByTestId(`per-page-option-${PER_PAGE_OPTIONS[0]}`),
+      ).toBeInTheDocument();
+
+      // Click outside to close
+      await userEvent.click(document.body);
+
+      // Verify dropdown is closed — options are no longer in the DOM
+      await waitFor(() => {
+        expect(
+          screen.queryByTestId(`per-page-option-${PER_PAGE_OPTIONS[0]}`),
+        ).not.toBeInTheDocument();
+      });
+    });
+
+    it("closes repo-type dropdown when clicking outside", async () => {
+      render(<RepoFilters {...defaultProps} />);
+
+      // Open the repo-type dropdown
+      const repoTypeSelect = screen.getByTestId("repo-type-select");
+      await userEvent.click(repoTypeSelect);
+
+      // Verify dropdown is open
+      expect(
+        screen.getByTestId(`repo-type-select-item-${REPO_TYPES[0].key}`),
+      ).toBeInTheDocument();
+
+      // Click outside to close
+      await userEvent.click(document.body);
+
+      // Verify dropdown is closed
+      await waitFor(() => {
+        expect(
+          screen.queryByTestId(`repo-type-select-item-${REPO_TYPES[0].key}`),
+        ).not.toBeInTheDocument();
+      });
+    });
+
+    it("closes action dropdown when clicking outside", async () => {
+      render(<RepoFilters {...defaultProps} />);
+
+      // Open the action dropdown
+      const dropdownTrigger = screen
+        .getByTestId("chevron-down-icon")
+        .closest("button");
+      if (!dropdownTrigger) throw new Error("Dropdown trigger not found");
+
+      await userEvent.click(dropdownTrigger);
+
+      // Verify dropdown is open
+      expect(
+        screen.getByTestId(`repo-action-dropdown-item-${REPO_ACTIONS[0].key}`),
+      ).toBeInTheDocument();
+
+      // Click outside to close
+      await userEvent.click(document.body);
+
+      // Verify dropdown is closed
+      await waitFor(() => {
+        expect(
+          screen.queryByTestId(
+            `repo-action-dropdown-item-${REPO_ACTIONS[0].key}`,
+          ),
+        ).not.toBeInTheDocument();
+      });
     });
   });
 
