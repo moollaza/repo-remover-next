@@ -203,4 +203,67 @@ describe("GitHubTokenForm", () => {
       screen.queryByText(/Invalid or expired token/i),
     ).not.toBeInTheDocument();
   });
+
+  test("submit button remains disabled after API error", async () => {
+    server.use(restUserUnauthorizedHandler());
+
+    const { submitButton } = setupForm({
+      value: "ghp_abcdefghijklmnopqrstuvwxyz1234567890",
+    });
+
+    // Wait for the error to appear
+    await waitFor(
+      () => {
+        expect(
+          screen.getByText(/Invalid or expired token/i),
+        ).toBeInTheDocument();
+      },
+      { timeout: 2000 },
+    );
+
+    // Submit button should still be disabled (isTokenValid is false)
+    expect(submitButton).toBeDisabled();
+  });
+
+  test("error clears when user clears the input after an API error", async () => {
+    server.use(restUserUnauthorizedHandler());
+
+    const { rerender } = render(
+      <GitHubTokenForm
+        onSubmit={mockOnSubmit}
+        onValueChange={mockOnValueChange}
+        value="ghp_abcdefghijklmnopqrstuvwxyz1234567890"
+      />,
+    );
+
+    // Wait for the 401 error to appear
+    await waitFor(
+      () => {
+        expect(
+          screen.getByText(/Invalid or expired token/i),
+        ).toBeInTheDocument();
+      },
+      { timeout: 2000 },
+    );
+
+    // User clicks clear — handleChange("") sets error to null
+    const clearButton = screen.getByRole("button", { name: /clear/i });
+    await user.click(clearButton);
+
+    // Parent responds by re-rendering with empty value (no re-validation triggered)
+    rerender(
+      <GitHubTokenForm
+        onSubmit={mockOnSubmit}
+        onValueChange={mockOnValueChange}
+        value=""
+      />,
+    );
+
+    // Error should be cleared
+    await waitFor(() => {
+      expect(
+        screen.queryByText(/Invalid or expired token/i),
+      ).not.toBeInTheDocument();
+    });
+  });
 });

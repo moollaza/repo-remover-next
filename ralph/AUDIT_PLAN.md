@@ -927,10 +927,11 @@ Unit tests for untested modules and critical paths.
   - What to test: The `if (actionButton)` guard silently skips the `expect` if `closest("button")` returns `null` — the test always passes regardless. Fix: add `expect(actionButton).not.toBeNull()` before the color check, or rewrite as a behavior test: verify the accessible name of the button is "Delete Selected Repos" when the delete action is active.
   - Test type: unit (fix existing test)
 
-- [ ] **[TEST-043] severity:high** — API error path is entirely untested
+- [x] **[TEST-043] severity:high** — API error path is entirely untested
 
   - What to test: When `getAuthenticated()` rejects (mock network error or 401 status), the "Invalid or expired token" error message is shown; `isTokenValid` stays false; the submit button remains disabled; the error clears when the user edits the input
   - Test type: unit (mock `createThrottledOctokit` to return an octokit whose `users.getAuthenticated` rejects)
+  - Fix applied: Added 2 tests: submit button remains disabled after 401 error, error clears when user clears the input after an API error. Existing tests already cover 401/500/network error messages.
 
 - [ ] **[TEST-044] severity:medium** — Stale success state after clearing the input is untested
 
