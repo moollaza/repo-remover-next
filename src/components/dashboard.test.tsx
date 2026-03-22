@@ -149,4 +149,21 @@ describe("Dashboard", () => {
     expect(screen.getByText(/limited access/i)).toBeInTheDocument();
     expect(screen.getByText(warning)).toBeInTheDocument();
   });
+
+  it("renders multi-item permissionWarning with newline separators as a single block", () => {
+    const multiWarning =
+      "Org A: missing read:org scope\n\nOrg B: SAML SSO required";
+
+    render(<Dashboard {...defaultProps} permissionWarning={multiWarning} />);
+
+    expect(screen.getByText(/limited access/i)).toBeInTheDocument();
+    // Both warning segments appear in the rendered output
+    expect(
+      screen.getByText(/Org A: missing read:org scope/),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/Org B: SAML SSO required/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/some organization repositories may not be visible/i),
+    ).toBeInTheDocument();
+  });
 });

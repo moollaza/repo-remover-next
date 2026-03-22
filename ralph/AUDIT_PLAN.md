@@ -953,7 +953,7 @@ Unit tests for untested modules and critical paths.
   - What to test: Render `<Dashboard isLoading={true} progress={{ stage: "user", orgsLoaded: 0, orgsTotal: 2, currentOrg: "org1" }} repos={null} .../>` and assert `RepoLoadingProgress` is visible. Also assert it is absent when `isLoading=false` even if `progress` is set (stale progress object scenario).
   - Test type: unit
 
-- [ ] **[TEST-048] severity:low** — Multi-item `permissionWarning` splitting via `\n\n` is untested
+- [x] **[TEST-048] severity:low** — Multi-item `permissionWarning` splitting via `\n\n` is untested
 
   - What to test: Pass `permissionWarning="Org A missing\n\nOrg B missing"` and assert two `<li>` elements are rendered, each with the correct text. Single-item (no `\n\n`) case is already implicitly covered.
   - Test type: unit
