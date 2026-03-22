@@ -92,6 +92,48 @@ describe("Dashboard", () => {
     // RepoTable handles loading indicator internally
   });
 
+  it("renders RepoLoadingProgress when isLoading and progress are set", () => {
+    render(
+      <Dashboard
+        {...defaultProps}
+        isLoading={true}
+        progress={{
+          currentOrg: "my-org",
+          orgsLoaded: 1,
+          orgsTotal: 3,
+          stage: "orgs",
+        }}
+        repos={null}
+      />,
+    );
+
+    expect(
+      screen.getByText(/loading organization repositories/i),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/currently loading: my-org/i)).toBeInTheDocument();
+    expect(screen.getByRole("progressbar")).toBeInTheDocument();
+  });
+
+  it("does not render RepoLoadingProgress when isLoading is false even with stale progress", () => {
+    render(
+      <Dashboard
+        {...defaultProps}
+        isLoading={false}
+        progress={{
+          currentOrg: "my-org",
+          orgsLoaded: 1,
+          orgsTotal: 3,
+          stage: "orgs",
+        }}
+      />,
+    );
+
+    expect(
+      screen.queryByText(/loading organization repositories/i),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
+  });
+
   it("shows both error and permission warning if present", () => {
     const warning = "Limited org access";
 

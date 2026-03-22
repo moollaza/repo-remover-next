@@ -948,7 +948,7 @@ Unit tests for untested modules and critical paths.
   - What to test: Typing three characters in quick succession (each within the 500 ms window) results in exactly one call to `createThrottledOctokit`, not three; use `vi.useFakeTimers()` to advance time and a spy on `createThrottledOctokit` to count calls
   - Test type: unit (fake timers)
 
-- [ ] **[TEST-047] severity:medium** — `RepoLoadingProgress` is never rendered in tests
+- [x] **[TEST-047] severity:medium** — `RepoLoadingProgress` is never rendered in tests
 
   - What to test: Render `<Dashboard isLoading={true} progress={{ stage: "user", orgsLoaded: 0, orgsTotal: 2, currentOrg: "org1" }} repos={null} .../>` and assert `RepoLoadingProgress` is visible. Also assert it is absent when `isLoading=false` even if `progress` is set (stale progress object scenario).
   - Test type: unit
