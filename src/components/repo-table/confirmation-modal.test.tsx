@@ -393,6 +393,86 @@ describe("ConfirmationModal", () => {
     expect(mockProps.onClose).toHaveBeenCalledTimes(1);
   });
 
+  it("closes modal when Escape is pressed in confirmation mode (TEST-035)", () => {
+    render(
+      <GitHubContext.Provider value={mockContextValue}>
+        <ConfirmationModal {...mockProps} />
+      </GitHubContext.Provider>,
+    );
+
+    // Verify we're in confirmation mode
+    expect(screen.getByTestId("confirmation-modal-header")).toBeInTheDocument();
+
+    // Press Escape on the dialog — HeroUI handles Escape on the overlay element
+    const dialog = screen.getByRole("dialog");
+    fireEvent.keyDown(dialog, { key: "Escape" });
+
+    // onClose should be called
+    expect(mockProps.onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("does NOT close modal when Escape is pressed in progress mode (TEST-035)", async () => {
+    vi.mocked(processRepo).mockReset();
+    // Use a long-running mock so we stay in progress mode
+    vi.mocked(processRepo).mockImplementation(
+      () => new Promise((resolve) => setTimeout(resolve, 5000)),
+    );
+
+    render(
+      <GitHubContext.Provider value={mockContextValue}>
+        <ConfirmationModal {...mockProps} />
+      </GitHubContext.Provider>,
+    );
+
+    // Type correct username and confirm to enter progress mode
+    const input = screen.getByTestId("confirmation-modal-input");
+    fireEvent.change(input, { target: { value: "testuser" } });
+    fireEvent.click(screen.getByTestId("confirmation-modal-confirm"));
+
+    // Advance just enough to enter progress mode (first repo starts processing)
+    await vi.advanceTimersByTimeAsync(100);
+
+    // Verify we're in progress mode
+    expect(screen.getByTestId("progress-modal-header")).toBeInTheDocument();
+
+    // Press Escape — isDismissable is false in progress mode
+    fireEvent.keyDown(document, { key: "Escape" });
+
+    // onClose should NOT be called
+    expect(mockProps.onClose).not.toHaveBeenCalled();
+
+    // Clean up: advance timers to let processing complete
+    await vi.advanceTimersByTimeAsync(30000);
+  });
+
+  it("does NOT close modal when Escape is pressed in result mode (TEST-035)", async () => {
+    vi.mocked(processRepo).mockReset();
+    vi.mocked(processRepo).mockResolvedValue(undefined);
+
+    render(
+      <GitHubContext.Provider value={mockContextValue}>
+        <ConfirmationModal {...mockProps} />
+      </GitHubContext.Provider>,
+    );
+
+    // Type correct username and confirm
+    const input = screen.getByTestId("confirmation-modal-input");
+    fireEvent.change(input, { target: { value: "testuser" } });
+    fireEvent.click(screen.getByTestId("confirmation-modal-confirm"));
+
+    // Advance timers to reach result screen
+    await vi.advanceTimersByTimeAsync(10000);
+
+    // Verify we're in result mode
+    expect(screen.getByTestId("result-modal-header")).toBeInTheDocument();
+
+    // Press Escape — isDismissable is false in result mode
+    fireEvent.keyDown(document, { key: "Escape" });
+
+    // onClose should NOT be called (user must click Close button)
+    expect(mockProps.onClose).not.toHaveBeenCalled();
+  });
+
   it("does not fire analytics when octokit is null (TEST-016)", async () => {
     const noPatContext: GitHubContextType = {
       ...mockContextValue,

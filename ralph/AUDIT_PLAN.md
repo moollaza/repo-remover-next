@@ -888,7 +888,7 @@ Unit tests for untested modules and critical paths.
   - What to test: After the fix is applied, `window.repos` should NOT be set in production mode (`import.meta.env.DEV = false`); should be set in dev mode. A regression test prevents the guard from being accidentally removed.
   - Test type: unit (mock `import.meta.env.DEV`)
 
-- [ ] **[TEST-035] severity:medium** — Escape key dismissal is completely untested
+- [x] **[TEST-035] severity:medium** — Escape key dismissal is completely untested
 
   - File: `src/components/repo-table/confirmation-modal.tsx:127-135`
   - What to test: Pressing Escape calls `handleOnClose` when `isDismissable=true` (confirmation/result modes); pressing Escape during progress mode (where `isDismissable=false`) does NOT close the modal; `document.removeEventListener` cleans up on unmount
