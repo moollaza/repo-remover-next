@@ -933,7 +933,7 @@ Unit tests for untested modules and critical paths.
   - Test type: unit (mock `createThrottledOctokit` to return an octokit whose `users.getAuthenticated` rejects)
   - Fix applied: Added 2 tests: submit button remains disabled after 401 error, error clears when user clears the input after an API error. Existing tests already cover 401/500/network error messages.
 
-- [ ] **[TEST-044] severity:medium** — Stale success state after clearing the input is untested
+- [x] **[TEST-044] severity:medium** — Stale success state after clearing the input is untested
 
   - What to test: After a token validates successfully (green "Token is valid" state), clicking the clear button should reset the form to the neutral default state — description back to the hint text, button disabled, no "Token is valid" message
   - Test type: unit

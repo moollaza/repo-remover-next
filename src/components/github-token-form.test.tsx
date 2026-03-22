@@ -225,6 +225,52 @@ describe("GitHubTokenForm", () => {
     expect(submitButton).toBeDisabled();
   });
 
+  test("clicking clear after successful validation resets to default hint state", async () => {
+    const { rerender } = render(
+      <GitHubTokenForm
+        onSubmit={mockOnSubmit}
+        onValueChange={mockOnValueChange}
+        value="ghp_abcdefghijklmnopqrstuvwxyz1234567890"
+      />,
+    );
+
+    const submitButton = screen.getByRole("button", { name: /submit/i });
+
+    // Wait for validation to succeed — green state
+    await waitFor(() => expect(submitButton).not.toBeDisabled(), {
+      timeout: 2000,
+    });
+    expect(screen.getByText(/Token is valid\. Welcome/i)).toBeInTheDocument();
+
+    // Click the clear button (fires handleChange(""))
+    const clearButton = screen.getByRole("button", { name: /clear/i });
+    await user.click(clearButton);
+
+    // Parent responds with empty value
+    rerender(
+      <GitHubTokenForm
+        onSubmit={mockOnSubmit}
+        onValueChange={mockOnValueChange}
+        value=""
+      />,
+    );
+
+    // Success message gone
+    await waitFor(() =>
+      expect(
+        screen.queryByText(/Token is valid\. Welcome/i),
+      ).not.toBeInTheDocument(),
+    );
+
+    // Button disabled
+    expect(submitButton).toBeDisabled();
+
+    // Description reverted to the default hint text
+    expect(
+      screen.getByText(/Token should start with 'ghp_'/i),
+    ).toBeInTheDocument();
+  });
+
   test("error clears when user clears the input after an API error", async () => {
     server.use(restUserUnauthorizedHandler());
 
