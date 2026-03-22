@@ -882,7 +882,7 @@ Unit tests for untested modules and critical paths.
   - What to test: Pagination nav renders only when `totalPages > 1`; "prev" button is disabled on page 1; "next" button is disabled on last page; clicking a page number updates `currentPage`; clicking "prev"/"next" navigates correctly.
   - Test type: unit (render with enough repos to trigger multiple pages)
 
-- [ ] **[TEST-034] severity:low** — `window.repos` production leak is untested (see BUG-023)
+- [x] **[TEST-034] severity:low** — `window.repos` production leak is untested (see BUG-023)
 
   - File: `src/components/repo-table/repo-table.tsx:38`
   - What to test: After the fix is applied, `window.repos` should NOT be set in production mode (`import.meta.env.DEV = false`); should be set in dev mode. A regression test prevents the guard from being accidentally removed.

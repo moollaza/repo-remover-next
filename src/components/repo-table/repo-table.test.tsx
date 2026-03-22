@@ -445,18 +445,29 @@ describe("RepoTable", () => {
     });
   });
 
-  test("does not expose repos on window in production mode", () => {
-    // In production, window.repos must not be set (security: exposes private repo data)
-    const originalDev = import.meta.env.DEV;
-    import.meta.env.DEV = false;
+  describe("window.repos dev guard (BUG-023 / TEST-034)", () => {
+    test("does not expose repos on window in production mode", () => {
+      const originalDev = import.meta.env.DEV;
+      import.meta.env.DEV = false;
 
-    try {
+      try {
+        render(<RepoTable login={mockLogin} repos={mockRepos} />);
+        expect(
+          (window as unknown as Record<string, unknown>).repos,
+        ).toBeUndefined();
+      } finally {
+        import.meta.env.DEV = originalDev;
+      }
+    });
+
+    test("exposes repos on window in dev mode", () => {
+      // DEV is true by default in Vitest
+      expect(import.meta.env.DEV).toBe(true);
+
       render(<RepoTable login={mockLogin} repos={mockRepos} />);
-      expect(
-        (window as unknown as Record<string, unknown>).repos,
-      ).toBeUndefined();
-    } finally {
-      import.meta.env.DEV = originalDev;
-    }
+      expect((window as unknown as Record<string, unknown>).repos).toBe(
+        mockRepos,
+      );
+    });
   });
 });
