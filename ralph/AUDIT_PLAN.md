@@ -943,7 +943,7 @@ Unit tests for untested modules and critical paths.
   - What to test: With a valid validated token in the input, pressing Enter calls `onSubmit`; with an invalid token, pressing Enter does NOT call `onSubmit`
   - Test type: unit (use `userEvent.keyboard('{Enter}')` inside the form)
 
-- [ ] **[TEST-046] severity:low** — Debounce behaviour is untested — rapid typing should fire only one API call
+- [x] **[TEST-046] severity:low** — Debounce behaviour is untested — rapid typing should fire only one API call
 
   - What to test: Typing three characters in quick succession (each within the 500 ms window) results in exactly one call to `createThrottledOctokit`, not three; use `vi.useFakeTimers()` to advance time and a spy on `createThrottledOctokit` to count calls
   - Test type: unit (fake timers)

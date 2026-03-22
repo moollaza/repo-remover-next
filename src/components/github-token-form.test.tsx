@@ -1,5 +1,6 @@
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, test, vi } from "vitest";
+import { http, HttpResponse } from "msw";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 import {
   restUserNetworkErrorHandler,
@@ -7,6 +8,7 @@ import {
   restUserUnauthorizedHandler,
 } from "@/mocks/handlers";
 import { server } from "@/mocks/server";
+import { MOCK_USER } from "@/mocks/static-fixtures";
 import { render, screen, waitFor } from "@/utils/test-utils";
 
 import GitHubTokenForm from "./github-token-form";
@@ -346,6 +348,73 @@ describe("GitHubTokenForm", () => {
       expect(
         screen.queryByText(/Invalid or expired token/i),
       ).not.toBeInTheDocument();
+    });
+  });
+
+  describe("debounce behaviour", () => {
+    beforeEach(() => {
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    test("rapid value changes within 500ms fire only one API validation call", async () => {
+      let apiCallCount = 0;
+      server.use(
+        http.get("https://api.github.com/user", () => {
+          apiCallCount++;
+          return HttpResponse.json(MOCK_USER);
+        }),
+      );
+
+      const token1 = "ghp_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+      const token2 = "ghp_bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
+      const token3 = "ghp_cccccccccccccccccccccccccccccccccccc";
+
+      const { rerender } = render(
+        <GitHubTokenForm
+          onSubmit={mockOnSubmit}
+          onValueChange={mockOnValueChange}
+          value={token1}
+        />,
+      );
+
+      // Advance 200ms — less than the 500ms debounce window
+      await vi.advanceTimersByTimeAsync(200);
+
+      rerender(
+        <GitHubTokenForm
+          onSubmit={mockOnSubmit}
+          onValueChange={mockOnValueChange}
+          value={token2}
+        />,
+      );
+
+      // Advance another 200ms — still within debounce window of the second render
+      await vi.advanceTimersByTimeAsync(200);
+
+      rerender(
+        <GitHubTokenForm
+          onSubmit={mockOnSubmit}
+          onValueChange={mockOnValueChange}
+          value={token3}
+        />,
+      );
+
+      // Now advance past the debounce window for the final value
+      await vi.advanceTimersByTimeAsync(600);
+
+      // Wait for the async validation to complete
+      await waitFor(() => {
+        expect(
+          screen.getByText(/Token is valid\. Welcome/i),
+        ).toBeInTheDocument();
+      });
+
+      // Only one API call should have been made — the debounce coalesced the three
+      expect(apiCallCount).toBe(1);
     });
   });
 });
