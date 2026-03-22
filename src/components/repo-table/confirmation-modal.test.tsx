@@ -473,6 +473,79 @@ describe("ConfirmationModal", () => {
     expect(mockProps.onClose).not.toHaveBeenCalled();
   });
 
+  it("closes modal when backdrop is clicked in confirmation mode (TEST-036)", () => {
+    render(
+      <GitHubContext.Provider value={mockContextValue}>
+        <ConfirmationModal {...mockProps} />
+      </GitHubContext.Provider>,
+    );
+
+    // Verify we're in confirmation mode (isDismissable = true)
+    expect(screen.getByTestId("confirmation-modal-header")).toBeInTheDocument();
+
+    // Simulate clicking outside the modal dialog (backdrop click)
+    // React Aria v3 useInteractOutside uses pointerdown + click (capture) on document
+    fireEvent.pointerDown(document.body, { button: 0 });
+    fireEvent.click(document.body, { button: 0 });
+
+    // onClose should be called — backdrop click dismisses in confirmation mode
+    expect(mockProps.onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("does NOT close modal when backdrop is clicked in progress mode (TEST-036)", async () => {
+    vi.mocked(processRepo).mockReset();
+    vi.mocked(processRepo).mockImplementation(
+      () => new Promise((resolve) => setTimeout(resolve, 5000)),
+    );
+
+    render(
+      <GitHubContext.Provider value={mockContextValue}>
+        <ConfirmationModal {...mockProps} />
+      </GitHubContext.Provider>,
+    );
+
+    // Type correct username and confirm to enter progress mode
+    const input = screen.getByTestId("confirmation-modal-input");
+    fireEvent.change(input, { target: { value: "testuser" } });
+    fireEvent.click(screen.getByTestId("confirmation-modal-confirm"));
+
+    // Advance just enough to enter progress mode
+    await vi.advanceTimersByTimeAsync(100);
+
+    // Verify we're in progress mode
+    expect(screen.getByTestId("progress-modal-header")).toBeInTheDocument();
+
+    // Simulate backdrop click
+    fireEvent.pointerDown(document.body, { button: 0 });
+    fireEvent.click(document.body, { button: 0 });
+
+    // onClose should NOT be called — modal is not dismissable during progress
+    expect(mockProps.onClose).not.toHaveBeenCalled();
+
+    // Clean up: advance timers to let processing complete
+    await vi.advanceTimersByTimeAsync(30000);
+  });
+
+  it("does NOT close modal when clicking inside modal content (TEST-036)", () => {
+    render(
+      <GitHubContext.Provider value={mockContextValue}>
+        <ConfirmationModal {...mockProps} />
+      </GitHubContext.Provider>,
+    );
+
+    // Verify we're in confirmation mode (dismissable)
+    const header = screen.getByTestId("confirmation-modal-header");
+    expect(header).toBeInTheDocument();
+
+    // Click inside the modal content (on the header text)
+    // React Aria checks composedPath — clicks inside the dialog ref are not "outside"
+    fireEvent.pointerDown(header, { button: 0 });
+    fireEvent.click(header, { button: 0 });
+
+    // onClose should NOT be called — click was inside the modal content
+    expect(mockProps.onClose).not.toHaveBeenCalled();
+  });
+
   it("does not fire analytics when octokit is null (TEST-016)", async () => {
     const noPatContext: GitHubContextType = {
       ...mockContextValue,

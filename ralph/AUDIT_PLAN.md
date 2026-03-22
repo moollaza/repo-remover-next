@@ -894,11 +894,12 @@ Unit tests for untested modules and critical paths.
   - What to test: Pressing Escape calls `handleOnClose` when `isDismissable=true` (confirmation/result modes); pressing Escape during progress mode (where `isDismissable=false`) does NOT close the modal; `document.removeEventListener` cleans up on unmount
   - Test type: unit (use `fireEvent.keyDown(document, { key: 'Escape' })`)
 
-- [ ] **[TEST-036] severity:medium** — Backdrop click dismissal is untested
+- [x] **[TEST-036] severity:medium** — Backdrop click dismissal is untested
 
   - File: `src/components/repo-table/confirmation-modal.tsx:143-147`
   - What to test: Clicking the overlay backdrop (`overlayRef.current`) closes the modal when dismissable; clicking inside the modal content (a child element) does NOT close it (`e.target !== overlayRef.current`); clicking during progress mode does nothing
   - Test type: unit
+  - Fix applied: Added 3 tests: backdrop click closes in confirmation mode (pointerdown+click on body triggers React Aria's useInteractOutside), backdrop click does NOT close in progress mode (isDismissable=false), clicking inside modal content does NOT close (composedPath includes dialog ref)
 
 - [ ] **[TEST-039] severity:medium** — `typesSummary` edge cases untested
 
