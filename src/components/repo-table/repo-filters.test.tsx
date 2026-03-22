@@ -7,7 +7,7 @@ import RepoFilters, {
   REPO_TYPES,
   type SelectionSet,
 } from "@/components/repo-table/repo-filters";
-import { render, screen } from "@/utils/test-utils";
+import { fireEvent, render, screen } from "@/utils/test-utils";
 
 // Mock the heroicons
 vi.mock("@heroicons/react/16/solid", () => ({
@@ -298,6 +298,80 @@ describe("RepoFilters", () => {
       expect(valueText).not.toContain("Template");
       expect(valueText).not.toContain("Mirror");
       expect(valueText).not.toContain("Disabled");
+    });
+  });
+
+  describe("Cmd+K / Ctrl+K keyboard shortcut", () => {
+    it("focuses search input on Ctrl+K", () => {
+      render(<RepoFilters {...defaultProps} />);
+
+      const searchInput = screen.getByTestId("repo-search-input");
+      // HeroUI Input wraps in a div; find the actual <input> inside
+      const inputElement =
+        searchInput.tagName === "INPUT"
+          ? searchInput
+          : searchInput.querySelector("input");
+      expect(inputElement).not.toBeNull();
+
+      fireEvent.keyDown(document, { ctrlKey: true, key: "k" });
+
+      expect(document.activeElement).toBe(inputElement);
+    });
+
+    it("focuses search input on Cmd+K (Meta)", () => {
+      render(<RepoFilters {...defaultProps} />);
+
+      const searchInput = screen.getByTestId("repo-search-input");
+      const inputElement =
+        searchInput.tagName === "INPUT"
+          ? searchInput
+          : searchInput.querySelector("input");
+      expect(inputElement).not.toBeNull();
+
+      fireEvent.keyDown(document, { key: "k", metaKey: true });
+
+      expect(document.activeElement).toBe(inputElement);
+    });
+
+    it("does not focus search input on plain K key press", () => {
+      render(<RepoFilters {...defaultProps} />);
+
+      const searchInput = screen.getByTestId("repo-search-input");
+      const inputElement =
+        searchInput.tagName === "INPUT"
+          ? searchInput
+          : searchInput.querySelector("input");
+
+      // Blur the input first to ensure it's not focused
+      inputElement!.blur();
+
+      fireEvent.keyDown(document, { key: "k" });
+
+      expect(document.activeElement).not.toBe(inputElement);
+    });
+
+    it("cleans up keydown listener on unmount", () => {
+      const addSpy = vi.spyOn(document, "addEventListener");
+      const removeSpy = vi.spyOn(document, "removeEventListener");
+
+      const { unmount } = render(<RepoFilters {...defaultProps} />);
+
+      // Find the keydown handler that was added
+      const keydownCalls = addSpy.mock.calls.filter(
+        (call) => call[0] === "keydown",
+      );
+      expect(keydownCalls.length).toBeGreaterThan(0);
+
+      unmount();
+
+      // Verify the same handler was removed
+      const removeKeydownCalls = removeSpy.mock.calls.filter(
+        (call) => call[0] === "keydown",
+      );
+      expect(removeKeydownCalls.length).toBeGreaterThan(0);
+
+      addSpy.mockRestore();
+      removeSpy.mockRestore();
     });
   });
 

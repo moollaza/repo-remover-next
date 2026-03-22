@@ -907,11 +907,12 @@ Unit tests for untested modules and critical paths.
   - What to test: Render with all types deselected -> trigger label shows "None"; all selected -> "All"; partial selection (e.g. only "Private" and "Forked") -> shows comma-joined labels
   - Test type: unit
 
-- [ ] **[TEST-040] severity:medium** — Cmd+K / Ctrl+K keyboard shortcut untested
+- [x] **[TEST-040] severity:medium** — Cmd+K / Ctrl+K keyboard shortcut untested
 
   - File: `src/components/repo-table/repo-filters.tsx:69-81`
   - What to test: Pressing `Ctrl+K` focuses the search input; pressing `Cmd+K` also focuses it; the `keydown` listener is removed on unmount (no focus error after unmount)
   - Test type: unit (use `fireEvent.keyDown(document, { metaKey: true, key: 'k' })`)
+  - Fix applied: Added 4 tests: Ctrl+K focuses search input, Cmd+K (Meta) focuses search input, plain K does not focus, keydown listener cleaned up on unmount
 
 - [ ] **[TEST-041] severity:medium** — Click-outside-to-close behavior untested for all three dropdowns
 
