@@ -876,7 +876,7 @@ Unit tests for untested modules and critical paths.
   - What to test: Clicking "Repository" column header sorts repos ascending on first click; clicking again reverses to descending (toggle); `aria-sort` attribute updates correctly; clicking "Last Updated" switches the active sort column and resets to ascending.
   - Test type: unit
 
-- [ ] **[TEST-033] severity:medium** — Pagination rendering and navigation are untested
+- [x] **[TEST-033] severity:medium** — Pagination rendering and navigation are untested
 
   - File: `src/components/repo-table/repo-table.tsx:423-467`
   - What to test: Pagination nav renders only when `totalPages > 1`; "prev" button is disabled on page 1; "next" button is disabled on last page; clicking a page number updates `currentPage`; clicking "prev"/"next" navigates correctly.

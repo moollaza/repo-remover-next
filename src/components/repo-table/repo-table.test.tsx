@@ -344,6 +344,107 @@ describe("RepoTable", () => {
     });
   });
 
+  describe("pagination rendering and navigation", () => {
+    // Default perPage is 5 (PER_PAGE_OPTIONS[0]), so we need >5 repos for pagination
+    const paginatedRepos: Repository[] = Array.from({ length: 12 }, (_, i) =>
+      createMockRepo({
+        description: `Repo ${i + 1} description`,
+        id: `paginated-repo-${i + 1}`,
+        name: `paginated-repo-${String(i + 1).padStart(2, "0")}`,
+        updatedAt: `2023-${String(12 - i).padStart(2, "0")}-01T00:00:00Z`,
+      }),
+    );
+
+    test("pagination renders only when totalPages > 1", () => {
+      // With 12 repos and perPage=5 → 3 pages → pagination should render
+      render(<RepoTable login={mockLogin} repos={paginatedRepos} />);
+      expect(
+        screen.getByRole("navigation", { name: /pagination/i }),
+      ).toBeInTheDocument();
+    });
+
+    test("pagination does not render when all items fit on one page", () => {
+      // 2 repos with perPage=5 → 1 page → no pagination
+      render(<RepoTable login={mockLogin} repos={mockRepos} />);
+      expect(
+        screen.queryByRole("navigation", { name: /pagination/i }),
+      ).not.toBeInTheDocument();
+    });
+
+    test("clicking a page number updates displayed repos", async () => {
+      const user = userEvent.setup();
+      render(<RepoTable login={mockLogin} repos={paginatedRepos} />);
+
+      // Page 1: should show first 5 repos
+      const rows = screen.getAllByTestId("repo-row");
+      expect(rows).toHaveLength(5);
+
+      // Click page 2 button (HeroUI uses "pagination item N" aria-labels)
+      const page2Button = screen.getByRole("button", {
+        name: "pagination item 2",
+      });
+      await user.click(page2Button);
+
+      // Should still have 5 rows on page 2
+      const page2Rows = screen.getAllByTestId("repo-row");
+      expect(page2Rows).toHaveLength(5);
+    });
+
+    test("clicking next navigates to the next page", async () => {
+      const user = userEvent.setup();
+      render(<RepoTable login={mockLogin} repos={paginatedRepos} />);
+
+      // Click "next page button" control (HeroUI label)
+      const nextButton = screen.getByRole("button", {
+        name: "next page button",
+      });
+      await user.click(nextButton);
+
+      // Verify we moved to page 2 — page 2 button should now be active
+      const page2Button = screen.getByRole("button", {
+        name: /pagination item 2/,
+      });
+      expect(page2Button).toHaveAttribute("aria-current", "true");
+    });
+
+    test("clicking previous navigates to the previous page", async () => {
+      const user = userEvent.setup();
+      render(<RepoTable login={mockLogin} repos={paginatedRepos} />);
+
+      // Navigate to page 2 first
+      const nextButton = screen.getByRole("button", {
+        name: "next page button",
+      });
+      await user.click(nextButton);
+
+      // Click "previous page button" control (HeroUI label)
+      const prevButton = screen.getByRole("button", {
+        name: "previous page button",
+      });
+      await user.click(prevButton);
+
+      // Verify we're back on page 1 — page 1 button should be active
+      const page1Button = screen.getByRole("button", {
+        name: /pagination item 1/,
+      });
+      expect(page1Button).toHaveAttribute("aria-current", "true");
+    });
+
+    test("last page shows remaining items (not a full page)", async () => {
+      const user = userEvent.setup();
+      render(<RepoTable login={mockLogin} repos={paginatedRepos} />);
+
+      // Navigate to page 3 (12 repos / 5 per page = 3 pages, last page has 2)
+      const page3Button = screen.getByRole("button", {
+        name: "pagination item 3",
+      });
+      await user.click(page3Button);
+
+      const rows = screen.getAllByTestId("repo-row");
+      expect(rows).toHaveLength(2);
+    });
+  });
+
   test("does not expose repos on window in production mode", () => {
     // In production, window.repos must not be set (security: exposes private repo data)
     const originalDev = import.meta.env.DEV;
