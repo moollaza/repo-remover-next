@@ -152,6 +152,27 @@ describe("Header", () => {
     });
   });
 
+  describe("Dashboard route", () => {
+    it("renders dashboard header with user info and hides home nav links", () => {
+      setupDashboardWithAuth();
+      render(<Header />);
+
+      // User name and login should be visible
+      expect(screen.getByText("Test User")).toBeInTheDocument();
+      expect(screen.getByText("testuser")).toBeInTheDocument();
+
+      // Home navigation links should NOT be present on dashboard
+      expect(screen.queryByText("Features")).not.toBeInTheDocument();
+      expect(screen.queryByText("How It Works")).not.toBeInTheDocument();
+      expect(screen.queryByText("Get Started")).not.toBeInTheDocument();
+
+      // User menu button should be present
+      expect(
+        screen.getByRole("button", { name: /user menu for test user/i }),
+      ).toBeInTheDocument();
+    });
+  });
+
   describe("Accessibility", () => {
     it("user dropdown trigger has aria-label and is a button", () => {
       setupDashboardWithAuth();

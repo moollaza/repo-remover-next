@@ -958,7 +958,7 @@ Unit tests for untested modules and critical paths.
   - What to test: Pass `permissionWarning="Org A missing\n\nOrg B missing"` and assert two `<li>` elements are rendered, each with the correct text. Single-item (no `\n\n`) case is already implicitly covered.
   - Test type: unit
 
-- [ ] **[TEST-049] severity:high** — Dashboard route (`pathname === "/dashboard"`) renders `DashboardHeader` — entirely untested
+- [x] **[TEST-049] severity:high** — Dashboard route (`pathname === "/dashboard"`) renders `DashboardHeader` — entirely untested
 
   - What to test: Mock `useLocation` to return `pathname: "/dashboard"` and mock `useGitHubData` with a user; assert `DashboardHeader` elements are present (user avatar/name, no home nav links, no "Features" link); assert user's name appears. Currently no test covers the `isDashboard` branch at all.
   - Test type: unit
