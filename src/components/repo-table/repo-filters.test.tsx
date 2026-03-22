@@ -241,6 +241,66 @@ describe("RepoFilters", () => {
     });
   });
 
+  describe("typesSummary display in repo type select", () => {
+    it("shows all type labels when all types are selected", () => {
+      render(<RepoFilters {...defaultProps} />);
+
+      const repoTypeSelect = screen.getByTestId("repo-type-select");
+      // HeroUI multi-select renders selected labels as comma-separated text
+      for (const type of REPO_TYPES) {
+        expect(repoTypeSelect).toHaveTextContent(type.label);
+      }
+    });
+
+    it("does not show type labels when no types are selected", () => {
+      render(
+        <RepoFilters
+          {...defaultProps}
+          repoTypesFilter={new Set() as SelectionSet}
+        />,
+      );
+
+      const repoTypeSelect = screen.getByTestId("repo-type-select");
+      // With no selection, individual type labels should not appear in the trigger value
+      for (const type of REPO_TYPES) {
+        // The label "Repo types to show" will still be present, but the values should not
+        const allTextNodes = repoTypeSelect.querySelectorAll(
+          "[data-slot='value']",
+        );
+        const valueText = Array.from(allTextNodes)
+          .map((el) => el.textContent)
+          .join("");
+        expect(valueText).not.toContain(type.label);
+      }
+    });
+
+    it("shows only selected type labels for partial selection", () => {
+      const partialSelection = new Set(["isFork", "isPrivate"]) as SelectionSet;
+
+      render(
+        <RepoFilters {...defaultProps} repoTypesFilter={partialSelection} />,
+      );
+
+      const repoTypeSelect = screen.getByTestId("repo-type-select");
+      // Selected types should be visible
+      expect(repoTypeSelect).toHaveTextContent("Private");
+      expect(repoTypeSelect).toHaveTextContent("Forked");
+
+      // Non-selected types should not appear in the value area
+      const valueElements = repoTypeSelect.querySelectorAll(
+        "[data-slot='value']",
+      );
+      const valueText = Array.from(valueElements)
+        .map((el) => el.textContent)
+        .join("");
+      expect(valueText).not.toContain("Organization");
+      expect(valueText).not.toContain("Archived");
+      expect(valueText).not.toContain("Template");
+      expect(valueText).not.toContain("Mirror");
+      expect(valueText).not.toContain("Disabled");
+    });
+  });
+
   it("shows danger color for delete action", () => {
     const propsWithDeleteAction = {
       ...defaultProps,

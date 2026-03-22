@@ -901,7 +901,7 @@ Unit tests for untested modules and critical paths.
   - Test type: unit
   - Fix applied: Added 3 tests: backdrop click closes in confirmation mode (pointerdown+click on body triggers React Aria's useInteractOutside), backdrop click does NOT close in progress mode (isDismissable=false), clicking inside modal content does NOT close (composedPath includes dialog ref)
 
-- [ ] **[TEST-039] severity:medium** — `typesSummary` edge cases untested
+- [x] **[TEST-039] severity:medium** — `typesSummary` edge cases untested
 
   - File: `src/components/repo-table/repo-filters.tsx:146-154`
   - What to test: Render with all types deselected -> trigger label shows "None"; all selected -> "All"; partial selection (e.g. only "Private" and "Forked") -> shows comma-joined labels
