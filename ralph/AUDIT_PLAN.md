@@ -938,7 +938,7 @@ Unit tests for untested modules and critical paths.
   - What to test: After a token validates successfully (green "Token is valid" state), clicking the clear button should reset the form to the neutral default state — description back to the hint text, button disabled, no "Token is valid" message
   - Test type: unit
 
-- [ ] **[TEST-045] severity:low** — Enter-key form submission is untested
+- [x] **[TEST-045] severity:low** — Enter-key form submission is untested
 
   - What to test: With a valid validated token in the input, pressing Enter calls `onSubmit`; with an invalid token, pressing Enter does NOT call `onSubmit`
   - Test type: unit (use `userEvent.keyboard('{Enter}')` inside the form)

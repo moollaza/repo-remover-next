@@ -271,6 +271,42 @@ describe("GitHubTokenForm", () => {
     ).toBeInTheDocument();
   });
 
+  test("pressing Enter submits the form when token is valid", async () => {
+    const { input } = setupForm({
+      value: "ghp_abcdefghijklmnopqrstuvwxyz1234567890",
+    });
+
+    const submitButton = screen.getByRole("button", { name: /submit/i });
+
+    // Wait for API validation to complete
+    await waitFor(() => expect(submitButton).not.toBeDisabled(), {
+      timeout: 2000,
+    });
+
+    // Press Enter on the input
+    await user.click(input);
+    await user.keyboard("{Enter}");
+
+    expect(mockOnSubmit).toHaveBeenCalledWith(
+      "ghp_abcdefghijklmnopqrstuvwxyz1234567890",
+    );
+  });
+
+  test("pressing Enter does NOT submit the form when token is invalid", async () => {
+    const { input } = setupForm({
+      value: "invalid-token",
+    });
+
+    // Button should be disabled (token format invalid, never validates)
+    expect(screen.getByRole("button", { name: /submit/i })).toBeDisabled();
+
+    // Press Enter on the input
+    await user.click(input);
+    await user.keyboard("{Enter}");
+
+    expect(mockOnSubmit).not.toHaveBeenCalled();
+  });
+
   test("error clears when user clears the input after an API error", async () => {
     server.use(restUserUnauthorizedHandler());
 
