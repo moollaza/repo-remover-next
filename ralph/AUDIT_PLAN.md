@@ -1040,20 +1040,23 @@ Unit tests for untested modules and critical paths.
   - What to test: When a user has no organizations, `totalSteps = 1` and `currentStep = 1` during "personal" stage — progress bar shows 100% while still loading. Verify the component renders correctly and percentage is clamped/displayed sensibly.
   - Test type: unit
 
-- [ ] **[TEST-064] severity:low** — Zero tests for `useGitHubData` / `GitHubContext`
+- [x] **[TEST-064] severity:low** — Zero tests for `useGitHubData` / `GitHubContext`
 
   - What to test: (1) Hook returns correct context values when rendered inside `<GitHubDataProvider>`; (2) All fields from `GitHubContextType` are present and have correct types at runtime; (3) Confirm behavior (error or silent default) when hook is used outside the provider.
   - Test type: unit
+  - Fix applied: Tests (1) and (3) already existed. Added test (2) — verifies all 17 GitHubContextType fields are present with correct initial values (null states, false booleans, function types for actions).
 
-- [ ] **[TEST-070] severity:high** — Race condition in `InlinePATForm` token validation (BUG-054) has no test: no test verifies that clearing the token while a validation call is in flight does not leave `canSubmit=true` with an empty token string
+- [x] **[TEST-070] severity:high** — Race condition in `InlinePATForm` token validation (BUG-054) has no test: no test verifies that clearing the token while a validation call is in flight does not leave `canSubmit=true` with an empty token string
 
   - What to test: mock `createThrottledOctokit` to return a delayed promise; type a valid token, advance timers past debounce, then clear the token before the promise resolves; assert submit button remains disabled
   - Test type: unit (vitest + RTL + fake timers)
+  - **MOOT**: `InlinePATForm` and `src/components/landing/` directory no longer exist. Component was deleted in a prior refactor. No fix needed.
 
-- [ ] **[TEST-071] severity:medium** — `InlinePATForm` has zero unit tests; all interactive logic (debounce validation, success/error states, remember-me checkbox, tooltip open/close on click-outside, form submit + navigation) is untested
+- [x] **[TEST-071] severity:medium** — `InlinePATForm` has zero unit tests; all interactive logic (debounce validation, success/error states, remember-me checkbox, tooltip open/close on click-outside, form submit + navigation) is untested
 
   - What to test: (a) invalid token -> error shown, (b) valid token -> success state + submit enabled, (c) unchecking remember-me passes `false` to `setPat`, (d) submit calls `setPat` and navigates to `/dashboard`, (e) tooltip opens and closes on outside click
   - Test type: unit (vitest + RTL)
+  - **MOOT**: `InlinePATForm` and `src/components/landing/` directory no longer exist. Component was deleted in a prior refactor. No fix needed.
 
 - [x] **[TEST-073] severity:medium** — `ThemeSwitcher` has zero tests
 
