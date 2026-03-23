@@ -999,10 +999,11 @@ Unit tests for untested modules and critical paths.
   - What to test: (1) unauthenticated redirect: when `isInitialized=true` and `pat=null`, `navigate("/")` is called; (2) no redirect before init: when `isInitialized=false`, even with `pat=null`, no navigation fires; (3) authenticated render: when `pat` is set, `DashboardComponent` is rendered with all props forwarded correctly (`repos`, `isLoading`, `isError`, `login`, `permissionWarning`, `progress`, `onRefresh`); (4) `ErrorBoundary` catches errors thrown by `DashboardComponent` without propagating to the route
   - Test type: unit
 
-- [ ] **[TEST-057] severity:low** — `sanitize-tokens.ts` tests do not cover non-standard `ghp_` lengths
+- [x] **[TEST-057] severity:low** — `sanitize-tokens.ts` tests do not cover non-standard `ghp_` lengths
 
   - What to test: (1) `ghp_` token shorter than 36 chars (e.g. `ghp_shorttoken`) should be redacted — currently would NOT be by line 7 and has no fallback; (2) `ghp_` token longer than 36 chars should be redacted; (3) mixed-case token e.g. `GHP_TOKEN` — currently case-sensitive patterns would NOT match
   - Test type: unit
+  - Fix applied: Already covered by existing tests in sanitize-tokens.test.ts: "redacts ghp* tokens shorter than 36 chars" (line 19), "redacts ghp* tokens longer than 36 chars" (line 14), "redacts uppercase GHP\_ tokens" (line 78). Patterns were unified to use `+` (unbounded) and `gi` flags in BUG-041 fix.
 
 - [x] **[TEST-058] severity:high** — Zero tests for `debug.ts` — a security-critical module with no coverage
 
@@ -1010,20 +1011,23 @@ Unit tests for untested modules and critical paths.
   - Test type: unit
   - Fix applied: Added 6 tests for production mode suppression: log/warn/group/groupEnd/table suppressed when DEV=false, error always fires in production, error sanitizes data in production, and 3 tests for development mode (log/warn fire, group/groupCollapsed fire, table fires). Pre-existing tests already covered sanitize() for PATs, objects, Errors, arrays, circular refs, key redaction.
 
-- [ ] **[TEST-059] severity:medium** — `sanitize()` with `Error` objects returns `{}` — behavior is surprising and untested
+- [x] **[TEST-059] severity:medium** — `sanitize()` with `Error` objects returns `{}` — behavior is surprising and untested
 
   - What to test: `sanitize(new Error("token ghp_abc"))` should return something meaningful (message, name), not an empty object. Adding this test would both document the current broken behavior and guard against regression once BUG-042 is fixed.
   - Test type: unit
+  - Fix applied: Already covered by existing tests in debug.test.ts: "preserves Error message and name after sanitization" (line 17) and "handles Error subclasses" (line 27). BUG-042 was already fixed — sanitize() now returns `{ message, name }` for Error instances.
 
-- [ ] **[TEST-060] severity:low** — Key-name false-positive redaction is untested
+- [x] **[TEST-060] severity:low** — Key-name false-positive redaction is untested
 
   - What to test: `sanitize({ monkey: "safe-value", jockey: "also-safe" })` — confirm whether these values are incorrectly redacted (BUG-044 scenario)
   - Test type: unit
+  - Fix applied: Already covered by existing tests in debug.test.ts: "does not redact innocuous keys that happen to contain 'key' substring" (line 56) covers monkey, jockey, keyboard, hotkey. "redacts actual sensitive key-related fields" (line 71) covers apiKey, access_key, etc.
 
-- [ ] **[TEST-061] severity:medium** — Zero tests for `analytics.ts`
+- [x] **[TEST-061] severity:medium** — Zero tests for `analytics.ts`
 
   - What to test: (1) `track()` in dev returns early and logs to console without calling `trackEvent`; (2) `track()` in prod calls `trackEvent` with the correct event name and value; (3) `track()` in prod with `value=undefined` calls `trackEvent` without `_value`; (4) `track()` swallows `trackEvent` throws silently; (5) all `analytics.*` convenience methods call `track` with the right event name and count
   - Test type: unit
+  - Fix applied: Added 13 tests in analytics.test.ts covering: dev mode logging (no trackEvent called), dev mode value logging (including value=0), prod mode trackEvent with/without \_value, prod mode error swallowing via debug.warn, and all 6 convenience methods (trackArchiveActionSubmitted, trackDeleteActionSubmitted, trackGetStartedClick, trackRepoArchived, trackRepoDeleted, trackTokenValidated).
 
 - [ ] **[TEST-062] severity:high** — Zero tests for `error-boundary.tsx`
 
