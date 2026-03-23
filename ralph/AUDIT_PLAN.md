@@ -963,7 +963,7 @@ Unit tests for untested modules and critical paths.
   - What to test: Mock `useLocation` to return `pathname: "/dashboard"` and mock `useGitHubData` with a user; assert `DashboardHeader` elements are present (user avatar/name, no home nav links, no "Features" link); assert user's name appears. Currently no test covers the `isDashboard` branch at all.
   - Test type: unit
 
-- [ ] **[TEST-050] severity:medium** — User dropdown open/close toggle is untested
+- [x] **[TEST-050] severity:medium** — User dropdown open/close toggle is untested
 
   - What to test: With `pathname: "/dashboard"`, click the user avatar button; assert dropdown menu appears with "Log Out" button. Click again (or elsewhere) and assert dropdown closes.
   - Test type: unit

@@ -185,6 +185,37 @@ describe("Header", () => {
     });
   });
 
+  describe("User dropdown toggle", () => {
+    it("opens dropdown on click and shows menu items, closes on second click", async () => {
+      setupDashboardWithAuth();
+      const user = userEvent.setup();
+      render(<Header />);
+
+      const trigger = screen.getByRole("button", {
+        name: /user menu for test user/i,
+      });
+
+      // Dropdown menu should not be visible initially
+      expect(screen.queryByText("Log Out")).not.toBeInTheDocument();
+      expect(screen.queryByText("Signed in as")).not.toBeInTheDocument();
+
+      // Click to open
+      await user.click(trigger);
+
+      // Dropdown menu should now be visible
+      expect(await screen.findByText("Log Out")).toBeInTheDocument();
+      expect(screen.getByText("Signed in as")).toBeInTheDocument();
+
+      // Click trigger again to close
+      await user.click(trigger);
+
+      // Dropdown menu should be gone
+      await vi.waitFor(() => {
+        expect(screen.queryByText("Log Out")).not.toBeInTheDocument();
+      });
+    });
+  });
+
   describe("Logout", () => {
     it("calls context logout function instead of directly clearing localStorage", async () => {
       const { mockLogout } = setupDashboardWithAuth();
