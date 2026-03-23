@@ -968,10 +968,11 @@ Unit tests for untested modules and critical paths.
   - What to test: With `pathname: "/dashboard"`, click the user avatar button; assert dropdown menu appears with "Log Out" button. Click again (or elsewhere) and assert dropdown closes.
   - Test type: unit
 
-- [ ] **[TEST-051] severity:medium** — Logout action is untested
+- [x] **[TEST-051] severity:medium** — Logout action is untested
 
   - What to test: Open the dropdown, click "Log Out"; assert `secureStorage.removeItem` was called for both "pat" and "login" and that `window.location.href` was set to "/". Spy on `window.location` assignment.
   - Test type: unit
+  - Fix applied: Already covered by 2 existing tests in header.test.tsx Logout describe block: (1) verifies context `logout()` is called and localStorage.clear is NOT called directly, (2) verifies `window.location.href` is set to "/" after logout. Header delegates to context `logout()` per BUG-039 fix, so `secureStorage.removeItem` testing belongs in provider tests.
 
 - [ ] **[TEST-052] severity:medium** — Dropdown closes on Escape key — untested
 
