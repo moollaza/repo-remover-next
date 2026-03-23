@@ -1004,10 +1004,11 @@ Unit tests for untested modules and critical paths.
   - What to test: (1) `ghp_` token shorter than 36 chars (e.g. `ghp_shorttoken`) should be redacted — currently would NOT be by line 7 and has no fallback; (2) `ghp_` token longer than 36 chars should be redacted; (3) mixed-case token e.g. `GHP_TOKEN` — currently case-sensitive patterns would NOT match
   - Test type: unit
 
-- [ ] **[TEST-058] severity:high** — Zero tests for `debug.ts` — a security-critical module with no coverage
+- [x] **[TEST-058] severity:high** — Zero tests for `debug.ts` — a security-critical module with no coverage
 
   - What to test: (1) `sanitize()` strips GitHub PATs from strings; (2) `sanitize()` strips tokens from nested object string values; (3) `sanitize()` redacts known key names (token, password, secret); (4) `log()`/`warn()`/`group()`/`table()` are suppressed when `isDevelopment=false`; (5) `error()` always fires regardless of `isDevelopment`; (6) `sanitize()` with an `Error` instance (expose BUG-042)
   - Test type: unit
+  - Fix applied: Added 6 tests for production mode suppression: log/warn/group/groupEnd/table suppressed when DEV=false, error always fires in production, error sanitizes data in production, and 3 tests for development mode (log/warn fire, group/groupCollapsed fire, table fires). Pre-existing tests already covered sanitize() for PATs, objects, Errors, arrays, circular refs, key redaction.
 
 - [ ] **[TEST-059] severity:medium** — `sanitize()` with `Error` objects returns `{}` — behavior is surprising and untested
 

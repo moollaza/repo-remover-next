@@ -141,3 +141,121 @@ describe("debug.error", () => {
     );
   });
 });
+
+describe("production mode suppression", () => {
+  let logSpy: ReturnType<typeof vi.spyOn>;
+  let warnSpy: ReturnType<typeof vi.spyOn>;
+  let errorSpy: ReturnType<typeof vi.spyOn>;
+  let groupSpy: ReturnType<typeof vi.spyOn>;
+  let groupCollapsedSpy: ReturnType<typeof vi.spyOn>;
+  let groupEndSpy: ReturnType<typeof vi.spyOn>;
+  let tableSpy: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    logSpy = vi
+      .spyOn(console, "log")
+      .mockImplementation((() => undefined) as typeof console.log);
+    warnSpy = vi
+      .spyOn(console, "warn")
+      .mockImplementation((() => undefined) as typeof console.warn);
+    errorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation((() => undefined) as typeof console.error);
+    groupSpy = vi
+      .spyOn(console, "group")
+      .mockImplementation((() => undefined) as typeof console.group);
+    groupCollapsedSpy = vi
+      .spyOn(console, "groupCollapsed")
+      .mockImplementation((() => undefined) as typeof console.groupCollapsed);
+    groupEndSpy = vi
+      .spyOn(console, "groupEnd")
+      .mockImplementation((() => undefined) as typeof console.groupEnd);
+    tableSpy = vi
+      .spyOn(console, "table")
+      .mockImplementation((() => undefined) as typeof console.table);
+  });
+
+  afterEach(() => {
+    logSpy.mockRestore();
+    warnSpy.mockRestore();
+    errorSpy.mockRestore();
+    groupSpy.mockRestore();
+    groupCollapsedSpy.mockRestore();
+    groupEndSpy.mockRestore();
+    tableSpy.mockRestore();
+    vi.restoreAllMocks();
+  });
+
+  it("log, warn, group, groupEnd, table are suppressed in production", async () => {
+    vi.resetModules();
+    vi.stubEnv("DEV", false);
+
+    const { debug: prodDebug } = await import("./debug");
+
+    prodDebug.log("should not appear");
+    prodDebug.warn("should not appear");
+    prodDebug.group("should not appear");
+    prodDebug.group("should not appear", true);
+    prodDebug.groupEnd();
+    prodDebug.table([{ a: 1 }]);
+
+    expect(logSpy).not.toHaveBeenCalled();
+    expect(warnSpy).not.toHaveBeenCalled();
+    expect(groupSpy).not.toHaveBeenCalled();
+    expect(groupCollapsedSpy).not.toHaveBeenCalled();
+    expect(groupEndSpy).not.toHaveBeenCalled();
+    expect(tableSpy).not.toHaveBeenCalled();
+
+    vi.unstubAllEnvs();
+  });
+
+  it("error always fires regardless of isDevelopment", async () => {
+    vi.resetModules();
+    vi.stubEnv("DEV", false);
+
+    const { debug: prodDebug } = await import("./debug");
+
+    prodDebug.error("critical failure");
+
+    expect(errorSpy).toHaveBeenCalledWith("[ERROR] critical failure");
+
+    vi.unstubAllEnvs();
+  });
+
+  it("error sanitizes data even in production", async () => {
+    vi.resetModules();
+    vi.stubEnv("DEV", false);
+
+    const { debug: prodDebug } = await import("./debug");
+
+    prodDebug.error("leak", "ghp_secrettoken123");
+
+    expect(errorSpy).toHaveBeenCalledWith("[ERROR] leak", "[REDACTED]");
+
+    vi.unstubAllEnvs();
+  });
+
+  it("log and warn fire in development mode", () => {
+    // In test environment, import.meta.env.DEV is true
+    debug.log("dev message");
+    debug.warn("dev warning");
+
+    expect(logSpy).toHaveBeenCalledWith("[DEBUG] dev message");
+    expect(warnSpy).toHaveBeenCalledWith("[WARN] dev warning");
+  });
+
+  it("group and groupCollapsed fire in development mode", () => {
+    debug.group("open group");
+    debug.group("collapsed group", true);
+    debug.groupEnd();
+
+    expect(groupSpy).toHaveBeenCalledWith("[DEBUG] open group");
+    expect(groupCollapsedSpy).toHaveBeenCalledWith("[DEBUG] collapsed group");
+    expect(groupEndSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it("table fires in development mode", () => {
+    debug.table([{ x: 1 }]);
+    expect(tableSpy).toHaveBeenCalled();
+  });
+});
