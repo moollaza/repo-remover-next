@@ -1,8 +1,13 @@
+import * as Sentry from "@sentry/react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 import { ErrorBoundary } from "./error-boundary";
+
+vi.mock("@sentry/react", () => ({
+  captureException: vi.fn(),
+}));
 
 // Suppress React error boundary console output in tests
 function renderWithErrorBoundary(ui: React.ReactElement) {
@@ -48,6 +53,22 @@ describe("ErrorBoundary", () => {
 
     expect(screen.getByText("Custom fallback")).toBeInTheDocument();
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
+  it("calls Sentry.captureException with the caught error", () => {
+    const error = new Error("sentry test error");
+    renderWithErrorBoundary(<ThrowingComponent error={error} />);
+
+    expect(Sentry.captureException).toHaveBeenCalledWith(
+      error,
+      expect.objectContaining({
+        contexts: expect.objectContaining({
+          react: expect.objectContaining({
+            componentStack: expect.any(String),
+          }),
+        }),
+      }),
+    );
   });
 
   it("resets error state when Try Again is clicked", async () => {

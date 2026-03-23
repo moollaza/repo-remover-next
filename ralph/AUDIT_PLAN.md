@@ -1029,10 +1029,11 @@ Unit tests for untested modules and critical paths.
   - Test type: unit
   - Fix applied: Added 13 tests in analytics.test.ts covering: dev mode logging (no trackEvent called), dev mode value logging (including value=0), prod mode trackEvent with/without \_value, prod mode error swallowing via debug.warn, and all 6 convenience methods (trackArchiveActionSubmitted, trackDeleteActionSubmitted, trackGetStartedClick, trackRepoArchived, trackRepoDeleted, trackTokenValidated).
 
-- [ ] **[TEST-062] severity:high** — Zero tests for `error-boundary.tsx`
+- [x] **[TEST-062] severity:high** — Zero tests for `error-boundary.tsx`
 
   - What to test: (1) renders children when no error; (2) renders default fallback when child throws; (3) "Try Again" button resets the error state and re-renders children; (4) custom `fallback` prop is rendered instead of default UI when provided; (5) `Sentry.captureException` is called with the caught error (mock Sentry)
   - Test type: unit
+  - Fix applied: Tests (1)-(4) already existed. Added test (5) — verifies Sentry.captureException called with error and componentStack context.
 
 - [ ] **[TEST-063] severity:low** — `orgsTotal === 0` edge case untested
 
