@@ -1036,7 +1036,7 @@ Unit tests for untested modules and critical paths.
   - Test type: unit
   - Fix applied: Tests (1)-(4) already existed. Added test (5) — verifies Sentry.captureException called with error and componentStack context.
 
-- [ ] **[TEST-063] severity:low** — `orgsTotal === 0` edge case untested
+- [x] **[TEST-063] severity:low** — `orgsTotal === 0` edge case untested
 
   - What to test: When a user has no organizations, `totalSteps = 1` and `currentStep = 1` during "personal" stage — progress bar shows 100% while still loading. Verify the component renders correctly and percentage is clamped/displayed sensibly.
   - Test type: unit
