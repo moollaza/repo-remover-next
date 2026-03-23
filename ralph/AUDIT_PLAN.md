@@ -984,10 +984,11 @@ Unit tests for untested modules and critical paths.
   - What to test: Open dropdown, simulate `mousedown` outside `dropdownRef`, assert dropdown is gone. The click-outside handler at `:109-125` has no test coverage.
   - Test type: unit
 
-- [ ] **[TEST-054] severity:medium** — Authenticated landing page shows "Go to Dashboard" link — untested
+- [x] **[TEST-054] severity:medium** — Authenticated landing page shows "Go to Dashboard" link — untested
 
   - What to test: Mock `useGitHubData` to return `isAuthenticated: true` with `pathname: "/"`, and assert a link with text "Go to Dashboard" pointing to `/dashboard` is visible. The current test only checks the unauthenticated (no link) case.
   - Test type: unit
+  - Fix applied: Added test in header.test.tsx verifying authenticated user on landing page sees "Go to Dashboard" button with href="/dashboard".
 
 - [ ] **[TEST-055] severity:medium** — `TokenFormSection` has zero tests
 

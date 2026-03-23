@@ -127,6 +127,17 @@ describe("Header", () => {
       ).not.toBeInTheDocument();
     });
 
+    it("shows Go to Dashboard link when authenticated on landing page", () => {
+      setupDefaultContext({ isAuthenticated: true, pat: "ghp_test" });
+      render(<Header />);
+
+      const dashboardLink = screen.getByRole("button", {
+        name: /go to dashboard/i,
+      });
+      expect(dashboardLink).toBeInTheDocument();
+      expect(dashboardLink).toHaveAttribute("href", "/dashboard");
+    });
+
     it("shows theme switcher", () => {
       render(<Header />);
 
@@ -236,6 +247,42 @@ describe("Header", () => {
       expect(localStorageClearSpy).not.toHaveBeenCalled();
 
       localStorageClearSpy.mockRestore();
+    });
+
+    it("redirects to home page via full reload after logout", async () => {
+      const { mockLogout } = setupDashboardWithAuth();
+      const user = userEvent.setup();
+
+      // Mock window.location to intercept href assignment
+      const originalLocation = window.location;
+      const mockLocation = { ...originalLocation, href: "/dashboard" };
+      Object.defineProperty(window, "location", {
+        configurable: true,
+        value: mockLocation,
+        writable: true,
+      });
+
+      render(<Header />);
+
+      // Open the dropdown menu
+      const trigger = screen.getByRole("button", {
+        name: /user menu for test user/i,
+      });
+      await user.click(trigger);
+
+      // Click logout
+      const logoutButton = await screen.findByText("Log Out");
+      await user.click(logoutButton);
+
+      expect(mockLogout).toHaveBeenCalledOnce();
+      expect(mockLocation.href).toBe("/");
+
+      // Restore original window.location
+      Object.defineProperty(window, "location", {
+        configurable: true,
+        value: originalLocation,
+        writable: true,
+      });
     });
   });
 });
