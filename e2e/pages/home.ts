@@ -4,7 +4,6 @@ import { expect, type Locator, type Page } from "@playwright/test";
 import { BasePage } from "./base-page";
 
 export class HomePage extends BasePage {
-  readonly rememberCheckbox: Locator;
   readonly tokenForm: Locator;
   readonly tokenFormError: Locator;
   readonly tokenFormHelp: Locator;
@@ -17,7 +16,6 @@ export class HomePage extends BasePage {
     this.tokenForm = page.getByTestId("github-token-form");
     this.tokenFormInput = page.getByTestId("github-token-input");
     this.tokenFormSubmit = page.getByTestId("github-token-submit");
-    this.rememberCheckbox = page.getByTestId("github-token-remember");
     this.tokenFormError = this.tokenForm.locator('[data-slot="error-message"]');
     this.tokenFormHelp = this.tokenForm.locator('[data-slot="helper-wrapper"]');
     this.tokenFormSuccess = this.tokenForm.locator('[data-slot="description"]');
@@ -65,9 +63,5 @@ export class HomePage extends BasePage {
 
   async submit() {
     await this.tokenFormSubmit.click();
-  }
-
-  async toggleRememberMe() {
-    await this.rememberCheckbox.click();
   }
 }

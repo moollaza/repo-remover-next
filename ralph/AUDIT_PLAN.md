@@ -1082,11 +1082,11 @@ Unit tests for untested modules and critical paths.
 
 E2E test fixes, deduplication, and new E2E coverage.
 
-- [ ] **[BUG-073] severity:medium** — Skipped test in `home.spec.ts` (line 66) references `home.rememberCheckbox` and `home.toggleRememberMe()` — neither exists on `HomePage`
+- [x] **[BUG-073] severity:medium** — Skipped test in `home.spec.ts` (line 66) references `home.rememberCheckbox` and `home.toggleRememberMe()` — neither exists on `HomePage`
 
   - File: `e2e/home.spec.ts:68,71` / `e2e/pages/home.ts`
   - Impact: The test is currently `test.skip(...)`. The moment it is un-skipped (e.g., after BUG-034 is fixed), it will immediately throw `TypeError: Cannot read properties of undefined` on line 68 before any test logic runs. TypeScript would also flag these as type errors, but CI has no `tsc --noEmit` step (BUG-069) and ESLint ignores test files (SIMP-034), so neither catch this automatically.
-  - Fix: Add `readonly rememberCheckbox: Locator` and `async toggleRememberMe()` to `HomePage`, or remove the skipped test if remember-me is being dropped.
+  - Fix: Removed the skipped test and the dead `rememberCheckbox`/`toggleRememberMe()` members from `HomePage`, since BUG-034 already removed the remember-me checkbox from the component.
 
 - [ ] **[BUG-070] severity:medium** — E2E job has no `GITHUB_TEST_TOKEN` secret — tests that need a real token silently skip or partially pass
 
