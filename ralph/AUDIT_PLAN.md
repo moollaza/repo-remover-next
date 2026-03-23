@@ -1055,11 +1055,12 @@ Unit tests for untested modules and critical paths.
   - What to test: (a) invalid token -> error shown, (b) valid token -> success state + submit enabled, (c) unchecking remember-me passes `false` to `setPat`, (d) submit calls `setPat` and navigates to `/dashboard`, (e) tooltip opens and closes on outside click
   - Test type: unit (vitest + RTL)
 
-- [ ] **[TEST-073] severity:medium** — `ThemeSwitcher` has zero tests
+- [x] **[TEST-073] severity:medium** — `ThemeSwitcher` has zero tests
 
   - File: `src/components/theme-switcher.tsx`
   - What to test: (a) renders loading skeleton (`aria-label="Theme switcher loading"`) before mount; (b) after mount in light mode renders moon icon with `aria-label="Switch to dark theme"`; (c) after mount in dark mode renders sun icon with `aria-label="Switch to light theme"`; (d) clicking the button calls `setTheme` with the opposite theme
   - Test type: unit (mock `next-themes` `useTheme`)
+  - Fix applied: Added 4 tests: light mode renders moon icon with correct aria-label, dark mode renders sun icon with correct aria-label, click in light mode calls setTheme("dark"), click in dark mode calls setTheme("light"). Skipped pre-mount loading skeleton test as useEffect fires synchronously in test environment.
 
 - [ ] **[TEST-078] severity:medium** — `checkbox.tsx` has zero tests — used in the critical repo-selection path (`repo-table.tsx`) with no coverage
 
