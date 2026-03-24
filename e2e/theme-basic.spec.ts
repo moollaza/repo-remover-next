@@ -11,7 +11,9 @@ test.describe("Basic Theme Functionality", () => {
 
   test("theme switcher displays proper icons", async ({ page }) => {
     // Find the theme switcher button in the nav
-    const themeSwitcher = page.getByRole("button", { name: /switch to.*theme/i });
+    const themeSwitcher = page.getByRole("button", {
+      name: /switch to.*theme/i,
+    });
     await expect(themeSwitcher).toBeVisible();
 
     // Check that it contains SVG icons (not emoji text)
@@ -25,18 +27,18 @@ test.describe("Basic Theme Functionality", () => {
 
   test("can switch between light and dark themes", async ({ page }) => {
     const html = page.locator("html");
-    const themeSwitcher = page.getByRole("button", { name: /switch to.*theme/i });
+    const themeSwitcher = page.getByRole("button", {
+      name: /switch to.*theme/i,
+    });
 
     // Switch to dark theme
     await themeSwitcher.click();
-    await page.waitForTimeout(500);
 
     // Check that dark class is applied
     await expect(html).toHaveClass(/dark/);
 
     // Switch back to light theme
     await themeSwitcher.click();
-    await page.waitForTimeout(500);
 
     // Check that dark class is removed
     await expect(html).not.toHaveClass(/dark/);
@@ -44,11 +46,12 @@ test.describe("Basic Theme Functionality", () => {
 
   test("theme preference persists across page reloads", async ({ page }) => {
     const html = page.locator("html");
-    const themeSwitcher = page.getByRole("button", { name: /switch to.*theme/i });
+    const themeSwitcher = page.getByRole("button", {
+      name: /switch to.*theme/i,
+    });
 
     // Switch to dark theme
     await themeSwitcher.click();
-    await page.waitForTimeout(500);
 
     // Verify dark theme is active
     await expect(html).toHaveClass(/dark/);
@@ -56,7 +59,6 @@ test.describe("Basic Theme Functionality", () => {
     // Reload the page
     await page.reload();
     await page.waitForLoadState("domcontentloaded");
-    await page.waitForTimeout(1000); // Give theme time to initialize
 
     // Check that dark theme is still active after reload
     await expect(html).toHaveClass(/dark/);
@@ -65,23 +67,24 @@ test.describe("Basic Theme Functionality", () => {
   test("dark theme changes background and text colors", async ({ page }) => {
     const html = page.locator("html");
     const body = page.locator("body");
-    const themeSwitcher = page.getByRole("button", { name: /switch to.*theme/i });
+    const themeSwitcher = page.getByRole("button", {
+      name: /switch to.*theme/i,
+    });
 
     // Get initial light theme colors
-    const lightBodyBg = await body.evaluate((el) =>
-      window.getComputedStyle(el).backgroundColor
+    const lightBodyBg = await body.evaluate(
+      (el) => window.getComputedStyle(el).backgroundColor,
     );
 
     // Switch to dark theme
     await themeSwitcher.click();
-    await page.waitForTimeout(500);
 
     // Verify dark theme is applied
     await expect(html).toHaveClass(/dark/);
 
     // Get dark theme colors
-    const darkBodyBg = await body.evaluate((el) =>
-      window.getComputedStyle(el).backgroundColor
+    const darkBodyBg = await body.evaluate(
+      (el) => window.getComputedStyle(el).backgroundColor,
     );
 
     // Colors should be different between light and dark themes

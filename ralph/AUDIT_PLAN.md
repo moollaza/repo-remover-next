@@ -1105,7 +1105,7 @@ E2E test fixes, deduplication, and new E2E coverage.
   - Fix: Delete the three duplicate tests from `theme.spec.ts` and keep only the two tests that genuinely need dashboard context (contrast check, keyboard shortcuts).
   - **VERIFIED**: Already fixed by BUG-074 — `theme.spec.ts` already contains only the two unique tests (contrast, keyboard shortcuts). No duplicates exist.
 
-- [ ] **[SIMP-038] severity:low** — `page.waitForTimeout(500)` / `page.waitForTimeout(1000)` used 7 times across theme test files instead of deterministic waits
+- [x] **[SIMP-038] severity:low** — `page.waitForTimeout(500)` / `page.waitForTimeout(1000)` used 7 times across theme test files instead of deterministic waits
 
   - Files: `e2e/theme.spec.ts:43,59,69,94,149` / `e2e/theme-basic.spec.ts:32,39,52,59`
   - Detail: Arbitrary `waitForTimeout` calls are a Playwright anti-pattern: too short on slow CI agents -> flaky failures; too long on fast machines -> wasted time. Theme class application is synchronous (`next-themes` adds the class synchronously on click), so a deterministic wait can be used instead.

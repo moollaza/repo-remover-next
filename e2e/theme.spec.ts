@@ -25,7 +25,6 @@ test.describe("Theme Functionality", () => {
       name: /switch to.*theme/i,
     });
     await themeSwitcher.click();
-    await page.waitForTimeout(500);
 
     // Wait for dark theme to be applied
     const html = page.locator("html");
@@ -83,7 +82,7 @@ test.describe("Theme Functionality", () => {
       name: /switch to.*theme/i,
     });
     await themeSwitcher.click();
-    await page.waitForTimeout(500);
+    await expect(page.locator("html")).toHaveClass(/dark/);
 
     // Test keyboard shortcut still works in dark theme
     await expect(searchInput).not.toBeFocused();
