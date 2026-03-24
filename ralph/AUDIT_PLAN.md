@@ -1073,10 +1073,11 @@ Unit tests for untested modules and critical paths.
   - What to test: (a) renders unchecked by default with correct border color; (b) renders checked with `data-checked` attribute and brand-blue background; (c) `disabled` prop applies `disabled:cursor-not-allowed disabled:opacity-50` classes; (d) `CheckIcon` is visible when checked and absent when unchecked (base-ui `Indicator` hides children when unchecked); (e) focus ring appears on keyboard focus with brand-blue color
   - Test type: unit (vitest + RTL)
 
-- [ ] **[TEST-079] severity:high** — Sentry `beforeSend` token-scrubbing logic has zero tests — this is the critical privacy barrier preventing GitHub PATs from leaking into error reports
+- [x] **[TEST-079] severity:high** — Sentry `beforeSend` token-scrubbing logic has zero tests — this is the critical privacy barrier preventing GitHub PATs from leaking into error reports
   - File: `src/main.tsx:13-67`
   - What to test: (a) token in `event.message` is scrubbed; (b) token in `exception.value` is scrubbed; (c) token in `exception.stacktrace.frames[].vars` is scrubbed; (d) token in `breadcrumb.message` is scrubbed; (e) token in `breadcrumb.data` values is scrubbed; (f) `event.user.ip_address` is deleted; (g) `event.request.headers.Authorization` is deleted; (h) the full event is returned (not null) after scrubbing; (i) `Sentry.init` is NOT called when `VITE_SENTRY_DSN` is not set. Since `beforeSend` is an inline function, extract it to a named export to enable unit testing without mocking Sentry internals.
   - Test type: unit
+  - Fix applied: Extracted `sentryBeforeSend` to `src/utils/sentry-before-send.ts` to avoid side-effect imports from `main.tsx`. Added 11 tests in `src/sentry-before-send.test.ts` covering (a)-(h) plus edge cases (empty fields, empty arrays). Item (i) is a module-level side effect test — the guard is straightforward (`if (SENTRY_DSN && import.meta.env.PROD)`) and not worth fragile module-mocking.
 
 ---
 
