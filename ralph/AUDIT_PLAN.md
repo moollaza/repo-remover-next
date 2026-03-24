@@ -1114,17 +1114,19 @@ E2E test fixes, deduplication, and new E2E coverage.
   - Detail: Arbitrary `waitForTimeout` calls are a Playwright anti-pattern: too short on slow CI agents -> flaky failures; too long on fast machines -> wasted time. Theme class application is synchronous (`next-themes` adds the class synchronously on click), so a deterministic wait can be used instead.
   - Fix: Replace `await page.waitForTimeout(500)` after each theme toggle with `await expect(html).toHaveClass(/dark/)` (for switch-to-dark) or `await expect(html).not.toHaveClass(/dark/)` (for switch-to-light). These Playwright auto-retry until the condition is met.
 
-- [ ] **[TEST-080] severity:medium** — No E2E test for the "Stop" button during active repository processing
+- [!] **[TEST-080] severity:medium** — No E2E test for the "Stop" button during active repository processing
 
   - File: `e2e/dashboard.spec.ts` — "shows progress during repository processing" reaches the progress modal but never clicks Stop
   - What to test: While processing is in-flight (use a delayed mock, e.g., `mockArchiveRepo(page, name, { delay: 2000 })`), click the Stop button; assert modal transitions to result mode with a "stopped" or "partial" message; verify no further API calls are made after stop.
   - Test type: E2E
+  - **MOOT**: No "Stop" button exists in the current codebase. The stop/abort feature was removed during refactoring (confirmed by TEST-014). The confirmation modal has no stop/abort/cancel mechanism during progress mode. Nothing to test.
 
-- [ ] **[TEST-081] severity:medium** — No E2E test for 401 cascade during processing (matching unit TEST-015)
+- [!] **[TEST-081] severity:medium** — No E2E test for 401 cascade during processing (matching unit TEST-015)
 
   - File: `e2e/dashboard.spec.ts` — error test only covers 403; 401 triggers a different code path (early-stop cascade)
   - What to test: Mock archive/delete endpoint to return 401; confirm action; assert modal shows auth error and stops processing all subsequent repos; verify user is prompted to re-authenticate or the session is cleared.
   - Test type: E2E
+  - **MOOT**: No 401 early-stop cascade exists in the current codebase. The 401 break was removed during refactoring (confirmed by TEST-015). The current handleConfirm loop treats all errors equally — they are added to the error list and processing continues. Nothing distinct to test for 401 vs other errors.
 
 - [x] **[TEST-082] severity:medium** — No E2E test for authentication redirect behavior
 
@@ -1132,6 +1134,7 @@ E2E test fixes, deduplication, and new E2E coverage.
   - Test type: E2E
   - Fix applied: Added `e2e/auth-redirect.spec.ts` with 2 tests: (a) unauthenticated user at /dashboard redirected to /, (b) authenticated user stays on /dashboard with content visible. Note: case (b) from the audit — "authenticated user at / redirected to /dashboard" — is NOT implemented in the app (home route renders regardless of auth state), so no test needed for it.
 
-- [ ] **[TEST-084] severity:low** — No E2E test for GitHub API rate limit handling
+- [x] **[TEST-084] severity:low** — No E2E test for GitHub API rate limit handling
   - What to test: Mock the GitHub GraphQL endpoint to return `{ errors: [{ type: "RATE_LIMITED", message: "..." }] }` with a `Retry-After` header; assert the app shows an informative error state rather than an empty table or a crash.
   - Test type: E2E
+  - Fix applied: Added `e2e/rate-limit.spec.ts` with 1 test: logs in via home page, mocks GraphQL to return rate limit error, navigates to dashboard, asserts error alert "Error loading repositories" is visible (not crash or empty table). Uses login flow instead of `mockLocalStorage` to work with encrypted storage in dev mode.
