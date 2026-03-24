@@ -91,7 +91,7 @@ export default function ConfirmationModal({
   // Get the PAT from the new provider
   const { mutate, pat } = useGitHubData();
 
-  // Memoize Octokit so rate-limit state persists across re-renders (BUG-011)
+  // Memoize Octokit so rate-limit state persists across re-renders
   const octokit = useMemo(
     () => (pat ? createThrottledOctokit(pat) : null),
     [pat],
@@ -175,7 +175,7 @@ export default function ConfirmationModal({
   }
 
   function handleOnClose() {
-    // Only refetch GitHub data if operations actually ran (BUG-013)
+    // Only refetch GitHub data if operations actually ran
     if (state.mode === "result") {
       void mutate();
     }

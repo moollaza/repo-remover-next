@@ -445,7 +445,7 @@ describe("RepoTable", () => {
     });
   });
 
-  describe("window.repos dev guard (BUG-023 / TEST-034)", () => {
+  describe("window.repos dev guard", () => {
     test("does not expose repos on window in production mode", () => {
       const originalDev = import.meta.env.DEV;
       import.meta.env.DEV = false;

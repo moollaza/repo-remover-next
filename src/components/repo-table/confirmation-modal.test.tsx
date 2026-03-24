@@ -165,7 +165,7 @@ describe("ConfirmationModal", () => {
     expect(processRepo).toHaveBeenCalledTimes(2);
   });
 
-  it("shows correct success count on result screen (BUG-030: processedCount, not total)", async () => {
+  it("shows correct success count on result screen (processedCount, not total)", async () => {
     vi.mocked(processRepo).mockReset();
     // First repo succeeds, second repo fails
     vi.mocked(processRepo)
@@ -188,7 +188,7 @@ describe("ConfirmationModal", () => {
     await vi.advanceTimersByTimeAsync(10000);
 
     // Result screen should show: 1 success out of 2 processed
-    // BUG-030: previously showed "count - errorCount" using repos.length as count
+    // Previously showed "count - errorCount" using repos.length as count
     // which would be wrong if processing was stopped early (skipped repos counted as successes)
     expect(screen.getByTestId("result-modal-header")).toBeInTheDocument();
     expect(
@@ -197,7 +197,7 @@ describe("ConfirmationModal", () => {
     expect(screen.getByText(/1 error/)).toBeInTheDocument();
   });
 
-  it("renders repo list as <ul> not <ol> for bullet-styled lists (BUG-027)", () => {
+  it("renders repo list as <ul> not <ol> for bullet-styled lists", () => {
     render(
       <GitHubContext.Provider value={mockContextValue}>
         <ConfirmationModal {...mockProps} />
@@ -217,7 +217,7 @@ describe("ConfirmationModal", () => {
     expect(orderedLists.length).toBe(0);
   });
 
-  it("does not call mutate when cancelling without processing (BUG-013)", () => {
+  it("does not call mutate when cancelling without processing", () => {
     render(
       <GitHubContext.Provider value={mockContextValue}>
         <ConfirmationModal {...mockProps} />
@@ -235,7 +235,7 @@ describe("ConfirmationModal", () => {
     expect(mockProps.onClose).toHaveBeenCalled();
   });
 
-  it("memoizes octokit instance — does not recreate on re-render (BUG-011)", () => {
+  it("memoizes octokit instance — does not recreate on re-render", () => {
     vi.mocked(createThrottledOctokit).mockClear();
 
     const { rerender } = render(
@@ -258,7 +258,7 @@ describe("ConfirmationModal", () => {
     expect(createThrottledOctokit).toHaveBeenCalledTimes(1);
   });
 
-  it("fires trackArchiveActionSubmitted on archive confirm (TEST-016)", async () => {
+  it("fires trackArchiveActionSubmitted on archive confirm", async () => {
     vi.mocked(processRepo).mockReset();
     vi.mocked(processRepo).mockResolvedValue(undefined);
 
@@ -279,7 +279,7 @@ describe("ConfirmationModal", () => {
     expect(analytics.trackDeleteActionSubmitted).not.toHaveBeenCalled();
   });
 
-  it("fires trackDeleteActionSubmitted on delete confirm (TEST-016)", async () => {
+  it("fires trackDeleteActionSubmitted on delete confirm", async () => {
     vi.mocked(processRepo).mockReset();
     vi.mocked(processRepo).mockResolvedValue(undefined);
 
@@ -300,7 +300,7 @@ describe("ConfirmationModal", () => {
     expect(analytics.trackArchiveActionSubmitted).not.toHaveBeenCalled();
   });
 
-  it("calls mutate and onClose when closing from result screen (TEST-017)", async () => {
+  it("calls mutate and onClose when closing from result screen", async () => {
     vi.mocked(processRepo).mockReset();
     vi.mocked(processRepo).mockResolvedValue(undefined);
 
@@ -331,7 +331,7 @@ describe("ConfirmationModal", () => {
     expect(mockProps.onClose).toHaveBeenCalledTimes(1);
   });
 
-  it("resets state to initial after closing from result screen (TEST-017)", async () => {
+  it("resets state to initial after closing from result screen", async () => {
     vi.mocked(processRepo).mockReset();
     vi.mocked(processRepo).mockResolvedValue(undefined);
 
@@ -371,7 +371,7 @@ describe("ConfirmationModal", () => {
     expect(screen.getByTestId("confirmation-modal-confirm")).toBeDisabled();
   });
 
-  it("resets state and calls onClose when cancelling from confirmation screen (TEST-017)", () => {
+  it("resets state and calls onClose when cancelling from confirmation screen", () => {
     render(
       <GitHubContext.Provider value={mockContextValue}>
         <ConfirmationModal {...mockProps} />
@@ -393,7 +393,7 @@ describe("ConfirmationModal", () => {
     expect(mockProps.onClose).toHaveBeenCalledTimes(1);
   });
 
-  it("closes modal when Escape is pressed in confirmation mode (TEST-035)", () => {
+  it("closes modal when Escape is pressed in confirmation mode", () => {
     render(
       <GitHubContext.Provider value={mockContextValue}>
         <ConfirmationModal {...mockProps} />
@@ -411,7 +411,7 @@ describe("ConfirmationModal", () => {
     expect(mockProps.onClose).toHaveBeenCalledTimes(1);
   });
 
-  it("does NOT close modal when Escape is pressed in progress mode (TEST-035)", async () => {
+  it("does NOT close modal when Escape is pressed in progress mode", async () => {
     vi.mocked(processRepo).mockReset();
     // Use a long-running mock so we stay in progress mode
     vi.mocked(processRepo).mockImplementation(
@@ -445,7 +445,7 @@ describe("ConfirmationModal", () => {
     await vi.advanceTimersByTimeAsync(30000);
   });
 
-  it("does NOT close modal when Escape is pressed in result mode (TEST-035)", async () => {
+  it("does NOT close modal when Escape is pressed in result mode", async () => {
     vi.mocked(processRepo).mockReset();
     vi.mocked(processRepo).mockResolvedValue(undefined);
 
@@ -473,7 +473,7 @@ describe("ConfirmationModal", () => {
     expect(mockProps.onClose).not.toHaveBeenCalled();
   });
 
-  it("closes modal when backdrop is clicked in confirmation mode (TEST-036)", () => {
+  it("closes modal when backdrop is clicked in confirmation mode", () => {
     render(
       <GitHubContext.Provider value={mockContextValue}>
         <ConfirmationModal {...mockProps} />
@@ -492,7 +492,7 @@ describe("ConfirmationModal", () => {
     expect(mockProps.onClose).toHaveBeenCalledTimes(1);
   });
 
-  it("does NOT close modal when backdrop is clicked in progress mode (TEST-036)", async () => {
+  it("does NOT close modal when backdrop is clicked in progress mode", async () => {
     vi.mocked(processRepo).mockReset();
     vi.mocked(processRepo).mockImplementation(
       () => new Promise((resolve) => setTimeout(resolve, 5000)),
@@ -526,7 +526,7 @@ describe("ConfirmationModal", () => {
     await vi.advanceTimersByTimeAsync(30000);
   });
 
-  it("does NOT close modal when clicking inside modal content (TEST-036)", () => {
+  it("does NOT close modal when clicking inside modal content", () => {
     render(
       <GitHubContext.Provider value={mockContextValue}>
         <ConfirmationModal {...mockProps} />
@@ -546,7 +546,7 @@ describe("ConfirmationModal", () => {
     expect(mockProps.onClose).not.toHaveBeenCalled();
   });
 
-  it("does not fire analytics when octokit is null (TEST-016)", async () => {
+  it("does not fire analytics when octokit is null", async () => {
     const noPatContext: GitHubContextType = {
       ...mockContextValue,
       pat: null,

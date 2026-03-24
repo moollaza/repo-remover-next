@@ -125,7 +125,7 @@ export default function RepoTable({
       const newAction = keys as SelectionSet;
       setSelectedRepoAction(newAction);
 
-      // BUG-015: When switching to "archive", remove archived repos from selection
+      // When switching to "archive", remove archived repos from selection
       // since they become disabled and shouldn't remain selected
       if (newAction.has("archive") && repos) {
         const archivedIds = new Set(

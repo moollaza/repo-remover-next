@@ -104,7 +104,7 @@ describe("secureStorage", () => {
       expect(result).toBe("ghp_test456");
     });
 
-    it("returns null and clears storage when decryption fails (BUG-022)", async () => {
+    it("returns null and clears storage when decryption fails", async () => {
       // Switch to production mode so real encryption is used
       vi.stubEnv("MODE", "production");
 
@@ -122,7 +122,7 @@ describe("secureStorage", () => {
       expect(localStorage.getItem("secure_pat")).toBeNull();
     });
 
-    it("returns null and clears key when fingerprint changes (TEST-027)", async () => {
+    it("returns null and clears key when fingerprint changes", async () => {
       vi.stubEnv("MODE", "production");
 
       // Store a value encrypted with the current fingerprint
@@ -142,7 +142,7 @@ describe("secureStorage", () => {
       expect(localStorage.getItem("secure_pat")).toBeNull();
     });
 
-    it("returns null when screen dimensions change (fingerprint instability — TEST-031)", async () => {
+    it("returns null when screen dimensions change (fingerprint instability)", async () => {
       vi.stubEnv("MODE", "production");
 
       await secureStorage.setItem("pat", "ghp_screen_test");
