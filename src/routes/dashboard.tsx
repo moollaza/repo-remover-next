@@ -31,9 +31,9 @@ export function Dashboard() {
     if (!isInitialized) return;
 
     if (!pat) {
-      navigate("/");
+      void navigate("/");
     } else {
-      refetchData();
+      void refetchData();
     }
   }, [pat, navigate, refetchData, isInitialized]);
 

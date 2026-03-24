@@ -17,7 +17,7 @@ export function Providers({ children, themeProps }: ProvidersProps) {
   const navigate = useNavigate();
 
   return (
-    <HeroUIProvider navigate={(url) => navigate(url)}>
+    <HeroUIProvider navigate={(url) => void navigate(url)}>
       <NextThemesProvider {...themeProps}>
         <GitHubDataProvider>{children}</GitHubDataProvider>
       </NextThemesProvider>
