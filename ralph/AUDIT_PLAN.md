@@ -974,10 +974,11 @@ Unit tests for untested modules and critical paths.
   - Test type: unit
   - Fix applied: Already covered by 2 existing tests in header.test.tsx Logout describe block: (1) verifies context `logout()` is called and localStorage.clear is NOT called directly, (2) verifies `window.location.href` is set to "/" after logout. Header delegates to context `logout()` per BUG-039 fix, so `secureStorage.removeItem` testing belongs in provider tests.
 
-- [ ] **[TEST-052] severity:medium** — Dropdown closes on Escape key — untested
+- [x] **[TEST-052] severity:medium** — Dropdown closes on Escape key — untested
 
   - What to test: Open dropdown, press Escape, assert dropdown is gone. The Escape handler at `:128-141` exists but has no coverage.
   - Test type: unit
+  - Fix applied: Added test in header.test.tsx "Dropdown dismissal" describe block verifying Escape key closes the HeroUI dropdown menu.
 
 - [ ] **[TEST-053] severity:medium** — Dropdown closes on outside click — untested
 

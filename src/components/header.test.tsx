@@ -227,6 +227,29 @@ describe("Header", () => {
     });
   });
 
+  describe("Dropdown dismissal", () => {
+    it("closes dropdown when Escape is pressed", async () => {
+      setupDashboardWithAuth();
+      const user = userEvent.setup();
+      render(<Header />);
+
+      const trigger = screen.getByRole("button", {
+        name: /user menu for test user/i,
+      });
+
+      // Open dropdown
+      await user.click(trigger);
+      expect(await screen.findByText("Log Out")).toBeInTheDocument();
+
+      // Press Escape to close
+      await user.keyboard("{Escape}");
+
+      await vi.waitFor(() => {
+        expect(screen.queryByText("Log Out")).not.toBeInTheDocument();
+      });
+    });
+  });
+
   describe("Logout", () => {
     it("calls context logout function instead of directly clearing localStorage", async () => {
       const { mockLogout } = setupDashboardWithAuth();
