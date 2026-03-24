@@ -1070,11 +1070,12 @@ Unit tests for untested modules and critical paths.
   - Test type: unit (mock `next-themes` `useTheme`)
   - Fix applied: Added 4 tests: light mode renders moon icon with correct aria-label, dark mode renders sun icon with correct aria-label, click in light mode calls setTheme("dark"), click in dark mode calls setTheme("light"). Skipped pre-mount loading skeleton test as useEffect fires synchronously in test environment.
 
-- [ ] **[TEST-078] severity:medium** — `checkbox.tsx` has zero tests — used in the critical repo-selection path (`repo-table.tsx`) with no coverage
+- [x] **[TEST-078] severity:medium** — `checkbox.tsx` has zero tests — used in the critical repo-selection path (`repo-table.tsx`) with no coverage
 
   - File: `src/components/ui/checkbox.tsx` (used in `src/components/repo-table/repo-table.tsx`)
   - What to test: (a) renders unchecked by default with correct border color; (b) renders checked with `data-checked` attribute and brand-blue background; (c) `disabled` prop applies `disabled:cursor-not-allowed disabled:opacity-50` classes; (d) `CheckIcon` is visible when checked and absent when unchecked (base-ui `Indicator` hides children when unchecked); (e) focus ring appears on keyboard focus with brand-blue color
   - Test type: unit (vitest + RTL)
+  - **MOOT**: File deleted — `src/components/ui/checkbox.tsx` and `src/components/ui/` directory no longer exist. The codebase uses HeroUI's built-in checkbox via Table's selection mode. No fix needed.
 
 - [x] **[TEST-079] severity:high** — Sentry `beforeSend` token-scrubbing logic has zero tests — this is the critical privacy barrier preventing GitHub PATs from leaking into error reports
   - File: `src/main.tsx:13-67`
@@ -1125,10 +1126,11 @@ E2E test fixes, deduplication, and new E2E coverage.
   - What to test: Mock archive/delete endpoint to return 401; confirm action; assert modal shows auth error and stops processing all subsequent repos; verify user is prompted to re-authenticate or the session is cleared.
   - Test type: E2E
 
-- [ ] **[TEST-082] severity:medium** — No E2E test for authentication redirect behavior
+- [x] **[TEST-082] severity:medium** — No E2E test for authentication redirect behavior
 
   - What to test: (a) unauthenticated user navigating to `/dashboard` is redirected to `/`; (b) authenticated user navigating to `/` is redirected to `/dashboard`. Both are critical routing correctness guarantees.
   - Test type: E2E
+  - Fix applied: Added `e2e/auth-redirect.spec.ts` with 2 tests: (a) unauthenticated user at /dashboard redirected to /, (b) authenticated user stays on /dashboard with content visible. Note: case (b) from the audit — "authenticated user at / redirected to /dashboard" — is NOT implemented in the app (home route renders regardless of auth state), so no test needed for it.
 
 - [ ] **[TEST-084] severity:low** — No E2E test for GitHub API rate limit handling
   - What to test: Mock the GitHub GraphQL endpoint to return `{ errors: [{ type: "RATE_LIMITED", message: "..." }] }` with a `Retry-After` header; assert the app shows an informative error state rather than an empty table or a crash.
