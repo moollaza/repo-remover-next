@@ -980,10 +980,11 @@ Unit tests for untested modules and critical paths.
   - Test type: unit
   - Fix applied: Added test in header.test.tsx "Dropdown dismissal" describe block verifying Escape key closes the HeroUI dropdown menu.
 
-- [ ] **[TEST-053] severity:medium** — Dropdown closes on outside click — untested
+- [x] **[TEST-053] severity:medium** — Dropdown closes on outside click — untested
 
   - What to test: Open dropdown, simulate `mousedown` outside `dropdownRef`, assert dropdown is gone. The click-outside handler at `:109-125` has no test coverage.
   - Test type: unit
+  - Fix applied: Added test in header.test.tsx "Dropdown dismissal" describe block verifying clicking outside (on logo) closes the HeroUI dropdown menu.
 
 - [x] **[TEST-054] severity:medium** — Authenticated landing page shows "Go to Dashboard" link — untested
 
@@ -1097,11 +1098,12 @@ E2E test fixes, deduplication, and new E2E coverage.
   - Impact: `testing.md` states "E2E Tests: Require real GitHub token in `.env.test` file (`GITHUB_TEST_TOKEN`)". The CI job sets no `env:` with this secret. If any E2E test uses the real GitHub API, it either silently skips (matching the "1 skipped" test in the suite) or fails with an auth error that is hidden by `fail-fast: false`. Token-dependent flows are never exercised in CI.
   - Fix: Add `env: GITHUB_TEST_TOKEN: ${{ secrets.GITHUB_TEST_TOKEN }}` to the `Run Playwright tests` step and document the required secret in `README.md`.
 
-- [ ] **[SIMP-037] severity:low** — `theme.spec.ts` and `theme-basic.spec.ts` contain 3 near-identical duplicate tests, doubling CI time for those scenarios
+- [x] **[SIMP-037] severity:low** — `theme.spec.ts` and `theme-basic.spec.ts` contain 3 near-identical duplicate tests, doubling CI time for those scenarios
 
   - Files: `e2e/theme.spec.ts:18-43,65-82` / `e2e/theme-basic.spec.ts:12-43,45-63`
   - Detail: "theme switcher displays proper icons", "can switch between light and dark themes", and "theme preference persists across page reloads" are virtually identical in both files, with the only difference being that `theme.spec.ts` uses `/dashboard` (implicitly redirected) and `theme-basic.spec.ts` uses `/`. The unique tests in `theme.spec.ts` ("dark theme has proper contrast" and "keyboard shortcuts work in both themes") are worth keeping; the duplicates are not.
   - Fix: Delete the three duplicate tests from `theme.spec.ts` and keep only the two tests that genuinely need dashboard context (contrast check, keyboard shortcuts).
+  - **VERIFIED**: Already fixed by BUG-074 — `theme.spec.ts` already contains only the two unique tests (contrast, keyboard shortcuts). No duplicates exist.
 
 - [ ] **[SIMP-038] severity:low** — `page.waitForTimeout(500)` / `page.waitForTimeout(1000)` used 7 times across theme test files instead of deterministic waits
 

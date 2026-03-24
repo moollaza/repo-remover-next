@@ -248,6 +248,27 @@ describe("Header", () => {
         expect(screen.queryByText("Log Out")).not.toBeInTheDocument();
       });
     });
+
+    it("closes dropdown when clicking outside", async () => {
+      setupDashboardWithAuth();
+      const user = userEvent.setup();
+      render(<Header />);
+
+      const trigger = screen.getByRole("button", {
+        name: /user menu for test user/i,
+      });
+
+      // Open dropdown
+      await user.click(trigger);
+      expect(await screen.findByText("Log Out")).toBeInTheDocument();
+
+      // Click outside the dropdown (on the logo)
+      await user.click(screen.getByText("Repo Remover"));
+
+      await vi.waitFor(() => {
+        expect(screen.queryByText("Log Out")).not.toBeInTheDocument();
+      });
+    });
   });
 
   describe("Logout", () => {
