@@ -992,10 +992,11 @@ Unit tests for untested modules and critical paths.
   - Test type: unit
   - Fix applied: Added test in header.test.tsx verifying authenticated user on landing page sees "Go to Dashboard" button with href="/dashboard".
 
-- [ ] **[TEST-055] severity:medium** — `TokenFormSection` has zero tests
+- [x] **[TEST-055] severity:medium** — `TokenFormSection` has zero tests
 
   - What to test: (1) `handleSubmit` calls `setPat` with the token, fires `analytics.trackTokenValidated()`, and navigates to `/dashboard`; (2) dev token pre-population: when `import.meta.env.DEV` is true and `VITE_GITHUB_DEV_TOKEN` is set, the input is pre-populated; (3) `onValueChange` propagates correctly to keep `value` state in sync
   - Test type: unit
+  - Fix applied: Added 5 tests: renders form, handleSubmit calls setPat and navigates to /dashboard, value syncs via onValueChange, dev token pre-population, empty input when no dev token set. Note: analytics.trackTokenValidated() is no longer called from TokenFormSection (moved per BUG-040).
 
 - [ ] **[TEST-056] severity:medium** — `Dashboard` route has zero tests
 
