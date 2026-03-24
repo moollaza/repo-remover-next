@@ -1092,7 +1092,7 @@ E2E test fixes, deduplication, and new E2E coverage.
   - Impact: The test is currently `test.skip(...)`. The moment it is un-skipped (e.g., after BUG-034 is fixed), it will immediately throw `TypeError: Cannot read properties of undefined` on line 68 before any test logic runs. TypeScript would also flag these as type errors, but CI has no `tsc --noEmit` step (BUG-069) and ESLint ignores test files (SIMP-034), so neither catch this automatically.
   - Fix: Removed the skipped test and the dead `rememberCheckbox`/`toggleRememberMe()` members from `HomePage`, since BUG-034 already removed the remember-me checkbox from the component.
 
-- [ ] **[BUG-070] severity:medium** — E2E job has no `GITHUB_TEST_TOKEN` secret — tests that need a real token silently skip or partially pass
+- [x] **[BUG-070] severity:medium** — E2E job has no `GITHUB_TEST_TOKEN` secret — tests that need a real token silently skip or partially pass
 
   - File: `.github/workflows/ci.yml:60-61` (Playwright test step)
   - Impact: `testing.md` states "E2E Tests: Require real GitHub token in `.env.test` file (`GITHUB_TEST_TOKEN`)". The CI job sets no `env:` with this secret. If any E2E test uses the real GitHub API, it either silently skips (matching the "1 skipped" test in the suite) or fails with an auth error that is hidden by `fail-fast: false`. Token-dependent flows are never exercised in CI.

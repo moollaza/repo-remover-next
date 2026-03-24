@@ -3,6 +3,7 @@
 ## Try it now at https://next.reporemover.xyz
 
 ✅ **Production Ready** - The application is now fully production-ready with:
+
 - Privacy-first analytics and error monitoring
 - Zero-knowledge security architecture
 - Comprehensive testing coverage
@@ -113,3 +114,9 @@ When writing tests that involve the GitHub API:
    - Require a valid GitHub token in the environment
    - Test real API interactions
    - Handle rate limiting and other API constraints
+
+#### CI Secrets
+
+The CI workflow requires the following repository secret for E2E tests:
+
+- `GITHUB_TEST_TOKEN` — A GitHub Personal Access Token with `repo` and `delete_repo` scopes, used by Playwright E2E tests that exercise real API calls

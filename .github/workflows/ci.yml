@@ -58,6 +58,8 @@ jobs:
         run: bunx playwright install --with-deps
       - name: Run Playwright tests
         run: bunx playwright test --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
+        env:
+          GITHUB_TEST_TOKEN: ${{ secrets.GITHUB_TEST_TOKEN }}
       - name: Upload Playwright report
         if: always()
         uses: actions/upload-artifact@v4
