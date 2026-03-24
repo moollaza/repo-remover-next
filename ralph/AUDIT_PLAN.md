@@ -998,10 +998,11 @@ Unit tests for untested modules and critical paths.
   - Test type: unit
   - Fix applied: Added 5 tests: renders form, handleSubmit calls setPat and navigates to /dashboard, value syncs via onValueChange, dev token pre-population, empty input when no dev token set. Note: analytics.trackTokenValidated() is no longer called from TokenFormSection (moved per BUG-040).
 
-- [ ] **[TEST-056] severity:medium** — `Dashboard` route has zero tests
+- [x] **[TEST-056] severity:medium** — `Dashboard` route has zero tests
 
   - What to test: (1) unauthenticated redirect: when `isInitialized=true` and `pat=null`, `navigate("/")` is called; (2) no redirect before init: when `isInitialized=false`, even with `pat=null`, no navigation fires; (3) authenticated render: when `pat` is set, `DashboardComponent` is rendered with all props forwarded correctly (`repos`, `isLoading`, `isError`, `login`, `permissionWarning`, `progress`, `onRefresh`); (4) `ErrorBoundary` catches errors thrown by `DashboardComponent` without propagating to the route
   - Test type: unit
+  - Fix applied: Added 8 tests in `src/routes/dashboard.test.tsx`: unauthenticated redirect when initialized, no redirect before init, authenticated render with DashboardComponent, refetchData called on mount, no redirect when authenticated, error state forwarding, permissionWarning forwarding, ErrorBoundary wrapping verification.
 
 - [x] **[TEST-057] severity:low** — `sanitize-tokens.ts` tests do not cover non-standard `ghp_` lengths
 
