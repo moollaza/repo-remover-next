@@ -4,12 +4,13 @@ import { throttling } from "@octokit/plugin-throttling";
 import { Octokit } from "@octokit/rest";
 
 import { analytics } from "@/utils/analytics";
-import { debug } from "@/utils/debug";
 
 // Create a custom Octokit class with the throttling plugin and pagination
 export const ThrottledOctokit = Octokit.plugin(throttling, paginateGraphQL);
 
 export type ThrottledOctokitType = InstanceType<typeof ThrottledOctokit>;
+
+const DEBUG = false;
 
 // Static test repository data for generation
 const REPO_TEMPLATES = [
@@ -50,12 +51,12 @@ export async function generateRepos(
   setLoading: (loading: boolean) => void,
   numberOfRepos = 10,
 ): Promise<void> {
-  debug.log("Generating test repos...");
+  DEBUG && console.log("Generating test repos...");
   setLoading(true);
 
   try {
     for (let i = 0; i < numberOfRepos; i++) {
-      debug.log(`Creating repo ${i + 1}...`);
+      DEBUG && console.log(`Creating repo ${i + 1}...`);
       const template = REPO_TEMPLATES[i % REPO_TEMPLATES.length];
       await octokit.rest.repos.createForAuthenticatedUser({
         description: template.description,
@@ -67,7 +68,7 @@ export async function generateRepos(
     }
   } catch (error) {
     const errorMessage = (error as Error).message;
-    debug.error(errorMessage);
+    console.error(errorMessage);
     throw new Error(`Failed to create repositories: ${errorMessage}`);
   } finally {
     setLoading(false);
@@ -79,9 +80,14 @@ export async function generateRepos(
 export function isValidGitHubToken(token: string): boolean {
   if (!token) return false;
 
-  // Special case for github_pat_ tokens
+  // Special case for github_pat_ (fine-grained) tokens — real tokens are 82+ chars
   if (token.startsWith("github_pat_")) {
-    return token.length >= 40 && /^[a-zA-Z0-9_]+$/.test(token.slice(11));
+    const payload = token.slice(11);
+    return (
+      token.length >= 72 &&
+      /^[a-zA-Z0-9_]+$/.test(payload) &&
+      /[a-zA-Z0-9]/.test(payload)
+    );
   }
 
   // All other tokens start with 3-letter prefix + underscore
@@ -111,7 +117,7 @@ export const archiveRepo = async (
     });
   } catch (error) {
     const errorMessage = (error as Error).message;
-    debug.error(errorMessage);
+    console.error(errorMessage);
     throw new Error(
       `Failed to archive ${repo.name}: ${(error as Error).message}`,
     );
@@ -129,7 +135,7 @@ export const deleteRepo = async (
     });
   } catch (error) {
     const errorMessage = (error as Error).message;
-    debug.error(errorMessage);
+    console.error(errorMessage);
     throw new Error(
       `Failed to delete ${repo.name}: ${(error as Error).message}`,
     );
@@ -153,13 +159,13 @@ export const processRepo = async (
     throw new Error("Action is required");
   }
 
-  debug.log(`Processing ${action} for ${repo.name}...`);
+  console.log(`Processing ${action} for ${repo.name}...`);
 
   if (action === "archive") {
     await archiveRepo(octokit, repo);
     // Track individual successful archive
     analytics.trackRepoArchived();
-  } else if (action === "delete") {
+  } else {
     await deleteRepo(octokit, repo);
     // Track individual successful delete
     analytics.trackRepoDeleted();
@@ -181,15 +187,18 @@ export function createThrottledOctokit(
       onRateLimit: (_retryAfter, _options, _octokitInstance, retryCount) => {
         // Otherwise retry once, then give up
         if (retryCount < 1) {
-          debug.log("[Throttle] Rate limited - retrying once");
+          if (DEBUG) console.log("[Throttle] Rate limited - retrying once");
           return true;
         }
-        debug.log("[Throttle] Rate limited - giving up");
+        if (DEBUG) console.log("[Throttle] Rate limited - giving up");
         return false;
       },
       onSecondaryRateLimit: () => {
         // Don't retry secondary rate limits (abuse detection)
-        debug.log("[Throttle] Secondary rate limit detected - not retrying");
+        if (DEBUG)
+          console.log(
+            "[Throttle] Secondary rate limit detected - not retrying",
+          );
         return false;
       },
     },

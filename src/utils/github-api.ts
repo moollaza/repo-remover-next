@@ -1,6 +1,7 @@
 import { GraphqlResponseError } from "@octokit/graphql";
 import { type Repository } from "@octokit/graphql-schema";
 
+import { debug } from "@/utils/debug";
 import {
   createThrottledOctokit,
   type ThrottledOctokitType,
@@ -194,6 +195,7 @@ export interface UserRepositoriesResponse {
 
 interface FetchResult {
   error: Error | null;
+  permissionWarning?: string;
   repos: null | Repository[];
   user: null | User;
 }
@@ -246,14 +248,14 @@ export async function fetchGitHubData(
           cursor = pageInfo.endCursor;
         } else {
           // Response doesn't match expected structure
-          console.warn(
+          debug.warn(
             "Unexpected organization response structure:",
             rawResponse,
           );
           hasNextPage = false;
         }
       } catch (error) {
-        console.error("Error fetching organizations:", error);
+        debug.error("Error fetching organizations:", error);
 
         // Check if this is a permission/scope error
         if (
@@ -304,21 +306,21 @@ export async function fetchGitHubData(
           cursor = pageInfo.endCursor;
         } else {
           // Response doesn't match expected structure
-          console.warn(
+          debug.warn(
             `Unexpected response structure for org ${orgLogin}:`,
             rawResponse,
           );
           hasNextPage = false;
         }
       } catch (error) {
-        console.error(`Error fetching repos for org ${orgLogin}:`, error);
+        debug.error(`Error fetching repos for org ${orgLogin}:`, error);
 
         // Check if this is a permission/scope error
         if (
           error instanceof Error &&
           error.message.includes("required scopes")
         ) {
-          console.warn(
+          debug.warn(
             `Skipping org ${orgLogin} due to insufficient permissions`,
           );
         }
@@ -358,23 +360,14 @@ export async function fetchGitHubData(
     try {
       orgs = await fetchAllOrganizations(userLogin);
     } catch (error) {
-      if (error instanceof Error) {
-        const msg = error.message;
-        if (
-          msg.includes("Missing GitHub token permissions") ||
-          msg.includes("SAML enforcement") ||
-          msg.includes("required scopes") ||
-          msg.includes("Resource protected")
-        ) {
-          permissionError =
-            "Some organizations require additional token permissions or SSO authorization. " +
-            "You can authorize your token for specific organizations at https://github.com/settings/tokens";
-          console.warn("Organization access limited:", msg);
-        } else {
-          throw error;
-        }
+      if (
+        error instanceof Error &&
+        error.message.includes("Missing GitHub token permissions")
+      ) {
+        permissionError = error.message;
+        debug.warn("Organization access limited due to token permissions");
       } else {
-        throw error;
+        throw error; // Re-throw unexpected errors
       }
     }
 
@@ -395,7 +388,7 @@ export async function fetchGitHubData(
       ...(permissionError && { permissionWarning: permissionError }),
     };
   } catch (error) {
-    console.error("Error fetching GitHub data:", error);
+    debug.error("Error fetching GitHub data:", error);
     return {
       error:
         error instanceof Error
@@ -451,18 +444,23 @@ export async function fetchGitHubDataWithProgress(
           hasNextPage = pageInfo.hasNextPage;
           cursor = pageInfo.endCursor;
         } else {
-          console.warn(
+          debug.warn(
             "Unexpected organization response structure:",
             rawResponse,
           );
           hasNextPage = false;
         }
       } catch (error) {
-        console.error("Error fetching organizations:", error);
+        debug.error("Error fetching organizations:", error);
 
-        // Re-throw all errors — let the outer handler categorize and surface them
-        if (error instanceof Error) {
-          throw error;
+        if (
+          error instanceof Error &&
+          error.message.includes("required scopes")
+        ) {
+          throw new Error(
+            "Missing GitHub token permissions: Your token needs 'read:org' scope to fetch organization data. " +
+              "You can update your token permissions at: https://github.com/settings/tokens",
+          );
         }
 
         hasNextPage = false;
@@ -496,20 +494,20 @@ export async function fetchGitHubDataWithProgress(
           hasNextPage = pageInfo.hasNextPage;
           cursor = pageInfo.endCursor;
         } else {
-          console.warn(
+          debug.warn(
             `Unexpected response structure for org ${orgLogin}:`,
             rawResponse,
           );
           hasNextPage = false;
         }
       } catch (error) {
-        console.error(`Error fetching repos for org ${orgLogin}:`, error);
+        debug.error(`Error fetching repos for org ${orgLogin}:`, error);
 
         if (
           error instanceof Error &&
           error.message.includes("required scopes")
         ) {
-          console.warn(
+          debug.warn(
             `Skipping org ${orgLogin} due to insufficient permissions`,
           );
         }
@@ -537,27 +535,10 @@ export async function fetchGitHubDataWithProgress(
       userLogin = userResponse.viewer.login;
     }
 
-    // Collect permission warnings from all stages
-    const warnings: string[] = [];
-
     // 1. Fetch personal repos FIRST
     const userRepoResult = await fetchUserRepos(userLogin);
     userData = userRepoResult.userData;
     let allRepos: Repository[] = userRepoResult.repos ?? [];
-
-    // Check if repo fetch had SAML/permission errors (partial data returned)
-    if (userRepoResult.error) {
-      const msg = userRepoResult.error.message;
-      if (
-        msg.includes("SAML enforcement") ||
-        msg.includes("Resource protected")
-      ) {
-        warnings.push(
-          "Some repositories are protected by SAML SSO. " +
-            "Authorize your token for those organizations in your GitHub token settings.",
-        );
-      }
-    }
 
     // Report personal repos immediately
     onProgress({
@@ -570,37 +551,20 @@ export async function fetchGitHubDataWithProgress(
 
     // 2. Fetch orgs list
     let orgs: { login: string; url: string }[] = [];
+    let permissionError: null | string = null;
 
     try {
       orgs = await fetchAllOrganizations(userLogin);
     } catch (error) {
-      if (error instanceof Error) {
-        const msg = error.message;
-        if (
-          msg.includes("required scopes") ||
-          msg.includes("Missing GitHub token permissions")
-        ) {
-          warnings.push(
-            "Your token needs the 'read:org' scope to load organization repositories. " +
-              "Edit your token and add this scope.",
-          );
-        } else if (
-          msg.includes("SAML enforcement") ||
-          msg.includes("Resource protected")
-        ) {
-          warnings.push(
-            "Organization data is protected by SAML SSO. " +
-              "Authorize your token for those organizations in your GitHub token settings.",
-          );
-        } else {
-          // Network errors, 500s, timeouts, etc. — still surface to user
-          warnings.push(
-            "Could not load organization repositories. This may be a temporary issue — try refreshing.",
-          );
-        }
-        console.warn("Organization access limited:", msg);
+      if (
+        error instanceof Error &&
+        error.message.includes("Missing GitHub token permissions")
+      ) {
+        permissionError = error.message;
+        debug.warn("Organization access limited due to token permissions");
+      } else {
+        throw error;
       }
-      // Don't re-throw — continue with personal repos
     }
 
     // 3. Fetch org repos in PARALLEL (keep current speed!)
@@ -643,18 +607,14 @@ export async function fetchGitHubDataWithProgress(
       user: userData,
     });
 
-    // Build combined permission warning
-    const permissionWarning =
-      warnings.length > 0 ? warnings.join("\n\n") : undefined;
-
     return {
       error: userRepoResult.error,
       repos: allRepos,
       user: userData,
-      ...(permissionWarning && { permissionWarning }),
+      ...(permissionError && { permissionWarning: permissionError }),
     };
   } catch (error) {
-    console.error("Error fetching GitHub data:", error);
+    debug.error("Error fetching GitHub data:", error);
     return {
       error:
         error instanceof Error
@@ -700,10 +660,10 @@ async function fetchRepositories(
       userData,
     };
   } catch (error) {
-    console.error("Error fetching GitHub repositories:", error);
+    debug.error("Error fetching GitHub repositories:", error);
 
     if (error instanceof GraphqlResponseError) {
-      console.log("GraphQL error:", error.message);
+      debug.log("GraphQL error:", error.message);
       const partialRepos =
         (error.data as { user?: { repositories?: { nodes?: Repository[] } } })
           ?.user?.repositories?.nodes ?? null;
