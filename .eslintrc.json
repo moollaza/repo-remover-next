@@ -14,34 +14,31 @@
     "dist/",
     ".vscode/",
     "out/",
-    "e2e/",
+    "vitest.setup.ts",
     "vite.config.ts",
     "vitest.config.ts",
-    "vitest.setup.ts",
     "playwright.config.ts",
-    "public/"
+    "e2e/",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx",
+    "public/mockServiceWorker.js"
   ],
-  "rules": {
-    "no-console": "warn"
-  },
+  "rules": {},
   "overrides": [
     {
       "files": [
         "**/*.test.ts",
         "**/*.test.tsx",
-        "**/*.spec.ts",
-        "**/*.spec.tsx",
         "**/__tests__/**/*.ts",
         "**/__tests__/**/*.tsx"
       ],
-      "parserOptions": {
-        "project": "./tsconfig.test.json"
-      },
+
       "rules": {
         "@typescript-eslint/no-unsafe-assignment": "off",
         "@typescript-eslint/no-unsafe-member-access": "off",
-        "@typescript-eslint/no-unsafe-call": "off",
-        "no-console": "off"
+        "@typescript-eslint/no-unsafe-call": "off"
       }
     }
   ]
