@@ -112,32 +112,8 @@ export interface GitHubContextType {
 
 /**
  * React context for GitHub data and authentication.
- * Initialized with default values that will be overridden by the GitHubDataProvider.
+ * Initialized with undefined — useGitHubData() throws if used outside GitHubDataProvider.
  */
-export const GitHubContext = createContext<GitHubContextType>({
-  error: null,
-  hasPartialData: false,
-  isAuthenticated: false,
-  isError: false,
-  isInitialized: false,
-  isLoading: false,
-  login: null,
-  logout: () => {
-    // no-op
-  },
-  mutate: async () =>
-    await Promise.resolve({ error: null, repos: null, user: null }),
-  pat: null,
-  progress: null,
-  refetchData: () => {
-    // no-op
-  },
-  repos: null,
-  setLogin: () => {
-    // no-op
-  },
-  setPat: () => {
-    // no-op
-  },
-  user: null,
-});
+export const GitHubContext = createContext<GitHubContextType | undefined>(
+  undefined,
+);
