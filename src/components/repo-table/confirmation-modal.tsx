@@ -1,6 +1,6 @@
 import { type Repository } from "@octokit/graphql-schema";
 import { RequestError } from "@octokit/request-error";
-import { useCallback, useEffect, useReducer, useRef } from "react";
+import { useCallback, useEffect, useMemo, useReducer, useRef } from "react";
 import { createPortal } from "react-dom";
 
 import { useGitHubData } from "@/hooks/use-github-data";
@@ -83,8 +83,11 @@ export default function ConfirmationModal({
   // Get the PAT from the new provider
   const { mutate, pat } = useGitHubData();
 
-  // Create an Octokit instance with the PAT
-  const octokit = pat ? createThrottledOctokit(pat) : null;
+  // Memoize Octokit so rate-limit state persists across re-renders
+  const octokit = useMemo(
+    () => (pat ? createThrottledOctokit(pat) : null),
+    [pat],
+  );
 
   // Use reducer for state management
   const [state, dispatch] = useReducer(modalReducer, initialState);
@@ -163,8 +166,10 @@ export default function ConfirmationModal({
   }
 
   function handleOnClose() {
-    // Refetch all GitHub data after operations are complete
-    void mutate();
+    // Only refetch GitHub data if operations actually ran
+    if (state.mode === "result") {
+      void mutate();
+    }
 
     // Close the modal
     onClose();
@@ -227,7 +232,7 @@ export default function ConfirmationModal({
         {state.mode === "result" && (
           <RepoActionResult
             action={action}
-            count={count}
+            count={state.progress}
             errors={state.errors}
             onClose={handleOnClose}
           />
@@ -379,11 +384,11 @@ function RepoActionConfirmation({
           Are you sure you want to <b>{action}</b> the following {count}{" "}
           repositor{count > 1 ? "ies" : "y"}?
         </p>
-        <ol className="list-disc list-inside">
+        <ul className="list-disc list-inside">
           {repos.map((repo, index) => (
             <li key={index}>{repo.name}</li>
           ))}
-        </ol>
+        </ul>
         <div className="mt-4" />
         <strong>Please type your GitHub username to confirm:</strong>
         <input
@@ -522,14 +527,14 @@ function RepoActionResult({
               {action === "archive" ? "archiving" : "deleting"} the following{" "}
               repositor{errorCount > 1 ? "ies" : "y"}:
             </p>
-            <ol className="list-disc list-inside">
+            <ul className="list-disc list-inside">
               {errors?.map(({ error, repository }, index) => (
                 <li key={index}>
                   {repository ? repository.name : "Unknown Repository"}:{" "}
                   {error.message}
                 </li>
               ))}
-            </ol>
+            </ul>
           </>
         )}
       </div>

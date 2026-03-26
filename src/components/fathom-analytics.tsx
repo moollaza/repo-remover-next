@@ -1,16 +1,17 @@
 import * as Fathom from "fathom-client";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
+
+import { debug } from "@/utils/debug";
 
 export function FathomAnalytics() {
   const location = useLocation();
+  const initializedRef = useRef(false);
 
   useEffect(() => {
     const siteId = import.meta.env.VITE_FATHOM_SITE_ID as string | undefined;
     if (!siteId) {
-      if (import.meta.env.DEV) {
-        console.warn("Fathom Analytics: VITE_FATHOM_SITE_ID not set");
-      }
+      debug.warn("Fathom Analytics: VITE_FATHOM_SITE_ID not set");
       return;
     }
 
@@ -19,9 +20,12 @@ export function FathomAnalytics() {
       excludedDomains: ["localhost", "127.0.0.1"],
       includedDomains: ["reporemover.xyz"],
     });
+    initializedRef.current = true;
   }, []);
 
   useEffect(() => {
+    if (!initializedRef.current) return;
+
     const url = location.pathname + location.search;
     Fathom.trackPageview({
       referrer: document.referrer,
