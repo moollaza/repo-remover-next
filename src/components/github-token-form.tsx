@@ -1,3 +1,4 @@
+import { RequestError } from "@octokit/request-error";
 import clsx from "clsx";
 import { useEffect, useState } from "react";
 
@@ -71,10 +72,7 @@ export default function GitHubTokenForm({
           setUsername(null);
 
           // Differentiate 401 (bad token) from server/network errors
-          const status =
-            err instanceof Error && "status" in err
-              ? (err as { status: number }).status
-              : undefined;
+          const status = err instanceof RequestError ? err.status : undefined;
 
           if (status === 401) {
             setError("Invalid or expired token");

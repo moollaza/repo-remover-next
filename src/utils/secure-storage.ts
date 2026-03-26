@@ -3,6 +3,8 @@
  * Uses Web Crypto API to encrypt sensitive data before storing in localStorage
  */
 
+import { debug } from "@/utils/debug";
+
 const STORAGE_KEY_PREFIX = "secure_";
 const ALGORITHM = "AES-GCM";
 
@@ -33,7 +35,7 @@ async function decryptData(encryptedData: string): Promise<string> {
 
     return decoder.decode(decrypted);
   } catch (error) {
-    console.error("Decryption failed:", error);
+    debug.error("Decryption failed:", error);
     throw new Error("Failed to decrypt data");
   }
 }
@@ -92,7 +94,7 @@ async function encryptData(data: string): Promise<string> {
     // Convert to base64 for storage
     return btoa(String.fromCharCode.apply(null, Array.from(combined)));
   } catch (error) {
-    console.error("Encryption failed:", error);
+    debug.error("Encryption failed:", error);
     throw new Error("Failed to encrypt data");
   }
 }
@@ -183,9 +185,7 @@ export const secureStorage = {
    */
   async setItem(key: string, value: string): Promise<void> {
     if (!isWebCryptoAvailable()) {
-      console.warn(
-        "Web Crypto API not available, falling back to plain storage",
-      );
+      debug.warn("Web Crypto API not available, falling back to plain storage");
       localStorage.setItem(STORAGE_KEY_PREFIX + key, value);
       return;
     }

@@ -1,5 +1,6 @@
-import { type Selection } from "@heroui/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
+
+import { type Selection } from "@/hooks/use-repo-filters";
 
 import { PER_PAGE_OPTIONS } from "@/config/repo-config";
 

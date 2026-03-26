@@ -1,5 +1,11 @@
-import { type Selection, type SortDescriptor } from "@heroui/react";
 import { type Repository } from "@octokit/graphql-schema";
+
+// Local type definitions (previously imported from @heroui/react)
+export type Selection = Set<string> | "all";
+export interface SortDescriptor {
+  column?: string;
+  direction?: "ascending" | "descending";
+}
 import { useCallback, useMemo, useState } from "react";
 
 import { COLUMNS, REPO_TYPES } from "@/config/repo-config";
