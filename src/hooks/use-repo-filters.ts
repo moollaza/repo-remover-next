@@ -15,7 +15,13 @@ export interface SortDescriptor {
   column?: string;
   direction?: "ascending" | "descending";
 }
-import { useCallback, useMemo, useState } from "react";
+import {
+  type Dispatch,
+  type SetStateAction,
+  useCallback,
+  useMemo,
+  useState,
+} from "react";
 
 import { COLUMNS, REPO_TYPES } from "@/config/repo-config";
 
@@ -46,7 +52,7 @@ export interface UseRepoFiltersReturn {
   /**
    * Update the sort configuration
    */
-  setSortDescriptor: (descriptor: SortDescriptor) => void;
+  setSortDescriptor: Dispatch<SetStateAction<SortDescriptor>>;
   /**
    * Update the type filters and reset pagination
    */

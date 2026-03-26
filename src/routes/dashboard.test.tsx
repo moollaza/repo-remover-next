@@ -87,10 +87,12 @@ describe("Dashboard route", () => {
 
       render(<Dashboard />);
 
-      expect(screen.getByText(/select repos to modify/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/select repositories to archive or delete/i),
+      ).toBeInTheDocument();
     });
 
-    it("calls refetchData on mount when authenticated", async () => {
+    it("does not force refetch on mount (SWR handles revalidation)", () => {
       const mockRefetchData = vi.fn();
       setupContext({
         isAuthenticated: true,
@@ -101,9 +103,8 @@ describe("Dashboard route", () => {
 
       render(<Dashboard />);
 
-      await waitFor(() => {
-        expect(mockRefetchData).toHaveBeenCalled();
-      });
+      // refetchData should NOT be called — SWR caches data and revalidates automatically
+      expect(mockRefetchData).not.toHaveBeenCalled();
     });
 
     it("does not redirect when authenticated", () => {
@@ -164,7 +165,9 @@ describe("Dashboard route", () => {
 
       // If ErrorBoundary were missing and DashboardComponent threw,
       // the error would propagate. Here we verify the normal path works.
-      expect(screen.getByText(/select repos to modify/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/select repositories to archive or delete/i),
+      ).toBeInTheDocument();
     });
   });
 });
