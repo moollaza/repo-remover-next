@@ -13,7 +13,10 @@ function createMockRepository(config: {
   isArchived?: boolean;
   isFork?: boolean;
   isInOrganization?: boolean;
+  isLocked?: boolean;
+  isMirror?: boolean;
   isPrivate?: boolean;
+  isTemplate?: boolean;
   name: string;
   ownerType: "current-user" | "organization";
   parent?: { name: string; owner: { login: string } } | null;
@@ -22,7 +25,11 @@ function createMockRepository(config: {
 }): MockRepository {
   const isUserOwned = config.ownerType === "current-user";
   const owner = isUserOwned
-    ? { id: "user-123456", login: "testuser", url: "https://github.com/testuser" }
+    ? {
+        id: "user-123456",
+        login: "testuser",
+        url: "https://github.com/testuser",
+      }
     : { id: "org-456789", login: "testorg", url: "https://github.com/testorg" };
 
   const ownerPrefix = isUserOwned ? "testuser" : "testorg";
@@ -33,10 +40,10 @@ function createMockRepository(config: {
     isArchived: config.isArchived ?? false,
     isFork: config.isFork ?? false,
     isInOrganization: config.isInOrganization ?? !isUserOwned,
-    isLocked: false,
-    isMirror: false,
+    isLocked: config.isLocked ?? false,
+    isMirror: config.isMirror ?? false,
     isPrivate: config.isPrivate ?? false,
-    isTemplate: false,
+    isTemplate: config.isTemplate ?? false,
     name: config.name,
     owner,
     ownerType: config.ownerType,
@@ -72,7 +79,6 @@ export const MOCK_REPOS: MockRepository[] = [
     description: "Second test repo",
     id: "repo-2",
     isArchived: true,
-    isInOrganization: true,
     isPrivate: true,
     name: "repo-2",
     ownerType: "current-user",
@@ -155,16 +161,53 @@ export const MOCK_REPOS: MockRepository[] = [
     ownerType: "current-user",
     updatedAt: "2023-03-01T05:00:00Z",
   }),
+
+  // Locked repository (e.g. DMCA takedown, admin lock)
+  createMockRepository({
+    description: "A locked repository",
+    id: "repo-locked",
+    isLocked: true,
+    name: "repo-locked",
+    ownerType: "current-user",
+    updatedAt: "2023-02-15T04:00:00Z",
+  }),
+
+  // Template repository
+  createMockRepository({
+    description: "A template repository",
+    id: "repo-template",
+    isTemplate: true,
+    name: "repo-template",
+    ownerType: "current-user",
+    updatedAt: "2023-02-01T03:00:00Z",
+  }),
+
+  // Mirror repository
+  createMockRepository({
+    description: "A mirrored repository",
+    id: "repo-mirror",
+    isMirror: true,
+    name: "repo-mirror",
+    ownerType: "organization",
+    updatedAt: "2023-01-15T02:00:00Z",
+  }),
 ];
 
 // Helper function to create a mock repo with overrides
-export function createMockRepo(overrides: Partial<MockRepository> = {}): MockRepository {
+export function createMockRepo(
+  overrides: Partial<MockRepository> = {},
+): MockRepository {
   const baseRepo = MOCK_REPOS[0];
+  const isOrgOwned = overrides.ownerType === "organization";
+  const derivedOwner = isOrgOwned
+    ? { id: "org-456789", login: "testorg", url: "https://github.com/testorg" }
+    : baseRepo.owner;
+
   return {
     ...baseRepo,
     ...overrides,
     owner: {
-      ...baseRepo.owner,
+      ...derivedOwner,
       ...overrides.owner,
     },
   } as MockRepository;
@@ -191,4 +234,16 @@ export const MOCK_ORGANIZATIONS = [
 export const mockUser = MOCK_USER;
 export const mockRepos = MOCK_REPOS;
 export const mockUsers = [MOCK_USER]; // For compatibility
-export const manyMockRepos = [...MOCK_REPOS, ...MOCK_REPOS]; // For large dataset tests
+export const manyMockRepos: MockRepository[] = [
+  ...MOCK_REPOS,
+  ...Array.from({ length: 10 }, (_, i) =>
+    createMockRepository({
+      description: `Generated repo ${i + 1}`,
+      id: `repo-gen-${i + 1}`,
+      isPrivate: i % 3 === 0,
+      name: `repo-gen-${i + 1}`,
+      ownerType: i % 2 === 0 ? "current-user" : "organization",
+      updatedAt: `2022-${String(12 - i).padStart(2, "0")}-01T00:00:00Z`,
+    }),
+  ),
+];
