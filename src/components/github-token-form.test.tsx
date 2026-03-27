@@ -125,6 +125,33 @@ describe("GitHubTokenForm", () => {
     );
   });
 
+  test("renders token input as password type by default", () => {
+    const { input } = setupForm({ value: "ghp_test" });
+
+    expect(input).toHaveAttribute("type", "password");
+  });
+
+  test("toggles token visibility when eye button is clicked", async () => {
+    const { input } = setupForm({ value: "ghp_test" });
+
+    // Default: password (masked)
+    expect(input).toHaveAttribute("type", "password");
+
+    // Click the show token button
+    const toggleButton = screen.getByRole("button", { name: /show token/i });
+    await user.click(toggleButton);
+
+    // Now: text (visible)
+    expect(input).toHaveAttribute("type", "text");
+
+    // Click again to hide
+    const hideButton = screen.getByRole("button", { name: /hide token/i });
+    await user.click(hideButton);
+
+    // Back to password
+    expect(input).toHaveAttribute("type", "password");
+  });
+
   test("doesn't call onSubmit when token is invalid", async () => {
     const { submitButton } = setupForm({
       value: "invalid-token",
