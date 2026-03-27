@@ -86,7 +86,7 @@ describe("TokenFormSection", () => {
 
     await user.click(submitButton);
 
-    expect(mockSetPat).toHaveBeenCalledWith(VALID_TOKEN);
+    expect(mockSetPat).toHaveBeenCalledWith(VALID_TOKEN, true);
     expect(mockNavigate).toHaveBeenCalledWith("/dashboard");
   });
 

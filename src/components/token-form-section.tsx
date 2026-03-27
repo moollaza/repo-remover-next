@@ -14,8 +14,8 @@ export default function TokenFormSection() {
   const { setPat } = useGitHubData();
   const navigate = useNavigate();
 
-  const handleSubmit = (token: string) => {
-    setPat(token);
+  const handleSubmit = (token: string, remember: boolean) => {
+    setPat(token, remember);
 
     // Track successful token validation
     analytics.trackTokenValidated();
