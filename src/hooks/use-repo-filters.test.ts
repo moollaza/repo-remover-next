@@ -140,7 +140,7 @@ describe("useRepoFilters", () => {
     // Initially all types are selected, so both repos should be shown
     expect(result.current.filteredRepos).toHaveLength(2);
 
-    // Deselect private repos
+    // Deselect private repos (keep isSource so source repos still show)
     act(() => {
       result.current.setTypeFilters(
         new Set([
@@ -149,6 +149,7 @@ describe("useRepoFilters", () => {
           "isFork",
           "isInOrganization",
           "isMirror",
+          "isSource",
           "isTemplate",
         ]),
       );
@@ -179,7 +180,7 @@ describe("useRepoFilters", () => {
       useRepoFilters({ login: "testuser", repos }),
     );
 
-    // Deselect archived repos
+    // Deselect archived repos (keep isSource so source repos still show)
     act(() => {
       result.current.setTypeFilters(
         new Set([
@@ -188,6 +189,7 @@ describe("useRepoFilters", () => {
           "isInOrganization",
           "isMirror",
           "isPrivate",
+          "isSource",
           "isTemplate",
         ]),
       );
@@ -497,6 +499,7 @@ describe("useRepoFilters", () => {
           "isInOrganization",
           "isMirror",
           "isPrivate",
+          "isSource",
           "isTemplate",
         ]),
       );
@@ -518,6 +521,7 @@ describe("useRepoFilters", () => {
           "isDisabled",
           "isInOrganization",
           "isPrivate",
+          "isSource",
           "isTemplate",
         ]),
       );
@@ -534,7 +538,13 @@ describe("useRepoFilters", () => {
     // Deselect isFork, isMirror, AND isTemplate — only source repo remains
     act(() => {
       result.current.setTypeFilters(
-        new Set(["isArchived", "isDisabled", "isInOrganization", "isPrivate"]),
+        new Set([
+          "isArchived",
+          "isDisabled",
+          "isInOrganization",
+          "isPrivate",
+          "isSource",
+        ]),
       );
     });
 
@@ -575,6 +585,102 @@ describe("useRepoFilters", () => {
     expect(result.current.filteredRepos[0].name).toBe("forked-repo");
   });
 
+  it("should hide source repos when isSource filter is unchecked", () => {
+    const repos = [
+      createMockRepo({
+        id: "1",
+        isFork: false,
+        isMirror: false,
+        key: "1",
+        name: "source-repo",
+      }),
+      createMockRepo({
+        id: "2",
+        isFork: true,
+        key: "2",
+        name: "forked-repo",
+      }),
+      createMockRepo({
+        id: "3",
+        isMirror: true,
+        key: "3",
+        name: "mirror-repo",
+      }),
+    ];
+
+    const { result } = renderHook(() =>
+      useRepoFilters({ login: "testuser", repos }),
+    );
+
+    // All visible initially
+    expect(result.current.filteredRepos).toHaveLength(3);
+
+    // Uncheck isSource — source repo should be hidden, fork and mirror stay
+    act(() => {
+      result.current.setTypeFilters(
+        new Set([
+          "isArchived",
+          "isDisabled",
+          "isFork",
+          "isInOrganization",
+          "isMirror",
+          "isPrivate",
+          "isTemplate",
+        ]),
+      );
+    });
+
+    expect(result.current.filteredRepos).toHaveLength(2);
+    expect(
+      result.current.filteredRepos.find((r) => r.name === "source-repo"),
+    ).toBeUndefined();
+    expect(
+      result.current.filteredRepos.find((r) => r.name === "forked-repo"),
+    ).toBeDefined();
+    expect(
+      result.current.filteredRepos.find((r) => r.name === "mirror-repo"),
+    ).toBeDefined();
+  });
+
+  it("should show no repos when all type filters are unchecked", () => {
+    const repos = [
+      createMockRepo({
+        id: "1",
+        isFork: false,
+        isMirror: false,
+        key: "1",
+        name: "source-repo",
+      }),
+      createMockRepo({
+        id: "2",
+        isFork: true,
+        key: "2",
+        name: "forked-repo",
+      }),
+      createMockRepo({
+        id: "3",
+        isArchived: true,
+        key: "3",
+        name: "archived-repo",
+      }),
+    ];
+
+    const { result } = renderHook(() =>
+      useRepoFilters({ login: "testuser", repos }),
+    );
+
+    // All visible initially
+    expect(result.current.filteredRepos).toHaveLength(3);
+
+    // Uncheck ALL type filters
+    act(() => {
+      result.current.setTypeFilters(new Set([]));
+    });
+
+    // No repos should be visible
+    expect(result.current.filteredRepos).toHaveLength(0);
+  });
+
   it('should handle HeroUI "all" selection by selecting all type filters', () => {
     const repos = [
       createMockRepo({
@@ -595,7 +701,7 @@ describe("useRepoFilters", () => {
       useRepoFilters({ login: "testuser", repos }),
     );
 
-    // First deselect private to narrow the list
+    // First deselect private to narrow the list (keep isSource so source repos still show)
     act(() => {
       result.current.setTypeFilters(
         new Set([
@@ -604,6 +710,7 @@ describe("useRepoFilters", () => {
           "isFork",
           "isInOrganization",
           "isMirror",
+          "isSource",
           "isTemplate",
         ]),
       );

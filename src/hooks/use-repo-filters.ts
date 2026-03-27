@@ -131,18 +131,26 @@ export function useRepoFilters({
         repo.name.toLowerCase().includes(nameFilter.toLowerCase()) ||
         repo.description?.toLowerCase().includes(nameFilter.toLowerCase());
 
+      // A "source" repo is one that is NOT a fork and NOT a mirror
+      const isSource = !repo.isFork && !repo.isMirror;
+
       const matchesType =
-        // For each type, if it is not selected, we check if the repo has it and return false
-        REPO_TYPES.every((type) => {
-          // If the type is not selected, check if the repo has it and return false
-          if (!typeFilters.has(type.key)) {
-            if (repo[type.key as keyof Repository]) {
-              return false;
-            }
-            return true;
-          }
-          return true;
-        });
+        // If no types are selected, nothing matches
+        typeFilters.size === 0
+          ? false
+          : REPO_TYPES.every((type) => {
+              if (!typeFilters.has(type.key)) {
+                // "isSource" is a derived property — hide source repos when unchecked
+                if (type.key === "isSource") {
+                  return !isSource;
+                }
+                // For real boolean properties, hide repos that have the property
+                if (repo[type.key as keyof Repository]) {
+                  return false;
+                }
+              }
+              return true;
+            });
 
       return matchesSearchQuery && matchesType;
     });
