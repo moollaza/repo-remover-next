@@ -63,6 +63,7 @@ function InlinePATForm() {
   const [isValid, setIsValid] = useState(false);
   const [remember, setRemember] = useState(true);
   const [showTooltip, setShowTooltip] = useState(false);
+  const [showToken, setShowToken] = useState(false);
   const tooltipRef = useRef<HTMLDivElement>(null);
   const { setPat } = useGitHubData();
   const navigate = useNavigate();
@@ -132,7 +133,7 @@ function InlinePATForm() {
         <Key className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-default-400" />
         <input
           autoComplete="off"
-          className={`w-full pl-10 pr-4 py-3 rounded-lg border bg-default-100 text-sm font-mono placeholder:text-default-400 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors ${
+          className={`w-full pl-10 pr-12 py-3 rounded-lg border bg-default-100 text-sm font-mono placeholder:text-default-400 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors ${
             error
               ? "border-danger"
               : isValid
@@ -142,14 +143,69 @@ function InlinePATForm() {
           data-testid="github-token-input"
           onChange={(e) => setToken(e.target.value)}
           placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-          type="text"
+          type={showToken ? "text" : "password"}
           data-1p-ignore
           data-lpignore="true"
           value={token}
         />
-        {isValidating && (
-          <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-default-400 animate-spin" />
-        )}
+        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
+          {token && (
+            <button
+              aria-label={showToken ? "Hide token" : "Show token"}
+              className="text-default-400 hover:text-default-600 transition-colors p-0.5"
+              onClick={() => setShowToken((prev) => !prev)}
+              type="button"
+            >
+              {showToken ? (
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <line
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    x1="1"
+                    x2="23"
+                    y1="1"
+                    y2="23"
+                  />
+                </svg>
+              ) : (
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              )}
+            </button>
+          )}
+          {isValidating && (
+            <Loader2 className="h-4 w-4 text-default-400 animate-spin" />
+          )}
+        </div>
       </div>
 
       {error && <p className="text-xs text-danger">{error}</p>}

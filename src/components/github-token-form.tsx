@@ -27,6 +27,7 @@ export default function GitHubTokenForm({
   const [lastValidatedToken, setLastValidatedToken] = useState<null | string>(
     null,
   );
+  const [showToken, setShowToken] = useState(false);
 
   // Handle value change
   const handleChange = (newValue: string) => {
@@ -162,7 +163,8 @@ export default function GitHubTokenForm({
             <input
               autoComplete="off"
               className={clsx(
-                "w-full rounded-lg border bg-default-100 px-3 py-2.5 text-sm text-foreground",
+                "w-full rounded-lg border bg-default-100 py-2.5 pl-3 text-sm text-foreground",
+                value ? "pr-16" : "pr-3",
                 "placeholder:text-default-400",
                 "focus:outline-none focus:ring-2",
                 "transition-colors",
@@ -175,33 +177,88 @@ export default function GitHubTokenForm({
                 handleChange(e.target.value);
               }}
               required
-              type="text"
+              type={showToken ? "text" : "password"}
               value={value}
             />
-            {/* Clear button */}
+            {/* Toggle visibility + Clear buttons */}
             {value && (
-              <button
-                aria-label="Clear token"
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-default-400 hover:text-default-600 transition-colors p-1"
-                onClick={() => {
-                  handleChange("");
-                }}
-                type="button"
-              >
-                <svg
-                  className="h-4 w-4"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                  viewBox="0 0 24 24"
+              <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-0.5">
+                <button
+                  aria-label={showToken ? "Hide token" : "Show token"}
+                  className="text-default-400 hover:text-default-600 transition-colors p-1"
+                  onClick={() => {
+                    setShowToken((prev) => !prev);
+                  }}
+                  type="button"
                 >
-                  <path
-                    d="M6 18L18 6M6 6l12 12"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </button>
+                  {showToken ? (
+                    <svg
+                      className="h-4 w-4"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      <line
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        x1="1"
+                        x2="23"
+                        y1="1"
+                        y2="23"
+                      />
+                    </svg>
+                  ) : (
+                    <svg
+                      className="h-4 w-4"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      <circle
+                        cx="12"
+                        cy="12"
+                        r="3"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  )}
+                </button>
+                <button
+                  aria-label="Clear token"
+                  className="text-default-400 hover:text-default-600 transition-colors p-1"
+                  onClick={() => {
+                    handleChange("");
+                  }}
+                  type="button"
+                >
+                  <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M6 18L18 6M6 6l12 12"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </button>
+              </div>
             )}
           </div>
           {/* Validation error */}
