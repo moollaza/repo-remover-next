@@ -70,7 +70,7 @@ export class DashboardPage extends BasePage {
     this.confirmationModalBody = page.getByTestId("confirmation-modal-body");
     this.confirmationModalRepoList = page
       .getByTestId("confirmation-modal-body")
-      .locator("ol");
+      .locator("ul");
     this.confirmationModalInput = page.getByTestId("confirmation-modal-input");
     this.confirmationModalCancel = page.getByTestId(
       "confirmation-modal-cancel",
@@ -217,9 +217,11 @@ export class DashboardPage extends BasePage {
   }
 
   async expectRepoHasOwner(repoName: string) {
-    // Find the repo row containing the repo name
+    // Find the repo row containing the repo name (exact match to avoid e.g. "repo-1" matching "repo-10")
     const repoRow = this.page.getByTestId("repo-row").filter({
-      has: this.page.getByTestId("repo-name").filter({ hasText: repoName }),
+      has: this.page
+        .getByTestId("repo-name")
+        .filter({ has: this.page.getByText(repoName, { exact: true }) }),
     });
 
     // Check for the owner information
@@ -228,9 +230,11 @@ export class DashboardPage extends BasePage {
   }
 
   async expectRepoHasTag(repoName: string, tagName: string) {
-    // First find the repo row containing the repo name
+    // First find the repo row containing the repo name (exact match)
     const repoRow = this.page.getByTestId("repo-row").filter({
-      has: this.page.getByTestId("repo-name").filter({ hasText: repoName }),
+      has: this.page
+        .getByTestId("repo-name")
+        .filter({ has: this.page.getByText(repoName, { exact: true }) }),
     });
 
     // Both mobile (lg:hidden) and desktop (hidden lg:table-cell) have repo-tags testid.
@@ -253,9 +257,9 @@ export class DashboardPage extends BasePage {
   }
 
   async expectRepoNameVisible(name: string) {
-    // Use more specific testid selector for repo name
+    // Use exact text matching to avoid substring matches (e.g. "repo-1" matching "repo-10")
     const repoNameLocator = this.page.getByTestId("repo-name").filter({
-      hasText: name,
+      has: this.page.getByText(name, { exact: true }),
     });
     await expect(repoNameLocator).toBeVisible();
   }
@@ -323,6 +327,19 @@ export class DashboardPage extends BasePage {
     await this.page.goto("/dashboard");
   }
 
+  /**
+   * Wait for all data to load (personal + org repos).
+   * Progressive loading shows personal repos first, then org repos trickle in.
+   * We detect full load by checking the pagination shows the expected page count.
+   */
+  async waitForFullDataLoad() {
+    // With 11 admin repos at 5/page, we expect 3 pages.
+    // Personal repos alone give 2 pages. Wait for the third page button.
+    await this.pagination
+      .getByRole("button", { name: "3" })
+      .waitFor({ state: "visible", timeout: 10000 });
+  }
+
   async goToNextPage() {
     await this.pagination.getByLabel("next").click();
   }
@@ -347,13 +364,11 @@ export class DashboardPage extends BasePage {
   }
 
   async selectAll() {
-    // HeroUI Table: use dispatchEvent to trigger the checkbox since
-    // the visual <span> overlay intercepts normal clicks
-    await this.selectAllCheckbox.dispatchEvent("click");
+    await this.selectAllCheckbox.click({ force: true });
   }
 
   async deselectAll() {
-    await this.selectAllCheckbox.dispatchEvent("click");
+    await this.selectAllCheckbox.click({ force: true });
   }
 
   /**
@@ -391,7 +406,10 @@ export class DashboardPage extends BasePage {
   async selectRepository(name: string) {
     // HeroUI checkbox: the visual <span> overlay intercepts normal clicks.
     // Use dispatchEvent to trigger the click on the underlying input.
-    await this.page.getByRole("checkbox", { name }).dispatchEvent("click");
+    // exact: true prevents e.g. "repo-1" matching "repo-10".
+    await this.page
+      .getByRole("checkbox", { exact: true, name })
+      .dispatchEvent("click");
   }
 
   async setupMocks() {

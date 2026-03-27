@@ -13,8 +13,9 @@ test.describe("Authentication Redirects", () => {
     // Navigate directly to /dashboard without setting up auth
     await page.goto("/dashboard");
 
-    // Should be redirected to home page
-    await expect(page).toHaveURL("/");
+    // Should be redirected to home page. The redirect is async (React useEffect)
+    // so we wait for the URL to change.
+    await page.waitForURL("/", { timeout: 10000 });
   });
 
   test("authenticated user stays on /dashboard", async ({ page }) => {
@@ -25,10 +26,10 @@ test.describe("Authentication Redirects", () => {
 
     await page.goto("/dashboard");
 
-    // Should remain on dashboard
+    // Should see dashboard content (implies URL is /dashboard and auth succeeded)
+    await expect(page.getByText("Repository Management")).toBeVisible({
+      timeout: 10000,
+    });
     await expect(page).toHaveURL("/dashboard");
-
-    // Should see dashboard content
-    await expect(page.getByText("Select Repos to Modify")).toBeVisible();
   });
 });

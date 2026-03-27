@@ -88,13 +88,18 @@ export async function mockGraphQLRepos(page: Page): Promise<void> {
     }
 
     if (body.query.includes("getRepositories")) {
+      // Only return user-owned repos here. Org repos come via getOrgRepositories
+      // to avoid duplicates (the real API returns org repos in both queries).
+      const userRepos = mockRepos.filter(
+        (r) => r.owner.login === mockUser.login,
+      );
       return void route.fulfill({
         json: {
           data: {
             user: {
               ...mockUser,
               repositories: {
-                nodes: mockRepos,
+                nodes: userRepos,
                 pageInfo: { endCursor: null, hasNextPage: false },
               },
             },
@@ -121,7 +126,9 @@ export async function mockGraphQLRepos(page: Page): Promise<void> {
     }
 
     if (body.query.includes("getOrgRepositories")) {
-      const orgRepos = mockRepos.filter((r) => r.isInOrganization);
+      const orgRepos = mockRepos.filter(
+        (r) => r.owner.login !== mockUser.login,
+      );
       return void route.fulfill({
         json: {
           data: {
@@ -214,8 +221,17 @@ export async function mockInvalidToken(
 export async function mockLocalStorage(page: Page) {
   const validToken = getValidPersonalAccessToken();
 
-  // Use the secure_ prefix to match secureStorage key convention
+  // The app's secureStorage uses Web Crypto (AES-GCM) to encrypt/decrypt tokens
+  // in dev mode. Since addInitScript doesn't await async functions, we can't
+  // reliably encrypt before the app reads localStorage.
+  //
+  // Instead, we set window.__E2E_PLAIN_STORAGE__ = true which tells secureStorage
+  // to skip encryption and use plain-text storage (same as unit test mode).
   await page.addInitScript((token) => {
+    // Tell secureStorage to skip encryption
+    (window as Record<string, unknown>).__E2E_PLAIN_STORAGE__ = true;
+
+    // Store plain-text values with the secure_ prefix (matching secureStorage keys)
     window.localStorage.setItem("secure_pat", token);
     window.localStorage.setItem("secure_login", "testuser");
   }, validToken);
