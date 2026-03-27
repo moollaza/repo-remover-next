@@ -151,4 +151,107 @@ describe("sentryBeforeSend", () => {
     const result = sentryBeforeSend(event);
     expect(result.breadcrumbs).toEqual([]);
   });
+
+  it("scrubs tokens from event.tags", () => {
+    const event = createEvent({
+      tags: {
+        environment: "production",
+        auth: `token: ${FAKE_GHP}`,
+        version: "1.0.0",
+      },
+    });
+    const result = sentryBeforeSend(event);
+    expect(result.tags?.auth).not.toContain(FAKE_GHP);
+    expect(result.tags?.auth).toContain("[REDACTED]");
+    expect(result.tags?.environment).toBe("production");
+    expect(result.tags?.version).toBe("1.0.0");
+  });
+
+  it("scrubs tokens from event.extra (flat values)", () => {
+    const event = createEvent({
+      extra: {
+        apiToken: FAKE_PAT,
+        count: 5,
+        safe: "no-secrets",
+      },
+    });
+    const result = sentryBeforeSend(event);
+    expect(result.extra?.apiToken).not.toContain(FAKE_PAT);
+    expect(result.extra?.apiToken).toContain("[REDACTED]");
+    expect(result.extra?.count).toBe(5);
+    expect(result.extra?.safe).toBe("no-secrets");
+  });
+
+  it("scrubs tokens from event.extra (nested objects)", () => {
+    const event = createEvent({
+      extra: {
+        request: {
+          headers: { authorization: `Bearer ${FAKE_GHP}` },
+          url: "https://api.github.com/user",
+        },
+      },
+    });
+    const result = sentryBeforeSend(event);
+    const request = result.extra?.request as Record<string, unknown>;
+    const headers = request.headers as Record<string, unknown>;
+    expect(headers.authorization).not.toContain(FAKE_GHP);
+    expect(headers.authorization).toContain("[REDACTED]");
+    expect(request.url).toBe("https://api.github.com/user");
+  });
+
+  it("scrubs tokens from event.contexts", () => {
+    const event = createEvent({
+      contexts: {
+        app: { app_name: "repo-remover", token: FAKE_GHP },
+        browser: { name: "Chrome", version: "120" },
+      },
+    });
+    const result = sentryBeforeSend(event);
+    const app = result.contexts?.app as Record<string, unknown>;
+    expect(app.token).not.toContain(FAKE_GHP);
+    expect(app.token).toContain("[REDACTED]");
+    expect(app.app_name).toBe("repo-remover");
+    const browser = result.contexts?.browser as Record<string, unknown>;
+    expect(browser.name).toBe("Chrome");
+    expect(browser.version).toBe("120");
+  });
+
+  it("scrubs tokens from deeply nested contexts", () => {
+    const event = createEvent({
+      contexts: {
+        custom: {
+          level1: {
+            level2: `secret ${FAKE_PAT} here`,
+          },
+        },
+      },
+    });
+    const result = sentryBeforeSend(event);
+    const custom = result.contexts?.custom as Record<string, unknown>;
+    const level1 = custom.level1 as Record<string, unknown>;
+    expect(level1.level2).not.toContain(FAKE_PAT);
+    expect(level1.level2).toContain("[REDACTED]");
+  });
+
+  it("preserves non-string values in extra and contexts", () => {
+    const event = createEvent({
+      extra: {
+        arr: [1, 2, 3],
+        flag: true,
+        num: 42,
+        nothing: null,
+      },
+      contexts: {
+        metrics: { count: 10, enabled: true },
+      },
+    });
+    const result = sentryBeforeSend(event);
+    expect(result.extra?.arr).toEqual([1, 2, 3]);
+    expect(result.extra?.flag).toBe(true);
+    expect(result.extra?.num).toBe(42);
+    expect(result.extra?.nothing).toBeNull();
+    const metrics = result.contexts?.metrics as Record<string, unknown>;
+    expect(metrics.count).toBe(10);
+    expect(metrics.enabled).toBe(true);
+  });
 });
