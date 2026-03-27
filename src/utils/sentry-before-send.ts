@@ -2,6 +2,22 @@ import { type ErrorEvent } from "@sentry/react";
 
 import { sanitizeTokens } from "./sanitize-tokens";
 
+/** Recursively scrub string values in a record. Non-string leaves are untouched. */
+function scrubRecord(obj: Record<string, unknown>): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+  for (const key of Object.keys(obj)) {
+    const val = obj[key];
+    if (typeof val === "string") {
+      result[key] = sanitizeTokens(val);
+    } else if (val !== null && typeof val === "object" && !Array.isArray(val)) {
+      result[key] = scrubRecord(val as Record<string, unknown>);
+    } else {
+      result[key] = val;
+    }
+  }
+  return result;
+}
+
 /** Scrub GitHub tokens and PII from Sentry events before transmission. */
 export function sentryBeforeSend(event: ErrorEvent): ErrorEvent {
   if (event.user?.ip_address) {
@@ -46,6 +62,20 @@ export function sentryBeforeSend(event: ErrorEvent): ErrorEvent {
         });
       }
     });
+  }
+  if (event.tags) {
+    event.tags = scrubRecord(event.tags as Record<string, unknown>) as Record<
+      string,
+      string
+    >;
+  }
+  if (event.extra) {
+    event.extra = scrubRecord(event.extra as Record<string, unknown>);
+  }
+  if (event.contexts) {
+    event.contexts = scrubRecord(
+      event.contexts as Record<string, unknown>,
+    ) as ErrorEvent["contexts"];
   }
   return event;
 }
