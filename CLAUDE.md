@@ -1,42 +1,85 @@
 # Repo Remover
 
-GitHub repository management tool — bulk view and delete repos. Zero-knowledge, client-side only.
+GitHub repository management tool — bulk view, archive, and delete repos. Zero-knowledge, client-side only.
 
 ## Stack
 
-Next.js 14 (App Router), React 18, TypeScript, HeroUI + Tailwind CSS, Vitest + RTL + Playwright, MSW, Octokit (GraphQL), SWR, Sentry + Fathom, npm
+Vite 8, React 18, React Router 7, TypeScript 5.9, Tailwind CSS 4, Vitest + RTL + Playwright, MSW, Octokit (GraphQL + REST), SWR, Sentry + Fathom, bun
+
+Deployed on **Cloudflare Workers** (not Vercel).
 
 ## Constraints
 
-- Zero-knowledge architecture: all GitHub API calls client-side only, no backend
-- PAT-based auth (only viable client-side GitHub auth option)
-- No user data, tokens, or PII sent to any server
-- Use HeroUI semantic colors (not hardcoded Tailwind colors) for theme support
+- **Zero-knowledge architecture**: all GitHub API calls client-side only, no backend
+- **PAT-based auth**: only viable client-side GitHub auth option (no OAuth, no PKCE)
+- **No user data, tokens, or PII** sent to any server
+- **Tailwind CSS only**: no component library — use plain Tailwind + CSS custom properties for theming
+- **bun** as package manager (not npm)
 
 ## Commands
 
 ```bash
-npm run dev              # dev server (localhost:3000)
-npm run build            # production build
-npm run lint             # eslint
-npm run lint:fix         # eslint with auto-fix
-npm run test:unit        # unit tests (vitest)
-npm run test:e2e         # playwright E2E tests
-npm run test:e2e:fast    # E2E with fast-fail
-npm run test:all         # unit + E2E
+bun run dev              # dev server (localhost:5173)
+bun run build            # tsc + vite production build
+bun run lint             # eslint
+bun run lint:fix         # eslint with auto-fix
+bun run test:unit        # unit tests (vitest)
+bun run test:e2e         # playwright E2E tests
+bun run test:e2e:fast    # E2E with fast-fail
+bun run test:all         # unit + E2E
+npx tsc --noEmit         # typecheck (must pass before merge)
 ```
 
-Run `npm run lint && npm run test:unit && npm run build` before every commit.
+**Before every commit:** `bun run lint && bun run test:unit && bun run build`
 
 ## Workflow
 
-Uses superpowers workflow. For cross-project standards, see ~/projects/project-hub/standards/.
+Uses **Compound Engineering** workflow: Plan → Work → Review → Compound.
+
+- `/lfg` — full autonomous pipeline (plan → work → review → compound)
+- `/slfg` — same but with swarm parallelism for work + review
+- `/ce-plan` — structured planning only
+- `/ce-work` — execute a plan
+- `/ce-review` — multi-agent code review
+- `/ce-compound` — document learnings in `docs/solutions/`
+
+Plans go in `docs/plans/`. Solutions go in `docs/solutions/`.
+
+## Architecture
+
+- **Presentational/Container split**: `page.tsx` (container) + `dashboard.tsx` (presentational)
+- **Custom hooks**: `use-repo-filters.ts`, `use-repo-pagination.ts` — extract logic from components >200 LOC
+- **Theme**: CSS custom properties in `globals.css`, dark mode via `class` strategy with `next-themes`
+- **Token storage**: AES-GCM encrypted in localStorage (`src/utils/secure-storage.ts`)
+- **Data flow**: React Context (`GitHubContext`) + SWR for caching → Octokit GraphQL → GitHub API
+- **Error monitoring**: Sentry (with token sanitization + PII scrubbing)
+- **Analytics**: Fathom (privacy-first, no cookies)
+
+## Coding Standards
+
+- Use Tailwind utility classes (not hardcoded colors). Use CSS custom properties for theme values
+- Use `debug` utility for logging — never `console.log` in production
+- Type-only imports for `@octokit/*` types: `import { type Repository } from "@octokit/graphql-schema"`
+- Components >200 LOC: extract custom hooks or sub-components
+- Tests required for all new components (co-located `.test.tsx`)
+- Custom test render: `import { render } from "@/utils/test-utils"` (wraps with providers)
+- MSW for unit test API mocking, operation-based handlers: `graphql.query('GetRepositories', ...)`
+
+## Lessons Learned
+
+- `secureStorage` uses `secure_` prefix: keys are `secure_pat` / `secure_login` in localStorage
+- lint-staged runs prettier on ALL files in working tree, not just staged — untracked malformed files block commits
+- HeroUI Table doesn't expose standard `aria-selected` — use button enable state to verify selection
+- Dashboard shows SKELETON when `repos === null`, TABLE (even empty) when `repos !== []`
+- E2E: `dashboard.goto()` doesn't wait for data — add explicit waits in tests that need loaded data
+- E2E: theme tests needing dashboard content must set up auth mocks BEFORE navigating
+- Pre-commit hook: `husky` + `lint-staged` (eslint --fix + prettier --write)
 
 ## Details
 
 - `.claude/rules/security.md` — zero-knowledge architecture, token handling, CSP (always loaded)
-- `.claude/rules/testing.md` — MSW patterns, E2E with real GitHub API, type-only imports
-- `.claude/rules/components.md` — HeroUI theme system, React patterns, component complexity
+- `.claude/rules/testing.md` — MSW patterns, E2E conventions, type-only imports
+- `.claude/rules/components.md` — theme system, React patterns, component complexity
 - `.claude/rules/architecture.md` — architecture review findings, priority recommendations, API patterns
 - Architecture docs in `docs/` (ARCHITECTURE_REVIEW, RECOMMENDATIONS, IMPLEMENTATION_PLAN, TESTING_STRATEGY)
 - `AGENTS.md` is a symlink to this file
