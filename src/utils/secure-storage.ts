@@ -138,6 +138,15 @@ function isWebCryptoAvailable(): boolean {
     return false;
   }
 
+  // E2E tests set this flag via addInitScript to bypass encryption
+  if (
+    typeof window !== "undefined" &&
+    (window as unknown as Record<string, unknown>).__E2E_PLAIN_STORAGE__ ===
+      true
+  ) {
+    return false;
+  }
+
   return (
     typeof crypto?.subtle !== "undefined" &&
     typeof crypto.getRandomValues !== "undefined"

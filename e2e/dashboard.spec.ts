@@ -169,11 +169,11 @@ test.describe("Dashboard Page", () => {
   test("should handle pagination", async () => {
     await dashboard.expectRepoVisible("repo-1");
 
-    // Change items per page to 10 - all 8 administerable repos fit on one page
+    // Change items per page to 20 - all 11 administerable repos fit on one page
     await dashboard.paginationFilter.click();
-    await dashboard.page.getByTestId("per-page-option-10").click();
+    await dashboard.page.getByTestId("per-page-option-20").click();
 
-    // With 8 repos on 10-per-page, pagination disappears (only shown when totalPages > 1)
+    // With 11 repos on 20-per-page, pagination disappears (only shown when totalPages > 1)
     await expect(dashboard.pagination).not.toBeVisible();
 
     // All repos should be visible on the single page
@@ -195,15 +195,15 @@ test.describe("Dashboard Page", () => {
       .getByRole("columnheader", { name: "Repository" })
       .click();
     // Verify descending sort
-    await dashboard.expectRepoAtPosition(1, "repo-9");
+    await dashboard.expectRepoAtPosition(1, "repo-template");
 
     // Sort by last updated
     const lastUpdatedHeader = dashboard.page.getByRole("columnheader", {
       name: "Last updated",
     });
     await lastUpdatedHeader.click();
-    // Verify descending sort by last updated
-    await dashboard.expectRepoAtPosition(1, "repo-10");
+    // Verify ascending sort by last updated (new column defaults to ascending)
+    await dashboard.expectRepoAtPosition(1, "repo-mirror");
 
     // Sort by last updated in reverse
     await lastUpdatedHeader.click();
@@ -254,8 +254,10 @@ test.describe("Dashboard Page", () => {
   });
 
   test("should select all repositories when select all is clicked", async () => {
-    // Wait for table data to load before selecting
-    await expect(dashboard.tableRows.first()).toBeVisible();
+    // Wait for ALL data (personal + org repos) to finish loading.
+    // Progressive loading returns personal repos first; org repos arrive later.
+    // If we select-all before org repos load, the selection set won't include them.
+    await dashboard.waitForFullDataLoad();
 
     // Select all repositories
     await dashboard.selectAll();
@@ -270,7 +272,7 @@ test.describe("Dashboard Page", () => {
     await dashboard.goToNextPage();
     await dashboard.expectCurrentPage(2);
     await dashboard.expectRepoVisible("repo-7");
-    await expect(dashboard.tableRows).toHaveCount(3);
+    await expect(dashboard.tableRows).toHaveCount(5);
     await expect(dashboard.archiveButton).toBeEnabled();
 
     // Uncheck all - archive button should disable again
