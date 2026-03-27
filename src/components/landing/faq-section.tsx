@@ -51,13 +51,17 @@ export function FAQSection() {
           </p>
         </div>
 
-        <Accordion>
+        <Accordion className="space-y-3">
           {faqs.map((faq, index) => (
-            <AccordionItem key={index} value={index}>
-              <AccordionTrigger className="text-left text-base">
+            <AccordionItem
+              className="rounded-xl border border-divider hover:border-primary/60 bg-background px-5 transition-colors"
+              key={index}
+              value={index}
+            >
+              <AccordionTrigger className="text-left text-base text-default-700 hover:text-foreground py-4">
                 {faq.question}
               </AccordionTrigger>
-              <AccordionContent className="text-default-500">
+              <AccordionContent className="text-default-700 text-sm">
                 {faq.answer}
               </AccordionContent>
             </AccordionItem>

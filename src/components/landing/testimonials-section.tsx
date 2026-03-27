@@ -47,7 +47,7 @@ export function TestimonialsSection() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {testimonials.map((t, index) => (
             <div
-              className="bg-background border border-divider rounded-xl p-6"
+              className="bg-background border border-divider rounded-xl p-6 flex flex-col"
               key={index}
             >
               <div className="flex gap-1 mb-4">
@@ -58,10 +58,10 @@ export function TestimonialsSection() {
                   />
                 ))}
               </div>
-              <p className="text-foreground mb-6 leading-relaxed">
+              <p className="text-foreground mb-6 leading-relaxed flex-1">
                 &ldquo;{t.quote}&rdquo;
               </p>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 mt-auto">
                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--brand-blue)] to-[var(--brand-cyan)] flex items-center justify-center text-white font-semibold text-sm">
                   {t.avatar}
                 </div>
