@@ -1,17 +1,17 @@
 ---
 globs: ["src/components/**", "*.tsx"]
-description: HeroUI patterns, theme system, component complexity guidelines
+description: Theme system, React patterns, component complexity guidelines
 ---
 
 # Component & UI Patterns
 
 ## Theme System
 
-Uses HeroUI's semantic color system for proper light/dark theme support.
+Uses CSS custom properties defined in `globals.css` with Tailwind utility classes for proper light/dark theme support.
 
 **DO NOT use hardcoded Tailwind colors** like `bg-gray-100`, `text-black`, `border-gray-200` — these do not adapt to theme changes.
 
-**DO use HeroUI semantic colors:**
+**DO use semantic color classes (defined via CSS custom properties in globals.css):**
 
 - `bg-background` / `text-foreground` — main background and text
 - `bg-content1` / `bg-content2` — content area backgrounds
@@ -23,11 +23,11 @@ Uses HeroUI's semantic color system for proper light/dark theme support.
 - **Provider**: Uses `next-themes` with `class` attribute strategy
 - **Default Theme**: Light mode by default
 - **Theme Persistence**: Automatically saved to localStorage
-- **HeroUI Integration**: Configured in `tailwind.config.ts` with `heroui()` plugin
+- **CSS Custom Properties**: Defined in `globals.css` via `@theme` directive, consumed as Tailwind utilities
 
 ### Common Theme Issues
 
-- **Black on black text**: Usually caused by hardcoded CSS overriding HeroUI's semantic colors
+- **Black on black text**: Usually caused by hardcoded CSS overriding semantic color custom properties
 - **Colors not switching**: Check that you're using semantic color classes, not hardcoded Tailwind colors
 - **Layout issues**: Ensure borders and backgrounds use `border-divider` and `bg-content1`
 
@@ -117,7 +117,7 @@ Uses HeroUI's semantic color system for proper light/dark theme support.
 
 **Do:**
 
-- Use HeroUI semantic colors for theme compatibility
+- Use semantic color classes (from CSS custom properties) for theme compatibility
 - Extract hooks from components >200 LOC
 - Write tests for all new components
 - Use type-only imports for `@octokit/graphql-schema` types

@@ -69,7 +69,7 @@ Plans go in `docs/plans/`. Solutions go in `docs/solutions/`.
 
 - `secureStorage` uses `secure_` prefix: keys are `secure_pat` / `secure_login` in localStorage
 - lint-staged runs prettier on ALL files in working tree, not just staged — untracked malformed files block commits
-- HeroUI Table doesn't expose standard `aria-selected` — use button enable state to verify selection
+- Table doesn't expose standard `aria-selected` — use button enable state to verify selection
 - Dashboard shows SKELETON when `repos === null`, TABLE (even empty) when `repos !== []`
 - E2E: `dashboard.goto()` doesn't wait for data — add explicit waits in tests that need loaded data
 - E2E: theme tests needing dashboard content must set up auth mocks BEFORE navigating

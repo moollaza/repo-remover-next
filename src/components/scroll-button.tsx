@@ -38,16 +38,65 @@ const colorMap: Record<string, string> = {
   warning: "bg-warning text-foreground hover:bg-warning/90",
 };
 
-const variantMap: Record<string, (color: string) => string> = {
-  bordered: (color) =>
-    `bg-transparent border-2 border-${color} text-${color} hover:bg-${color}/10`,
-  flat: (color) => `bg-${color}/20 text-${color} hover:bg-${color}/30`,
-  ghost: (color) =>
-    `bg-transparent border-2 border-${color} text-${color} hover:bg-${color} hover:text-white`,
-  light: (color) => `bg-transparent text-${color} hover:bg-${color}/10`,
-  shadow: (color) =>
-    `bg-${color} text-white shadow-lg shadow-${color}/40 hover:bg-${color}/90`,
-  solid: () => "", // handled by colorMap
+const variantMap: Record<string, Record<string, string>> = {
+  bordered: {
+    danger:
+      "bg-transparent border-2 border-danger text-danger hover:bg-danger/10",
+    default:
+      "bg-transparent border-2 border-default text-default hover:bg-default/10",
+    primary:
+      "bg-transparent border-2 border-primary text-primary hover:bg-primary/10",
+    secondary:
+      "bg-transparent border-2 border-secondary text-secondary hover:bg-secondary/10",
+    success:
+      "bg-transparent border-2 border-success text-success hover:bg-success/10",
+    warning:
+      "bg-transparent border-2 border-warning text-warning hover:bg-warning/10",
+  },
+  flat: {
+    danger: "bg-danger/20 text-danger hover:bg-danger/30",
+    default: "bg-default/20 text-default hover:bg-default/30",
+    primary: "bg-primary/20 text-primary hover:bg-primary/30",
+    secondary: "bg-secondary/20 text-secondary hover:bg-secondary/30",
+    success: "bg-success/20 text-success hover:bg-success/30",
+    warning: "bg-warning/20 text-warning hover:bg-warning/30",
+  },
+  ghost: {
+    danger:
+      "bg-transparent border-2 border-danger text-danger hover:bg-danger hover:text-white",
+    default:
+      "bg-transparent border-2 border-default text-default hover:bg-default hover:text-white",
+    primary:
+      "bg-transparent border-2 border-primary text-primary hover:bg-primary hover:text-white",
+    secondary:
+      "bg-transparent border-2 border-secondary text-secondary hover:bg-secondary hover:text-white",
+    success:
+      "bg-transparent border-2 border-success text-success hover:bg-success hover:text-white",
+    warning:
+      "bg-transparent border-2 border-warning text-warning hover:bg-warning hover:text-white",
+  },
+  light: {
+    danger: "bg-transparent text-danger hover:bg-danger/10",
+    default: "bg-transparent text-default hover:bg-default/10",
+    primary: "bg-transparent text-primary hover:bg-primary/10",
+    secondary: "bg-transparent text-secondary hover:bg-secondary/10",
+    success: "bg-transparent text-success hover:bg-success/10",
+    warning: "bg-transparent text-warning hover:bg-warning/10",
+  },
+  shadow: {
+    danger:
+      "bg-danger text-white shadow-lg shadow-danger/40 hover:bg-danger/90",
+    default:
+      "bg-default text-white shadow-lg shadow-default/40 hover:bg-default/90",
+    primary:
+      "bg-primary text-white shadow-lg shadow-primary/40 hover:bg-primary/90",
+    secondary:
+      "bg-secondary text-white shadow-lg shadow-secondary/40 hover:bg-secondary/90",
+    success:
+      "bg-success text-white shadow-lg shadow-success/40 hover:bg-success/90",
+    warning:
+      "bg-warning text-white shadow-lg shadow-warning/40 hover:bg-warning/90",
+  },
 };
 
 const sizeMap: Record<string, string> = {
@@ -78,7 +127,7 @@ export default function ScrollButton({
   if (variant === "solid" || !variantMap[variant]) {
     variantClass = colorMap[color] ?? colorMap.primary;
   } else {
-    variantClass = variantMap[variant](color);
+    variantClass = variantMap[variant][color];
   }
 
   return (
