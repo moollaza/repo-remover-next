@@ -16,7 +16,7 @@ description: Architecture review findings, priority recommendations, GitHub API 
 
 - **Data Provider Layer**: `GitHubDataProvider` wraps the app and manages API calls and state
 - **Context Layer**: `GitHubContext` provides typed access to user data, repositories, and authentication state
-- **Component Layer**: Reusable UI components built with HeroUI and Tailwind CSS
+- **Component Layer**: Reusable UI components built with Tailwind CSS
 - **Testing Layer**: MSW for unit tests, real API calls for E2E tests
 
 ## GitHub API Best Practices
@@ -104,7 +104,6 @@ Configure optional monitoring services:
 
 ### UI & Styling
 
-- HeroUI: https://heroui.com/docs/guide/introduction
 - Tailwind CSS: https://tailwindcss.com/docs
 - Framer Motion: https://www.framer.com/motion/
 

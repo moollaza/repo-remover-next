@@ -53,7 +53,6 @@ Before any changes are made, you will be asked to review the list of selected re
 ## Built with
 
 - [Next.js](https://nextjs.org/) - React framework with App Router
-- [HeroUI](https://www.heroui.com/) - NextUI fork for modern UI components
 - [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS framework
 - [Vitest](https://vitest.dev/) + [Playwright](https://playwright.dev/) - Testing framework
 - [Sentry.io](https://sentry.io/) - Privacy-first error monitoring

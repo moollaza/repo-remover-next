@@ -1,6 +1,9 @@
 # dependencies
 /node_modules
 
+# claude worktrees
+.claude/worktrees/
+
 # build output
 /dist
 

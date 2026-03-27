@@ -27,9 +27,6 @@ export default defineConfig({
             ) {
               return "react-vendor";
             }
-            if (id.includes("@heroui") || id.includes("@nextui")) {
-              return "heroui-vendor";
-            }
             if (id.includes("@octokit")) {
               return "octokit-vendor";
             }
