@@ -400,7 +400,7 @@ export default function RepoTable({
 
                         {/* Description */}
                         <div
-                          className="text-xs text-default-400"
+                          className="text-xs text-default-500"
                           data-testid="repo-description"
                         >
                           {repo.description ?? <i>No description</i>}

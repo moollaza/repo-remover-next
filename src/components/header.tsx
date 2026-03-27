@@ -180,12 +180,12 @@ function DashboardHeader({
                 </div>
               )}
               {/* Name + link */}
-              <div className="text-left hidden sm:block">
+              <div className="text-left hidden sm:block leading-tight">
                 <div className="text-sm font-medium text-foreground">
                   {user?.name}
                 </div>
                 <a
-                  className="text-xs text-[var(--brand-link)] hover:underline"
+                  className="text-xs text-[var(--brand-link)] hover:underline leading-none"
                   href={(user?.url as string) ?? "https://github.com"}
                   onClick={(e) => e.stopPropagation()}
                   rel="noopener noreferrer"

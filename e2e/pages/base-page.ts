@@ -31,7 +31,7 @@ export class BasePage {
 
   async expectFooterCopyright() {
     await expect(
-      this.page.getByText(/© 2019-2026 Repo Remover/),
+      this.page.getByText(/© 2019-2026 Repo Remover/).first(),
     ).toBeVisible();
   }
 
@@ -84,9 +84,9 @@ export class BasePage {
     // Author link
     await this.expectFooterLink("Zaahir Moolla", "https://zaahir.ca");
 
-    // Copyright
+    // Copyright (desktop + mobile versions exist, use first visible)
     await expect(
-      this.page.getByText(/© 2019-2026 Repo Remover/),
+      this.page.getByText(/© 2019-2026 Repo Remover/).first(),
     ).toBeVisible();
 
     // GitHub link

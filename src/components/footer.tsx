@@ -20,7 +20,7 @@ export default function Footer() {
       data-testid="footer"
     >
       <div className="max-w-7xl mx-auto px-6 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center gap-2 mb-4">
               <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
@@ -49,6 +49,23 @@ export default function Footer() {
               >
                 <BlueskyIcon className="h-5 w-5" />
               </a>
+            </div>
+            {/* Copyright shown inline on desktop, hidden on mobile (shown below grid instead) */}
+            <div className="hidden md:block mt-4">
+              <p className="text-sm text-default-400 mb-1">
+                © 2019-2026 Repo Remover. All rights reserved.
+              </p>
+              <p className="text-sm text-default-400 flex items-center gap-2">
+                Made with <Heart className="h-4 w-4 text-danger fill-danger" /> by{" "}
+                <a
+                  className="hover:text-foreground transition-colors"
+                  href="https://zaahir.ca"
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  Zaahir Moolla
+                </a>
+              </p>
             </div>
           </div>
 
@@ -116,9 +133,9 @@ export default function Footer() {
             </ul>
           </div>
         </div>
-
-        <div className="pt-8 border-t border-divider flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-sm text-default-400">
+        {/* Copyright shown at bottom on mobile only */}
+        <div className="md:hidden mt-8">
+          <p className="text-sm text-default-400 mb-1">
             © 2019-2026 Repo Remover. All rights reserved.
           </p>
           <p className="text-sm text-default-400 flex items-center gap-2">
