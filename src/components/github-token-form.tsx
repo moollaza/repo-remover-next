@@ -9,7 +9,7 @@ import {
 
 interface GitHubTokenFormProps {
   className?: string;
-  onSubmit: (token: string) => void;
+  onSubmit: (token: string, remember: boolean) => void;
   onValueChange: (value: string) => void;
   value: string;
 }
@@ -24,6 +24,7 @@ export default function GitHubTokenForm({
   const [isValidating, setIsValidating] = useState(false);
   const [isTokenValid, setIsTokenValid] = useState(false);
   const [username, setUsername] = useState<null | string>(null);
+  const [remember, setRemember] = useState(true);
   const [lastValidatedToken, setLastValidatedToken] = useState<null | string>(
     null,
   );
@@ -108,7 +109,7 @@ export default function GitHubTokenForm({
 
     if (!value || !isTokenValid) return;
 
-    onSubmit(value);
+    onSubmit(value, remember);
   }
 
   // Input state based on validation
@@ -214,13 +215,14 @@ export default function GitHubTokenForm({
           </p>
         </div>
 
-        {/* TODO: Set to false */}
         <label className="flex items-center gap-2 cursor-pointer">
           <input
-            checked={true}
+            checked={remember}
             className="h-4 w-4 rounded border-default-300 text-primary focus:ring-primary"
             data-testid="github-token-remember"
-            readOnly
+            onChange={(e) => {
+              setRemember(e.target.checked);
+            }}
             type="checkbox"
           />
           <span className="text-sm text-foreground">

@@ -60,7 +60,7 @@ describe("GitHubTokenForm", () => {
     ).toBeInTheDocument();
   });
 
-  test("calls onSubmit when form is submitted with valid token", async () => {
+  test("calls onSubmit with token and remember=true by default", async () => {
     const { submitButton } = setupForm({
       value: "ghp_abcdefghijklmnopqrstuvwxyz1234567890",
     });
@@ -73,9 +73,55 @@ describe("GitHubTokenForm", () => {
     // Submit the form
     await user.click(submitButton);
 
-    // onSubmit should be called with the token
+    // onSubmit should be called with the token and remember=true
     expect(mockOnSubmit).toHaveBeenCalledWith(
       "ghp_abcdefghijklmnopqrstuvwxyz1234567890",
+      true,
+    );
+  });
+
+  test("remember me checkbox is checked by default", () => {
+    setupForm();
+
+    const checkbox = screen.getByTestId("github-token-remember");
+    expect(checkbox).toBeChecked();
+  });
+
+  test("remember me checkbox can be toggled", async () => {
+    setupForm();
+
+    const checkbox = screen.getByTestId("github-token-remember");
+    expect(checkbox).toBeChecked();
+
+    await user.click(checkbox);
+    expect(checkbox).not.toBeChecked();
+
+    await user.click(checkbox);
+    expect(checkbox).toBeChecked();
+  });
+
+  test("calls onSubmit with remember=false when checkbox is unchecked", async () => {
+    const { submitButton } = setupForm({
+      value: "ghp_abcdefghijklmnopqrstuvwxyz1234567890",
+    });
+
+    // Uncheck remember me
+    const checkbox = screen.getByTestId("github-token-remember");
+    await user.click(checkbox);
+    expect(checkbox).not.toBeChecked();
+
+    // Wait for API validation to complete and button to become enabled
+    await waitFor(() => expect(submitButton).not.toBeDisabled(), {
+      timeout: 2000,
+    });
+
+    // Submit the form
+    await user.click(submitButton);
+
+    // onSubmit should be called with remember=false
+    expect(mockOnSubmit).toHaveBeenCalledWith(
+      "ghp_abcdefghijklmnopqrstuvwxyz1234567890",
+      false,
     );
   });
 
