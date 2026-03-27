@@ -1,6 +1,8 @@
 import * as Sentry from "@sentry/react";
 import { Component, type ErrorInfo, type ReactNode } from "react";
 
+import { debug } from "@/utils/debug";
+
 interface ErrorBoundaryProps {
   children: ReactNode;
   fallback?: ReactNode;
@@ -42,7 +44,7 @@ export class ErrorBoundary extends Component<
 
     // Log to console in development
     if (import.meta.env.DEV) {
-      console.error("Error Boundary caught an error:", error, errorInfo);
+      debug.error("Error Boundary caught an error:", error, errorInfo);
     }
   }
 
@@ -59,7 +61,10 @@ export class ErrorBoundary extends Component<
 
       // Default fallback UI
       return (
-        <div className="flex min-h-[400px] items-center justify-center px-4">
+        <div
+          className="flex min-h-[400px] items-center justify-center px-4"
+          role="alert"
+        >
           <div className="w-full max-w-md rounded-lg bg-content1 p-8 text-center shadow-lg">
             <div className="mb-4">
               <h2 className="text-2xl font-bold text-foreground">

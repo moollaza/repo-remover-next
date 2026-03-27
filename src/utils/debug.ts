@@ -7,20 +7,12 @@
  * - Provides consistent logging interface across the application
  */
 
+import { SENSITIVE_PATTERNS } from "./sanitize-tokens";
+
 /**
  * Check if we're in development mode
  */
 const isDevelopment = import.meta.env.DEV;
-
-/**
- * Patterns to detect and sanitize sensitive data
- */
-const SENSITIVE_PATTERNS = [
-  /github_pat_[a-zA-Z0-9_]+/gi, // Fine-grained PATs
-  /gh[porus]_[a-zA-Z0-9]+/gi, // Standard GitHub tokens
-  /Bearer\s+[a-zA-Z0-9_-]+/gi, // Bearer tokens
-  /token[:\s]+[a-zA-Z0-9_-]+/gi, // Generic token patterns
-] as const;
 
 /**
  * Log an error message
@@ -29,14 +21,8 @@ const SENSITIVE_PATTERNS = [
  * @param data - Optional data to log with the error
  */
 function error(message: string, ...data: unknown[]): void {
-  const sanitizedData = data.map(sanitize);
-  if (sanitizedData.length > 0) {
-    // eslint-disable-next-line no-console
-    console.error(`[ERROR] ${message}`, ...sanitizedData);
-  } else {
-    // eslint-disable-next-line no-console
-    console.error(`[ERROR] ${message}`);
-  }
+  // eslint-disable-next-line no-console
+  console.error(`[ERROR] ${message}`, ...data.map(sanitize));
 }
 
 /**
@@ -73,14 +59,8 @@ function groupEnd(): void {
 function log(message: string, ...data: unknown[]): void {
   if (!isDevelopment) return;
 
-  const sanitizedData = data.map(sanitize);
-  if (sanitizedData.length > 0) {
-    // eslint-disable-next-line no-console
-    console.log(`[DEBUG] ${message}`, ...sanitizedData);
-  } else {
-    // eslint-disable-next-line no-console
-    console.log(`[DEBUG] ${message}`);
-  }
+  // eslint-disable-next-line no-console
+  console.log(`[DEBUG] ${message}`, ...data.map(sanitize));
 }
 
 /**
@@ -89,6 +69,10 @@ function log(message: string, ...data: unknown[]): void {
  * @returns Sanitized value safe for logging
  */
 function sanitize(value: unknown): unknown {
+  return sanitizeInner(value, new WeakSet<object>());
+}
+
+function sanitizeInner(value: unknown, seen: WeakSet<object>): unknown {
   if (typeof value === "string") {
     let sanitized = value;
     for (const pattern of SENSITIVE_PATTERNS) {
@@ -97,23 +81,40 @@ function sanitize(value: unknown): unknown {
     return sanitized;
   }
 
-  if (Array.isArray(value)) {
-    return value.map(sanitize);
-  }
-
   if (value && typeof value === "object") {
+    if (seen.has(value)) {
+      return "[Circular]";
+    }
+    seen.add(value);
+
+    if (Array.isArray(value)) {
+      return value.map((item) => sanitizeInner(item, seen));
+    }
+
+    if (value instanceof Error) {
+      return {
+        message: sanitizeInner(value.message, seen) as string,
+        name: value.name,
+      };
+    }
+
     const sanitized: Record<string, unknown> = {};
     for (const [key, val] of Object.entries(value)) {
       // Redact known sensitive keys entirely
+      // Use case-sensitive endsWith("Key") for camelCase (apiKey, accessKey)
+      // and case-insensitive for exact "key" and snake_case "_key" variants
+      const lk = key.toLowerCase();
       if (
-        key.toLowerCase().includes("token") ||
-        key.toLowerCase().includes("password") ||
-        key.toLowerCase().includes("secret") ||
-        key.toLowerCase().includes("key")
+        lk.includes("token") ||
+        lk.includes("password") ||
+        lk.includes("secret") ||
+        lk === "key" ||
+        key.endsWith("Key") ||
+        lk.endsWith("_key")
       ) {
         sanitized[key] = "[REDACTED]";
       } else {
-        sanitized[key] = sanitize(val);
+        sanitized[key] = sanitizeInner(val, seen);
       }
     }
     return sanitized;
@@ -146,14 +147,8 @@ function table(data: unknown): void {
 function warn(message: string, ...data: unknown[]): void {
   if (!isDevelopment) return;
 
-  const sanitizedData = data.map(sanitize);
-  if (sanitizedData.length > 0) {
-    // eslint-disable-next-line no-console
-    console.warn(`[WARN] ${message}`, ...sanitizedData);
-  } else {
-    // eslint-disable-next-line no-console
-    console.warn(`[WARN] ${message}`);
-  }
+  // eslint-disable-next-line no-console
+  console.warn(`[WARN] ${message}`, ...data.map(sanitize));
 }
 
 /**

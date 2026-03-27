@@ -79,9 +79,14 @@ export async function generateRepos(
 export function isValidGitHubToken(token: string): boolean {
   if (!token) return false;
 
-  // Special case for github_pat_ tokens
+  // Special case for github_pat_ (fine-grained) tokens — real tokens are 82+ chars
   if (token.startsWith("github_pat_")) {
-    return token.length >= 40 && /^[a-zA-Z0-9_]+$/.test(token.slice(11));
+    const payload = token.slice(11);
+    return (
+      token.length >= 72 &&
+      /^[a-zA-Z0-9_]+$/.test(payload) &&
+      /[a-zA-Z0-9]/.test(payload)
+    );
   }
 
   // All other tokens start with 3-letter prefix + underscore
@@ -159,7 +164,7 @@ export const processRepo = async (
     await archiveRepo(octokit, repo);
     // Track individual successful archive
     analytics.trackRepoArchived();
-  } else if (action === "delete") {
+  } else {
     await deleteRepo(octokit, repo);
     // Track individual successful delete
     analytics.trackRepoDeleted();
@@ -188,7 +193,6 @@ export function createThrottledOctokit(
         return false;
       },
       onSecondaryRateLimit: () => {
-        // Don't retry secondary rate limits (abuse detection)
         debug.log("[Throttle] Secondary rate limit detected - not retrying");
         return false;
       },

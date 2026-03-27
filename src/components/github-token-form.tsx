@@ -1,3 +1,4 @@
+import { RequestError } from "@octokit/request-error";
 import clsx from "clsx";
 import { useEffect, useState } from "react";
 
@@ -31,17 +32,25 @@ export default function GitHubTokenForm({
   const handleChange = (newValue: string) => {
     onValueChange(newValue);
     if (error) setError(null);
+    if (!newValue) {
+      setIsTokenValid(false);
+      setUsername(null);
+      setLastValidatedToken(null);
+    }
   };
 
   useEffect(() => {
     let isMounted = true;
 
     const validateToken = async () => {
-      if (
-        !value ||
-        !isValidGitHubToken(value) ||
-        value === lastValidatedToken
-      ) {
+      if (!value) {
+        setIsTokenValid(false);
+        setUsername(null);
+        setLastValidatedToken(null);
+        return;
+      }
+
+      if (!isValidGitHubToken(value) || value === lastValidatedToken) {
         return;
       }
 
@@ -61,7 +70,20 @@ export default function GitHubTokenForm({
         if (isMounted) {
           setIsTokenValid(false);
           setUsername(null);
-          setError("Invalid or expired token");
+
+          // Differentiate 401 (bad token) from server/network errors
+          const status = err instanceof RequestError ? err.status : undefined;
+
+          if (status === 401) {
+            setError("Invalid or expired token");
+          } else if (status !== undefined && status >= 500) {
+            setError("GitHub API is unavailable — please try again later");
+          } else {
+            setError(
+              "GitHub API is unavailable — please check your connection",
+            );
+          }
+
           setLastValidatedToken(value);
         }
       } finally {

@@ -3,6 +3,8 @@
  * Uses Web Crypto API to encrypt sensitive data before storing in localStorage
  */
 
+import { debug } from "@/utils/debug";
+
 const STORAGE_KEY_PREFIX = "secure_";
 const ALGORITHM = "AES-GCM";
 
@@ -33,7 +35,7 @@ async function decryptData(encryptedData: string): Promise<string> {
 
     return decoder.decode(decrypted);
   } catch (error) {
-    console.error("Decryption failed:", error);
+    debug.error("Decryption failed:", error);
     throw new Error("Failed to decrypt data");
   }
 }
@@ -92,7 +94,7 @@ async function encryptData(data: string): Promise<string> {
     // Convert to base64 for storage
     return btoa(String.fromCharCode.apply(null, Array.from(combined)));
   } catch (error) {
-    console.error("Encryption failed:", error);
+    debug.error("Encryption failed:", error);
     throw new Error("Failed to encrypt data");
   }
 }
@@ -107,15 +109,17 @@ function generateSalt(): Uint8Array {
   return crypto.getRandomValues(new Uint8Array(16));
 }
 
-// Get a deterministic password based on the browser/device
-// DO NOT use screen.width/height — these change when monitors are
-// connected/disconnected, which would silently invalidate the encryption
-// key and lock users out of their stored tokens.
-export async function getBrowserFingerprint(): Promise<string> {
-  // Create a fingerprint based on STABLE browser characteristics only.
+// Get a deterministic password based on the browser/device.
+// Deliberately excludes navigator.userAgent — it contains the browser
+// version string which changes on every auto-update, silently
+// invalidating all encrypted tokens.
+// Deliberately excludes screen.width/height — these change when monitors
+// are connected/disconnected.
+async function getBrowserFingerprint(): Promise<string> {
   const fingerprint = [
-    navigator.userAgent,
     navigator.language,
+    navigator.hardwareConcurrency,
+    navigator.platform, // deprecated but stable across all browsers
     Intl.DateTimeFormat().resolvedOptions().timeZone,
   ].join("|");
 
@@ -154,9 +158,11 @@ export const secureStorage = {
 
     try {
       return await decryptData(stored);
-    } catch (error) {
-      console.warn("Decryption failed, treating as plain text:", error);
-      return stored;
+    } catch {
+      // Decryption failed — fingerprint changed or data corrupted.
+      // Clear the key rather than returning raw ciphertext.
+      localStorage.removeItem(STORAGE_KEY_PREFIX + key);
+      return null;
     }
   },
 
@@ -179,19 +185,12 @@ export const secureStorage = {
    */
   async setItem(key: string, value: string): Promise<void> {
     if (!isWebCryptoAvailable()) {
-      console.warn(
-        "Web Crypto API not available, falling back to plain storage",
-      );
+      debug.warn("Web Crypto API not available, falling back to plain storage");
       localStorage.setItem(STORAGE_KEY_PREFIX + key, value);
       return;
     }
 
-    try {
-      const encrypted = await encryptData(value);
-      localStorage.setItem(STORAGE_KEY_PREFIX + key, encrypted);
-    } catch (error) {
-      console.warn("Encryption failed, falling back to plain storage:", error);
-      localStorage.setItem(STORAGE_KEY_PREFIX + key, value);
-    }
+    const encrypted = await encryptData(value);
+    localStorage.setItem(STORAGE_KEY_PREFIX + key, encrypted);
   },
 };

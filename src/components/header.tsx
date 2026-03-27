@@ -5,7 +5,6 @@ import { useLocation } from "react-router-dom";
 
 import { GenerateReposButton } from "@/components/generate-repos-button";
 import { useGitHubData } from "@/hooks/use-github-data";
-import { secureStorage } from "@/utils/secure-storage";
 
 const homeLinks = [
   { href: "#features", label: "Features" },
@@ -229,15 +228,14 @@ function DashboardHeader({
 
 export default function Header() {
   const { pathname } = useLocation();
-  const { isAuthenticated, user } = useGitHubData();
+  const { isAuthenticated, logout, user } = useGitHubData();
 
   const isDashboard = pathname === "/dashboard";
   const isDevelopment = import.meta.env.DEV;
 
   function handleLogout() {
-    // Only clear auth data — preserve theme and other preferences
-    secureStorage.removeItem("pat");
-    secureStorage.removeItem("login");
+    logout();
+    // Force full reload to clear SWR cache and React state
     window.location.href = "/";
   }
 

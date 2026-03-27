@@ -2,6 +2,16 @@ import { type Repository } from "@octokit/graphql-schema";
 import { Octokit } from "@octokit/rest";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+// Mock analytics module before importing anything that uses it
+vi.mock("@/utils/analytics", () => ({
+  analytics: {
+    trackRepoArchived: vi.fn(),
+    trackRepoDeleted: vi.fn(),
+  },
+}));
+
+import { analytics } from "@/utils/analytics";
+
 // Import the functions we want to test
 import {
   archiveRepo,
@@ -149,48 +159,40 @@ describe("GitHub Utils", () => {
       expect(mockUpdate).not.toHaveBeenCalled();
     });
 
-    it("should use debug.log instead of direct console.log", async () => {
-      const debugModule = await import("@/utils/debug");
-      const debugSpy = vi
-        .spyOn(debugModule.debug, "log")
-        .mockImplementation(() => {});
-
+    it("should call analytics.trackRepoArchived after successful archive", async () => {
       await processRepo(mockOctokit as Octokit, mockRepo, "archive");
 
-      expect(debugSpy).toHaveBeenCalledWith(
-        expect.stringContaining("Processing archive for test-repo"),
-      );
-      debugSpy.mockRestore();
+      expect(analytics.trackRepoArchived).toHaveBeenCalledOnce();
+      expect(analytics.trackRepoDeleted).not.toHaveBeenCalled();
     });
 
-    it("should use debug.error on archive failure", async () => {
-      const debugModule = await import("@/utils/debug");
-      const debugSpy = vi
-        .spyOn(debugModule.debug, "error")
-        .mockImplementation(() => {});
+    it("should call analytics.trackRepoDeleted after successful delete", async () => {
+      await processRepo(mockOctokit as Octokit, mockRepo, "delete");
+
+      expect(analytics.trackRepoDeleted).toHaveBeenCalledOnce();
+      expect(analytics.trackRepoArchived).not.toHaveBeenCalled();
+    });
+
+    it("should not call analytics when archive API throws", async () => {
       mockUpdate.mockRejectedValueOnce(new Error("Permission denied"));
 
       await expect(
-        archiveRepo(mockOctokit as Octokit, mockRepo),
+        processRepo(mockOctokit as Octokit, mockRepo, "archive"),
       ).rejects.toThrow();
 
-      expect(debugSpy).toHaveBeenCalled();
-      debugSpy.mockRestore();
+      expect(analytics.trackRepoArchived).not.toHaveBeenCalled();
+      expect(analytics.trackRepoDeleted).not.toHaveBeenCalled();
     });
 
-    it("should use debug.error on delete failure", async () => {
-      const debugModule = await import("@/utils/debug");
-      const debugSpy = vi
-        .spyOn(debugModule.debug, "error")
-        .mockImplementation(() => {});
+    it("should not call analytics when delete API throws", async () => {
       mockDelete.mockRejectedValueOnce(new Error("Not found"));
 
       await expect(
-        deleteRepo(mockOctokit as Octokit, mockRepo),
+        processRepo(mockOctokit as Octokit, mockRepo, "delete"),
       ).rejects.toThrow();
 
-      expect(debugSpy).toHaveBeenCalled();
-      debugSpy.mockRestore();
+      expect(analytics.trackRepoDeleted).not.toHaveBeenCalled();
+      expect(analytics.trackRepoArchived).not.toHaveBeenCalled();
     });
   });
 
@@ -202,24 +204,51 @@ describe("GitHub Utils", () => {
       expect(isValidGitHubToken(undefined as unknown as string)).toBe(false);
     });
 
-    // Test github_pat_ tokens
+    // Test github_pat_ tokens (fine-grained PATs are 82+ chars)
     it("should validate github_pat_ tokens correctly", () => {
-      // Valid github_pat_ tokens
+      // Valid github_pat_ token (realistic length ~82 chars)
+      expect(
+        isValidGitHubToken(
+          "github_pat_11AABBCCDDEEFFGGHH0011_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVW",
+        ),
+      ).toBe(true);
+
+      // Too short — prefix only
+      expect(isValidGitHubToken("github_pat_short")).toBe(false);
+
+      // Too short — 40 chars total (only 29 chars of payload, not a real PAT)
+      expect(
+        isValidGitHubToken("github_pat_12345678901234567890123456789"),
+      ).toBe(false);
+
+      // Too short — 56 chars (still below 72-char minimum)
       expect(
         isValidGitHubToken(
           "github_pat_11AABBCCDDEEFFGGHH0011223344556677889900_abcDEF",
         ),
-      ).toBe(true);
-
-      // Too short
-      expect(isValidGitHubToken("github_pat_short")).toBe(false);
+      ).toBe(false);
 
       // Invalid characters
       expect(
         isValidGitHubToken(
-          "github_pat_11AABBCCDDEEFFGGHH0011223344556677889900_abc$%^",
+          "github_pat_11AABBCCDDEEFFGGHH0011_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRST$%^",
         ),
       ).toBe(false);
+    });
+
+    it("should reject github_pat_ tokens with underscore-only payloads", () => {
+      // 72 chars total, all underscores after prefix — not a real token
+      expect(isValidGitHubToken("github_pat_" + "_".repeat(61))).toBe(false);
+
+      // Even longer underscore-only payload
+      expect(isValidGitHubToken("github_pat_" + "_".repeat(100))).toBe(false);
+
+      // Mixed underscores with at least one alphanumeric should still pass
+      expect(
+        isValidGitHubToken(
+          "github_pat_11AABBCCDDEEFFGGHH0011_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVW",
+        ),
+      ).toBe(true);
     });
 
     // Test standard tokens (ghp_, gho_, etc.)

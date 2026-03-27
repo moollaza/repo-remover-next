@@ -9,6 +9,8 @@ import React, {
 import useSWR from "swr";
 
 import { GitHubContext, GitHubContextType } from "@/contexts/github-context";
+import { analytics } from "@/utils/analytics";
+import { debug } from "@/utils/debug";
 import {
   fetchGitHubDataWithProgress,
   type LoadingProgress,
@@ -51,6 +53,7 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
   const [isInitialized, setIsInitialized] = useState(false);
   const [progress, setProgress] = useState<LoadingProgress | null>(null);
   const lastFetchTimeRef = useRef<number>(0);
+  const tokenValidatedRef = useRef<null | string>(null);
 
   // Load from secure storage on mount
   useLayoutEffect(() => {
@@ -63,7 +66,7 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
           setLoginState(storedLogin);
         if (storedPat && typeof storedPat === "string") setPatState(storedPat);
       } catch (error) {
-        console.warn("Error accessing secure storage:", error);
+        debug.warn("Error accessing secure storage:", error);
       } finally {
         setIsInitialized(true);
       }
@@ -117,18 +120,23 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
     {
       dedupingInterval: 60000, // 1 minute
       onError: (err: Error) => {
-        console.error("GitHub API error:", err);
+        debug.error("GitHub API error:", err);
         // Clear progress on error
         setProgress(null);
         // If error is authentication related, consider clearing credentials
         if (err.message.includes("401") || err.message.includes("auth")) {
-          console.warn("Authentication error detected, consider logging out");
+          debug.warn("Authentication error detected, consider logging out");
         }
       },
       onSuccess: (data: GitHubFetcherResult) => {
         // Set the login from the API response if it wasn't provided
         if (data.user?.login && !login) {
           setLogin(data.user.login);
+        }
+        // Track token validation once per token (not on revalidation)
+        if (pat && tokenValidatedRef.current !== pat) {
+          tokenValidatedRef.current = pat;
+          analytics.trackTokenValidated();
         }
         // Clear progress when complete
         setProgress(null);
@@ -158,28 +166,28 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
   // Actions with localStorage persistence
   const setLogin = useCallback((newLogin: string) => {
     if (!newLogin || typeof newLogin !== "string") {
-      console.error("Invalid login format");
+      debug.error("Invalid login format");
       return;
     }
 
     setLoginState(newLogin);
     if (typeof window !== "undefined") {
       secureStorage.setItem("login", newLogin).catch((error) => {
-        console.warn("Failed to save login to secure storage:", error);
+        debug.warn("Failed to save login to secure storage:", error);
       });
     }
   }, []);
 
   const setPat = useCallback((newPat: string, remember = true) => {
     if (!newPat || typeof newPat !== "string") {
-      console.error("Invalid Personal Access Token format");
+      debug.error("Invalid Personal Access Token format");
       return;
     }
 
     setPatState(newPat);
     if (remember && typeof window !== "undefined") {
       secureStorage.setItem("pat", newPat).catch((error) => {
-        console.warn("Failed to save PAT to secure storage:", error);
+        debug.warn("Failed to save PAT to secure storage:", error);
       });
     } else if (!remember && typeof window !== "undefined") {
       // Clear any previously stored token
@@ -191,12 +199,13 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
   const logout = useCallback(() => {
     setLoginState(null);
     setPatState(null);
+    tokenValidatedRef.current = null;
     if (typeof window !== "undefined") {
       try {
         secureStorage.removeItem("login");
         secureStorage.removeItem("pat");
       } catch (error) {
-        console.warn("Failed to clear secure storage during logout:", error);
+        debug.warn("Failed to clear secure storage during logout:", error);
       }
     }
   }, []);
@@ -209,7 +218,7 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
       lastFetchTimeRef.current = now;
       void mutate();
     } else {
-      console.warn("Rate limiting refetch attempts");
+      debug.warn("Rate limiting refetch attempts");
     }
   }, [mutate]);
 
@@ -217,7 +226,7 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
   // Use useEffect for logging to avoid excessive console output
   useEffect(() => {
     if (IS_DEV) {
-      console.debug("GitHub Provider state updated:", {
+      debug.log("GitHub Provider state updated:", {
         hasLogin: !!login,
         hasPartialData,
         hasRepos: repos?.length ?? 0,

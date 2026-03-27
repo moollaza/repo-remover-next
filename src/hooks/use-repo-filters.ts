@@ -1,7 +1,4 @@
 import { type Repository } from "@octokit/graphql-schema";
-import { useCallback, useMemo, useState } from "react";
-
-import { COLUMNS, REPO_TYPES } from "@/config/repo-config";
 
 /**
  * Local replacement for HeroUI's Selection type.
@@ -14,13 +11,19 @@ export type Selection = Set<string> | "all";
  */
 export type SelectionSet = Exclude<Selection, "all">;
 
-/**
- * Sort descriptor compatible with the old HeroUI SortDescriptor.
- */
 export interface SortDescriptor {
   column?: string;
   direction?: "ascending" | "descending";
 }
+import {
+  type Dispatch,
+  type SetStateAction,
+  useCallback,
+  useMemo,
+  useState,
+} from "react";
+
+import { COLUMNS, REPO_TYPES } from "@/config/repo-config";
 
 export interface UseRepoFiltersProps {
   /**
@@ -49,9 +52,7 @@ export interface UseRepoFiltersReturn {
   /**
    * Update the sort configuration
    */
-  setSortDescriptor: (
-    descriptor: SortDescriptor | ((prev: SortDescriptor) => SortDescriptor),
-  ) => void;
+  setSortDescriptor: Dispatch<SetStateAction<SortDescriptor>>;
   /**
    * Update the type filters and reset pagination
    */
@@ -107,7 +108,11 @@ export function useRepoFilters({
 
   // Callback for type filter changes that can trigger pagination reset in parent
   const setTypeFilters = useCallback((keys: Selection) => {
-    setTypeFiltersState(keys as SelectionSet);
+    if (keys === "all") {
+      setTypeFiltersState(new Set(REPO_TYPES.map((t) => t.key)));
+    } else {
+      setTypeFiltersState(keys);
+    }
   }, []);
 
   // First filter repos by search query, selected types, and admin permissions
@@ -126,24 +131,18 @@ export function useRepoFilters({
         repo.name.toLowerCase().includes(nameFilter.toLowerCase()) ||
         repo.description?.toLowerCase().includes(nameFilter.toLowerCase());
 
-      const matchesType = REPO_TYPES.every((type) => {
-        if (type.key === "isSource") {
-          // "Sources" = repos that aren't forks, mirrors, or templates
-          if (!typeFilters.has("isSource")) {
-            const isSource = !repo.isFork && !repo.isMirror && !repo.isTemplate;
-            if (isSource) return false; // Hide source repos when "Sources" is deselected
+      const matchesType =
+        // For each type, if it is not selected, we check if the repo has it and return false
+        REPO_TYPES.every((type) => {
+          // If the type is not selected, check if the repo has it and return false
+          if (!typeFilters.has(type.key)) {
+            if (repo[type.key as keyof Repository]) {
+              return false;
+            }
+            return true;
           }
           return true;
-        }
-        // For regular types: if the type is deselected and the repo has that flag, hide it
-        if (!typeFilters.has(type.key)) {
-          if (repo[type.key as keyof Repository]) {
-            return false;
-          }
-          return true;
-        }
-        return true;
-      });
+        });
 
       return matchesSearchQuery && matchesType;
     });
