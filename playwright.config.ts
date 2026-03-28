@@ -18,7 +18,11 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
 
   // Reporter to use
-  reporter: "html",
+  reporter: [
+    [process.env.CI ? "dot" : "list"],
+    ["html", { open: "never" }],
+    ["@argos-ci/playwright/reporter", { uploadToArgos: !!process.env.CI }],
+  ],
 
   // Global timeout for tests (30 seconds)
   timeout: 30 * 1000,
@@ -32,6 +36,9 @@ export default defineConfig({
 
     // Action timeout (10 seconds)
     actionTimeout: 10 * 1000,
+
+    // Allow Argos stabilization script past CSP
+    bypassCSP: true,
   },
   // Configure projects for major browsers.
   projects: [
