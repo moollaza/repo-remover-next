@@ -5,7 +5,7 @@ vi.mock("fathom-client", () => ({
 }));
 
 vi.mock("@/utils/debug", () => ({
-  debug: { warn: vi.fn() },
+  debug: { log: vi.fn(), warn: vi.fn() },
 }));
 
 import { trackEvent } from "fathom-client";
@@ -24,22 +24,10 @@ describe("track", () => {
   });
 
   describe("in development mode (default test env)", () => {
-    let consoleSpy: ReturnType<typeof vi.spyOn>;
-
-    beforeEach(() => {
-      consoleSpy = vi
-        .spyOn(console, "log")
-        .mockImplementation((() => undefined) as typeof console.log);
-    });
-
-    afterEach(() => {
-      consoleSpy.mockRestore();
-    });
-
     it("logs dev message and does not call trackEvent", () => {
       track("test_event");
 
-      expect(consoleSpy).toHaveBeenCalledWith(
+      expect(debug.log).toHaveBeenCalledWith(
         "[DEV] Would track event: test_event",
         "",
       );
@@ -49,7 +37,7 @@ describe("track", () => {
     it("logs dev message with value when provided", () => {
       track("test_event", 5);
 
-      expect(consoleSpy).toHaveBeenCalledWith(
+      expect(debug.log).toHaveBeenCalledWith(
         "[DEV] Would track event: test_event",
         "(value: 5)",
       );
@@ -59,7 +47,7 @@ describe("track", () => {
     it("logs value=0 correctly (not falsy-skipped)", () => {
       track("test_event", 0);
 
-      expect(consoleSpy).toHaveBeenCalledWith(
+      expect(debug.log).toHaveBeenCalledWith(
         "[DEV] Would track event: test_event",
         "(value: 0)",
       );
@@ -109,22 +97,13 @@ describe("track", () => {
 });
 
 describe("analytics convenience methods", () => {
-  let consoleSpy: ReturnType<typeof vi.spyOn>;
-
   beforeEach(() => {
     vi.clearAllMocks();
-    consoleSpy = vi
-      .spyOn(console, "log")
-      .mockImplementation((() => undefined) as typeof console.log);
-  });
-
-  afterEach(() => {
-    consoleSpy.mockRestore();
   });
 
   it("trackArchiveActionSubmitted passes correct event name and count", () => {
     analytics.trackArchiveActionSubmitted(3);
-    expect(consoleSpy).toHaveBeenCalledWith(
+    expect(debug.log).toHaveBeenCalledWith(
       "[DEV] Would track event: archive_action_submitted",
       "(value: 3)",
     );
@@ -132,7 +111,7 @@ describe("analytics convenience methods", () => {
 
   it("trackDeleteActionSubmitted passes correct event name and count", () => {
     analytics.trackDeleteActionSubmitted(5);
-    expect(consoleSpy).toHaveBeenCalledWith(
+    expect(debug.log).toHaveBeenCalledWith(
       "[DEV] Would track event: delete_action_submitted",
       "(value: 5)",
     );
@@ -140,7 +119,7 @@ describe("analytics convenience methods", () => {
 
   it("trackGetStartedClick passes correct event name", () => {
     analytics.trackGetStartedClick();
-    expect(consoleSpy).toHaveBeenCalledWith(
+    expect(debug.log).toHaveBeenCalledWith(
       "[DEV] Would track event: get_started_click",
       "",
     );
@@ -148,7 +127,7 @@ describe("analytics convenience methods", () => {
 
   it("trackRepoArchived passes correct event name and value 1", () => {
     analytics.trackRepoArchived();
-    expect(consoleSpy).toHaveBeenCalledWith(
+    expect(debug.log).toHaveBeenCalledWith(
       "[DEV] Would track event: repo_archived",
       "(value: 1)",
     );
@@ -156,7 +135,7 @@ describe("analytics convenience methods", () => {
 
   it("trackRepoDeleted passes correct event name and value 1", () => {
     analytics.trackRepoDeleted();
-    expect(consoleSpy).toHaveBeenCalledWith(
+    expect(debug.log).toHaveBeenCalledWith(
       "[DEV] Would track event: repo_deleted",
       "(value: 1)",
     );
@@ -164,7 +143,7 @@ describe("analytics convenience methods", () => {
 
   it("trackTokenValidated passes correct event name", () => {
     analytics.trackTokenValidated();
-    expect(consoleSpy).toHaveBeenCalledWith(
+    expect(debug.log).toHaveBeenCalledWith(
       "[DEV] Would track event: token_validated",
       "",
     );

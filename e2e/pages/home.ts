@@ -4,11 +4,13 @@ import { expect, type Locator, type Page } from "@playwright/test";
 import { BasePage } from "./base-page";
 
 export class HomePage extends BasePage {
+  readonly rememberCheckbox: Locator;
   readonly tokenFormInput: Locator;
   readonly tokenFormSubmit: Locator;
 
   constructor(page: Page) {
     super(page);
+    this.rememberCheckbox = page.getByTestId("github-token-remember");
     this.tokenFormInput = page.getByTestId("github-token-input");
     this.tokenFormSubmit = page.getByTestId("github-token-submit");
   }
@@ -53,5 +55,9 @@ export class HomePage extends BasePage {
 
   async submit() {
     await this.tokenFormSubmit.click();
+  }
+
+  async toggleRememberMe() {
+    await this.rememberCheckbox.click();
   }
 }

@@ -9,7 +9,7 @@ interface ConfirmationModalProps {
   isOpen: boolean;
   login: string;
   onClose: () => void;
-  onConfirm: () => void;
+  onConfirm?: () => void;
   repos: Repository[];
 }
 

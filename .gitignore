@@ -1,5 +1,6 @@
 # dependencies
 /node_modules
+package-lock.json
 
 # claude worktrees
 .claude/worktrees/
@@ -41,7 +42,10 @@ yarn-error.log*
 # Argos screenshots (generated locally, uploaded in CI)
 /screenshots/
 
-# Claude Code local files
+# tooling local files
 .claude/settings.local.json
+.context/
 .superpowers/
 ralph/
+cache/
+docs/

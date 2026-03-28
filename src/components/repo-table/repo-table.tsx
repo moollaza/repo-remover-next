@@ -152,10 +152,6 @@ export default function RepoTable({
     paginatedRepos,
   });
 
-  const handleConfirm = useCallback(() => {
-    // TODO: Record # of repos deleted/archived?
-  }, []);
-
   // --- Sort handler ---
   const handleSortChange = useCallback(
     (columnKey: string) => {
@@ -509,7 +505,6 @@ export default function RepoTable({
           isOpen={isOpen}
           login={login ?? selectedRepos[0]?.owner?.login ?? ""}
           onClose={onClose}
-          onConfirm={handleConfirm}
           repos={selectedRepos}
         />
       )}
