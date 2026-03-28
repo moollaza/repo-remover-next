@@ -17,7 +17,11 @@ export function GenerateReposButton() {
   const octokit = pat ? createThrottledOctokit(pat) : null;
   const [isLoading, setIsLoading] = useState(false);
 
-  if (!import.meta.env.DEV || !octokit) {
+  const hasDemoParam =
+    typeof window !== "undefined" &&
+    new URLSearchParams(window.location.search).has("demo");
+
+  if ((!import.meta.env.DEV && !hasDemoParam) || !octokit) {
     return null;
   }
 
