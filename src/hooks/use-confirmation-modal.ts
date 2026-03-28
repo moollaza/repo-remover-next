@@ -144,7 +144,6 @@ export function useConfirmationModal({
       analytics.trackDeleteActionSubmitted(repos.length);
     }
 
-    const startTime = Date.now();
     const erroredRepoIds = new Set<string>();
     const processedRepoIds = new Set<string>();
 
@@ -181,11 +180,6 @@ export function useConfirmationModal({
       }
     }
 
-    const elapsedTime = Date.now() - startTime;
-    if (elapsedTime < 2000) {
-      await new Promise((resolve) => setTimeout(resolve, 2000 - elapsedTime));
-    }
-
     // Optimistically remove successfully processed repos from SWR cache
     const successfulIds = new Set(
       [...processedRepoIds].filter((id) => !erroredRepoIds.has(id)),
@@ -219,10 +213,14 @@ export function useConfirmationModal({
   }, []);
 
   const handleOnClose = useCallback(() => {
-    // No need for full revalidation — cache was optimistically updated after processing
+    // Trigger background revalidation to sync with server state
+    // (optimistic update already removed successful repos from cache)
+    if (state.mode === "result") {
+      void mutate();
+    }
     onClose();
     dispatch({ type: "RESET" });
-  }, [onClose]);
+  }, [mutate, onClose, state.mode]);
 
   const handleSetUsername = useCallback(
     (value: React.SetStateAction<string>) => {
