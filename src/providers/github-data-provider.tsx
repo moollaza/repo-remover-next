@@ -53,14 +53,14 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
   const [pat, setPatState] = useState<null | string>(null);
   const [isInitialized, setIsInitialized] = useState(false);
   const [progress, setProgress] = useState<LoadingProgress | null>(null);
-  // Store warning data in React state instead of reading from SWR cache.
-  // SWR's mutate() calls during progressive loading override the fetcher return,
-  // so fields only present in the final result (permissionWarning, samlProtectedOrgs)
-  // get lost from the cache. React state is unaffected by SWR's mutation tracking.
-  const [permissionWarning, setPermissionWarning] = useState<
-    string | undefined
-  >();
-  const [samlProtectedOrgs, setSamlProtectedOrgs] = useState<string[]>([]);
+  // Progressive data from onProgress callbacks — shown while SWR fetch is in flight.
+  // We intentionally do NOT call SWR's mutate() during the fetch because it corrupts
+  // SWR's internal cache state and causes the final fetcher result (with permissionWarning,
+  // samlProtectedOrgs) to be silently discarded.
+  const [progressiveRepos, setProgressiveRepos] = useState<null | Repository[]>(
+    null,
+  );
+  const [progressiveUser, setProgressiveUser] = useState<null | User>(null);
   const lastFetchTimeRef = useRef<number>(0);
   const tokenValidatedRef = useRef<null | string>(null);
 
@@ -105,18 +105,12 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
       const result = await fetchGitHubDataWithProgress(
         [login ?? "", pat],
         (progressUpdate) => {
-          // Update progress state
           setProgress(progressUpdate);
-
-          // Update SWR cache immediately with partial data!
-          void mutate(
-            {
-              error: null,
-              repos: progressUpdate.repos,
-              user: progressUpdate.user as null | User,
-            },
-            false, // false = don't revalidate
-          );
+          // Store progressive data in React state for immediate rendering.
+          // Do NOT call mutate() here — it corrupts SWR cache and drops
+          // the final fetch result (permissionWarning, samlProtectedOrgs).
+          setProgressiveRepos(progressUpdate.repos);
+          setProgressiveUser(progressUpdate.user as null | User);
         },
       );
 
@@ -138,10 +132,9 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
         }
       },
       onSuccess: (data: GitHubFetcherResult) => {
-        // Store warning data in React state — SWR cache loses these fields
-        // because progress callback mutate() calls override the fetcher return.
-        setPermissionWarning(data.permissionWarning);
-        setSamlProtectedOrgs(data.samlProtectedOrgs ?? []);
+        // Clear progressive state — SWR data is now authoritative
+        setProgressiveRepos(null);
+        setProgressiveUser(null);
         // Set the login from the API response if it wasn't provided
         if (data.user?.login && !login) {
           setLogin(data.user.login);
@@ -160,16 +153,19 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
   );
 
   // Derived data state - handle partial data cases
-  // isLoading = first load only (no cached data). isRefreshing = background revalidation with cached data visible.
-  const isLoading = isAuthenticated && !data && !error;
-  const isRefreshing = isAuthenticated && !!data && isValidating;
+  // isLoading = true until we have ANY visible data (SWR or progressive).
+  // isRefreshing = background revalidation while content is already visible.
+  const hasVisibleData = !!data || !!progressiveRepos;
+  const isLoading = isAuthenticated && !hasVisibleData && !error;
+  const isRefreshing = isAuthenticated && hasVisibleData && isValidating;
 
   // We have an error state if there's an SWR error OR if data.error exists but we have no partial data
   const isError = Boolean(error ?? (data?.error && !data.repos && !data.user));
 
-  // Handle data loading and errors - use partial data if available
-  const repos = data?.repos ?? null;
-  const user = data?.user ?? null;
+  // Handle data loading and errors - use partial data if available.
+  // Fall back to progressive state during loading for immediate rendering.
+  const repos = data?.repos ?? progressiveRepos;
+  const user = data?.user ?? progressiveUser;
 
   // Derive login from API user data if state is null (storage may fail to load it)
   const effectiveLogin = login ?? (user?.login as null | string) ?? null;
@@ -213,8 +209,8 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
   const logout = useCallback(() => {
     setLoginState(null);
     setPatState(null);
-    setPermissionWarning(undefined);
-    setSamlProtectedOrgs([]);
+    setProgressiveRepos(null);
+    setProgressiveUser(null);
     tokenValidatedRef.current = null;
     if (typeof window !== "undefined") {
       try {
@@ -267,10 +263,10 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
     logout,
     mutate,
     pat,
-    permissionWarning,
+    permissionWarning: data?.permissionWarning,
     progress,
     refetchData,
-    samlProtectedOrgs,
+    samlProtectedOrgs: data?.samlProtectedOrgs ?? [],
     repos,
     setLogin,
     setPat,
