@@ -16,6 +16,7 @@ export function Dashboard() {
     isError,
     isInitialized,
     isLoading,
+    isRefreshing,
     login,
     pat,
     permissionWarning,
@@ -43,6 +44,7 @@ export function Dashboard() {
       <DashboardComponent
         isError={isError}
         isLoading={isLoading}
+        isRefreshing={isRefreshing}
         login={login}
         onRefresh={refetchData}
         permissionWarning={permissionWarning}

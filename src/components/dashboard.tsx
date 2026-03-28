@@ -8,8 +8,10 @@ import { type LoadingProgress } from "@/utils/github-api";
 export interface DashboardProps {
   /** Whether an error occurred during data fetch */
   isError: boolean;
-  /** Whether data is currently loading */
+  /** Whether data is currently loading (first time, no cache) */
   isLoading: boolean;
+  /** Whether data is refreshing in the background (cached data visible) */
+  isRefreshing: boolean;
   /** Current user's login/username */
   login: null | string;
   /** Optional callback for refresh action */
@@ -26,17 +28,20 @@ export interface DashboardProps {
  * Dashboard - Presentational Component
  *
  * Pure presentational component with zero hooks/context/effects.
- * Container version: src/app/dashboard/page.tsx
+ * Container version: src/routes/dashboard.tsx
  */
 export default function Dashboard({
   isError,
   isLoading,
+  isRefreshing,
   login,
   onRefresh,
   permissionWarning,
   progress,
   repos,
 }: DashboardProps) {
+  const showProgress = (isLoading || isRefreshing) && progress;
+
   return (
     <section className="py-10 flex-grow">
       <div className="flex items-center justify-between mb-8">
@@ -47,9 +52,21 @@ export default function Dashboard({
           >
             Repository Management
           </h1>
-          <p className="text-default-500 mt-1">
-            Select repositories to archive or delete permanently
-          </p>
+          {/* Inline progress replaces subtitle to prevent layout shift */}
+          {showProgress ? (
+            <div className="mt-1">
+              <RepoLoadingProgress
+                currentOrg={progress.currentOrg}
+                orgsLoaded={progress.orgsLoaded}
+                orgsTotal={progress.orgsTotal}
+                stage={progress.stage}
+              />
+            </div>
+          ) : (
+            <p className="text-default-500 mt-1">
+              Select repositories to archive or delete permanently
+            </p>
+          )}
         </div>
 
         {onRefresh && !isLoading && (
@@ -76,16 +93,6 @@ export default function Dashboard({
           </button>
         )}
       </div>
-
-      {/* Show progress while loading */}
-      {isLoading && progress && (
-        <RepoLoadingProgress
-          currentOrg={progress.currentOrg}
-          orgsLoaded={progress.orgsLoaded}
-          orgsTotal={progress.orgsTotal}
-          stage={progress.stage}
-        />
-      )}
 
       {isError && (
         <div
@@ -118,7 +125,7 @@ export default function Dashboard({
         </div>
       )}
 
-      {/* Show skeleton until first data arrives; show table even when empty */}
+      {/* Show skeleton only on first load; show table (even during refresh) once we have data */}
       {repos === null ? (
         <RepoTableSkeleton rows={10} />
       ) : (

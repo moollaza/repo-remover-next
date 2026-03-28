@@ -9,6 +9,7 @@ import Dashboard, { type DashboardProps } from "./dashboard";
 const defaultProps: DashboardProps = {
   isError: false,
   isLoading: false,
+  isRefreshing: false,
   login: MOCK_USER.login,
   repos: MOCK_REPOS,
 };

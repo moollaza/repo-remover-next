@@ -147,8 +147,9 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
   );
 
   // Derived data state - handle partial data cases
-  // Keep isLoading true while we have progress (progressive loading)
-  const isLoading = isAuthenticated && (!data || progress !== null) && !error;
+  // isLoading = first load only (no cached data). isRefreshing = background revalidation with cached data visible.
+  const isLoading = isAuthenticated && !data && !error;
+  const isRefreshing = isAuthenticated && !!data && progress !== null;
 
   // We have an error state if there's an SWR error OR if data.error exists but we have no partial data
   const isError = Boolean(error ?? (data?.error && !data.repos && !data.user));
@@ -246,6 +247,7 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
     isError,
     isInitialized,
     isLoading,
+    isRefreshing,
     login: effectiveLogin,
     logout,
     mutate,
