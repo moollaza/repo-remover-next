@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import {
   Archive,
   ChevronDown,
@@ -6,6 +7,13 @@ import {
   Search,
   Trash2,
 } from "lucide-react";
+
+import {
+  fadeUp,
+  scaleIn,
+  staggerContainer,
+  viewportOnce,
+} from "@/utils/motion";
 
 const mockRepos = [
   {
@@ -62,21 +70,42 @@ export function ProductShowcase() {
       id="how-it-works"
     >
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-12">
-          <span className="inline-block px-3 py-1 text-xs rounded-full bg-[var(--brand-blue)]/10 text-[var(--brand-blue)] border border-[var(--brand-blue)]/20 mb-4">
+        <motion.div
+          className="text-center mb-12"
+          initial="hidden"
+          variants={staggerContainer}
+          viewport={viewportOnce}
+          whileInView="visible"
+        >
+          <motion.span
+            className="inline-block px-3 py-1 text-xs rounded-full bg-[var(--brand-blue)]/10 text-[var(--brand-blue)] border border-[var(--brand-blue)]/20 mb-4"
+            variants={fadeUp}
+          >
             See it in action
-          </span>
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+          </motion.span>
+          <motion.h2
+            className="text-3xl md:text-4xl font-bold mb-4"
+            variants={fadeUp}
+          >
             All Your Repos in One View
-          </h2>
-          <p className="text-lg text-default-500 max-w-2xl mx-auto">
+          </motion.h2>
+          <motion.p
+            className="text-lg text-default-500 max-w-2xl mx-auto"
+            variants={fadeUp}
+          >
             Browse your repositories in an organized table. Search, filter,
             select, and take action.
-          </p>
-        </div>
+          </motion.p>
+        </motion.div>
 
         {/* Glow + UI mockup */}
-        <div className="relative max-w-5xl mx-auto">
+        <motion.div
+          className="relative max-w-5xl mx-auto"
+          initial="hidden"
+          variants={scaleIn}
+          viewport={viewportOnce}
+          whileInView="visible"
+        >
           <div className="absolute inset-0 bg-gradient-to-r from-[var(--brand-blue)] to-[var(--brand-cyan)] blur-3xl opacity-10 dark:opacity-20 rounded-3xl" />
           <div className="relative rounded-xl overflow-hidden border border-divider shadow-2xl bg-content1 text-sm">
             {/* Toolbar */}
@@ -196,32 +225,38 @@ export function ProductShowcase() {
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Feature highlights below */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12 max-w-5xl mx-auto">
-          <div className="text-center">
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12 max-w-5xl mx-auto"
+          initial="hidden"
+          variants={staggerContainer}
+          viewport={viewportOnce}
+          whileInView="visible"
+        >
+          <motion.div className="text-center" variants={fadeUp}>
             <div className="text-2xl mb-2">⚡</div>
             <h3 className="font-semibold mb-1">Instant Search</h3>
             <p className="text-sm text-default-500">
               Find repos by name or description in milliseconds
             </p>
-          </div>
-          <div className="text-center">
+          </motion.div>
+          <motion.div className="text-center" variants={fadeUp}>
             <div className="text-2xl mb-2">🎯</div>
             <h3 className="font-semibold mb-1">Smart Filtering</h3>
             <p className="text-sm text-default-500">
               Filter by type, visibility, and more
             </p>
-          </div>
-          <div className="text-center">
+          </motion.div>
+          <motion.div className="text-center" variants={fadeUp}>
             <div className="text-2xl mb-2">✅</div>
             <h3 className="font-semibold mb-1">Bulk Actions</h3>
             <p className="text-sm text-default-500">
               Select multiple repos and act on them at once
             </p>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </div>
     </section>
   );

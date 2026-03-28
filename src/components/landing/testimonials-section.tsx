@@ -1,4 +1,7 @@
+import { motion } from "framer-motion";
 import { ExternalLink, Star } from "lucide-react";
+
+import { fadeUp, staggerContainer, viewportOnce } from "@/utils/motion";
 
 const testimonials = [
   {
@@ -34,20 +37,39 @@ export function TestimonialsSection() {
   return (
     <section className="w-full px-6 py-20 bg-default-50">
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+        <motion.div
+          className="text-center mb-16"
+          initial="hidden"
+          variants={staggerContainer}
+          viewport={viewportOnce}
+          whileInView="visible"
+        >
+          <motion.h2
+            className="text-3xl md:text-4xl font-bold mb-4"
+            variants={fadeUp}
+          >
             What Developers Are Saying
-          </h2>
-          <p className="text-lg text-default-500 max-w-2xl mx-auto">
+          </motion.h2>
+          <motion.p
+            className="text-lg text-default-500 max-w-2xl mx-auto"
+            variants={fadeUp}
+          >
             Real reviews from developers who use Repo Remover.
-          </p>
-        </div>
+          </motion.p>
+        </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-3 gap-6"
+          initial="hidden"
+          variants={staggerContainer}
+          viewport={viewportOnce}
+          whileInView="visible"
+        >
           {testimonials.map((t, index) => (
-            <div
+            <motion.div
               className="bg-background border border-divider rounded-xl p-6 flex flex-col"
               key={index}
+              variants={fadeUp}
             >
               <div className="flex gap-1 mb-4">
                 {Array.from({ length: t.rating }, (_, i) => (
@@ -77,9 +99,9 @@ export function TestimonialsSection() {
                   </a>
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );

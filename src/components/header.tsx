@@ -1,3 +1,4 @@
+import { AnimatePresence, motion } from "framer-motion";
 import { Moon, Sun, Trash2 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -23,14 +24,26 @@ function LandingThemeSwitcher() {
   const isDark = mounted && theme === "dark";
 
   return (
-    <button
+    <motion.button
       aria-label={`Switch to ${isDark ? "light" : "dark"} theme`}
-      className="rounded-full p-2 hover:bg-default-100 transition-colors"
+      className="rounded-full p-2 hover:bg-default-100 transition-colors relative overflow-hidden"
       onClick={() => setTheme(isDark ? "light" : "dark")}
       type="button"
+      whileTap={{ scale: 0.85, rotate: isDark ? -90 : 90 }}
     >
-      {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-    </button>
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.span
+          key={isDark ? "sun" : "moon"}
+          initial={{ opacity: 0, rotate: -90, scale: 0.5 }}
+          animate={{ opacity: 1, rotate: 0, scale: 1 }}
+          exit={{ opacity: 0, rotate: 90, scale: 0.5 }}
+          transition={{ duration: 0.2 }}
+          className="block"
+        >
+          {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+        </motion.span>
+      </AnimatePresence>
+    </motion.button>
   );
 }
 
@@ -54,7 +67,7 @@ function LandingHeader({ isAuthenticated }: { isAuthenticated: boolean }) {
 
         <nav className="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
           {homeLinks.map((link) => (
-            <a
+            <motion.a
               className="text-default-500 hover:text-foreground transition-colors"
               href={link.href}
               key={link.href}
@@ -63,9 +76,11 @@ function LandingHeader({ isAuthenticated }: { isAuthenticated: boolean }) {
                 const target = document.querySelector(link.href);
                 target?.scrollIntoView({ behavior: "smooth" });
               }}
+              whileHover={{ y: -1 }}
+              whileTap={{ scale: 0.95 }}
             >
               {link.label}
-            </a>
+            </motion.a>
           ))}
         </nav>
 
