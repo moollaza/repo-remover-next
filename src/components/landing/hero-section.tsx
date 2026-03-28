@@ -22,8 +22,8 @@ export function HeroSection() {
         </h1>
 
         <p className="text-lg md:text-xl text-default-500 mb-10 max-w-2xl mx-auto leading-relaxed">
-          The fastest way to clean up your GitHub account. Search, filter, and
-          manage hundreds of repositories with powerful bulk operations.
+          Search, filter, and bulk-manage hundreds of repositories in one place.
+          Zero-knowledge — your token never leaves your browser.
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">

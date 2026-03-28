@@ -36,11 +36,10 @@ export function TestimonialsSection() {
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Loved by Developers Worldwide
+            What Developers Are Saying
           </h2>
           <p className="text-lg text-default-500 max-w-2xl mx-auto">
-            Join thousands of developers who have reclaimed control of their
-            GitHub accounts.
+            Real reviews from developers who use Repo Remover.
           </p>
         </div>
 
