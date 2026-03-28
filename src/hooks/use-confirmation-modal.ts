@@ -17,7 +17,7 @@ export type ModalAction =
   | { payload: { login: string; username: string }; type: "SET_USERNAME" }
   | { type: "COMPLETE_PROCESSING" }
   | { type: "RESET" }
-  | { type: "START_PROCESSING" };
+  | { payload: { totalCount: number }; type: "START_PROCESSING" };
 
 export interface ModalState {
   confirming: boolean;
@@ -26,6 +26,7 @@ export interface ModalState {
   isCorrectUsername: boolean;
   mode: ModalMode;
   progress: number;
+  totalCount: number;
   username: string;
 }
 
@@ -55,6 +56,7 @@ export const initialState: ModalState = {
   isCorrectUsername: false,
   mode: "confirmation",
   progress: 0,
+  totalCount: 0,
   username: "",
 };
 
@@ -89,6 +91,7 @@ export function modalReducer(
         errors: [],
         mode: "progress",
         progress: 0,
+        totalCount: action.payload.totalCount,
       };
     case "UPDATE_PROGRESS":
       return {
@@ -136,7 +139,10 @@ export function useConfirmationModal({
     if (!octokit || state.confirming) return;
 
     abortRef.current = false;
-    dispatch({ type: "START_PROCESSING" });
+    dispatch({
+      payload: { totalCount: repos.length },
+      type: "START_PROCESSING",
+    });
 
     if (action === "archive") {
       analytics.trackArchiveActionSubmitted(repos.length);
@@ -144,13 +150,23 @@ export function useConfirmationModal({
       analytics.trackDeleteActionSubmitted(repos.length);
     }
 
-    const startTime = Date.now();
-
     for (const repo of repos) {
       if (abortRef.current) break;
 
       try {
         await processRepo(octokit, repo, action);
+
+        // Optimistically remove this repo from table immediately
+        void mutate(
+          (current) => {
+            if (!current?.repos) return current;
+            return {
+              ...current,
+              repos: current.repos.filter((r) => r.id !== repo.id),
+            };
+          },
+          { revalidate: false },
+        );
       } catch (error) {
         if (error instanceof Error) {
           debug.error(`Failed to ${action} the repo:`, error);
@@ -177,16 +193,11 @@ export function useConfirmationModal({
       }
     }
 
-    const elapsedTime = Date.now() - startTime;
-    if (elapsedTime < 2000) {
-      await new Promise((resolve) => setTimeout(resolve, 2000 - elapsedTime));
-    }
-
     dispatch({ type: "COMPLETE_PROCESSING" });
     setTimeout(() => {
       onConfirm();
     }, 100);
-  }, [action, octokit, onConfirm, repos, state.confirming]);
+  }, [action, mutate, octokit, onConfirm, repos, state.confirming]);
 
   const handleConfirm = useCallback(
     () => void handleConfirmAsync(),
@@ -198,6 +209,8 @@ export function useConfirmationModal({
   }, []);
 
   const handleOnClose = useCallback(() => {
+    // Trigger background revalidation to sync with server state
+    // (optimistic update already removed successful repos from cache)
     if (state.mode === "result") {
       void mutate();
     }
