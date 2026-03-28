@@ -16,10 +16,10 @@ export function Dashboard() {
     isError,
     isInitialized,
     isLoading,
+    isRefreshing,
     login,
     pat,
     permissionWarning,
-    progress,
     refetchData,
     repos,
   } = useGitHubData();
@@ -43,10 +43,10 @@ export function Dashboard() {
       <DashboardComponent
         isError={isError}
         isLoading={isLoading}
+        isRefreshing={isRefreshing}
         login={login}
         onRefresh={refetchData}
         permissionWarning={permissionWarning}
-        progress={progress}
         repos={repos}
       />
     </ErrorBoundary>

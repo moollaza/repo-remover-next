@@ -545,7 +545,7 @@ describe("GitHubDataProvider", () => {
       expect(result.current.repos).toBeNull();
     });
 
-    it("isLoading=true when progress is active even if data exists", async () => {
+    it("isRefreshing=true when progress is active with existing data", async () => {
       // Capture the progress callback so we can control it
       let progressCallback:
         | ((progress: import("@/utils/github-api").LoadingProgress) => void)
@@ -579,8 +579,9 @@ describe("GitHubDataProvider", () => {
         expect(result.current.repos).not.toBeNull();
       });
 
-      // Even though data exists, progress is still active → isLoading=true
-      expect(result.current.isLoading).toBe(true);
+      // Data exists + progress active → isRefreshing=true, isLoading=false
+      expect(result.current.isLoading).toBe(false);
+      expect(result.current.isRefreshing).toBe(true);
       expect(result.current.progress).not.toBeNull();
       expect(progressCallback).not.toBeNull();
     });

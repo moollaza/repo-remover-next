@@ -7,51 +7,38 @@ interface RepoLoadingProgressProps {
   stage: "complete" | "orgs" | "personal";
 }
 
+/**
+ * Compact inline loading indicator — renders as a single line
+ * to avoid layout shift when placed inside the dashboard title area.
+ */
 export default function RepoLoadingProgress({
-  currentOrg,
   orgsLoaded,
   orgsTotal,
   stage,
 }: RepoLoadingProgressProps) {
-  // Auto-dismiss when complete
   if (stage === "complete") {
     return null;
   }
 
-  const totalSteps = 1 + orgsTotal; // 1 personal + N orgs
+  const totalSteps = 1 + orgsTotal;
   const currentStep = stage === "personal" ? 1 : 1 + orgsLoaded;
   const percentage = Math.round((currentStep / totalSteps) * 100);
 
   const label =
     stage === "personal"
-      ? "Loading personal repositories..."
-      : `Loading organization repositories (${orgsLoaded}/${orgsTotal})...`;
-
-  const subtitle = currentOrg ? `Currently loading: ${currentOrg}` : "";
+      ? "Loading repos..."
+      : `Loading orgs (${orgsLoaded}/${orgsTotal})...`;
 
   return (
-    <div className="mb-6 p-4 bg-content1 rounded-xl border border-divider shadow-sm">
-      <div className="flex items-center gap-3 mb-2">
-        <ArrowPathIcon className="h-5 w-5 text-primary animate-spin" />
-        <div className="flex-1">
-          <div className="flex items-center justify-between text-sm">
-            <span className="font-medium text-foreground">{label}</span>
-            <span className="text-default-500">
-              {currentStep} of {totalSteps}
-            </span>
-          </div>
-          {subtitle && (
-            <p className="text-xs text-default-400 mt-1">{subtitle}</p>
-          )}
-        </div>
-      </div>
-      {/* Progress bar */}
+    <div className="flex items-center gap-2 text-sm text-default-500">
+      <ArrowPathIcon className="h-3.5 w-3.5 text-primary animate-spin shrink-0" />
+      <span>{label}</span>
       <div
         aria-label="Loading progress"
         aria-valuemax={100}
         aria-valuemin={0}
         aria-valuenow={percentage}
-        className="w-full h-1.5 bg-default-200 rounded-full overflow-hidden"
+        className="w-24 h-1 bg-default-200 rounded-full overflow-hidden"
         role="progressbar"
       >
         <div
@@ -59,6 +46,9 @@ export default function RepoLoadingProgress({
           style={{ width: `${percentage}%` }}
         />
       </div>
+      <span className="text-xs text-default-400">
+        {currentStep}/{totalSteps}
+      </span>
     </div>
   );
 }
