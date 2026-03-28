@@ -40,43 +40,6 @@ description: Architecture review findings, priority recommendations, GitHub API 
 - Never ignore repeated 4xx/5xx errors
 - Validate input to prevent validation errors
 
-## Architecture Grades & Targets (2025-10-07 Review)
-
-| Aspect                   | Current               | Target                         |
-| ------------------------ | --------------------- | ------------------------------ |
-| **Overall Architecture** | A- (90/100)           | A+ (95+)                       |
-| **Test Coverage**        | ~40%                  | ~70%                           |
-| **Component Complexity** | High (456 LOC max)    | Medium (200 LOC max)           |
-| **Type Safety**          | Excellent (Strict TS) | Maintain                       |
-| **Performance**          | Good (Memoization)    | Excellent (Optimistic updates) |
-| **DX**                   | Good                  | Excellent (Custom test utils)  |
-
-## Priority Recommendations (If Asked to Improve)
-
-### P0 — Critical (Do First)
-
-1. **Presentational/Container Refactor** (see `docs/PRESENTATIONAL_CONTAINER_REFACTOR.md`)
-2. Create `src/utils/test-utils/render.tsx` (custom render utility)
-3. Add error boundaries (`src/components/error-boundary.tsx`)
-4. Migrate MSW to operation-based GraphQL handlers
-
-### P1 — High (Do Next)
-
-5. Extract hooks from `RepoTable` and `ConfirmationModal`
-6. Add missing tests (scroll-button, token-form-section, generate-repos-button)
-7. Extract shared constants to `src/config/`
-
-See `docs/RECOMMENDATIONS.md` for full list and implementation details.
-
-## Architecture Docs
-
-Detailed architecture docs live in the `docs/` directory:
-
-- `docs/ARCHITECTURE_REVIEW.md` — complete architecture analysis
-- `docs/RECOMMENDATIONS.md` — 15 prioritized improvements with code examples
-- `docs/IMPLEMENTATION_PLAN.md` — phased rollout strategy
-- `docs/TESTING_STRATEGY.md` — testing requirements and best practices
-
 ## Environment Setup
 
 ### Development Environment
@@ -91,14 +54,15 @@ No environment variables required. The app uses:
 
 Configure optional monitoring services:
 
-1. **Sentry.io** — add `NEXT_PUBLIC_SENTRY_DSN` to `.env.local`
-2. **Fathom Analytics** — add `NEXT_PUBLIC_FATHOM_SITE_ID` to `.env.local`
+1. **Sentry.io** — add `VITE_SENTRY_DSN` to `.env`
+2. **Fathom Analytics** — add `VITE_FATHOM_SITE_ID` to `.env`
 
 ## Documentation Links
 
 ### Core Framework & Libraries
 
-- Next.js: https://nextjs.org/docs
+- Vite: https://vitejs.dev/guide/
+- React Router: https://reactrouter.com/
 - React: https://react.dev/reference/react
 - TypeScript: https://www.typescriptlang.org/docs/
 
@@ -124,9 +88,8 @@ Configure optional monitoring services:
 
 - ESLint: https://eslint.org/docs/latest/
 - Prettier: https://prettier.io/docs/en/
-- Vite: https://vitejs.dev/guide/
 
 ### Production Monitoring
 
-- Sentry.io: https://docs.sentry.io/platforms/javascript/guides/nextjs/
+- Sentry.io: https://docs.sentry.io/platforms/javascript/guides/react/
 - Fathom Analytics: https://usefathom.com/docs

@@ -1,7 +1,7 @@
 ---
 title: "fix: E2E mocking for CI + deferred test rewrites"
 type: fix
-status: active
+status: completed
 date: 2026-03-27
 ---
 
