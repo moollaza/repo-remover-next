@@ -2,6 +2,7 @@ import { RequestError } from "@octokit/request-error";
 import clsx from "clsx";
 import { useEffect, useState } from "react";
 
+import { checkTokenScopes, SCOPE_DESCRIPTIONS } from "@/utils/github-api";
 import {
   createThrottledOctokit,
   isValidGitHubToken,
@@ -29,6 +30,7 @@ export default function GitHubTokenForm({
     null,
   );
   const [showToken, setShowToken] = useState(false);
+  const [scopeWarnings, setScopeWarnings] = useState<string[]>([]);
 
   // Handle value change
   const handleChange = (newValue: string) => {
@@ -38,6 +40,7 @@ export default function GitHubTokenForm({
       setIsTokenValid(false);
       setUsername(null);
       setLastValidatedToken(null);
+      setScopeWarnings([]);
     }
   };
 
@@ -61,12 +64,21 @@ export default function GitHubTokenForm({
 
       try {
         const octokit = createThrottledOctokit(value);
-        const { data: userData } = await octokit.users.getAuthenticated();
+        const [{ data: userData }, scopeResult] = await Promise.all([
+          octokit.users.getAuthenticated(),
+          checkTokenScopes(octokit),
+        ]);
 
         if (isMounted) {
           setIsTokenValid(true);
           setUsername(userData.login);
           setLastValidatedToken(value);
+
+          // Show scope warnings (non-blocking — token is still valid)
+          const warnings = scopeResult.missingScopes
+            .map((scope) => SCOPE_DESCRIPTIONS[scope])
+            .filter(Boolean);
+          setScopeWarnings(warnings);
         }
       } catch (err) {
         if (isMounted) {
@@ -271,6 +283,30 @@ export default function GitHubTokenForm({
             {inputDescription}
           </p>
         </div>
+
+        {/* Scope warnings — shown when token is valid but missing recommended scopes */}
+        {scopeWarnings.length > 0 && (
+          <div
+            className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-700 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-400"
+            data-testid="scope-warnings"
+            role="alert"
+          >
+            <p className="font-medium">Token is missing recommended scopes:</p>
+            <ul className="mt-1 list-inside list-disc space-y-0.5 text-xs">
+              {scopeWarnings.map((warning) => (
+                <li key={warning}>{warning}</li>
+              ))}
+            </ul>
+            <a
+              className="mt-2 inline-block text-xs font-medium underline hover:no-underline"
+              href="https://github.com/settings/tokens"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              Update token scopes on GitHub &rarr;
+            </a>
+          </div>
+        )}
 
         <label className="flex items-center gap-2 cursor-pointer">
           <input

@@ -33,9 +33,7 @@ describe("Dashboard", () => {
     const warning = "Some organizations are not accessible due to SSO";
     render(<Dashboard {...defaultProps} permissionWarning={warning} />);
 
-    expect(
-      screen.getByText(/some repositories may be missing/i),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/limited token permissions/i)).toBeInTheDocument();
     expect(screen.getByText(warning)).toBeInTheDocument();
   });
 
@@ -117,9 +115,7 @@ describe("Dashboard", () => {
     );
 
     expect(screen.getByText(/error loading repositories/i)).toBeInTheDocument();
-    expect(
-      screen.getByText(/some repositories may be missing/i),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/limited token permissions/i)).toBeInTheDocument();
     expect(screen.getByText(warning)).toBeInTheDocument();
   });
 

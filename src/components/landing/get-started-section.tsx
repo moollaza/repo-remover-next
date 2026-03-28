@@ -13,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 
 import { useGitHubData } from "@/hooks/use-github-data";
 import { analytics } from "@/utils/analytics";
+import { checkTokenScopes, SCOPE_DESCRIPTIONS } from "@/utils/github-api";
 import {
   createThrottledOctokit,
   isValidGitHubToken,
@@ -72,6 +73,7 @@ function InlinePATForm() {
   const [remember, setRemember] = useState(true);
   const [showTooltip, setShowTooltip] = useState(false);
   const [showToken, setShowToken] = useState(false);
+  const [scopeWarnings, setScopeWarnings] = useState<string[]>([]);
   const tooltipRef = useRef<HTMLDivElement>(null);
   const { setPat } = useGitHubData();
   const navigate = useNavigate();
@@ -108,16 +110,24 @@ function InlinePATForm() {
 
     const timeout = setTimeout(() => {
       const octokit = createThrottledOctokit(token);
-      octokit.rest.users
-        .getAuthenticated()
-        .then(() => {
+      Promise.all([
+        octokit.rest.users.getAuthenticated(),
+        checkTokenScopes(octokit),
+      ])
+        .then(([, scopeResult]) => {
           setIsValid(true);
           setIsValidating(false);
+          // Show scope warnings (non-blocking)
+          const warnings = scopeResult.missingScopes
+            .map((scope) => SCOPE_DESCRIPTIONS[scope])
+            .filter(Boolean);
+          setScopeWarnings(warnings);
         })
         .catch(() => {
           setError("Invalid or expired token");
           setIsValid(false);
           setIsValidating(false);
+          setScopeWarnings([]);
         });
     }, 500);
 
@@ -222,6 +232,29 @@ function InlinePATForm() {
         <p className="text-xs text-emerald-700 dark:text-emerald-400">
           Token validated successfully
         </p>
+      )}
+
+      {scopeWarnings.length > 0 && (
+        <div
+          className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-700 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-400"
+          data-testid="scope-warnings"
+          role="alert"
+        >
+          <p className="font-medium">Missing recommended scopes:</p>
+          <ul className="mt-1 list-inside list-disc space-y-0.5 text-xs">
+            {scopeWarnings.map((warning) => (
+              <li key={warning}>{warning}</li>
+            ))}
+          </ul>
+          <a
+            className="mt-2 inline-block text-xs font-medium underline hover:no-underline"
+            href="https://github.com/settings/tokens"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            Update token scopes on GitHub &rarr;
+          </a>
+        </div>
       )}
 
       <div className="flex items-center gap-2">

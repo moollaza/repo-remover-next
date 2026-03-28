@@ -227,6 +227,30 @@ export const handlers = [
     });
   }),
 
+  // Handle rate limit check (used for scope detection)
+  http.get("https://api.github.com/rate_limit", ({ request }) => {
+    const authHeader = request.headers.get("Authorization");
+
+    if (!authHeader?.includes(getValidPersonalAccessToken())) {
+      return HttpResponse.json({ message: "Bad credentials" }, { status: 401 });
+    }
+
+    return HttpResponse.json(
+      {
+        rate: {
+          limit: 5000,
+          remaining: 4999,
+          reset: Math.floor(Date.now() / 1000) + 3600,
+          used: 1,
+        },
+        resources: {},
+      },
+      {
+        headers: { "X-OAuth-Scopes": "repo, delete_repo, read:org" },
+      },
+    );
+  }),
+
   // Handle user authentication
   http.get("https://api.github.com/user", ({ request }) => {
     const authHeader = request.headers.get("Authorization");

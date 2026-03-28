@@ -1,6 +1,9 @@
 import { render, screen, waitFor } from "@/utils/test-utils";
 import userEvent from "@testing-library/user-event";
+import { http, HttpResponse } from "msw";
 import { beforeEach, describe, expect, test, vi } from "vitest";
+
+import { server } from "@/mocks/server";
 
 import GitHubTokenForm from "./github-token-form";
 
@@ -150,6 +153,62 @@ describe("GitHubTokenForm", () => {
 
     // Back to password
     expect(input).toHaveAttribute("type", "password");
+  });
+
+  test("shows scope warnings when token is missing scopes", async () => {
+    // Override rate_limit to return empty scopes (classic PAT with no scopes)
+    server.use(
+      http.get("https://api.github.com/rate_limit", () => {
+        return HttpResponse.json(
+          {
+            rate: {
+              limit: 5000,
+              remaining: 4999,
+              reset: Math.floor(Date.now() / 1000) + 3600,
+              used: 1,
+            },
+            resources: {},
+          },
+          { headers: { "X-OAuth-Scopes": "" } },
+        );
+      }),
+    );
+
+    setupForm({ value: "ghp_abcdefghijklmnopqrstuvwxyz1234567890" });
+
+    // Wait for validation + scope check to complete
+    await waitFor(
+      () => {
+        expect(screen.getByTestId("scope-warnings")).toBeInTheDocument();
+      },
+      { timeout: 5000 },
+    );
+
+    expect(
+      screen.getByText(/private repositories won't be visible/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/you won't be able to delete repositories/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/organization repositories won't be visible/i),
+    ).toBeInTheDocument();
+  });
+
+  test("no scope warnings when all scopes are present", async () => {
+    // Default MSW handlers return all scopes
+    setupForm({ value: "ghp_abcdefghijklmnopqrstuvwxyz1234567890" });
+
+    // Wait for validation to complete
+    await waitFor(
+      () => {
+        expect(screen.getByText(/Token is valid/i)).toBeInTheDocument();
+      },
+      { timeout: 5000 },
+    );
+
+    // Should NOT show scope warnings
+    expect(screen.queryByTestId("scope-warnings")).not.toBeInTheDocument();
   });
 
   test("doesn't call onSubmit when token is invalid", async () => {
