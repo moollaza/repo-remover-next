@@ -13,7 +13,7 @@ Bulk view, archive, and delete your GitHub repositories. Zero-knowledge — ever
 
 ## How it works
 
-Repo Remover uses a [Personal Access Token](https://help.github.com/en/articles/creating-a-personal-access-token-for-the-command-line) with the GitHub API to list your repositories and make changes to them.
+Repo Remover uses a [Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) with the GitHub API to list your repositories and make changes to them.
 
 1. Provide a Personal Access Token
 2. Select which repos to archive or delete
@@ -24,6 +24,8 @@ Repo Remover uses a [Personal Access Token](https://help.github.com/en/articles/
 **Note**: Tokens are not stored by default. If you opt-in to "Remember Me", your PAT is encrypted (AES-GCM) and stored in localStorage. For optimal security, create a new token each time and delete it when done.
 
 ## Run locally
+
+Requires Node.js >= 22 and [bun](https://bun.sh/).
 
 1. Clone the repository
    ```bash
