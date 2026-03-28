@@ -1,6 +1,7 @@
 import { config } from "@fortawesome/fontawesome-svg-core";
 import { MotionConfig } from "framer-motion";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { useEffect } from "react";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import "@fortawesome/fontawesome-svg-core/styles.css";
 
 import { ErrorBoundary } from "@/components/error-boundary";
@@ -13,12 +14,22 @@ import { Home } from "@/routes/home";
 
 config.autoAddCss = false;
 
+/** Reset scroll position on route change */
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+}
+
 export function App() {
   return (
     <Providers themeProps={{ attribute: "class", defaultTheme: "light" }}>
       <MotionConfig reducedMotion="user">
         <ErrorBoundary>
           <FathomAnalytics />
+          <ScrollToTop />
           <div className="min-h-full">
             <Header />
             <main>
