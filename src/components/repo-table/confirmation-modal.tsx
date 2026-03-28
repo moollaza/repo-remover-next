@@ -45,8 +45,6 @@ export default function ConfirmationModal({
   onConfirm,
   repos,
 }: ConfirmationModalProps) {
-  const count = repos.length;
-
   const {
     handleConfirm,
     handleOnClose,
@@ -57,6 +55,9 @@ export default function ConfirmationModal({
   } = useConfirmationModal({ action, login, onClose, onConfirm, repos });
 
   if (!isOpen) return null;
+
+  // Use totalCount from state during progress/result (immune to SWR cache updates)
+  const count = state.mode === "confirmation" ? repos.length : state.totalCount;
 
   return createPortal(
     <ModalOverlay

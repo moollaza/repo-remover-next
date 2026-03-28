@@ -9,7 +9,10 @@ describe("modalReducer", () => {
   });
 
   it("should handle START_PROCESSING", () => {
-    const result = modalReducer(initialState, { type: "START_PROCESSING" });
+    const result = modalReducer(initialState, {
+      payload: { totalCount: 5 },
+      type: "START_PROCESSING",
+    });
     expect(result.confirming).toBe(true);
     expect(result.mode).toBe("progress");
     expect(result.progress).toBe(0);
@@ -154,7 +157,10 @@ describe("modalReducer", () => {
       ...initialState,
       errors: [{ error: new Error("old error") }],
     };
-    const result = modalReducer(state, { type: "START_PROCESSING" });
+    const result = modalReducer(state, {
+      payload: { totalCount: 5 },
+      type: "START_PROCESSING",
+    });
     expect(result.errors).toEqual([]);
   });
 
@@ -168,7 +174,10 @@ describe("modalReducer", () => {
     expect(state.mode).toBe("confirmation");
     expect(state.isCorrectUsername).toBe(true);
 
-    state = modalReducer(state, { type: "START_PROCESSING" });
+    state = modalReducer(state, {
+      payload: { totalCount: 5 },
+      type: "START_PROCESSING",
+    });
     expect(state.mode).toBe("progress");
     expect(state.confirming).toBe(true);
 

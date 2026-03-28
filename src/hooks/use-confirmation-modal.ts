@@ -17,7 +17,7 @@ export type ModalAction =
   | { payload: { login: string; username: string }; type: "SET_USERNAME" }
   | { type: "COMPLETE_PROCESSING" }
   | { type: "RESET" }
-  | { type: "START_PROCESSING" };
+  | { payload: { totalCount: number }; type: "START_PROCESSING" };
 
 export interface ModalState {
   confirming: boolean;
@@ -26,6 +26,7 @@ export interface ModalState {
   isCorrectUsername: boolean;
   mode: ModalMode;
   progress: number;
+  totalCount: number;
   username: string;
 }
 
@@ -55,6 +56,7 @@ export const initialState: ModalState = {
   isCorrectUsername: false,
   mode: "confirmation",
   progress: 0,
+  totalCount: 0,
   username: "",
 };
 
@@ -89,6 +91,7 @@ export function modalReducer(
         errors: [],
         mode: "progress",
         progress: 0,
+        totalCount: action.payload.totalCount,
       };
     case "UPDATE_PROGRESS":
       return {
@@ -136,7 +139,10 @@ export function useConfirmationModal({
     if (!octokit || state.confirming) return;
 
     abortRef.current = false;
-    dispatch({ type: "START_PROCESSING" });
+    dispatch({
+      payload: { totalCount: repos.length },
+      type: "START_PROCESSING",
+    });
 
     if (action === "archive") {
       analytics.trackArchiveActionSubmitted(repos.length);
