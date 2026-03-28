@@ -1,7 +1,35 @@
-import { motion } from "framer-motion";
+import { motion, useInView } from "framer-motion";
 import { CheckSquare, Filter, Search, Shield } from "lucide-react";
+import { useRef } from "react";
 
 import { fadeUp, staggerContainerWide, viewportOnce } from "@/utils/motion";
+
+/** Wrapper that draws SVG icon strokes when scrolled into view */
+function AnimatedIcon({
+  icon: Icon,
+}: {
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const isInView = useInView(ref, { once: true, margin: "-80px" });
+
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ scale: 0.8, opacity: 0 }}
+      animate={isInView ? { scale: 1, opacity: 1 } : { scale: 0.8, opacity: 0 }}
+      transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
+      whileHover={{ rotate: [0, -5, 5, 0], transition: { duration: 0.4 } }}
+      className="[&_svg]:w-24 [&_svg]:h-24 [&_svg]:text-white"
+      style={{
+        strokeDasharray: isInView ? "none" : "200",
+        strokeDashoffset: isInView ? "0" : "200",
+      }}
+    >
+      <Icon strokeWidth={1.5} />
+    </motion.div>
+  );
+}
 
 const features = [
   {
@@ -73,10 +101,7 @@ export function FeaturesSection() {
                 variants={fadeUp}
               >
                 <div className="w-48 h-48 rounded-2xl bg-gradient-to-br from-[var(--brand-blue)] to-[var(--brand-cyan)] dark:from-[var(--brand-blue)]/80 dark:to-[var(--brand-cyan)]/80 flex items-center justify-center shadow-xl">
-                  <feature.icon
-                    className="w-24 h-24 text-white"
-                    strokeWidth={1.5}
-                  />
+                  <AnimatedIcon icon={feature.icon} />
                 </div>
               </motion.div>
               <motion.div className="flex-1" variants={fadeUp}>

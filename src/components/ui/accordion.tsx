@@ -1,7 +1,8 @@
 import { Accordion as AccordionPrimitive } from "@base-ui/react/accordion";
+import { motion } from "framer-motion";
 
 import { cn } from "@/lib/utils";
-import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
+import { ChevronDownIcon } from "lucide-react";
 
 function Accordion({ className, ...props }: AccordionPrimitive.Root.Props) {
   return (
@@ -39,14 +40,17 @@ function AccordionTrigger({
         {...props}
       >
         {children}
-        <ChevronDownIcon
+        <motion.span
           data-slot="accordion-trigger-icon"
-          className="pointer-events-none shrink-0 group-aria-expanded/accordion-trigger:hidden"
-        />
-        <ChevronUpIcon
-          data-slot="accordion-trigger-icon"
-          className="pointer-events-none hidden shrink-0 group-aria-expanded/accordion-trigger:inline"
-        />
+          className="pointer-events-none shrink-0 inline-flex"
+          initial={false}
+          animate={{}}
+          style={{
+            rotate: "var(--chevron-rotate, 0deg)",
+          }}
+        >
+          <ChevronDownIcon className="size-4 text-muted-foreground transition-transform duration-200 group-aria-expanded/accordion-trigger:rotate-180" />
+        </motion.span>
       </AccordionPrimitive.Trigger>
     </AccordionPrimitive.Header>
   );
