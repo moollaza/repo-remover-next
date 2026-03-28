@@ -1,23 +1,40 @@
 import { argosScreenshot } from "@argos-ci/playwright";
-import { test } from "@playwright/test";
+import { type Page, test } from "@playwright/test";
 
 import { DashboardPage } from "./pages/dashboard";
 import { HomePage } from "./pages/home";
-import { mockGraphQLRepos, mockOctokitInit } from "./utils/github-api-mocks";
-import { mockLocalStorage } from "./utils/github-api-mocks";
 
-/** CSS injected during screenshots to disable animations and ensure stability */
+/**
+ * CSS injected during screenshots to disable all animations and
+ * force framer-motion animated elements to be visible.
+ * Framer-motion sets inline styles (opacity, transform) via JS,
+ * so we need !important overrides on all elements.
+ */
 const stabilizationCSS = `
   *, *::before, *::after {
     animation-duration: 0s !important;
     animation-delay: 0s !important;
     transition-duration: 0s !important;
     transition-delay: 0s !important;
+    opacity: 1 !important;
+    transform: none !important;
   }
   .animate-spin, .animate-ping, .animate-pulse, .animate-bounce {
     animation: none !important;
   }
 `;
+
+/** Force all framer-motion elements visible by clearing inline styles */
+async function forceAllVisible(page: Page) {
+  await page.evaluate(() => {
+    document
+      .querySelectorAll("[style*='opacity'], [style*='transform']")
+      .forEach((el) => {
+        (el as HTMLElement).style.opacity = "1";
+        (el as HTMLElement).style.transform = "none";
+      });
+  });
+}
 
 test.describe("Visual Regression", () => {
   test.describe("Landing Page", () => {
@@ -26,6 +43,14 @@ test.describe("Visual Regression", () => {
       await home.setupMocks();
       await home.goto();
       await page.waitForLoadState("networkidle");
+
+      // Scroll through page to trigger whileInView animations
+      await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+      await page.waitForTimeout(500);
+      await page.evaluate(() => window.scrollTo(0, 0));
+      await page.waitForTimeout(300);
+
+      await forceAllVisible(page);
 
       await argosScreenshot(page, "landing-light", {
         argosCSS: stabilizationCSS,
@@ -39,13 +64,19 @@ test.describe("Visual Regression", () => {
       await home.goto();
       await page.waitForLoadState("networkidle");
 
-      // Toggle to dark mode via class strategy
+      // Toggle dark mode
       await page.evaluate(() => {
         document.documentElement.classList.add("dark");
         localStorage.setItem("theme", "dark");
       });
-      // Wait for theme transition
+
+      // Scroll to trigger animations then force visible
+      await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+      await page.waitForTimeout(500);
+      await page.evaluate(() => window.scrollTo(0, 0));
       await page.waitForTimeout(300);
+
+      await forceAllVisible(page);
 
       await argosScreenshot(page, "landing-dark", {
         argosCSS: stabilizationCSS,
@@ -92,9 +123,10 @@ test.describe("Visual Regression", () => {
       await home.setupMocks();
       await home.goto();
 
-      // Scroll to get-started section
+      // Scroll to trigger animations
       await page.locator("#get-started").scrollIntoViewIfNeeded();
-      await page.waitForTimeout(200);
+      await page.waitForTimeout(500);
+      await forceAllVisible(page);
 
       await argosScreenshot(page, "get-started-form", {
         argosCSS: stabilizationCSS,
