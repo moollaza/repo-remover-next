@@ -1,7 +1,7 @@
 ---
 title: "refactor: Remove @heroui/theme — replace with CSS custom properties"
 type: refactor
-status: active
+status: completed
 date: 2026-03-27
 ---
 

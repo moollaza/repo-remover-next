@@ -80,6 +80,5 @@ Plans go in `docs/plans/`. Solutions go in `docs/solutions/`.
 - `.claude/rules/security.md` — zero-knowledge architecture, token handling, CSP (always loaded)
 - `.claude/rules/testing.md` — MSW patterns, E2E conventions, type-only imports
 - `.claude/rules/components.md` — theme system, React patterns, component complexity
-- `.claude/rules/architecture.md` — architecture review findings, priority recommendations, API patterns
-- Architecture docs in `docs/` (ARCHITECTURE_REVIEW, RECOMMENDATIONS, IMPLEMENTATION_PLAN, TESTING_STRATEGY)
+- `.claude/rules/architecture.md` — architecture patterns, API best practices, environment setup
 - `AGENTS.md` is a symlink to this file
