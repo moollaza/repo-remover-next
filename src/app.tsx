@@ -20,13 +20,10 @@ export function App() {
         <ErrorBoundary>
           <FathomAnalytics />
           <div className="min-h-full">
-            {/* Header renders its own sticky/border/blur per route */}
             <Header />
             <main>
               <Routes>
-                {/* Home is full-width — sections handle their own max-width */}
                 <Route element={<Home />} path="/" />
-                {/* Dashboard is constrained */}
                 <Route
                   element={
                     <div className="max-w-7xl mx-auto px-6">

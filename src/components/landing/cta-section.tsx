@@ -14,7 +14,7 @@ export function CTASection() {
               Ready to Clean Up Your GitHub?
             </h2>
             <p className="text-lg md:text-xl mb-10 text-white/90 max-w-2xl mx-auto">
-              Trusted by 15,000+ developers. No sign-up, no backend, no
+              Trusted by 25,000+ developers. No sign-up, no backend, no
               tracking. Free and open source, forever.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
