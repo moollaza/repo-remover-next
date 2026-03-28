@@ -288,7 +288,7 @@ describe("fetchGitHubDataWithProgress", () => {
       expect(result.error).toBeNull();
     });
 
-    it("silently skips orgs on SAML enforcement error — personal repos still returned", async () => {
+    it("surfaces SAML enforcement error as permissionWarning — personal repos still returned", async () => {
       server.use(
         createOrgErrorHandler(() =>
           HttpResponse.json({
@@ -310,15 +310,15 @@ describe("fetchGitHubDataWithProgress", () => {
         onProgress,
       );
 
-      // SAML errors don't match "required scopes" — org fetch silently returns empty
-      expect(result.permissionWarning).toBeUndefined();
+      // SAML errors now surface as permissionWarning
+      expect(result.permissionWarning).toBeDefined();
       // Personal repos still returned despite org failure
       expect(result.repos).toHaveLength(3);
       expect(result.error).toBeNull();
       expect(result.user).not.toBeNull();
     });
 
-    it("silently skips orgs on unknown error — personal repos still returned", async () => {
+    it("surfaces unknown org error as permissionWarning — personal repos still returned", async () => {
       server.use(createOrgErrorHandler(() => HttpResponse.error()));
 
       const onProgress = vi.fn();
@@ -327,8 +327,8 @@ describe("fetchGitHubDataWithProgress", () => {
         onProgress,
       );
 
-      // Network errors don't match "required scopes" — org fetch silently returns empty
-      expect(result.permissionWarning).toBeUndefined();
+      // Any org fetch error now surfaces as permissionWarning
+      expect(result.permissionWarning).toBeDefined();
       // Personal repos still returned
       expect(result.repos).toHaveLength(3);
       expect(result.error).toBeNull();
@@ -1156,7 +1156,7 @@ describe("fetchGitHubData", () => {
       );
     }
 
-    it("silently skips orgs on SAML enforcement error — personal repos returned", async () => {
+    it("surfaces SAML enforcement error as permissionWarning — personal repos returned", async () => {
       server.use(
         createFetchGitHubDataOrgErrorHandler(() =>
           HttpResponse.json({
@@ -1174,20 +1174,20 @@ describe("fetchGitHubData", () => {
 
       const result = await fetchGitHubData(["testuser", VALID_PAT]);
 
-      expect(result.permissionWarning).toBeUndefined();
+      expect(result.permissionWarning).toBeDefined();
       expect(result.repos).toHaveLength(3);
       expect(result.error).toBeNull();
       expect(result.user).not.toBeNull();
     });
 
-    it("silently skips orgs on unknown error — personal repos returned", async () => {
+    it("surfaces unknown org error as permissionWarning — personal repos returned", async () => {
       server.use(
         createFetchGitHubDataOrgErrorHandler(() => HttpResponse.error()),
       );
 
       const result = await fetchGitHubData(["testuser", VALID_PAT]);
 
-      expect(result.permissionWarning).toBeUndefined();
+      expect(result.permissionWarning).toBeDefined();
       expect(result.repos).toHaveLength(3);
       expect(result.error).toBeNull();
       expect(result.user).not.toBeNull();

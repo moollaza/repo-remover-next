@@ -257,21 +257,8 @@ export async function fetchGitHubData(
         }
       } catch (error) {
         debug.error("Error fetching organizations:", error);
-
-        // Check if this is a permission/scope error
-        if (
-          error instanceof Error &&
-          error.message.includes("required scopes")
-        ) {
-          // This is a scope permission error - we should surface this to the UI
-          throw new Error(
-            "Missing GitHub token permissions: Your token needs 'read:org' scope to fetch organization data. " +
-              "You can update your token permissions at: https://github.com/settings/tokens",
-          );
-        }
-
-        // For other errors, break the loop but return what we have so far
-        hasNextPage = false;
+        // Re-throw so caller can surface as permissionWarning
+        throw error;
       }
     }
 
@@ -472,18 +459,8 @@ export async function fetchGitHubDataWithProgress(
         }
       } catch (error) {
         debug.error("Error fetching organizations:", error);
-
-        if (
-          error instanceof Error &&
-          error.message.includes("required scopes")
-        ) {
-          throw new Error(
-            "Missing GitHub token permissions: Your token needs 'read:org' scope to fetch organization data. " +
-              "You can update your token permissions at: https://github.com/settings/tokens",
-          );
-        }
-
-        hasNextPage = false;
+        // Re-throw so caller can surface as permissionWarning
+        throw error;
       }
     }
 
