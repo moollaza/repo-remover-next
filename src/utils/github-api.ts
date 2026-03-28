@@ -278,8 +278,9 @@ export async function fetchGitHubData(
     return orgs;
   }
 
-  // Track SAML-protected orgs across all org fetches
+  // Track SAML-protected and scope-limited orgs across all org fetches
   const samlProtectedOrgs: string[] = [];
+  const scopeLimitedOrgs: string[] = [];
 
   // Helper to fetch all repos for an org (paginated)
   async function fetchAllOrgRepos(orgLogin: string): Promise<Repository[]> {
@@ -337,6 +338,7 @@ export async function fetchGitHubData(
           debug.warn(
             `Skipping org ${orgLogin} due to insufficient permissions`,
           );
+          scopeLimitedOrgs.push(orgLogin);
         }
 
         // For any error, break the loop but return what we have so far
@@ -399,7 +401,11 @@ export async function fetchGitHubData(
       error: userRepoResult.error,
       repos: allRepos,
       user: userData,
-      ...(permissionError && { permissionWarning: permissionError }),
+      ...((permissionError ?? scopeLimitedOrgs.length > 0) && {
+        permissionWarning:
+          permissionError ??
+          `Token lacks required scopes to access repos in: ${scopeLimitedOrgs.join(", ")}. Update your token at https://github.com/settings/tokens`,
+      }),
       ...(samlProtectedOrgs.length > 0 && { samlProtectedOrgs }),
     };
   } catch (error) {
@@ -485,8 +491,9 @@ export async function fetchGitHubDataWithProgress(
     return orgs;
   }
 
-  // Track SAML-protected orgs across all org fetches
+  // Track SAML-protected and scope-limited orgs across all org fetches
   const samlProtectedOrgs: string[] = [];
+  const scopeLimitedOrgs: string[] = [];
 
   // Helper to fetch all repos for an org (paginated)
   async function fetchAllOrgRepos(orgLogin: string): Promise<Repository[]> {
@@ -539,6 +546,7 @@ export async function fetchGitHubDataWithProgress(
           debug.warn(
             `Skipping org ${orgLogin} due to insufficient permissions`,
           );
+          scopeLimitedOrgs.push(orgLogin);
         }
 
         hasNextPage = false;
@@ -640,7 +648,11 @@ export async function fetchGitHubDataWithProgress(
       error: userRepoResult.error,
       repos: allRepos,
       user: userData,
-      ...(permissionError && { permissionWarning: permissionError }),
+      ...((permissionError ?? scopeLimitedOrgs.length > 0) && {
+        permissionWarning:
+          permissionError ??
+          `Token lacks required scopes to access repos in: ${scopeLimitedOrgs.join(", ")}. Update your token at https://github.com/settings/tokens`,
+      }),
       ...(samlProtectedOrgs.length > 0 && { samlProtectedOrgs }),
     };
   } catch (error) {
