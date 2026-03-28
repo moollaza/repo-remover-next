@@ -54,7 +54,7 @@ export default function Dashboard({
         {onRefresh && (
           <button
             aria-label="Refresh repository data"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-divider text-sm font-medium hover:bg-default-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-divider text-sm font-medium cursor-pointer hover:bg-default-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={isLoading || isRefreshing}
             onClick={onRefresh}
             type="button"
