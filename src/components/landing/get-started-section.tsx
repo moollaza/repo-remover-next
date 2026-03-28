@@ -291,11 +291,11 @@ export function GetStartedSection() {
             Get Started in Under 2 Minutes
           </motion.h2>
           <motion.p
-            className="text-lg text-default-500 max-w-2xl mx-auto text-pretty"
+            className="text-lg text-default-500 max-w-2xl mx-auto text-balance"
             variants={fadeUp}
           >
             No installs, no sign-up, no server. Just a token in your browser and
-            you're ready to&nbsp;go.
+            you're ready to go.
           </motion.p>
         </motion.div>
 

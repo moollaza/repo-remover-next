@@ -1,14 +1,7 @@
-/**
- * Shared animation variants and utilities for framer-motion.
- *
- * All variants respect prefers-reduced-motion via MotionConfig
- * reducedMotion="user" set in src/app.tsx.
- */
 import type { Variants } from "framer-motion";
 
 const EASE = [0.25, 0.1, 0.25, 1] as const;
 
-/** Fade-in + slide-up (hero, section headings) */
 export const fadeUp: Variants = {
   hidden: { opacity: 0, y: 24 },
   visible: {
@@ -18,7 +11,6 @@ export const fadeUp: Variants = {
   },
 };
 
-/** Staggered container — wraps children with stagger delay */
 export const staggerContainer: Variants = {
   hidden: {},
   visible: {
@@ -28,7 +20,6 @@ export const staggerContainer: Variants = {
   },
 };
 
-/** Wider stagger for larger groups (e.g. feature sections) */
 export const staggerContainerWide: Variants = {
   hidden: {},
   visible: {
@@ -38,7 +29,6 @@ export const staggerContainerWide: Variants = {
   },
 };
 
-/** Fade-in only (no translate — for cards, smaller elements) */
 export const fadeIn: Variants = {
   hidden: { opacity: 0 },
   visible: {
@@ -47,7 +37,6 @@ export const fadeIn: Variants = {
   },
 };
 
-/** Scale-in (CTA card, product showcase) */
 export const scaleIn: Variants = {
   hidden: { opacity: 0, scale: 0.96 },
   visible: {
@@ -57,5 +46,4 @@ export const scaleIn: Variants = {
   },
 };
 
-/** Default viewport trigger options for whileInView */
 export const viewportOnce = { once: true, margin: "-80px" as const };

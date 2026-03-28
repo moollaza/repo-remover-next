@@ -24,6 +24,7 @@ export function HeroSection() {
             300,000+ repos managed and counting
           </span>
         </motion.div>
+
         <motion.h1
           className="text-4xl md:text-6xl font-bold mb-6 leading-tight"
           variants={fadeUp}
@@ -33,6 +34,7 @@ export function HeroSection() {
             Instantly
           </span>
         </motion.h1>
+
         <motion.p
           className="text-lg md:text-xl text-default-500 mb-10 max-w-2xl mx-auto leading-relaxed"
           variants={fadeUp}
@@ -40,6 +42,7 @@ export function HeroSection() {
           Search, filter, and bulk-manage hundreds of repositories in one place.
           Zero-knowledge — your token never leaves your browser.
         </motion.p>
+
         <motion.div
           className="flex flex-col sm:flex-row items-center justify-center gap-4"
           variants={fadeUp}
@@ -68,6 +71,7 @@ export function HeroSection() {
             View on GitHub
           </motion.a>
         </motion.div>
+
         <motion.div
           className="mt-8 flex items-center justify-center gap-4 text-sm text-default-600"
           variants={fadeUp}
