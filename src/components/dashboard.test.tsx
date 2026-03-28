@@ -60,14 +60,16 @@ describe("Dashboard", () => {
     expect(onRefresh).toHaveBeenCalledTimes(1);
   });
 
-  it("hides refresh button when loading", () => {
+  it("disables refresh button and shows loading state when loading", () => {
     render(
       <Dashboard {...defaultProps} isLoading={true} onRefresh={vi.fn()} />,
     );
 
-    expect(
-      screen.queryByRole("button", { name: /refresh repository data/i }),
-    ).not.toBeInTheDocument();
+    const button = screen.getByRole("button", {
+      name: /refresh repository data/i,
+    });
+    expect(button).toBeDisabled();
+    expect(button).toHaveTextContent("Loading...");
   });
 
   it("does not render refresh button when onRefresh not provided", () => {

@@ -1,9 +1,8 @@
 import { type Repository } from "@octokit/graphql-schema";
+import { RefreshCw } from "lucide-react";
 
-import RepoLoadingProgress from "@/components/repo-loading-progress";
 import RepoTable from "@/components/repo-table/repo-table";
 import RepoTableSkeleton from "@/components/repo-table/repo-table-skeleton";
-import { type LoadingProgress } from "@/utils/github-api";
 
 export interface DashboardProps {
   /** Whether an error occurred during data fetch */
@@ -18,8 +17,6 @@ export interface DashboardProps {
   onRefresh?: () => void;
   /** Optional permission warning message */
   permissionWarning?: string;
-  /** Loading progress information */
-  progress?: LoadingProgress | null;
   /** Current user's repositories */
   repos: null | Repository[];
 }
@@ -37,11 +34,8 @@ export default function Dashboard({
   login,
   onRefresh,
   permissionWarning,
-  progress,
   repos,
 }: DashboardProps) {
-  const showProgress = (isLoading || isRefreshing) && progress;
-
   return (
     <section className="py-10 flex-grow">
       <div className="flex items-center justify-between mb-8">
@@ -52,44 +46,23 @@ export default function Dashboard({
           >
             Repository Management
           </h1>
-          {/* Inline progress replaces subtitle to prevent layout shift */}
-          {showProgress ? (
-            <div className="mt-1">
-              <RepoLoadingProgress
-                currentOrg={progress.currentOrg}
-                orgsLoaded={progress.orgsLoaded}
-                orgsTotal={progress.orgsTotal}
-                stage={progress.stage}
-              />
-            </div>
-          ) : (
-            <p className="text-default-500 mt-1">
-              Select repositories to archive or delete permanently
-            </p>
-          )}
+          <p className="text-default-500 mt-1">
+            Select repositories to archive or delete permanently
+          </p>
         </div>
 
-        {onRefresh && !isLoading && (
+        {onRefresh && (
           <button
             aria-label="Refresh repository data"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-divider text-sm font-medium hover:bg-default-50 transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-divider text-sm font-medium hover:bg-default-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={isLoading || isRefreshing}
             onClick={onRefresh}
             type="button"
           >
-            <svg
-              className="h-4 w-4"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2}
-              viewBox="0 0 24 24"
-            >
-              <path
-                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            Refresh
+            <RefreshCw
+              className={`h-4 w-4 ${isLoading || isRefreshing ? "animate-spin" : ""}`}
+            />
+            {isLoading || isRefreshing ? "Loading..." : "Refresh"}
           </button>
         )}
       </div>

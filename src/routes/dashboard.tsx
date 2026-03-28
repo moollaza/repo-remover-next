@@ -20,7 +20,6 @@ export function Dashboard() {
     login,
     pat,
     permissionWarning,
-    progress,
     refetchData,
     repos,
   } = useGitHubData();
@@ -48,7 +47,6 @@ export function Dashboard() {
         login={login}
         onRefresh={refetchData}
         permissionWarning={permissionWarning}
-        progress={progress}
         repos={repos}
       />
     </ErrorBoundary>
