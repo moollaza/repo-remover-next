@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import {
   CheckSquare,
   ExternalLink,
@@ -16,6 +17,13 @@ import {
   createThrottledOctokit,
   isValidGitHubToken,
 } from "@/utils/github-utils";
+import {
+  fadeUp,
+  scaleIn,
+  staggerContainer,
+  staggerContainerWide,
+  viewportOnce,
+} from "@/utils/motion";
 
 const steps = [
   {
@@ -269,23 +277,45 @@ export function GetStartedSection() {
   return (
     <section className="w-full px-6 py-20" id="get-started">
       <div className="max-w-5xl mx-auto">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+        <motion.div
+          className="text-center mb-16"
+          initial="hidden"
+          variants={staggerContainer}
+          viewport={viewportOnce}
+          whileInView="visible"
+        >
+          <motion.h2
+            className="text-3xl md:text-4xl font-bold mb-4"
+            variants={fadeUp}
+          >
             Get Started in Under 2 Minutes
-          </h2>
-          <p className="text-lg text-default-500 max-w-2xl mx-auto text-pretty">
+          </motion.h2>
+          <motion.p
+            className="text-lg text-default-500 max-w-2xl mx-auto text-balance"
+            variants={fadeUp}
+          >
             No installs, no sign-up, no server. Just a token in your browser and
             you're ready to go.
-          </p>
-        </div>
+          </motion.p>
+        </motion.div>
 
-        <div className="relative">
+        <motion.div
+          className="relative"
+          initial="hidden"
+          variants={staggerContainerWide}
+          viewport={viewportOnce}
+          whileInView="visible"
+        >
           {/* Connecting line */}
           <div className="absolute left-5 top-6 bottom-6 w-px bg-divider hidden sm:block" />
 
           <div className="space-y-10">
             {steps.map((step, index) => (
-              <div className="flex gap-6 items-start relative" key={index}>
+              <motion.div
+                className="flex gap-6 items-start relative"
+                key={index}
+                variants={fadeUp}
+              >
                 <div className="shrink-0 relative z-10">
                   <div
                     className={`w-11 h-11 rounded-full flex items-center justify-center font-bold text-base shadow-sm ring-4 ring-background ${
@@ -315,13 +345,19 @@ export function GetStartedSection() {
                     </a>
                   )}
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
-        </div>
+        </motion.div>
 
-        {/* PAT form card — plain Tailwind, no HeroUI */}
-        <div className="mt-16 bg-content1 border border-divider rounded-xl p-8 max-w-xl mx-auto">
+        {/* PAT form card */}
+        <motion.div
+          className="mt-16 bg-content1 border border-divider rounded-xl p-8 max-w-xl mx-auto"
+          initial="hidden"
+          variants={scaleIn}
+          viewport={viewportOnce}
+          whileInView="visible"
+        >
           <h3 className="text-xl font-semibold mb-2 text-center">
             Ready to start?
           </h3>
@@ -345,7 +381,7 @@ export function GetStartedSection() {
               100% free
             </span>
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

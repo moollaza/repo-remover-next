@@ -1,0 +1,263 @@
+import { type Repository } from "@octokit/graphql-schema";
+import { RequestError } from "@octokit/request-error";
+import { useCallback, useMemo, useReducer, useRef } from "react";
+
+import { useGitHubData } from "@/hooks/use-github-data";
+import { analytics } from "@/utils/analytics";
+import { debug } from "@/utils/debug";
+import { createThrottledOctokit, processRepo } from "@/utils/github-utils";
+
+// --- Types ---
+
+export type ModalMode = "confirmation" | "progress" | "result";
+
+export type ModalAction =
+  | { payload: { error: Error; repository?: Repository }; type: "ADD_ERROR" }
+  | { payload: { increment: number; repo: string }; type: "UPDATE_PROGRESS" }
+  | { payload: { login: string; username: string }; type: "SET_USERNAME" }
+  | { type: "COMPLETE_PROCESSING" }
+  | { type: "RESET" }
+  | { type: "START_PROCESSING" };
+
+export interface ModalState {
+  confirming: boolean;
+  currentRepo: string;
+  errors: { error: Error; repository?: Repository }[];
+  isCorrectUsername: boolean;
+  mode: ModalMode;
+  progress: number;
+  username: string;
+}
+
+export interface UseConfirmationModalProps {
+  action: "archive" | "delete";
+  login: string;
+  onClose: () => void;
+  onConfirm: () => void;
+  repos: Repository[];
+}
+
+export interface UseConfirmationModalReturn {
+  /** Confirm and begin processing repos */
+  handleConfirm: () => void;
+  /** Close modal and reset state; triggers data refetch if operations ran */
+  handleOnClose: () => void;
+  /** Update the username input (supports React setState pattern) */
+  handleSetUsername: (value: React.SetStateAction<string>) => void;
+  /** Abort the current batch operation */
+  handleStop: () => void;
+  /** Whether the modal can be dismissed (only in confirmation mode) */
+  isDismissable: boolean;
+  /** Current modal state */
+  state: ModalState;
+}
+
+// --- Reducer ---
+
+export const initialState: ModalState = {
+  confirming: false,
+  currentRepo: "",
+  errors: [],
+  isCorrectUsername: false,
+  mode: "confirmation",
+  progress: 0,
+  username: "",
+};
+
+export function modalReducer(
+  state: ModalState,
+  action: ModalAction,
+): ModalState {
+  switch (action.type) {
+    case "ADD_ERROR":
+      return {
+        ...state,
+        errors: [...state.errors, action.payload],
+      };
+    case "COMPLETE_PROCESSING":
+      return {
+        ...state,
+        confirming: false,
+        mode: "result",
+      };
+    case "RESET":
+      return initialState;
+    case "SET_USERNAME":
+      return {
+        ...state,
+        isCorrectUsername: action.payload.username === action.payload.login,
+        username: action.payload.username,
+      };
+    case "START_PROCESSING":
+      return {
+        ...state,
+        confirming: true,
+        errors: [],
+        mode: "progress",
+        progress: 0,
+      };
+    case "UPDATE_PROGRESS":
+      return {
+        ...state,
+        currentRepo: action.payload.repo,
+        progress: state.progress + action.payload.increment,
+      };
+    default:
+      return state;
+  }
+}
+
+// --- Hook ---
+
+/**
+ * Custom hook for managing the confirmation modal state machine.
+ *
+ * Handles:
+ * - State transitions (confirmation -> progress -> result)
+ * - Username validation
+ * - Batch repo processing with abort support
+ * - Analytics tracking
+ * - Error collection
+ *
+ * @example
+ * ```tsx
+ * const {
+ *   state,
+ *   handleConfirm,
+ *   handleStop,
+ *   handleOnClose,
+ *   handleSetUsername,
+ *   isDismissable,
+ * } = useConfirmationModal({ action, login, onClose, onConfirm, repos });
+ * ```
+ */
+export function useConfirmationModal({
+  action,
+  login,
+  onClose,
+  onConfirm,
+  repos,
+}: UseConfirmationModalProps): UseConfirmationModalReturn {
+  const { mutate, pat } = useGitHubData();
+
+  // Memoize Octokit so rate-limit state persists across re-renders
+  const octokit = useMemo(
+    () => (pat ? createThrottledOctokit(pat) : null),
+    [pat],
+  );
+
+  const [state, dispatch] = useReducer(modalReducer, initialState);
+  const abortRef = useRef(false);
+
+  const handleConfirmAsync = useCallback(async () => {
+    debug.log("handleConfirm called");
+
+    if (!octokit || state.confirming) return;
+
+    abortRef.current = false;
+    dispatch({ type: "START_PROCESSING" });
+
+    // Track bulk action submission
+    if (action === "archive") {
+      analytics.trackArchiveActionSubmitted(repos.length);
+    } else {
+      analytics.trackDeleteActionSubmitted(repos.length);
+    }
+
+    const startTime = Date.now();
+
+    for (const repo of repos) {
+      // Check abort flag before each repo
+      if (abortRef.current) break;
+
+      try {
+        await processRepo(octokit, repo, action);
+      } catch (error) {
+        if (error instanceof Error) {
+          debug.error(`Failed to ${action} the repo:`, error);
+          dispatch({
+            payload: { error, repository: repo },
+            type: "ADD_ERROR",
+          });
+
+          // Detect authentication failure — stop the batch early
+          if (error instanceof RequestError && error.status === 401) {
+            debug.error(
+              "Authentication failed — stopping batch early. Token may have expired.",
+            );
+            break;
+          }
+        } else {
+          debug.error("An unknown error occurred");
+        }
+      } finally {
+        dispatch({
+          payload: { increment: 1, repo: repo.name },
+          type: "UPDATE_PROGRESS",
+        });
+        // Brief pause for visual feedback
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+    }
+
+    // Minimum display time for UX
+    const elapsedTime = Date.now() - startTime;
+    if (elapsedTime < 2000) {
+      await new Promise((resolve) => setTimeout(resolve, 2000 - elapsedTime));
+    }
+
+    dispatch({ type: "COMPLETE_PROCESSING" });
+    setTimeout(() => {
+      onConfirm();
+    }, 100);
+  }, [action, octokit, onConfirm, repos, state.confirming]);
+
+  const handleConfirm = useCallback(
+    () => void handleConfirmAsync(),
+    [handleConfirmAsync],
+  );
+
+  const handleStop = useCallback(() => {
+    abortRef.current = true;
+  }, []);
+
+  const handleOnClose = useCallback(() => {
+    // Only refetch GitHub data if operations actually ran
+    if (state.mode === "result") {
+      void mutate();
+    }
+
+    // Close the modal
+    onClose();
+
+    // Reset the state
+    dispatch({ type: "RESET" });
+  }, [mutate, onClose, state.mode]);
+
+  const handleSetUsername = useCallback(
+    (value: React.SetStateAction<string>) => {
+      if (typeof value === "function") {
+        const updater = value as (prevState: string) => string;
+        const newValue = updater(state.username);
+        dispatch({
+          payload: { login, username: newValue },
+          type: "SET_USERNAME",
+        });
+      } else {
+        dispatch({ payload: { login, username: value }, type: "SET_USERNAME" });
+      }
+    },
+    [login, state.username],
+  );
+
+  const isDismissable = state.mode === "confirmation";
+
+  return {
+    handleConfirm,
+    handleOnClose,
+    handleSetUsername,
+    handleStop,
+    isDismissable,
+    state,
+  };
+}

@@ -67,11 +67,11 @@ export function ProductShowcase() {
             See it in action
           </span>
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Powerful Repository Management at Your Fingertips
+            All Your Repos in One View
           </h2>
           <p className="text-lg text-default-500 max-w-2xl mx-auto">
-            View all your repositories in a clean, organized table. Search,
-            filter, and select with ease.
+            Browse your repositories in an organized table. Search, filter,
+            select, and take action.
           </p>
         </div>
 

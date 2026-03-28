@@ -8,9 +8,9 @@ const features = [
       "See results update in real-time as you type",
     ],
     description:
-      "Never scroll through endless lists again. Our smart search instantly finds repositories by name or description.",
+      "Find any repository instantly by name or description. No more scrolling through endless lists.",
     icon: Search,
-    title: "Lightning-Fast Search",
+    title: "Instant Search",
   },
   {
     benefits: [
@@ -19,7 +19,7 @@ const features = [
       "Combine multiple filters for precise results",
     ],
     description:
-      "Take control with powerful filters. Show only private repos, archived projects, or forked repos. Sort by name or last updated.",
+      "Show only private repos, archived projects, or forks. Sort by name or last updated. Combine filters for precise results.",
     icon: Filter,
     title: "Advanced Filtering & Sorting",
   },
@@ -30,7 +30,7 @@ const features = [
       "Confirmation dialogs prevent accidents",
     ],
     description:
-      "Select multiple repositories with checkboxes and perform actions on all of them at once. Archive dozens or delete test repos in a single click.",
+      "Select repos with checkboxes and act on all of them at once. Archive dozens or delete test repos in a single click.",
     icon: CheckSquare,
     title: "Bulk Operations Made Simple",
   },
