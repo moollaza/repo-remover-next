@@ -197,6 +197,7 @@ interface FetchResult {
   error: Error | null;
   permissionWarning?: string;
   repos: null | Repository[];
+  samlProtectedOrgs?: string[];
   user: null | User;
 }
 
@@ -256,26 +257,17 @@ export async function fetchGitHubData(
         }
       } catch (error) {
         debug.error("Error fetching organizations:", error);
-
-        // Check if this is a permission/scope error
-        if (
-          error instanceof Error &&
-          error.message.includes("required scopes")
-        ) {
-          // This is a scope permission error - we should surface this to the UI
-          throw new Error(
-            "Missing GitHub token permissions: Your token needs 'read:org' scope to fetch organization data. " +
-              "You can update your token permissions at: https://github.com/settings/tokens",
-          );
-        }
-
-        // For other errors, break the loop but return what we have so far
-        hasNextPage = false;
+        // Re-throw so caller can surface as permissionWarning
+        throw error;
       }
     }
 
     return orgs;
   }
+
+  // Track SAML-protected and scope-limited orgs across all org fetches
+  const samlProtectedOrgs: string[] = [];
+  const scopeLimitedOrgs: string[] = [];
 
   // Helper to fetch all repos for an org (paginated)
   async function fetchAllOrgRepos(orgLogin: string): Promise<Repository[]> {
@@ -315,14 +307,25 @@ export async function fetchGitHubData(
       } catch (error) {
         debug.error(`Error fetching repos for org ${orgLogin}:`, error);
 
-        // Check if this is a permission/scope error
+        // Check if this is a SAML SSO enforcement error
         if (
+          error instanceof Error &&
+          error.message.includes(
+            "Resource protected by organization SAML enforcement",
+          )
+        ) {
+          debug.warn(`Skipping org ${orgLogin} due to SAML SSO enforcement`);
+          samlProtectedOrgs.push(orgLogin);
+        }
+        // Check if this is a permission/scope error
+        else if (
           error instanceof Error &&
           error.message.includes("required scopes")
         ) {
           debug.warn(
             `Skipping org ${orgLogin} due to insufficient permissions`,
           );
+          scopeLimitedOrgs.push(orgLogin);
         }
 
         // For any error, break the loop but return what we have so far
@@ -360,12 +363,11 @@ export async function fetchGitHubData(
     try {
       orgs = await fetchAllOrganizations(userLogin);
     } catch (error) {
-      if (
-        error instanceof Error &&
-        error.message.includes("Missing GitHub token permissions")
-      ) {
-        permissionError = error.message;
-        debug.warn("Organization access limited due to token permissions");
+      if (error instanceof Error) {
+        permissionError =
+          "Your token may lack the read:org scope needed to fetch organization repositories. " +
+          "Update your token at https://github.com/settings/tokens";
+        debug.warn("Organization access limited:", error.message);
       } else {
         throw error; // Re-throw unexpected errors
       }
@@ -385,7 +387,12 @@ export async function fetchGitHubData(
       error: userRepoResult.error,
       repos: allRepos,
       user: userData,
-      ...(permissionError && { permissionWarning: permissionError }),
+      ...((permissionError ?? scopeLimitedOrgs.length > 0) && {
+        permissionWarning:
+          permissionError ??
+          `Token lacks required scopes to access repos in: ${scopeLimitedOrgs.join(", ")}. Update your token at https://github.com/settings/tokens`,
+      }),
+      ...(samlProtectedOrgs.length > 0 && { samlProtectedOrgs }),
     };
   } catch (error) {
     debug.error("Error fetching GitHub data:", error);
@@ -452,23 +459,17 @@ export async function fetchGitHubDataWithProgress(
         }
       } catch (error) {
         debug.error("Error fetching organizations:", error);
-
-        if (
-          error instanceof Error &&
-          error.message.includes("required scopes")
-        ) {
-          throw new Error(
-            "Missing GitHub token permissions: Your token needs 'read:org' scope to fetch organization data. " +
-              "You can update your token permissions at: https://github.com/settings/tokens",
-          );
-        }
-
-        hasNextPage = false;
+        // Re-throw so caller can surface as permissionWarning
+        throw error;
       }
     }
 
     return orgs;
   }
+
+  // Track SAML-protected and scope-limited orgs across all org fetches
+  const samlProtectedOrgs: string[] = [];
+  const scopeLimitedOrgs: string[] = [];
 
   // Helper to fetch all repos for an org (paginated)
   async function fetchAllOrgRepos(orgLogin: string): Promise<Repository[]> {
@@ -503,13 +504,25 @@ export async function fetchGitHubDataWithProgress(
       } catch (error) {
         debug.error(`Error fetching repos for org ${orgLogin}:`, error);
 
+        // Check if this is a SAML SSO enforcement error
         if (
+          error instanceof Error &&
+          error.message.includes(
+            "Resource protected by organization SAML enforcement",
+          )
+        ) {
+          debug.warn(`Skipping org ${orgLogin} due to SAML SSO enforcement`);
+          samlProtectedOrgs.push(orgLogin);
+        }
+        // Check if this is a permission/scope error
+        else if (
           error instanceof Error &&
           error.message.includes("required scopes")
         ) {
           debug.warn(
             `Skipping org ${orgLogin} due to insufficient permissions`,
           );
+          scopeLimitedOrgs.push(orgLogin);
         }
 
         hasNextPage = false;
@@ -556,12 +569,11 @@ export async function fetchGitHubDataWithProgress(
     try {
       orgs = await fetchAllOrganizations(userLogin);
     } catch (error) {
-      if (
-        error instanceof Error &&
-        error.message.includes("Missing GitHub token permissions")
-      ) {
-        permissionError = error.message;
-        debug.warn("Organization access limited due to token permissions");
+      if (error instanceof Error) {
+        permissionError =
+          "Your token may lack the read:org scope needed to fetch organization repositories. " +
+          "Update your token at https://github.com/settings/tokens";
+        debug.warn("Organization access limited:", error.message);
       } else {
         throw error;
       }
@@ -611,7 +623,12 @@ export async function fetchGitHubDataWithProgress(
       error: userRepoResult.error,
       repos: allRepos,
       user: userData,
-      ...(permissionError && { permissionWarning: permissionError }),
+      ...((permissionError ?? scopeLimitedOrgs.length > 0) && {
+        permissionWarning:
+          permissionError ??
+          `Token lacks required scopes to access repos in: ${scopeLimitedOrgs.join(", ")}. Update your token at https://github.com/settings/tokens`,
+      }),
+      ...(samlProtectedOrgs.length > 0 && { samlProtectedOrgs }),
     };
   } catch (error) {
     debug.error("Error fetching GitHub data:", error);

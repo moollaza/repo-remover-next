@@ -122,4 +122,48 @@ describe("Dashboard", () => {
     ).toBeInTheDocument();
     expect(screen.getByText(warning)).toBeInTheDocument();
   });
+
+  it("shows SAML banner when samlProtectedOrgs is non-empty", () => {
+    render(
+      <Dashboard
+        {...defaultProps}
+        samlProtectedOrgs={["acme-corp", "big-co"]}
+      />,
+    );
+
+    expect(
+      screen.getByText(/some organizations require saml authentication/i),
+    ).toBeInTheDocument();
+    expect(screen.getByText("acme-corp, big-co")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /authorize sso/i }),
+    ).toHaveAttribute("href", "https://github.com/settings/tokens");
+  });
+
+  it("does not show SAML banner when samlProtectedOrgs is empty", () => {
+    render(<Dashboard {...defaultProps} samlProtectedOrgs={[]} />);
+
+    expect(
+      screen.queryByText(/some organizations require saml authentication/i),
+    ).not.toBeInTheDocument();
+  });
+
+  it("dismisses SAML banner when X button is clicked", async () => {
+    const user = userEvent.setup();
+
+    render(<Dashboard {...defaultProps} samlProtectedOrgs={["acme-corp"]} />);
+
+    expect(
+      screen.getByText(/some organizations require saml authentication/i),
+    ).toBeInTheDocument();
+
+    const dismissButton = screen.getByRole("button", {
+      name: /dismiss saml warning/i,
+    });
+    await user.click(dismissButton);
+
+    expect(
+      screen.queryByText(/some organizations require saml authentication/i),
+    ).not.toBeInTheDocument();
+  });
 });

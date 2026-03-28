@@ -24,6 +24,7 @@ export interface GitHubFetcherResult {
   error: Error | null;
   permissionWarning?: string;
   repos: null | Repository[];
+  samlProtectedOrgs?: string[];
   user: null | User;
 }
 
@@ -255,6 +256,7 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
     permissionWarning: data?.permissionWarning,
     progress,
     refetchData,
+    samlProtectedOrgs: data?.samlProtectedOrgs ?? [],
     repos,
     setLogin,
     setPat,

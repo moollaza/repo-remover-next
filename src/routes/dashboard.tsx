@@ -22,6 +22,7 @@ export function Dashboard() {
     permissionWarning,
     refetchData,
     repos,
+    samlProtectedOrgs,
   } = useGitHubData();
 
   const navigate = useNavigate();
@@ -48,6 +49,7 @@ export function Dashboard() {
         onRefresh={refetchData}
         permissionWarning={permissionWarning}
         repos={repos}
+        samlProtectedOrgs={samlProtectedOrgs}
       />
     </ErrorBoundary>
   );
