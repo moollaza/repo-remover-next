@@ -1,5 +1,6 @@
 # dependencies
 /node_modules
+package-lock.json
 
 # claude worktrees
 .claude/worktrees/
@@ -38,7 +39,10 @@ yarn-error.log*
 /playwright/.cache/
 .playwright-mcp/
 
-# Claude Code local files
+# tooling local files
 .claude/settings.local.json
+.context/
 .superpowers/
 ralph/
+cache/
+docs/

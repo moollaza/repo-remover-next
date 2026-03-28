@@ -61,9 +61,10 @@ test.describe("Home Page", () => {
     await expect(home.page).toHaveURL("/dashboard");
   });
 
-  // TODO: Add fix remember me checkbox
-  // TODO: Switch to opt-in for remember me
-  test.skip("should handle remember me checkbox", async () => {
+  test("should handle remember me checkbox", async () => {
+    // Scroll to the form section first
+    await home.rememberCheckbox.scrollIntoViewIfNeeded();
+
     // Should be checked by default
     await expect(home.rememberCheckbox).toBeChecked();
 

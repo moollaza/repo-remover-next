@@ -34,7 +34,7 @@ export interface UseConfirmationModalProps {
   action: "archive" | "delete";
   login: string;
   onClose: () => void;
-  onConfirm: () => void;
+  onConfirm?: () => void;
   repos: Repository[];
 }
 
@@ -195,7 +195,7 @@ export function useConfirmationModal({
 
     dispatch({ type: "COMPLETE_PROCESSING" });
     setTimeout(() => {
-      onConfirm();
+      onConfirm?.();
     }, 100);
   }, [action, mutate, octokit, onConfirm, repos, state.confirming]);
 

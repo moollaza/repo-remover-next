@@ -1,7 +1,5 @@
-import { config } from "@fortawesome/fontawesome-svg-core";
 import { MotionConfig } from "framer-motion";
 import { Navigate, Route, Routes } from "react-router-dom";
-import "@fortawesome/fontawesome-svg-core/styles.css";
 
 import { ErrorBoundary } from "@/components/error-boundary";
 import { FathomAnalytics } from "@/components/fathom-analytics";
@@ -10,8 +8,6 @@ import Header from "@/components/header";
 import { Providers } from "@/providers/providers";
 import { Dashboard } from "@/routes/dashboard";
 import { Home } from "@/routes/home";
-
-config.autoAddCss = false;
 
 export function App() {
   return (

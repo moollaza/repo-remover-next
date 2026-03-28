@@ -228,6 +228,7 @@ function InlinePATForm() {
         <input
           checked={remember}
           className="h-4 w-4 rounded border-default-300 accent-[var(--brand-blue)]"
+          data-testid="github-token-remember"
           id="remember-token"
           onChange={(e) => setRemember(e.target.checked)}
           type="checkbox"

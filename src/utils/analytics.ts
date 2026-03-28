@@ -17,7 +17,7 @@ const IS_PRODUCTION = import.meta.env.PROD;
  */
 export function track(eventName: string, value?: number): void {
   if (!IS_PRODUCTION) {
-    console.log(
+    debug.log(
       `[DEV] Would track event: ${eventName}`,
       value !== undefined ? `(value: ${value})` : "",
     );
