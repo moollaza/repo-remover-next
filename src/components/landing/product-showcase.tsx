@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import {
   Archive,
   ChevronDown,
@@ -11,8 +11,8 @@ import {
 import {
   fadeUp,
   scaleIn,
+  scrollRevealProps,
   staggerContainer,
-  viewportOnce,
 } from "@/utils/motion";
 
 const mockRepos = [
@@ -64,6 +64,8 @@ const mockRepos = [
 ];
 
 export function ProductShowcase() {
+  const reduced = useReducedMotion();
+
   return (
     <section
       className="w-full px-6 py-20 bg-gradient-to-b from-background to-default-50"
@@ -72,10 +74,7 @@ export function ProductShowcase() {
       <div className="max-w-7xl mx-auto">
         <motion.div
           className="text-center mb-12"
-          initial="hidden"
-          variants={staggerContainer}
-          viewport={viewportOnce}
-          whileInView="visible"
+          {...scrollRevealProps(staggerContainer, reduced)}
         >
           <motion.span
             className="inline-block px-3 py-1 text-xs rounded-full bg-[var(--brand-blue)]/10 text-[var(--brand-blue)] border border-[var(--brand-blue)]/20 mb-4"
@@ -101,10 +100,7 @@ export function ProductShowcase() {
         {/* Glow + UI mockup */}
         <motion.div
           className="relative max-w-5xl mx-auto"
-          initial="hidden"
-          variants={scaleIn}
-          viewport={viewportOnce}
-          whileInView="visible"
+          {...scrollRevealProps(scaleIn, reduced)}
         >
           <div className="absolute inset-0 bg-gradient-to-r from-[var(--brand-blue)] to-[var(--brand-cyan)] blur-3xl opacity-10 dark:opacity-20 rounded-3xl" />
           <div className="relative rounded-xl overflow-hidden border border-divider shadow-2xl bg-content1 text-sm">
@@ -230,10 +226,7 @@ export function ProductShowcase() {
         {/* Feature highlights below */}
         <motion.div
           className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12 max-w-5xl mx-auto"
-          initial="hidden"
-          variants={staggerContainer}
-          viewport={viewportOnce}
-          whileInView="visible"
+          {...scrollRevealProps(staggerContainer, reduced)}
         >
           <motion.div className="text-center" variants={fadeUp}>
             <div className="text-2xl mb-2">⚡</div>

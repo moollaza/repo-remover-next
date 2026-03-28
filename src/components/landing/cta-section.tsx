@@ -1,23 +1,22 @@
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, Github } from "lucide-react";
 
 import {
   fadeUp,
   scaleIn,
+  scrollRevealProps,
   staggerContainer,
-  viewportOnce,
 } from "@/utils/motion";
 
 export function CTASection() {
+  const reduced = useReducedMotion();
+
   return (
     <section className="w-full px-6 py-20">
       <div className="max-w-4xl mx-auto">
         <motion.div
           className="rounded-2xl p-12 md:p-16 text-center bg-gradient-to-br from-[var(--brand-blue)] to-[var(--brand-cyan)] dark:from-[var(--brand-blue)]/90 dark:to-[var(--brand-cyan)]/80 text-white relative overflow-hidden shadow-2xl"
-          initial="hidden"
-          variants={scaleIn}
-          viewport={viewportOnce}
-          whileInView="visible"
+          {...scrollRevealProps(scaleIn, reduced)}
         >
           {/* Decorative blurs */}
           <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
@@ -25,10 +24,7 @@ export function CTASection() {
 
           <motion.div
             className="relative z-10"
-            initial="hidden"
-            variants={staggerContainer}
-            viewport={viewportOnce}
-            whileInView="visible"
+            {...scrollRevealProps(staggerContainer, reduced)}
           >
             <motion.h2
               className="text-3xl md:text-5xl font-bold mb-6"

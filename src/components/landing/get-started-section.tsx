@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import {
   CheckSquare,
   ExternalLink,
@@ -20,9 +20,9 @@ import {
 import {
   fadeUp,
   scaleIn,
+  scrollRevealProps,
   staggerContainer,
   staggerContainerWide,
-  viewportOnce,
 } from "@/utils/motion";
 
 const steps = [
@@ -274,15 +274,14 @@ function InlinePATForm() {
 }
 
 export function GetStartedSection() {
+  const reduced = useReducedMotion();
+
   return (
     <section className="w-full px-6 py-20" id="get-started">
       <div className="max-w-5xl mx-auto">
         <motion.div
           className="text-center mb-16"
-          initial="hidden"
-          variants={staggerContainer}
-          viewport={viewportOnce}
-          whileInView="visible"
+          {...scrollRevealProps(staggerContainer, reduced)}
         >
           <motion.h2
             className="text-3xl md:text-4xl font-bold mb-4"
@@ -301,10 +300,7 @@ export function GetStartedSection() {
 
         <motion.div
           className="relative"
-          initial="hidden"
-          variants={staggerContainerWide}
-          viewport={viewportOnce}
-          whileInView="visible"
+          {...scrollRevealProps(staggerContainerWide, reduced)}
         >
           {/* Connecting line */}
           <div className="absolute left-5 top-6 bottom-6 w-px bg-divider hidden sm:block" />
@@ -353,10 +349,7 @@ export function GetStartedSection() {
         {/* PAT form card */}
         <motion.div
           className="mt-16 bg-content1 border border-divider rounded-xl p-8 max-w-xl mx-auto"
-          initial="hidden"
-          variants={scaleIn}
-          viewport={viewportOnce}
-          whileInView="visible"
+          {...scrollRevealProps(scaleIn, reduced)}
         >
           <h3 className="text-xl font-semibold mb-2 text-center">
             Ready to start?

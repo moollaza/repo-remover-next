@@ -1,8 +1,12 @@
-import { motion, useInView } from "framer-motion";
+import { motion, useInView, useReducedMotion } from "framer-motion";
 import { CheckSquare, Filter, Search, Shield } from "lucide-react";
 import { useRef } from "react";
 
-import { fadeUp, staggerContainerWide, viewportOnce } from "@/utils/motion";
+import {
+  fadeUp,
+  scrollRevealProps,
+  staggerContainerWide,
+} from "@/utils/motion";
 
 /** Wrapper that draws SVG icon strokes when scrolled into view */
 function AnimatedIcon({
@@ -11,19 +15,23 @@ function AnimatedIcon({
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  const prefersReduced = useReducedMotion();
   const isInView = useInView(ref, { once: true, margin: "-80px" });
+  const visible = prefersReduced ?? isInView;
 
   return (
     <motion.div
       ref={ref}
-      initial={{ scale: 0.8, opacity: 0 }}
-      animate={isInView ? { scale: 1, opacity: 1 } : { scale: 0.8, opacity: 0 }}
+      initial={
+        prefersReduced ? { scale: 1, opacity: 1 } : { scale: 0.8, opacity: 0 }
+      }
+      animate={visible ? { scale: 1, opacity: 1 } : { scale: 0.8, opacity: 0 }}
       transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
       whileHover={{ rotate: [0, -5, 5, 0], transition: { duration: 0.4 } }}
       className="[&_svg]:w-24 [&_svg]:h-24 [&_svg]:text-white"
       style={{
-        strokeDasharray: isInView ? "none" : "200",
-        strokeDashoffset: isInView ? "0" : "200",
+        strokeDasharray: visible ? "none" : "200",
+        strokeDashoffset: visible ? "0" : "200",
       }}
     >
       <Icon strokeWidth={1.5} />
@@ -79,6 +87,8 @@ const features = [
 ];
 
 export function FeaturesSection() {
+  const reduced = useReducedMotion();
+
   return (
     <section className="w-full" id="features">
       {features.map((feature, index) => (
@@ -88,10 +98,7 @@ export function FeaturesSection() {
         >
           <motion.div
             className="max-w-7xl mx-auto"
-            initial="hidden"
-            variants={staggerContainerWide}
-            viewport={viewportOnce}
-            whileInView="visible"
+            {...scrollRevealProps(staggerContainerWide, reduced)}
           >
             <div
               className={`flex flex-col ${index % 2 === 1 ? "lg:flex-row-reverse" : "lg:flex-row"} items-center gap-12 lg:gap-16`}

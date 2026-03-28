@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 
 import {
   Accordion,
@@ -6,7 +6,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { fadeUp, staggerContainer, viewportOnce } from "@/utils/motion";
+import { fadeUp, scrollRevealProps, staggerContainer } from "@/utils/motion";
 
 const faqs = [
   {
@@ -42,15 +42,14 @@ const faqs = [
 ];
 
 export function FAQSection() {
+  const reduced = useReducedMotion();
+
   return (
     <section className="w-full px-6 py-20">
       <div className="max-w-3xl mx-auto">
         <motion.div
           className="text-center mb-12"
-          initial="hidden"
-          variants={staggerContainer}
-          viewport={viewportOnce}
-          whileInView="visible"
+          {...scrollRevealProps(staggerContainer, reduced)}
         >
           <motion.h2
             className="text-3xl md:text-4xl font-bold mb-4"
@@ -63,12 +62,7 @@ export function FAQSection() {
           </motion.p>
         </motion.div>
 
-        <motion.div
-          initial="hidden"
-          variants={staggerContainer}
-          viewport={viewportOnce}
-          whileInView="visible"
-        >
+        <motion.div {...scrollRevealProps(staggerContainer, reduced)}>
           <Accordion className="space-y-3">
             {faqs.map((faq, index) => (
               <motion.div key={index} variants={fadeUp}>
