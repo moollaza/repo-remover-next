@@ -197,6 +197,7 @@ interface FetchResult {
   error: Error | null;
   permissionWarning?: string;
   repos: null | Repository[];
+  samlProtectedOrgs?: string[];
   user: null | User;
 }
 
@@ -277,6 +278,9 @@ export async function fetchGitHubData(
     return orgs;
   }
 
+  // Track SAML-protected orgs across all org fetches
+  const samlProtectedOrgs: string[] = [];
+
   // Helper to fetch all repos for an org (paginated)
   async function fetchAllOrgRepos(orgLogin: string): Promise<Repository[]> {
     let repos: Repository[] = [];
@@ -315,8 +319,18 @@ export async function fetchGitHubData(
       } catch (error) {
         debug.error(`Error fetching repos for org ${orgLogin}:`, error);
 
-        // Check if this is a permission/scope error
+        // Check if this is a SAML SSO enforcement error
         if (
+          error instanceof Error &&
+          error.message.includes(
+            "Resource protected by organization SAML enforcement",
+          )
+        ) {
+          debug.warn(`Skipping org ${orgLogin} due to SAML SSO enforcement`);
+          samlProtectedOrgs.push(orgLogin);
+        }
+        // Check if this is a permission/scope error
+        else if (
           error instanceof Error &&
           error.message.includes("required scopes")
         ) {
@@ -386,6 +400,7 @@ export async function fetchGitHubData(
       repos: allRepos,
       user: userData,
       ...(permissionError && { permissionWarning: permissionError }),
+      ...(samlProtectedOrgs.length > 0 && { samlProtectedOrgs }),
     };
   } catch (error) {
     debug.error("Error fetching GitHub data:", error);
@@ -470,6 +485,9 @@ export async function fetchGitHubDataWithProgress(
     return orgs;
   }
 
+  // Track SAML-protected orgs across all org fetches
+  const samlProtectedOrgs: string[] = [];
+
   // Helper to fetch all repos for an org (paginated)
   async function fetchAllOrgRepos(orgLogin: string): Promise<Repository[]> {
     let repos: Repository[] = [];
@@ -503,7 +521,18 @@ export async function fetchGitHubDataWithProgress(
       } catch (error) {
         debug.error(`Error fetching repos for org ${orgLogin}:`, error);
 
+        // Check if this is a SAML SSO enforcement error
         if (
+          error instanceof Error &&
+          error.message.includes(
+            "Resource protected by organization SAML enforcement",
+          )
+        ) {
+          debug.warn(`Skipping org ${orgLogin} due to SAML SSO enforcement`);
+          samlProtectedOrgs.push(orgLogin);
+        }
+        // Check if this is a permission/scope error
+        else if (
           error instanceof Error &&
           error.message.includes("required scopes")
         ) {
@@ -612,6 +641,7 @@ export async function fetchGitHubDataWithProgress(
       repos: allRepos,
       user: userData,
       ...(permissionError && { permissionWarning: permissionError }),
+      ...(samlProtectedOrgs.length > 0 && { samlProtectedOrgs }),
     };
   } catch (error) {
     debug.error("Error fetching GitHub data:", error);

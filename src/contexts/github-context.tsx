@@ -93,6 +93,11 @@ export interface GitHubContextType {
   refetchData: () => void;
 
   /**
+   * List of org names that failed to load due to SAML SSO enforcement.
+   */
+  samlProtectedOrgs: string[];
+
+  /**
    * The repositories of the user.
    */
   repos: null | Repository[];

@@ -43,6 +43,7 @@ function setupContext(overrides = {}) {
     progress: null,
     refetchData: vi.fn(),
     repos: null,
+    samlProtectedOrgs: [],
     setLogin: vi.fn(),
     setPat: vi.fn(),
     user: null,
@@ -150,6 +151,22 @@ describe("Dashboard route", () => {
       expect(
         screen.getByText(/Token lacks read:org scope/),
       ).toBeInTheDocument();
+    });
+
+    it("forwards samlProtectedOrgs to DashboardComponent", () => {
+      setupContext({
+        isAuthenticated: true,
+        pat: "ghp_test123",
+        repos: MOCK_REPOS,
+        samlProtectedOrgs: ["acme-corp"],
+      });
+
+      render(<Dashboard />);
+
+      expect(
+        screen.getByText(/some organizations require saml authentication/i),
+      ).toBeInTheDocument();
+      expect(screen.getByText("acme-corp")).toBeInTheDocument();
     });
   });
 
