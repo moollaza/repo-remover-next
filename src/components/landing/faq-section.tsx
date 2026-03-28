@@ -1,9 +1,12 @@
+import { motion } from "framer-motion";
+
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { fadeUp, staggerContainer, viewportOnce } from "@/utils/motion";
 
 const faqs = [
   {
@@ -42,31 +45,48 @@ export function FAQSection() {
   return (
     <section className="w-full px-6 py-20">
       <div className="max-w-3xl mx-auto">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+        <motion.div
+          className="text-center mb-12"
+          initial="hidden"
+          variants={staggerContainer}
+          viewport={viewportOnce}
+          whileInView="visible"
+        >
+          <motion.h2
+            className="text-3xl md:text-4xl font-bold mb-4"
+            variants={fadeUp}
+          >
             Frequently Asked Questions
-          </h2>
-          <p className="text-lg text-default-500">
+          </motion.h2>
+          <motion.p className="text-lg text-default-500" variants={fadeUp}>
             Everything you need to know about Repo Remover
-          </p>
-        </div>
+          </motion.p>
+        </motion.div>
 
-        <Accordion className="space-y-3">
-          {faqs.map((faq, index) => (
-            <AccordionItem
-              className="rounded-xl border border-divider hover:border-primary/60 bg-background px-5 transition-colors"
-              key={index}
-              value={index}
-            >
-              <AccordionTrigger className="text-left text-base text-default-700 hover:text-foreground py-4">
-                {faq.question}
-              </AccordionTrigger>
-              <AccordionContent className="text-default-700 text-sm">
-                {faq.answer}
-              </AccordionContent>
-            </AccordionItem>
-          ))}
-        </Accordion>
+        <motion.div
+          initial="hidden"
+          variants={staggerContainer}
+          viewport={viewportOnce}
+          whileInView="visible"
+        >
+          <Accordion className="space-y-3">
+            {faqs.map((faq, index) => (
+              <motion.div key={index} variants={fadeUp}>
+                <AccordionItem
+                  className="rounded-xl border border-divider hover:border-primary/60 bg-background px-5 transition-colors"
+                  value={index}
+                >
+                  <AccordionTrigger className="text-left text-base text-default-700 hover:text-foreground py-4">
+                    {faq.question}
+                  </AccordionTrigger>
+                  <AccordionContent className="text-default-700 text-sm">
+                    {faq.answer}
+                  </AccordionContent>
+                </AccordionItem>
+              </motion.div>
+            ))}
+          </Accordion>
+        </motion.div>
       </div>
     </section>
   );

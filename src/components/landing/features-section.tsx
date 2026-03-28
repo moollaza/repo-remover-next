@@ -1,4 +1,7 @@
+import { motion } from "framer-motion";
 import { CheckSquare, Filter, Search, Shield } from "lucide-react";
+
+import { fadeUp, staggerContainerWide, viewportOnce } from "@/utils/motion";
 
 const features = [
   {
@@ -55,19 +58,28 @@ export function FeaturesSection() {
           className={`w-full px-6 py-20 ${index % 2 === 1 ? "bg-default-50" : ""}`}
           key={index}
         >
-          <div className="max-w-7xl mx-auto">
+          <motion.div
+            className="max-w-7xl mx-auto"
+            initial="hidden"
+            variants={staggerContainerWide}
+            viewport={viewportOnce}
+            whileInView="visible"
+          >
             <div
               className={`flex flex-col ${index % 2 === 1 ? "lg:flex-row-reverse" : "lg:flex-row"} items-center gap-12 lg:gap-16`}
             >
-              <div className="flex-1 flex justify-center">
+              <motion.div
+                className="flex-1 flex justify-center"
+                variants={fadeUp}
+              >
                 <div className="w-48 h-48 rounded-2xl bg-gradient-to-br from-[var(--brand-blue)] to-[var(--brand-cyan)] dark:from-[var(--brand-blue)]/80 dark:to-[var(--brand-cyan)]/80 flex items-center justify-center shadow-xl">
                   <feature.icon
                     className="w-24 h-24 text-white"
                     strokeWidth={1.5}
                   />
                 </div>
-              </div>
-              <div className="flex-1">
+              </motion.div>
+              <motion.div className="flex-1" variants={fadeUp}>
                 <h2 className="text-3xl md:text-4xl font-bold mb-4">
                   {feature.title}
                 </h2>
@@ -96,9 +108,9 @@ export function FeaturesSection() {
                     Try It Now
                   </button>
                 )}
-              </div>
+              </motion.div>
             </div>
-          </div>
+          </motion.div>
         </div>
       ))}
     </section>

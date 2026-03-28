@@ -21,7 +21,7 @@ export function HeroSection() {
             <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--brand-blue)]" />
           </span>
           <span className="text-sm text-default-500">
-            300,000+ repos managed and counting
+            250,000+ repos managed and counting
           </span>
         </motion.div>
 
