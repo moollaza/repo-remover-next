@@ -1,4 +1,5 @@
 import { config } from "@fortawesome/fontawesome-svg-core";
+import { MotionConfig } from "framer-motion";
 import { Navigate, Route, Routes } from "react-router-dom";
 import "@fortawesome/fontawesome-svg-core/styles.css";
 
@@ -15,30 +16,32 @@ config.autoAddCss = false;
 export function App() {
   return (
     <Providers themeProps={{ attribute: "class", defaultTheme: "light" }}>
-      <ErrorBoundary>
-        <FathomAnalytics />
-        <div className="min-h-full">
-          {/* Header renders its own sticky/border/blur per route */}
-          <Header />
-          <main>
-            <Routes>
-              {/* Home is full-width — sections handle their own max-width */}
-              <Route element={<Home />} path="/" />
-              {/* Dashboard is constrained */}
-              <Route
-                element={
-                  <div className="max-w-7xl mx-auto px-6">
-                    <Dashboard />
-                  </div>
-                }
-                path="/dashboard"
-              />
-              <Route element={<Navigate replace to="/" />} path="*" />
-            </Routes>
-          </main>
-          <Footer />
-        </div>
-      </ErrorBoundary>
+      <MotionConfig reducedMotion="user">
+        <ErrorBoundary>
+          <FathomAnalytics />
+          <div className="min-h-full">
+            {/* Header renders its own sticky/border/blur per route */}
+            <Header />
+            <main>
+              <Routes>
+                {/* Home is full-width — sections handle their own max-width */}
+                <Route element={<Home />} path="/" />
+                {/* Dashboard is constrained */}
+                <Route
+                  element={
+                    <div className="max-w-7xl mx-auto px-6">
+                      <Dashboard />
+                    </div>
+                  }
+                  path="/dashboard"
+                />
+                <Route element={<Navigate replace to="/" />} path="*" />
+              </Routes>
+            </main>
+            <Footer />
+          </div>
+        </ErrorBoundary>
+      </MotionConfig>
     </Providers>
   );
 }
