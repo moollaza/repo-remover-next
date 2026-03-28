@@ -90,7 +90,7 @@ export default function Dashboard({
           className="mb-4 p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800"
           role="alert"
         >
-          <strong>Some repositories may be missing</strong>
+          <strong>Limited token permissions</strong>
           <ul className="mt-2 text-sm list-disc list-inside space-y-1">
             {permissionWarning.split("\n\n").map((warning, i) => (
               <li key={i}>{warning}</li>
@@ -135,9 +135,7 @@ export default function Dashboard({
           <strong>Some organizations require SAML authentication</strong>
           <p className="mt-1 text-sm">
             Repos from{" "}
-            <span className="font-medium">
-              {samlProtectedOrgs.join(", ")}
-            </span>{" "}
+            <span className="font-medium">{samlProtectedOrgs.join(", ")}</span>{" "}
             couldn&apos;t be loaded. Authorize your token in your org&apos;s SSO
             settings to access these repositories.
           </p>

@@ -7,6 +7,110 @@ import {
   type ThrottledOctokitType,
 } from "@/utils/github-utils";
 
+// --- Token scope checking ---
+
+/**
+ * Required OAuth scopes for full app functionality.
+ * Only applies to classic PATs (ghp_). Fine-grained tokens use a different permission model.
+ */
+const REQUIRED_SCOPES = ["repo", "delete_repo", "read:org"] as const;
+
+/**
+ * Maps each required scope to the set of scopes that satisfy it.
+ * Parent scopes implicitly include child scopes (e.g. admin:org includes read:org).
+ */
+const SCOPE_SATISFIED_BY: Record<string, string[]> = {
+  delete_repo: ["delete_repo"],
+  "read:org": ["read:org", "write:org", "admin:org"],
+  repo: ["repo"],
+};
+
+const SCOPE_DESCRIPTIONS: Record<string, string> = {
+  delete_repo: "you won't be able to delete repositories",
+  "read:org": "organization repositories won't be visible",
+  repo: "private repositories won't be visible",
+};
+
+export interface ScopeCheckResult {
+  grantedScopes: string[];
+  missingScopes: string[];
+}
+
+/**
+ * Checks what OAuth scopes the token has been granted by inspecting
+ * the X-OAuth-Scopes response header from a lightweight REST call.
+ * Returns empty arrays for fine-grained tokens (which don't use OAuth scopes).
+ */
+export async function checkTokenScopes(
+  octokit: ThrottledOctokitType,
+): Promise<ScopeCheckResult> {
+  try {
+    const response = await octokit.request("GET /rate_limit");
+    const scopeHeader = response.headers["x-oauth-scopes"] ?? "";
+
+    // Empty header = fine-grained token or scopes not detectable
+    if (!scopeHeader.trim()) {
+      return { grantedScopes: [], missingScopes: [] };
+    }
+
+    const grantedScopes = scopeHeader
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    const missingScopes = REQUIRED_SCOPES.filter((required) => {
+      const satisfiedBy = SCOPE_SATISFIED_BY[required] ?? [required];
+      return !satisfiedBy.some((scope) => grantedScopes.includes(scope));
+    });
+
+    return { grantedScopes, missingScopes };
+  } catch {
+    // If scope check fails, don't block — fall back to error-based detection
+    debug.warn("Could not check token scopes");
+    return { grantedScopes: [], missingScopes: [] };
+  }
+}
+
+/**
+ * Builds user-facing warning messages from a list of missing scopes.
+ */
+function buildScopeWarnings(missingScopes: string[]): string[] {
+  return missingScopes
+    .map((scope) => {
+      const desc = SCOPE_DESCRIPTIONS[scope];
+      return desc ? `Missing ${scope} scope — ${desc}.` : null;
+    })
+    .filter((w): w is string => w !== null);
+}
+
+/**
+ * Combines all permission warnings from scope checks and error-based detection
+ * into a single newline-separated string for display.
+ */
+function combineWarnings(
+  scopeResult: ScopeCheckResult,
+  permissionError: null | string,
+  scopeLimitedOrgs: string[],
+): string | undefined {
+  const warnings: string[] = [];
+
+  // Proactive scope warnings from REST header check
+  warnings.push(...buildScopeWarnings(scopeResult.missingScopes));
+
+  // Reactive org-related warnings (skip if scope check already flagged read:org)
+  if (!scopeResult.missingScopes.includes("read:org")) {
+    if (permissionError) {
+      warnings.push(permissionError);
+    } else if (scopeLimitedOrgs.length > 0) {
+      warnings.push(
+        `Token lacks required scopes to access repos in: ${scopeLimitedOrgs.join(", ")}.`,
+      );
+    }
+  }
+
+  return warnings.length > 0 ? warnings.join("\n\n") : undefined;
+}
+
 // GraphQL queries remain the same
 export const GET_REPOS = `
   query getRepositories($login: String!, $cursor: String) {
@@ -351,8 +455,11 @@ export async function fetchGitHubData(
       userLogin = userResponse.viewer.login;
     }
 
-    // Fetch user repos first
-    const userRepoResult = await fetchUserRepos(userLogin);
+    // Fetch user repos AND check token scopes in parallel
+    const [userRepoResult, scopeResult] = await Promise.all([
+      fetchUserRepos(userLogin),
+      checkTokenScopes(octokit),
+    ]);
     userData = userRepoResult.userData;
     let allRepos: Repository[] = userRepoResult.repos ?? [];
 
@@ -383,15 +490,17 @@ export async function fetchGitHubData(
       }
     }
 
+    const permissionWarning = combineWarnings(
+      scopeResult,
+      permissionError,
+      scopeLimitedOrgs,
+    );
+
     return {
       error: userRepoResult.error,
       repos: allRepos,
       user: userData,
-      ...((permissionError ?? scopeLimitedOrgs.length > 0) && {
-        permissionWarning:
-          permissionError ??
-          `Token lacks required scopes to access repos in: ${scopeLimitedOrgs.join(", ")}. Update your token at https://github.com/settings/tokens`,
-      }),
+      ...(permissionWarning && { permissionWarning }),
       ...(samlProtectedOrgs.length > 0 && { samlProtectedOrgs }),
     };
   } catch (error) {
@@ -548,8 +657,11 @@ export async function fetchGitHubDataWithProgress(
       userLogin = userResponse.viewer.login;
     }
 
-    // 1. Fetch personal repos FIRST
-    const userRepoResult = await fetchUserRepos(userLogin);
+    // 1. Fetch personal repos AND check token scopes in parallel
+    const [userRepoResult, scopeResult] = await Promise.all([
+      fetchUserRepos(userLogin),
+      checkTokenScopes(octokit),
+    ]);
     userData = userRepoResult.userData;
     let allRepos: Repository[] = userRepoResult.repos ?? [];
 
@@ -619,15 +731,17 @@ export async function fetchGitHubDataWithProgress(
       user: userData,
     });
 
+    const permissionWarning = combineWarnings(
+      scopeResult,
+      permissionError,
+      scopeLimitedOrgs,
+    );
+
     return {
       error: userRepoResult.error,
       repos: allRepos,
       user: userData,
-      ...((permissionError ?? scopeLimitedOrgs.length > 0) && {
-        permissionWarning:
-          permissionError ??
-          `Token lacks required scopes to access repos in: ${scopeLimitedOrgs.join(", ")}. Update your token at https://github.com/settings/tokens`,
-      }),
+      ...(permissionWarning && { permissionWarning }),
       ...(samlProtectedOrgs.length > 0 && { samlProtectedOrgs }),
     };
   } catch (error) {

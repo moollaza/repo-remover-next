@@ -9,11 +9,274 @@ import {
   MOCK_USER,
 } from "@/mocks/static-fixtures";
 import {
+  checkTokenScopes,
   fetchGitHubData,
   fetchGitHubDataWithProgress,
 } from "@/utils/github-api";
+import { createThrottledOctokit } from "@/utils/github-utils";
 
 const VALID_PAT = getValidPersonalAccessToken();
+
+// Helper to create a rate_limit handler with specific scopes
+function createRateLimitHandler(scopes: string) {
+  return http.get("https://api.github.com/rate_limit", () => {
+    return HttpResponse.json(
+      {
+        rate: {
+          limit: 5000,
+          remaining: 4999,
+          reset: Math.floor(Date.now() / 1000) + 3600,
+          used: 1,
+        },
+        resources: {},
+      },
+      { headers: { "X-OAuth-Scopes": scopes } },
+    );
+  });
+}
+
+describe("checkTokenScopes", () => {
+  it("returns no missing scopes when all required scopes are present", async () => {
+    const octokit = createThrottledOctokit(VALID_PAT);
+    const result = await checkTokenScopes(octokit);
+
+    expect(result.missingScopes).toEqual([]);
+    expect(result.grantedScopes).toContain("repo");
+    expect(result.grantedScopes).toContain("delete_repo");
+    expect(result.grantedScopes).toContain("read:org");
+  });
+
+  it("detects missing delete_repo scope", async () => {
+    server.use(createRateLimitHandler("repo, read:org"));
+
+    const octokit = createThrottledOctokit(VALID_PAT);
+    const result = await checkTokenScopes(octokit);
+
+    expect(result.missingScopes).toContain("delete_repo");
+    expect(result.missingScopes).not.toContain("repo");
+    expect(result.missingScopes).not.toContain("read:org");
+  });
+
+  it("detects missing read:org scope", async () => {
+    server.use(createRateLimitHandler("repo, delete_repo"));
+
+    const octokit = createThrottledOctokit(VALID_PAT);
+    const result = await checkTokenScopes(octokit);
+
+    expect(result.missingScopes).toContain("read:org");
+    expect(result.missingScopes).not.toContain("repo");
+  });
+
+  it("detects missing repo scope", async () => {
+    server.use(createRateLimitHandler("delete_repo, read:org"));
+
+    const octokit = createThrottledOctokit(VALID_PAT);
+    const result = await checkTokenScopes(octokit);
+
+    expect(result.missingScopes).toContain("repo");
+    expect(result.missingScopes).not.toContain("delete_repo");
+  });
+
+  it("accepts admin:org as satisfying read:org", async () => {
+    server.use(createRateLimitHandler("repo, delete_repo, admin:org"));
+
+    const octokit = createThrottledOctokit(VALID_PAT);
+    const result = await checkTokenScopes(octokit);
+
+    expect(result.missingScopes).toEqual([]);
+  });
+
+  it("accepts write:org as satisfying read:org", async () => {
+    server.use(createRateLimitHandler("repo, delete_repo, write:org"));
+
+    const octokit = createThrottledOctokit(VALID_PAT);
+    const result = await checkTokenScopes(octokit);
+
+    expect(result.missingScopes).toEqual([]);
+  });
+
+  it("returns empty arrays for fine-grained tokens (empty scope header)", async () => {
+    server.use(createRateLimitHandler(""));
+
+    const octokit = createThrottledOctokit(VALID_PAT);
+    const result = await checkTokenScopes(octokit);
+
+    expect(result.grantedScopes).toEqual([]);
+    expect(result.missingScopes).toEqual([]);
+  });
+
+  it("returns empty arrays when rate_limit endpoint fails", async () => {
+    server.use(
+      http.get("https://api.github.com/rate_limit", () => {
+        return HttpResponse.error();
+      }),
+    );
+
+    const octokit = createThrottledOctokit(VALID_PAT);
+    const result = await checkTokenScopes(octokit);
+
+    expect(result.grantedScopes).toEqual([]);
+    expect(result.missingScopes).toEqual([]);
+  });
+});
+
+describe("scope warnings in fetch results", () => {
+  it("includes delete_repo warning in permissionWarning when scope is missing", async () => {
+    server.use(createRateLimitHandler("repo, read:org"));
+
+    const onProgress = vi.fn();
+    const result = await fetchGitHubDataWithProgress(
+      ["testuser", VALID_PAT],
+      onProgress,
+    );
+
+    expect(result.permissionWarning).toBeDefined();
+    expect(result.permissionWarning).toContain("delete_repo");
+    expect(result.permissionWarning).toContain("delete repositories");
+    // Repos should still load fine
+    expect(result.repos).not.toBeNull();
+  });
+
+  it("includes read:org warning in permissionWarning when scope is missing", async () => {
+    server.use(createRateLimitHandler("repo, delete_repo"));
+
+    const onProgress = vi.fn();
+    const result = await fetchGitHubDataWithProgress(
+      ["testuser", VALID_PAT],
+      onProgress,
+    );
+
+    expect(result.permissionWarning).toBeDefined();
+    expect(result.permissionWarning).toContain("read:org");
+    expect(result.permissionWarning).toContain("organization");
+  });
+
+  it("includes multiple scope warnings when multiple scopes are missing", async () => {
+    server.use(createRateLimitHandler("repo"));
+
+    const onProgress = vi.fn();
+    const result = await fetchGitHubDataWithProgress(
+      ["testuser", VALID_PAT],
+      onProgress,
+    );
+
+    expect(result.permissionWarning).toBeDefined();
+    expect(result.permissionWarning).toContain("delete_repo");
+    expect(result.permissionWarning).toContain("read:org");
+  });
+
+  it("does not include permissionWarning when all scopes are present", async () => {
+    const onProgress = vi.fn();
+    const result = await fetchGitHubDataWithProgress(
+      ["testuser", VALID_PAT],
+      onProgress,
+    );
+
+    expect(result.permissionWarning).toBeUndefined();
+  });
+
+  it("falls back to error-based detection for fine-grained tokens", async () => {
+    // Fine-grained tokens have empty scope header
+    server.use(
+      createRateLimitHandler(""),
+      // But org fetch still fails with scope error
+      http.post("https://api.github.com/graphql", async ({ request }) => {
+        const body = (await request.json()) as { query: string };
+
+        if (body.query.includes("getOrganizations")) {
+          return HttpResponse.json({
+            data: null,
+            errors: [
+              {
+                message:
+                  "Your token has not been granted the required scopes to execute this query.",
+                type: "INSUFFICIENT_SCOPES",
+              },
+            ],
+          });
+        }
+
+        if (body.query.includes("getRepositories")) {
+          return HttpResponse.json({
+            data: {
+              user: {
+                ...MOCK_USER,
+                repositories: {
+                  nodes: MOCK_REPOS.slice(0, 2),
+                  pageInfo: { endCursor: null, hasNextPage: false },
+                },
+              },
+            },
+          });
+        }
+
+        return HttpResponse.json({ data: {} });
+      }),
+    );
+
+    const onProgress = vi.fn();
+    const result = await fetchGitHubDataWithProgress(
+      ["testuser", VALID_PAT],
+      onProgress,
+    );
+
+    // Should fall back to error-based detection
+    expect(result.permissionWarning).toBeDefined();
+    expect(result.permissionWarning).toContain("read:org");
+    expect(result.repos).not.toBeNull();
+  });
+
+  it("scope-based read:org warning prevents duplicate error-based warning", async () => {
+    // Token is missing read:org AND org fetch fails
+    server.use(
+      createRateLimitHandler("repo, delete_repo"),
+      http.post("https://api.github.com/graphql", async ({ request }) => {
+        const body = (await request.json()) as { query: string };
+
+        if (body.query.includes("getOrganizations")) {
+          return HttpResponse.json({
+            data: null,
+            errors: [
+              {
+                message:
+                  "Your token has not been granted the required scopes to execute this query.",
+                type: "INSUFFICIENT_SCOPES",
+              },
+            ],
+          });
+        }
+
+        if (body.query.includes("getRepositories")) {
+          return HttpResponse.json({
+            data: {
+              user: {
+                ...MOCK_USER,
+                repositories: {
+                  nodes: MOCK_REPOS.slice(0, 2),
+                  pageInfo: { endCursor: null, hasNextPage: false },
+                },
+              },
+            },
+          });
+        }
+
+        return HttpResponse.json({ data: {} });
+      }),
+    );
+
+    const onProgress = vi.fn();
+    const result = await fetchGitHubDataWithProgress(
+      ["testuser", VALID_PAT],
+      onProgress,
+    );
+
+    expect(result.permissionWarning).toBeDefined();
+    // Should have scope-based warning
+    expect(result.permissionWarning).toContain("Missing read:org scope");
+    // Should NOT have duplicate error-based "may lack the read:org scope" message
+    expect(result.permissionWarning).not.toContain("may lack");
+  });
+});
 
 describe("fetchGitHubDataWithProgress", () => {
   it("returns permissionWarning when org fetch fails with required scopes error", async () => {
