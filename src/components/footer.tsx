@@ -50,23 +50,6 @@ export default function Footer() {
                 <BlueskyIcon className="h-5 w-5" />
               </a>
             </div>
-            {/* Copyright shown inline on desktop, hidden on mobile (shown below grid instead) */}
-            <div className="hidden md:block mt-4">
-              <p className="text-sm text-default-400 mb-1">
-                © 2019-2026 Repo Remover. All rights reserved.
-              </p>
-              <p className="text-sm text-default-400 flex items-center gap-2">
-                Made with <Heart className="h-4 w-4 text-danger fill-danger" /> by{" "}
-                <a
-                  className="hover:text-foreground transition-colors"
-                  href="https://zaahir.ca"
-                  rel="noopener noreferrer"
-                  target="_blank"
-                >
-                  Zaahir Moolla
-                </a>
-              </p>
-            </div>
           </div>
 
           <div>
@@ -133,13 +116,15 @@ export default function Footer() {
             </ul>
           </div>
         </div>
-        {/* Copyright shown at bottom on mobile only */}
-        <div className="md:hidden mt-8">
-          <p className="text-sm text-default-400 mb-1">
+
+        {/* Divider + copyright row */}
+        <div className="border-t border-divider mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-sm text-default-400">
             © 2019-2026 Repo Remover. All rights reserved.
           </p>
-          <p className="text-sm text-default-400 flex items-center gap-2">
-            Made with <Heart className="h-4 w-4 text-danger fill-danger" /> by{" "}
+          <p className="text-sm text-default-400 flex items-center gap-1.5">
+            Made with <Heart className="h-3.5 w-3.5 text-danger fill-danger" />{" "}
+            by{" "}
             <a
               className="hover:text-foreground transition-colors"
               href="https://zaahir.ca"

@@ -48,9 +48,14 @@ export interface GitHubContextType {
   isInitialized: boolean;
 
   /**
-   * Whether the data is loading.
+   * Whether data is loading for the first time (no cached data yet).
    */
   isLoading: boolean;
+
+  /**
+   * Whether data is being refreshed in the background (cached data is visible).
+   */
+  isRefreshing: boolean;
 
   /**
    * The login of the user.

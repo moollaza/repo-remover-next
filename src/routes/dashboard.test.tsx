@@ -35,6 +35,7 @@ function setupContext(overrides = {}) {
     isError: false,
     isInitialized: true,
     isLoading: false,
+    isRefreshing: false,
     login: null,
     logout: vi.fn(),
     mutate: vi.fn(),
@@ -80,6 +81,7 @@ describe("Dashboard route", () => {
       setupContext({
         isAuthenticated: true,
         isLoading: false,
+        isRefreshing: false,
         login: "testuser",
         pat: "ghp_test123",
         repos: MOCK_REPOS,

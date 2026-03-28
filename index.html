@@ -47,6 +47,10 @@
       }
     </script>
 
+    <!-- Preconnect to GitHub API (saves ~100-200ms on first API call) -->
+    <link rel="preconnect" href="https://api.github.com" crossorigin />
+    <link rel="dns-prefetch" href="https://api.github.com" />
+
     <!-- Prevent flash of wrong theme (class-based dark mode) -->
     <script>
       (function () {
