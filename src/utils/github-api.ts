@@ -376,12 +376,11 @@ export async function fetchGitHubData(
     try {
       orgs = await fetchAllOrganizations(userLogin);
     } catch (error) {
-      if (
-        error instanceof Error &&
-        error.message.includes("Missing GitHub token permissions")
-      ) {
-        permissionError = error.message;
-        debug.warn("Organization access limited due to token permissions");
+      if (error instanceof Error) {
+        permissionError =
+          "Your token may lack the read:org scope needed to fetch organization repositories. " +
+          "Update your token at https://github.com/settings/tokens";
+        debug.warn("Organization access limited:", error.message);
       } else {
         throw error; // Re-throw unexpected errors
       }
@@ -593,12 +592,11 @@ export async function fetchGitHubDataWithProgress(
     try {
       orgs = await fetchAllOrganizations(userLogin);
     } catch (error) {
-      if (
-        error instanceof Error &&
-        error.message.includes("Missing GitHub token permissions")
-      ) {
-        permissionError = error.message;
-        debug.warn("Organization access limited due to token permissions");
+      if (error instanceof Error) {
+        permissionError =
+          "Your token may lack the read:org scope needed to fetch organization repositories. " +
+          "Update your token at https://github.com/settings/tokens";
+        debug.warn("Organization access limited:", error.message);
       } else {
         throw error;
       }
