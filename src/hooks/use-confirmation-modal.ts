@@ -145,6 +145,8 @@ export function useConfirmationModal({
     }
 
     const startTime = Date.now();
+    const erroredRepoIds = new Set<string>();
+    const processedRepoIds = new Set<string>();
 
     for (const repo of repos) {
       if (abortRef.current) break;
@@ -152,6 +154,7 @@ export function useConfirmationModal({
       try {
         await processRepo(octokit, repo, action);
       } catch (error) {
+        erroredRepoIds.add(repo.id);
         if (error instanceof Error) {
           debug.error(`Failed to ${action} the repo:`, error);
           dispatch({
@@ -169,6 +172,7 @@ export function useConfirmationModal({
           debug.error("An unknown error occurred");
         }
       } finally {
+        processedRepoIds.add(repo.id);
         dispatch({
           payload: { increment: 1, repo: repo.name },
           type: "UPDATE_PROGRESS",
@@ -182,11 +186,28 @@ export function useConfirmationModal({
       await new Promise((resolve) => setTimeout(resolve, 2000 - elapsedTime));
     }
 
+    // Optimistically remove successfully processed repos from SWR cache
+    const successfulIds = new Set(
+      [...processedRepoIds].filter((id) => !erroredRepoIds.has(id)),
+    );
+    if (successfulIds.size > 0) {
+      void mutate(
+        (current) => {
+          if (!current?.repos) return current;
+          return {
+            ...current,
+            repos: current.repos.filter((repo) => !successfulIds.has(repo.id)),
+          };
+        },
+        { revalidate: false },
+      );
+    }
+
     dispatch({ type: "COMPLETE_PROCESSING" });
     setTimeout(() => {
       onConfirm();
     }, 100);
-  }, [action, octokit, onConfirm, repos, state.confirming]);
+  }, [action, mutate, octokit, onConfirm, repos, state.confirming]);
 
   const handleConfirm = useCallback(
     () => void handleConfirmAsync(),
@@ -198,12 +219,10 @@ export function useConfirmationModal({
   }, []);
 
   const handleOnClose = useCallback(() => {
-    if (state.mode === "result") {
-      void mutate();
-    }
+    // No need for full revalidation — cache was optimistically updated after processing
     onClose();
     dispatch({ type: "RESET" });
-  }, [mutate, onClose, state.mode]);
+  }, [onClose]);
 
   const handleSetUsername = useCallback(
     (value: React.SetStateAction<string>) => {
