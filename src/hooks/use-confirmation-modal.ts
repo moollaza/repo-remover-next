@@ -144,16 +144,24 @@ export function useConfirmationModal({
       analytics.trackDeleteActionSubmitted(repos.length);
     }
 
-    const erroredRepoIds = new Set<string>();
-    const processedRepoIds = new Set<string>();
-
     for (const repo of repos) {
       if (abortRef.current) break;
 
       try {
         await processRepo(octokit, repo, action);
+
+        // Optimistically remove this repo from table immediately
+        void mutate(
+          (current) => {
+            if (!current?.repos) return current;
+            return {
+              ...current,
+              repos: current.repos.filter((r) => r.id !== repo.id),
+            };
+          },
+          { revalidate: false },
+        );
       } catch (error) {
-        erroredRepoIds.add(repo.id);
         if (error instanceof Error) {
           debug.error(`Failed to ${action} the repo:`, error);
           dispatch({
@@ -171,30 +179,12 @@ export function useConfirmationModal({
           debug.error("An unknown error occurred");
         }
       } finally {
-        processedRepoIds.add(repo.id);
         dispatch({
           payload: { increment: 1, repo: repo.name },
           type: "UPDATE_PROGRESS",
         });
         await new Promise((resolve) => setTimeout(resolve, 1000));
       }
-    }
-
-    // Optimistically remove successfully processed repos from SWR cache
-    const successfulIds = new Set(
-      [...processedRepoIds].filter((id) => !erroredRepoIds.has(id)),
-    );
-    if (successfulIds.size > 0) {
-      void mutate(
-        (current) => {
-          if (!current?.repos) return current;
-          return {
-            ...current,
-            repos: current.repos.filter((repo) => !successfulIds.has(repo.id)),
-          };
-        },
-        { revalidate: false },
-      );
     }
 
     dispatch({ type: "COMPLETE_PROCESSING" });
