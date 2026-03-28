@@ -50,7 +50,7 @@ test.describe("Visual Regression", () => {
       const dashboard = new DashboardPage(page);
       await dashboard.setupMocks();
       await dashboard.goto();
-      await dashboard.waitForReposLoaded();
+      await dashboard.waitForFullDataLoad();
 
       await argosScreenshot(page, "dashboard-light", { fullPage: true });
     });
@@ -59,7 +59,7 @@ test.describe("Visual Regression", () => {
       const dashboard = new DashboardPage(page);
       await dashboard.setupMocks();
       await dashboard.goto();
-      await dashboard.waitForReposLoaded();
+      await dashboard.waitForFullDataLoad();
 
       await page.evaluate(() => {
         document.documentElement.classList.add("dark");
