@@ -11,6 +11,7 @@ import {
   useRepoFilters,
 } from "@/hooks/use-repo-filters";
 import { useRepoPagination } from "@/hooks/use-repo-pagination";
+import { useRepoSelection } from "@/hooks/use-repo-selection";
 import { debug } from "@/utils/debug";
 
 import ConfirmationModal from "./confirmation-modal";
@@ -29,9 +30,6 @@ export default function RepoTable({
   login,
   repos,
 }: RepoTableProps): JSX.Element {
-  const [selectedRepoKeys, setSelectedRepoKeys] = useState<Selection>(
-    new Set(),
-  );
   const [selectedRepoAction, setSelectedRepoAction] = useState<SelectionSet>(
     new Set([REPO_ACTIONS[0].key]),
   );
@@ -81,14 +79,6 @@ export default function RepoTable({
     setPerPage,
     totalPages,
   } = useRepoPagination({ items: filteredRepos });
-
-  // Build the list of selected repos based on the keys
-  const selectedRepos = useMemo(() => {
-    if (selectedRepoKeys === "all") {
-      return filteredRepos;
-    }
-    return filteredRepos.filter((repo) => selectedRepoKeys.has(repo.id));
-  }, [filteredRepos, selectedRepoKeys]);
 
   const handleRepoTypesFilterChange = useCallback(
     (keys: Selection) => {
@@ -147,54 +137,24 @@ export default function RepoTable({
     );
   }, [paginatedRepos, isRepoDisabled]);
 
+  // Use custom hook for selection state
+  const {
+    allSelectableSelected,
+    handleRowSelect,
+    handleSelectAll,
+    selectableRepos,
+    selectedRepoKeys,
+    selectedRepos,
+  } = useRepoSelection({
+    disabledKeys,
+    filteredRepos,
+    isRepoDisabled,
+    paginatedRepos,
+  });
+
   const handleConfirm = useCallback(() => {
     // TODO: Record # of repos deleted/archived?
   }, []);
-
-  // --- Selection handlers ---
-  const selectableRepos = useMemo(
-    () => paginatedRepos.filter((r) => !disabledKeys.has(r.id)),
-    [paginatedRepos, disabledKeys],
-  );
-
-  const allSelectableSelected = useMemo(() => {
-    if (selectedRepoKeys === "all") return true;
-    if (selectableRepos.length === 0) return false;
-    return selectableRepos.every((r) => selectedRepoKeys.has(r.id));
-  }, [selectedRepoKeys, selectableRepos]);
-
-  const handleSelectAll = useCallback(() => {
-    if (allSelectableSelected) {
-      // Deselect all
-      setSelectedRepoKeys(new Set());
-    } else {
-      // Select all filteredRepos (not just current page) to match HeroUI "all" behavior
-      const allIds = new Set(
-        filteredRepos.filter((r) => !isRepoDisabled(r)).map((r) => r.id),
-      );
-      setSelectedRepoKeys(allIds);
-    }
-  }, [allSelectableSelected, filteredRepos, isRepoDisabled]);
-
-  const handleRowSelect = useCallback(
-    (repoId: string) => {
-      if (disabledKeys.has(repoId)) return;
-
-      setSelectedRepoKeys((prev) => {
-        const prevSet =
-          prev === "all"
-            ? new Set(filteredRepos.map((r) => r.id))
-            : new Set(prev);
-        if (prevSet.has(repoId)) {
-          prevSet.delete(repoId);
-        } else {
-          prevSet.add(repoId);
-        }
-        return prevSet;
-      });
-    },
-    [disabledKeys, filteredRepos],
-  );
 
   // --- Sort handler ---
   const handleSortChange = useCallback(
