@@ -1,5 +1,6 @@
 import { MotionConfig } from "framer-motion";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { useEffect } from "react";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 
 import { ErrorBoundary } from "@/components/error-boundary";
 import { FathomAnalytics } from "@/components/fathom-analytics";
@@ -9,12 +10,22 @@ import { Providers } from "@/providers/providers";
 import { Dashboard } from "@/routes/dashboard";
 import { Home } from "@/routes/home";
 
+/** Reset scroll position on route change */
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+}
+
 export function App() {
   return (
     <Providers themeProps={{ attribute: "class", defaultTheme: "light" }}>
       <MotionConfig reducedMotion="user">
         <ErrorBoundary>
           <FathomAnalytics />
+          <ScrollToTop />
           <div className="min-h-full">
             <Header />
             <main>

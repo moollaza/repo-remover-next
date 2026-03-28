@@ -39,6 +39,9 @@ yarn-error.log*
 /playwright/.cache/
 .playwright-mcp/
 
+# Argos screenshots (generated locally, uploaded in CI)
+/screenshots/
+
 # tooling local files
 .claude/settings.local.json
 .context/
