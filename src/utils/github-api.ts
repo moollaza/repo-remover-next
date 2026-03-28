@@ -25,7 +25,7 @@ const SCOPE_SATISFIED_BY: Record<string, string[]> = {
   repo: ["repo"],
 };
 
-const SCOPE_DESCRIPTIONS: Record<string, string> = {
+export const SCOPE_DESCRIPTIONS: Record<string, string> = {
   delete_repo: "you won't be able to delete repositories",
   "read:org": "organization repositories won't be visible",
   repo: "private repositories won't be visible",
