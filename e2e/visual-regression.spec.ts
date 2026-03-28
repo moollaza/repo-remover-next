@@ -7,11 +7,11 @@ import { HomePage } from "./pages/home";
 /**
  * Visual regression tests using Argos CI.
  *
- * Animations are disabled via `prefers-reduced-motion: reduce` which triggers:
- * 1. framer-motion's `reducedMotion="user"` (MotionConfig in app.tsx)
- * 2. CSS rule in globals.css that disables all CSS animations/transitions
- *
- * This is the same code path real users with reduced motion preferences hit.
+ * All content renders immediately (no animation gating) via `prefers-reduced-motion: reduce`:
+ * 1. `scrollRevealProps()` in motion.ts detects reduced motion and uses `animate="visible"`
+ *    instead of `whileInView`, so below-fold content is visible in full-page screenshots.
+ * 2. framer-motion's `reducedMotion="user"` (MotionConfig in app.tsx) skips transitions.
+ * 3. CSS rule in globals.css disables all CSS animations/transitions.
  */
 test.describe("Visual Regression", () => {
   test.beforeEach(async ({ page }) => {

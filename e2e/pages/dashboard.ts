@@ -328,6 +328,13 @@ export class DashboardPage extends BasePage {
   }
 
   /**
+   * Wait for repos to appear in the table (at least one row visible).
+   */
+  async waitForReposLoaded() {
+    await this.tableRows.first().waitFor({ state: "visible", timeout: 10000 });
+  }
+
+  /**
    * Wait for all data to load (personal + org repos).
    * Progressive loading shows personal repos first, then org repos trickle in.
    * We detect full load by checking the pagination shows the expected page count.

@@ -1,7 +1,7 @@
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { ExternalLink, Star } from "lucide-react";
 
-import { fadeUp, staggerContainer, viewportOnce } from "@/utils/motion";
+import { fadeUp, scrollRevealProps, staggerContainer } from "@/utils/motion";
 
 const testimonials = [
   {
@@ -34,15 +34,14 @@ const testimonials = [
 ];
 
 export function TestimonialsSection() {
+  const reduced = useReducedMotion();
+
   return (
     <section className="w-full px-6 py-20 bg-default-50">
       <div className="max-w-7xl mx-auto">
         <motion.div
           className="text-center mb-16"
-          initial="hidden"
-          variants={staggerContainer}
-          viewport={viewportOnce}
-          whileInView="visible"
+          {...scrollRevealProps(staggerContainer, reduced)}
         >
           <motion.h2
             className="text-3xl md:text-4xl font-bold mb-4"
@@ -60,10 +59,7 @@ export function TestimonialsSection() {
 
         <motion.div
           className="grid grid-cols-1 md:grid-cols-3 gap-6"
-          initial="hidden"
-          variants={staggerContainer}
-          viewport={viewportOnce}
-          whileInView="visible"
+          {...scrollRevealProps(staggerContainer, reduced)}
         >
           {testimonials.map((t, index) => (
             <motion.div

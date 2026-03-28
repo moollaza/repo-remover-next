@@ -2,6 +2,26 @@ import type { Variants } from "framer-motion";
 
 const EASE = [0.25, 0.1, 0.25, 1] as const;
 
+/**
+ * Returns motion props for scroll-triggered reveal animations.
+ * When reduced motion is preferred (including Argos VRT), content renders
+ * visible immediately instead of waiting for viewport intersection.
+ */
+export function scrollRevealProps(
+  variants: Variants,
+  prefersReduced: boolean | null,
+) {
+  if (prefersReduced) {
+    return { animate: "visible" as const, variants };
+  }
+  return {
+    initial: "hidden" as const,
+    variants,
+    viewport: viewportOnce,
+    whileInView: "visible" as const,
+  };
+}
+
 export const fadeUp: Variants = {
   hidden: { opacity: 0, y: 24 },
   visible: {
