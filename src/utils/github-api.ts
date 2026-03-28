@@ -46,11 +46,16 @@ export async function checkTokenScopes(
 ): Promise<ScopeCheckResult> {
   try {
     const response = await octokit.request("GET /rate_limit");
-    const scopeHeader = response.headers["x-oauth-scopes"] ?? "";
+    const scopeHeader = response.headers["x-oauth-scopes"];
 
-    // Empty header = fine-grained token or scopes not detectable
-    if (!scopeHeader.trim()) {
+    // Header absent = fine-grained token (uses different permission model)
+    if (scopeHeader == null) {
       return { grantedScopes: [], missingScopes: [] };
+    }
+
+    // Header present but empty = classic PAT with no scopes selected
+    if (!scopeHeader.trim()) {
+      return { grantedScopes: [], missingScopes: [...REQUIRED_SCOPES] };
     }
 
     const grantedScopes = scopeHeader

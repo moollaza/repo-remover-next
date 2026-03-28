@@ -130,6 +130,10 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
         }
       },
       onSuccess: (data: GitHubFetcherResult) => {
+        // Re-set cache with full result — progress callback mutations during
+        // fetch override the fetcher return in SWR v2 (mutation > revalidation).
+        // Without this, fields like permissionWarning get lost.
+        void mutate(data, false);
         // Set the login from the API response if it wasn't provided
         if (data.user?.login && !login) {
           setLogin(data.user.login);

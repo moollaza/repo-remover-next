@@ -95,14 +95,38 @@ describe("checkTokenScopes", () => {
     expect(result.missingScopes).toEqual([]);
   });
 
-  it("returns empty arrays for fine-grained tokens (empty scope header)", async () => {
-    server.use(createRateLimitHandler(""));
+  it("returns empty arrays for fine-grained tokens (no scope header)", async () => {
+    // Fine-grained tokens don't include X-OAuth-Scopes header at all
+    server.use(
+      http.get("https://api.github.com/rate_limit", () => {
+        return HttpResponse.json({
+          rate: {
+            limit: 5000,
+            remaining: 4999,
+            reset: Math.floor(Date.now() / 1000) + 3600,
+            used: 1,
+          },
+          resources: {},
+        });
+      }),
+    );
 
     const octokit = createThrottledOctokit(VALID_PAT);
     const result = await checkTokenScopes(octokit);
 
     expect(result.grantedScopes).toEqual([]);
     expect(result.missingScopes).toEqual([]);
+  });
+
+  it("detects all missing scopes for classic PAT with empty scope header", async () => {
+    // Classic PATs with no scopes return X-OAuth-Scopes header with empty value
+    server.use(createRateLimitHandler(""));
+
+    const octokit = createThrottledOctokit(VALID_PAT);
+    const result = await checkTokenScopes(octokit);
+
+    expect(result.grantedScopes).toEqual([]);
+    expect(result.missingScopes).toEqual(["repo", "delete_repo", "read:org"]);
   });
 
   it("returns empty arrays when rate_limit endpoint fails", async () => {
@@ -176,9 +200,19 @@ describe("scope warnings in fetch results", () => {
   });
 
   it("falls back to error-based detection for fine-grained tokens", async () => {
-    // Fine-grained tokens have empty scope header
+    // Fine-grained tokens have no X-OAuth-Scopes header at all
     server.use(
-      createRateLimitHandler(""),
+      http.get("https://api.github.com/rate_limit", () => {
+        return HttpResponse.json({
+          rate: {
+            limit: 5000,
+            remaining: 4999,
+            reset: Math.floor(Date.now() / 1000) + 3600,
+            used: 1,
+          },
+          resources: {},
+        });
+      }),
       // But org fetch still fails with scope error
       http.post("https://api.github.com/graphql", async ({ request }) => {
         const body = (await request.json()) as { query: string };
