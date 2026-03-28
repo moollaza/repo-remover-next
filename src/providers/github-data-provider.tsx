@@ -85,7 +85,7 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
 
   // Stable SWR key: only depends on PAT (not login, which loads async and would cause refetch)
   // Login is passed to the fetcher separately via closure
-  const { data, error, mutate } = useSWR<
+  const { data, error, isValidating, mutate } = useSWR<
     GitHubFetcherResult,
     Error,
     GitHubFetcherKey | null
@@ -149,11 +149,7 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
   // Derived data state - handle partial data cases
   // isLoading = first load only (no cached data). isRefreshing = background revalidation with cached data visible.
   const isLoading = isAuthenticated && !data && !error;
-  const isRefreshing =
-    isAuthenticated &&
-    !!data &&
-    progress !== null &&
-    progress.stage !== "complete";
+  const isRefreshing = isAuthenticated && !!data && isValidating;
 
   // We have an error state if there's an SWR error OR if data.error exists but we have no partial data
   const isError = Boolean(error ?? (data?.error && !data.repos && !data.user));
