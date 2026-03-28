@@ -64,6 +64,7 @@ jobs:
         run: bunx playwright test --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
         env:
           GITHUB_TEST_TOKEN: ${{ secrets.GITHUB_TEST_TOKEN }}
+          ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN }}
       - name: Upload Playwright report
         if: always()
         uses: actions/upload-artifact@v7
