@@ -373,6 +373,57 @@ describe("GitHubDataProvider", () => {
       );
     });
 
+    it("preserves permissionWarning even with progress callback mutations", async () => {
+      // This test simulates the real scenario where progress callbacks
+      // call mutate() during the fetch, which in SWR v2 overrides the
+      // fetcher return value. The fix stores warnings in React state.
+      mockFetch.mockImplementation(async (_params, onProgress) => {
+        // Simulate progress callbacks (these trigger mutate in the provider)
+        if (onProgress) {
+          onProgress({
+            orgsLoaded: 0,
+            orgsTotal: 0,
+            repos: MOCK_REPOS as Repository[],
+            stage: "personal",
+            user: MOCK_USER as unknown as User,
+          });
+          onProgress({
+            orgsLoaded: 0,
+            orgsTotal: 0,
+            repos: MOCK_REPOS as Repository[],
+            stage: "complete",
+            user: MOCK_USER as unknown as User,
+          });
+        }
+        return {
+          error: null,
+          permissionWarning:
+            "Missing delete_repo scope — you won't be able to delete repositories.",
+          repos: MOCK_REPOS as Repository[],
+          samlProtectedOrgs: ["saml-org"],
+          user: MOCK_USER as unknown as User,
+        };
+      });
+
+      const { result } = renderHook(() => useGitHubData(), {
+        wrapper: IsolatedProvider,
+      });
+
+      act(() => {
+        result.current.setPat(validToken);
+      });
+
+      await waitFor(() => {
+        expect(result.current.repos).not.toBeNull();
+      });
+
+      // Warning should be present despite progress callback mutations
+      expect(result.current.permissionWarning).toBe(
+        "Missing delete_repo scope — you won't be able to delete repositories.",
+      );
+      expect(result.current.samlProtectedOrgs).toEqual(["saml-org"]);
+    });
+
     it("permissionWarning is undefined when API returns no warning", async () => {
       setupSuccessfulFetch();
 

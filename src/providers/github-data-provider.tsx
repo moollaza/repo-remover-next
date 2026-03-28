@@ -53,6 +53,14 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
   const [pat, setPatState] = useState<null | string>(null);
   const [isInitialized, setIsInitialized] = useState(false);
   const [progress, setProgress] = useState<LoadingProgress | null>(null);
+  // Store warning data in React state instead of reading from SWR cache.
+  // SWR's mutate() calls during progressive loading override the fetcher return,
+  // so fields only present in the final result (permissionWarning, samlProtectedOrgs)
+  // get lost from the cache. React state is unaffected by SWR's mutation tracking.
+  const [permissionWarning, setPermissionWarning] = useState<
+    string | undefined
+  >();
+  const [samlProtectedOrgs, setSamlProtectedOrgs] = useState<string[]>([]);
   const lastFetchTimeRef = useRef<number>(0);
   const tokenValidatedRef = useRef<null | string>(null);
 
@@ -130,10 +138,10 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
         }
       },
       onSuccess: (data: GitHubFetcherResult) => {
-        // Re-set cache with full result — progress callback mutations during
-        // fetch override the fetcher return in SWR v2 (mutation > revalidation).
-        // Without this, fields like permissionWarning get lost.
-        void mutate(data, false);
+        // Store warning data in React state — SWR cache loses these fields
+        // because progress callback mutate() calls override the fetcher return.
+        setPermissionWarning(data.permissionWarning);
+        setSamlProtectedOrgs(data.samlProtectedOrgs ?? []);
         // Set the login from the API response if it wasn't provided
         if (data.user?.login && !login) {
           setLogin(data.user.login);
@@ -205,6 +213,8 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
   const logout = useCallback(() => {
     setLoginState(null);
     setPatState(null);
+    setPermissionWarning(undefined);
+    setSamlProtectedOrgs([]);
     tokenValidatedRef.current = null;
     if (typeof window !== "undefined") {
       try {
@@ -257,10 +267,10 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
     logout,
     mutate,
     pat,
-    permissionWarning: data?.permissionWarning,
+    permissionWarning,
     progress,
     refetchData,
-    samlProtectedOrgs: data?.samlProtectedOrgs ?? [],
+    samlProtectedOrgs,
     repos,
     setLogin,
     setPat,
