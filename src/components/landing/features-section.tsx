@@ -17,7 +17,8 @@ function AnimatedIcon({
   const ref = useRef<HTMLDivElement>(null);
   const prefersReduced = useReducedMotion();
   const isInView = useInView(ref, { once: true, margin: "-80px" });
-  const visible = prefersReduced ?? isInView;
+  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- ?? would swallow false, hiding icons for non-reduced-motion users
+  const visible = prefersReduced || isInView;
 
   return (
     <motion.div
