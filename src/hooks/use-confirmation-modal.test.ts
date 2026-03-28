@@ -4,15 +4,12 @@ import { initialState, modalReducer } from "./use-confirmation-modal";
 
 describe("modalReducer", () => {
   it("should return initial state for unknown action", () => {
-    const result = modalReducer(initialState, {
-      type: "UNKNOWN" as never,
-    });
+    const result = modalReducer(initialState, { type: "UNKNOWN" as never });
     expect(result).toEqual(initialState);
   });
 
   it("should handle START_PROCESSING", () => {
     const result = modalReducer(initialState, { type: "START_PROCESSING" });
-
     expect(result.confirming).toBe(true);
     expect(result.mode).toBe("progress");
     expect(result.progress).toBe(0);
@@ -29,7 +26,6 @@ describe("modalReducer", () => {
       payload: { increment: 1, repo: "my-repo" },
       type: "UPDATE_PROGRESS",
     });
-
     expect(result.progress).toBe(1);
     expect(result.currentRepo).toBe("my-repo");
   });
@@ -40,7 +36,6 @@ describe("modalReducer", () => {
       confirming: true,
       mode: "progress" as const,
     };
-
     state = modalReducer(state, {
       payload: { increment: 1, repo: "repo-1" },
       type: "UPDATE_PROGRESS",
@@ -49,7 +44,6 @@ describe("modalReducer", () => {
       payload: { increment: 1, repo: "repo-2" },
       type: "UPDATE_PROGRESS",
     });
-
     expect(state.progress).toBe(2);
     expect(state.currentRepo).toBe("repo-2");
   });
@@ -65,7 +59,6 @@ describe("modalReducer", () => {
       payload: { error },
       type: "ADD_ERROR",
     });
-
     expect(result.errors).toHaveLength(1);
     expect(result.errors[0].error.message).toBe("Failed to archive");
   });
@@ -82,7 +75,6 @@ describe("modalReducer", () => {
       payload: { error, repository },
       type: "ADD_ERROR",
     });
-
     expect(result.errors).toHaveLength(1);
     expect(result.errors[0].repository).toEqual(repository);
   });
@@ -93,7 +85,6 @@ describe("modalReducer", () => {
       confirming: true,
       mode: "progress" as const,
     };
-
     state = modalReducer(state, {
       payload: { error: new Error("Error 1") },
       type: "ADD_ERROR",
@@ -102,7 +93,6 @@ describe("modalReducer", () => {
       payload: { error: new Error("Error 2") },
       type: "ADD_ERROR",
     });
-
     expect(state.errors).toHaveLength(2);
   });
 
@@ -114,10 +104,9 @@ describe("modalReducer", () => {
       progress: 3,
     };
     const result = modalReducer(state, { type: "COMPLETE_PROCESSING" });
-
     expect(result.confirming).toBe(false);
     expect(result.mode).toBe("result");
-    expect(result.progress).toBe(3); // preserves progress
+    expect(result.progress).toBe(3);
   });
 
   it("should handle SET_USERNAME with matching login", () => {
@@ -125,7 +114,6 @@ describe("modalReducer", () => {
       payload: { login: "testuser", username: "testuser" },
       type: "SET_USERNAME",
     });
-
     expect(result.username).toBe("testuser");
     expect(result.isCorrectUsername).toBe(true);
   });
@@ -135,7 +123,6 @@ describe("modalReducer", () => {
       payload: { login: "testuser", username: "wronguser" },
       type: "SET_USERNAME",
     });
-
     expect(result.username).toBe("wronguser");
     expect(result.isCorrectUsername).toBe(false);
   });
@@ -145,7 +132,6 @@ describe("modalReducer", () => {
       payload: { login: "testuser", username: "TestUser" },
       type: "SET_USERNAME",
     });
-
     expect(result.isCorrectUsername).toBe(false);
   });
 
@@ -160,7 +146,6 @@ describe("modalReducer", () => {
       username: "testuser",
     };
     const result = modalReducer(dirtyState, { type: "RESET" });
-
     expect(result).toEqual(initialState);
   });
 
@@ -170,14 +155,12 @@ describe("modalReducer", () => {
       errors: [{ error: new Error("old error") }],
     };
     const result = modalReducer(state, { type: "START_PROCESSING" });
-
     expect(result.errors).toEqual([]);
   });
 
   it("should follow full lifecycle: confirmation -> progress -> result -> reset", () => {
     let state = initialState;
 
-    // Set username
     state = modalReducer(state, {
       payload: { login: "user", username: "user" },
       type: "SET_USERNAME",
@@ -185,31 +168,26 @@ describe("modalReducer", () => {
     expect(state.mode).toBe("confirmation");
     expect(state.isCorrectUsername).toBe(true);
 
-    // Start processing
     state = modalReducer(state, { type: "START_PROCESSING" });
     expect(state.mode).toBe("progress");
     expect(state.confirming).toBe(true);
 
-    // Update progress
     state = modalReducer(state, {
       payload: { increment: 1, repo: "repo-1" },
       type: "UPDATE_PROGRESS",
     });
     expect(state.progress).toBe(1);
 
-    // Add an error
     state = modalReducer(state, {
       payload: { error: new Error("failed") },
       type: "ADD_ERROR",
     });
     expect(state.errors).toHaveLength(1);
 
-    // Complete
     state = modalReducer(state, { type: "COMPLETE_PROCESSING" });
     expect(state.mode).toBe("result");
     expect(state.confirming).toBe(false);
 
-    // Reset
     state = modalReducer(state, { type: "RESET" });
     expect(state).toEqual(initialState);
   });

@@ -38,17 +38,11 @@ export interface UseConfirmationModalProps {
 }
 
 export interface UseConfirmationModalReturn {
-  /** Confirm and begin processing repos */
   handleConfirm: () => void;
-  /** Close modal and reset state; triggers data refetch if operations ran */
   handleOnClose: () => void;
-  /** Update the username input (supports React setState pattern) */
   handleSetUsername: (value: React.SetStateAction<string>) => void;
-  /** Abort the current batch operation */
   handleStop: () => void;
-  /** Whether the modal can be dismissed (only in confirmation mode) */
   isDismissable: boolean;
-  /** Current modal state */
   state: ModalState;
 }
 
@@ -118,18 +112,6 @@ export function modalReducer(
  * - Batch repo processing with abort support
  * - Analytics tracking
  * - Error collection
- *
- * @example
- * ```tsx
- * const {
- *   state,
- *   handleConfirm,
- *   handleStop,
- *   handleOnClose,
- *   handleSetUsername,
- *   isDismissable,
- * } = useConfirmationModal({ action, login, onClose, onConfirm, repos });
- * ```
  */
 export function useConfirmationModal({
   action,
@@ -140,7 +122,6 @@ export function useConfirmationModal({
 }: UseConfirmationModalProps): UseConfirmationModalReturn {
   const { mutate, pat } = useGitHubData();
 
-  // Memoize Octokit so rate-limit state persists across re-renders
   const octokit = useMemo(
     () => (pat ? createThrottledOctokit(pat) : null),
     [pat],
@@ -157,7 +138,6 @@ export function useConfirmationModal({
     abortRef.current = false;
     dispatch({ type: "START_PROCESSING" });
 
-    // Track bulk action submission
     if (action === "archive") {
       analytics.trackArchiveActionSubmitted(repos.length);
     } else {
@@ -167,7 +147,6 @@ export function useConfirmationModal({
     const startTime = Date.now();
 
     for (const repo of repos) {
-      // Check abort flag before each repo
       if (abortRef.current) break;
 
       try {
@@ -180,7 +159,6 @@ export function useConfirmationModal({
             type: "ADD_ERROR",
           });
 
-          // Detect authentication failure — stop the batch early
           if (error instanceof RequestError && error.status === 401) {
             debug.error(
               "Authentication failed — stopping batch early. Token may have expired.",
@@ -195,12 +173,10 @@ export function useConfirmationModal({
           payload: { increment: 1, repo: repo.name },
           type: "UPDATE_PROGRESS",
         });
-        // Brief pause for visual feedback
         await new Promise((resolve) => setTimeout(resolve, 1000));
       }
     }
 
-    // Minimum display time for UX
     const elapsedTime = Date.now() - startTime;
     if (elapsedTime < 2000) {
       await new Promise((resolve) => setTimeout(resolve, 2000 - elapsedTime));
@@ -222,15 +198,10 @@ export function useConfirmationModal({
   }, []);
 
   const handleOnClose = useCallback(() => {
-    // Only refetch GitHub data if operations actually ran
     if (state.mode === "result") {
       void mutate();
     }
-
-    // Close the modal
     onClose();
-
-    // Reset the state
     dispatch({ type: "RESET" });
   }, [mutate, onClose, state.mode]);
 
