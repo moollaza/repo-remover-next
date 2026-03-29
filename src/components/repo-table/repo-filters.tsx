@@ -188,11 +188,15 @@ export default function RepoFilters({
           >
             <PopoverTrigger
               render={
-                <Button
-                  className="rounded-r-lg rounded-l-none border-l border-white/20"
+                <button
+                  className={cn(
+                    "inline-flex h-9 w-9 items-center justify-center rounded-r-lg rounded-l-none border-l border-white/20 text-sm font-medium transition-colors",
+                    isDeleteAction
+                      ? "bg-destructive text-white hover:bg-destructive/90"
+                      : "bg-amber-500 text-white hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700",
+                  )}
                   data-testid="repo-action-dropdown-trigger"
-                  size="icon"
-                  variant={isDeleteAction ? "destructive" : "warning"}
+                  type="button"
                 />
               }
             >
