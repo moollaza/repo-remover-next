@@ -8,6 +8,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -167,7 +172,7 @@ export default function RepoFilters({
       <div className="w-full md:w-auto md:flex-shrink-0">
         <div className="flex">
           <Button
-            className="h-10 px-4 py-2 rounded-l-lg rounded-r-none"
+            className="rounded-l-lg rounded-r-none"
             data-testid={`repo-action-button-${isDeleteAction ? "delete" : "archive"}`}
             disabled={isDisabled}
             onClick={onRepoActionClick}
@@ -176,48 +181,43 @@ export default function RepoFilters({
             {REPO_ACTIONS.find((action) => selectedRepoAction.has(action.key))
               ?.label ?? "Select Action"}
           </Button>
-          <Select
-            value={Array.from(selectedRepoAction)[0] || "archive"}
-            onValueChange={(value: string | null) => {
-              if (value != null) onRepoActionChange(new Set([value]));
-            }}
-          >
-            <SelectTrigger
-              className={cn(
-                "!h-10 !w-10 !min-w-0 !px-0 !py-0 !pl-0 !pr-0 !border-0 rounded-r-lg rounded-l-none border-l border-white/20 justify-center [&>svg:last-child]:hidden",
-                isDeleteAction
-                  ? "bg-destructive text-white hover:bg-destructive/90"
-                  : "bg-amber-500 text-white hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700",
-              )}
-              data-testid="repo-action-dropdown-trigger"
+          <Popover>
+            <PopoverTrigger
+              render={
+                <Button
+                  className="rounded-r-lg rounded-l-none border-l border-white/20"
+                  data-testid="repo-action-dropdown-trigger"
+                  size="icon"
+                  variant={isDeleteAction ? "destructive" : "warning"}
+                />
+              }
             >
               <ChevronDownIcon className="h-4 w-4" />
-            </SelectTrigger>
-            <SelectContent
-              align="end"
-              alignItemWithTrigger={false}
-              className="min-w-72"
+            </PopoverTrigger>
+            <PopoverContent
+              className="w-72 p-1"
               data-testid="repo-action-dropdown-menu"
             >
               {REPO_ACTIONS.map((action) => (
-                <SelectItem
-                  key={action.key}
-                  value={action.key}
+                <button
+                  className={cn(
+                    "w-full px-3 py-2 text-left rounded-md hover:bg-content2 transition-colors",
+                    selectedRepoAction.has(action.key) && "bg-content2",
+                  )}
                   data-testid={`repo-action-dropdown-item-${action.key}`}
-                  className="py-2"
+                  key={action.key}
+                  onClick={() => onRepoActionChange(new Set([action.key]))}
                 >
-                  <div className="flex flex-col items-start">
-                    <div className="text-sm font-medium text-foreground">
-                      {action.label}
-                    </div>
-                    <div className="text-xs text-default-500">
-                      {action.description}
-                    </div>
+                  <div className="text-sm font-medium text-foreground">
+                    {action.label}
                   </div>
-                </SelectItem>
+                  <div className="text-xs text-default-500">
+                    {action.description}
+                  </div>
+                </button>
               ))}
-            </SelectContent>
-          </Select>
+            </PopoverContent>
+          </Popover>
         </div>
       </div>
     </div>
