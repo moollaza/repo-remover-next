@@ -2,7 +2,7 @@ import {
   ChevronDown as ChevronDownIcon,
   Search as MagnifyingGlassIcon,
 } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -70,6 +70,7 @@ export default function RepoFilters({
     };
   }, []);
 
+  const [actionDropdownOpen, setActionDropdownOpen] = useState(false);
   const isDisabled = selectedRepoKeys !== "all" && selectedRepoKeys.size === 0;
 
   const isDeleteAction = selectedRepoAction.has("delete");
@@ -181,7 +182,10 @@ export default function RepoFilters({
             {REPO_ACTIONS.find((action) => selectedRepoAction.has(action.key))
               ?.label ?? "Select Action"}
           </Button>
-          <Popover>
+          <Popover
+            open={actionDropdownOpen}
+            onOpenChange={setActionDropdownOpen}
+          >
             <PopoverTrigger
               render={
                 <Button
@@ -206,7 +210,10 @@ export default function RepoFilters({
                   )}
                   data-testid={`repo-action-dropdown-item-${action.key}`}
                   key={action.key}
-                  onClick={() => onRepoActionChange(new Set([action.key]))}
+                  onClick={() => {
+                    onRepoActionChange(new Set([action.key]));
+                    setActionDropdownOpen(false);
+                  }}
                 >
                   <div className="text-sm font-medium text-foreground">
                     {action.label}
