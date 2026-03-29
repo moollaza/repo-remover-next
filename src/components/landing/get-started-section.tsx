@@ -169,7 +169,6 @@ function InlinePATForm() {
               aria-label={showToken ? "Hide token" : "Show token"}
               className="text-default-400 hover:text-default-600 transition-colors p-0.5"
               onClick={() => setShowToken((prev) => !prev)}
-              type="button"
               variant="ghost"
               size="icon"
             >
@@ -231,7 +230,6 @@ function InlinePATForm() {
               <Button
                 aria-label="Token storage info"
                 className="text-default-400 hover:text-default-600 transition-colors"
-                type="button"
                 variant="ghost"
                 size="icon"
               />

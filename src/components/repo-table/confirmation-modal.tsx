@@ -149,8 +149,9 @@ function RepoActionConfirmation({
             <li key={index}>{repo.name}</li>
           ))}
         </ul>
-        <div className="mt-4" />
-        <strong>Please type your GitHub username to confirm:</strong>
+        <strong className="mt-4 block">
+          Please type your GitHub username to confirm:
+        </strong>
         <Input
           autoCapitalize="none"
           autoComplete="off"
@@ -171,7 +172,6 @@ function RepoActionConfirmation({
           variant="ghost"
           data-testid="confirmation-modal-cancel"
           onClick={onClose}
-          type="button"
         >
           Cancel
         </Button>
@@ -183,7 +183,6 @@ function RepoActionConfirmation({
           onClick={() => {
             void handleConfirm();
           }}
-          type="button"
         >
           I understand the consequences, {action} the repositor
           {count > 1 ? "ies" : "y"}
@@ -237,7 +236,7 @@ function RepoActionProgress({
         </div>
       </div>
       <div className="flex justify-end px-6 py-4 border-t border-divider">
-        <Button variant="ghost" onClick={onStop} type="button">
+        <Button variant="ghost" onClick={onStop}>
           Stop
         </Button>
       </div>
@@ -269,12 +268,10 @@ function RepoActionResult({
           {action === "archive" ? "archived" : "deleted"} successfully!
         </p>
 
-        <div className="mt-4" />
-
         {/* Report Errors */}
         {errorCount > 0 && (
           <>
-            <p>
+            <p className="mt-4">
               {errorCount} error{errorCount > 1 ? "s" : ""} occurred while{" "}
               {action === "archive" ? "archiving" : "deleting"} the following{" "}
               repositor{errorCount > 1 ? "ies" : "y"}:
@@ -295,7 +292,6 @@ function RepoActionResult({
           variant="ghost"
           data-testid="repo-action-result-close"
           onClick={onClose}
-          type="button"
         >
           Close
         </Button>

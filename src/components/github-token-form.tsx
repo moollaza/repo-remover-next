@@ -1,5 +1,4 @@
 import { RequestError } from "@octokit/request-error";
-import clsx from "clsx";
 import { Eye, EyeOff, Loader2, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -8,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 
 import { checkTokenScopes, SCOPE_DESCRIPTIONS } from "@/utils/github-api";
 import {
@@ -164,7 +164,7 @@ export default function GitHubTokenForm({
 
   return (
     <form
-      className={clsx("flex flex-col gap-10", className)}
+      className={cn("flex flex-col gap-10", className)}
       data-testid="github-token-form"
       onSubmit={(e) => {
         handleSubmit(e);
@@ -179,7 +179,7 @@ export default function GitHubTokenForm({
           <div className="relative">
             <Input
               autoComplete="off"
-              className={clsx(
+              className={cn(
                 "h-auto bg-default-100 py-2.5 pl-3 text-sm text-foreground",
                 value ? "pr-16" : "pr-3",
                 "placeholder:text-default-400",
@@ -234,7 +234,7 @@ export default function GitHubTokenForm({
             <p className="text-xs text-danger">{validationMessage}</p>
           )}
           {/* Description */}
-          <p className={clsx("text-xs", descriptionColorClass)}>
+          <p className={cn("text-xs", descriptionColorClass)}>
             {inputDescription}
           </p>
         </div>
@@ -276,7 +276,7 @@ export default function GitHubTokenForm({
       </div>
 
       <Button
-        className={clsx(
+        className={cn(
           "w-full px-4 py-2.5",
           !isTokenValid || isValidating
             ? "bg-primary/50 text-white/70 cursor-not-allowed"

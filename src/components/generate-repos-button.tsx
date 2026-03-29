@@ -1,9 +1,9 @@
-import clsx from "clsx";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { useGitHubData } from "@/hooks/use-github-data";
+import { cn } from "@/lib/utils";
 import { createThrottledOctokit, generateRepos } from "@/utils/github-utils";
 
 /**
@@ -29,7 +29,7 @@ export function GenerateReposButton() {
 
   return (
     <Button
-      className={clsx(
+      className={cn(
         "border-[var(--brand-blue)] px-4 py-2 text-sm font-medium text-[var(--brand-blue)]",
         "hover:bg-[var(--brand-blue)] hover:text-white",
         isLoading && "opacity-70 cursor-not-allowed",

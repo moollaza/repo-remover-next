@@ -140,26 +140,24 @@ export default function RepoFilters({
 
       {/* SEARCH INPUT */}
       <div className="w-full md:flex-1">
-        <div>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-              <MagnifyingGlassIcon className="h-5 w-5 text-default-400" />
-            </div>
-            <Input
-              aria-label="Search"
-              className="h-10 pl-10 pr-16 bg-content1 text-foreground text-sm placeholder:text-default-400 border-divider"
-              data-testid="repo-search-input"
-              onChange={(e) => onSearchChange(e.target.value)}
-              placeholder="Search by name or description"
-              ref={searchInputRef}
-              type="text"
-              value={searchQuery}
-            />
-            <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-              <kbd className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded border border-divider bg-content2 text-default-500 text-xs font-mono">
-                ⌘K
-              </kbd>
-            </div>
+        <div className="relative">
+          <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+            <MagnifyingGlassIcon className="h-5 w-5 text-default-400" />
+          </div>
+          <Input
+            aria-label="Search"
+            className="h-10 pl-10 pr-16 bg-content1 text-foreground text-sm placeholder:text-default-400 border-divider"
+            data-testid="repo-search-input"
+            onChange={(e) => onSearchChange(e.target.value)}
+            placeholder="Search by name or description"
+            ref={searchInputRef}
+            type="text"
+            value={searchQuery}
+          />
+          <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+            <kbd className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded border border-divider bg-content2 text-default-500 text-xs font-mono">
+              ⌘K
+            </kbd>
           </div>
         </div>
       </div>
