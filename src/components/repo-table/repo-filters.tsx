@@ -6,6 +6,7 @@ import { useEffect, useRef } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 import {
   Select,
   SelectContent,
@@ -182,14 +183,13 @@ export default function RepoFilters({
             }}
           >
             <SelectTrigger
-              className="h-10 px-2 py-2 rounded-r-lg rounded-l-none border-l border-white/20 [&>svg:last-child]:hidden"
+              className={cn(
+                "!h-10 w-10 px-0 rounded-r-lg rounded-l-none border-l border-white/20 [&>svg:last-child]:hidden",
+                isDeleteAction
+                  ? "bg-destructive text-white hover:bg-destructive/90"
+                  : "bg-amber-500 text-white hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700",
+              )}
               data-testid="repo-action-dropdown-trigger"
-              render={
-                <Button
-                  size="icon"
-                  variant={isDeleteAction ? "destructive" : "warning"}
-                />
-              }
             >
               <ChevronDownIcon className="h-4 w-4" />
             </SelectTrigger>

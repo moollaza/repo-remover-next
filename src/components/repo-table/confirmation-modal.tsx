@@ -169,7 +169,7 @@ function RepoActionConfirmation({
       </div>
       <div className="flex justify-end gap-2 px-6 py-4 border-t border-divider">
         <Button
-          variant="ghost"
+          variant="outline"
           data-testid="confirmation-modal-cancel"
           onClick={onClose}
         >
@@ -236,7 +236,7 @@ function RepoActionProgress({
         </div>
       </div>
       <div className="flex justify-end px-6 py-4 border-t border-divider">
-        <Button variant="ghost" onClick={onStop}>
+        <Button variant="outline" onClick={onStop}>
           Stop
         </Button>
       </div>
@@ -289,7 +289,7 @@ function RepoActionResult({
       </div>
       <div className="flex justify-end gap-2 px-6 py-4 border-t border-divider">
         <Button
-          variant="ghost"
+          variant="outline"
           data-testid="repo-action-result-close"
           onClick={onClose}
         >
