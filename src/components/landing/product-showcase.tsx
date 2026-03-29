@@ -121,7 +121,10 @@ export function ProductShowcase() {
                 <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-divider bg-background text-default-400 text-xs">
                   Visibility <ChevronDown className="w-3 h-3" />
                 </div>
-                <Button className="flex items-center gap-1.5 px-3 py-1.5 h-auto rounded-md bg-amber-400 dark:bg-amber-500 text-black text-xs font-medium hover:bg-amber-400/90 dark:hover:bg-amber-500/90">
+                <Button
+                  className="flex items-center gap-1.5 px-3 py-1.5 h-auto rounded-md text-xs"
+                  variant="warning"
+                >
                   <Archive className="w-3.5 h-3.5" />
                   Archive Selected (3)
                 </Button>

@@ -225,12 +225,7 @@ function RepoActionConfirmation({
           Cancel
         </Button>
         <Button
-          variant={action === "archive" ? "default" : "destructive"}
-          className={
-            action === "archive"
-              ? "bg-amber-500 text-white hover:bg-amber-600"
-              : "bg-red-500 text-white hover:bg-red-600"
-          }
+          variant={action === "archive" ? "warning" : "destructive"}
           data-testid="confirmation-modal-confirm"
           disabled={!isCorrectUsername}
           name="confirm"

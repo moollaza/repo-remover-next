@@ -210,13 +210,14 @@ describe("RepoFilters", () => {
       .getAllByText(REPO_ACTIONS[1].label)[0]
       .closest("button");
 
-    // The danger style might be applied with a class instead of data-attribute
-    // Let's check for color="danger" attribute or className including "danger"
+    // The destructive variant applies classes containing "destructive" or "red"
     if (actionButton) {
-      const hasColorAttribute = actionButton.getAttribute("color") === "danger";
-      const hasClassWithDanger = actionButton.className.includes("danger");
+      const hasDestructiveStyle =
+        actionButton.className.includes("destructive") ||
+        actionButton.className.includes("danger") ||
+        actionButton.className.includes("bg-red");
 
-      expect(hasColorAttribute || hasClassWithDanger).toBe(true);
+      expect(hasDestructiveStyle).toBe(true);
     }
   });
 });

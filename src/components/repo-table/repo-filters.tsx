@@ -279,28 +279,22 @@ export default function RepoFilters({
         <div className="flex">
           <div className="flex">
             <Button
-              className={`h-10 px-4 py-2 text-sm font-medium rounded-l-lg rounded-r-none text-white ${
-                isDeleteAction
-                  ? "bg-danger hover:bg-danger/90"
-                  : "bg-warning hover:bg-warning/90"
-              }`}
+              className="h-10 px-4 py-2 rounded-l-lg rounded-r-none"
               data-testid={`repo-action-button-${isDeleteAction ? "delete" : "archive"}`}
               disabled={isDisabled}
               onClick={onRepoActionClick}
+              variant={isDeleteAction ? "destructive" : "warning"}
             >
               {REPO_ACTIONS.find((action) => selectedRepoAction.has(action.key))
                 ?.label ?? "Select Action"}
             </Button>
             <div className="relative" ref={actionDropdownRef}>
               <Button
-                className={`h-10 px-2 py-2 rounded-r-lg rounded-l-none border-l border-white/20 text-white ${
-                  isDeleteAction
-                    ? "bg-danger hover:bg-danger/90"
-                    : "bg-warning hover:bg-warning/90"
-                }`}
+                className="h-10 px-2 py-2 rounded-r-lg rounded-l-none border-l border-white/20"
                 data-testid="repo-action-dropdown-trigger"
                 onClick={() => setActionDropdownOpen((prev) => !prev)}
                 size="icon"
+                variant={isDeleteAction ? "destructive" : "warning"}
               >
                 <ChevronDownIcon className="h-4 w-4" />
               </Button>
