@@ -125,7 +125,7 @@ export default function RepoFilters({
           >
             <SelectValue placeholder="Types">{() => typesSummary}</SelectValue>
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent alignItemWithTrigger={false}>
             {REPO_TYPES.map((repoType) => (
               <SelectItem
                 key={repoType.key}
@@ -184,7 +184,7 @@ export default function RepoFilters({
           >
             <SelectTrigger
               className={cn(
-                "!h-10 w-10 px-0 rounded-r-lg rounded-l-none border-l border-white/20 [&>svg:last-child]:hidden",
+                "!h-10 !w-10 !min-w-0 !px-0 !py-0 !pl-0 !pr-0 !border-0 rounded-r-lg rounded-l-none border-l border-white/20 justify-center [&>svg:last-child]:hidden",
                 isDeleteAction
                   ? "bg-destructive text-white hover:bg-destructive/90"
                   : "bg-amber-500 text-white hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700",
@@ -196,6 +196,7 @@ export default function RepoFilters({
             <SelectContent
               align="end"
               alignItemWithTrigger={false}
+              className="min-w-72"
               data-testid="repo-action-dropdown-menu"
             >
               {REPO_ACTIONS.map((action) => (
