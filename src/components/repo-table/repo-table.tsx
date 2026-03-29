@@ -372,10 +372,7 @@ export default function RepoTable({
                     </TableCell>
 
                     {/* Repository — name + description + MOBILE-ONLY pills */}
-                    <TableCell
-                      className="px-3 py-3"
-                      style={{ maxWidth: "20rem" }}
-                    >
+                    <TableCell className="px-3 py-3">
                       <div data-testid="repo-details">
                         <div className="mb-1" data-testid="repo-name">
                           <a
@@ -398,7 +395,7 @@ export default function RepoTable({
 
                         {/* Description */}
                         <div
-                          className="text-xs text-default-500 break-words"
+                          className="text-xs text-default-500"
                           data-testid="repo-description"
                         >
                           {repo.description ?? <i>No description</i>}
