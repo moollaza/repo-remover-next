@@ -2,11 +2,17 @@ import {
   ChevronDown as ChevronDownIcon,
   Search as MagnifyingGlassIcon,
 } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   PER_PAGE_OPTIONS,
   REPO_ACTIONS,
@@ -42,12 +48,6 @@ export default function RepoFilters({
   selectedRepoKeys,
 }: RepoFiltersProps): JSX.Element {
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const [perPageOpen, setPerPageOpen] = useState(false);
-  const [repoTypeOpen, setRepoTypeOpen] = useState(false);
-  const [actionDropdownOpen, setActionDropdownOpen] = useState(false);
-  const perPageDropdownRef = useRef<HTMLDivElement>(null);
-  const repoTypeDropdownRef = useRef<HTMLDivElement>(null);
-  const actionDropdownRef = useRef<HTMLDivElement>(null);
 
   // Keyboard shortcut for Cmd+K / Ctrl+K
   useEffect(() => {
@@ -63,64 +63,6 @@ export default function RepoFilters({
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, []);
-
-  // Close dropdowns when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        perPageDropdownRef.current &&
-        !perPageDropdownRef.current.contains(event.target as Node)
-      ) {
-        setPerPageOpen(false);
-      }
-      if (
-        repoTypeDropdownRef.current &&
-        !repoTypeDropdownRef.current.contains(event.target as Node)
-      ) {
-        setRepoTypeOpen(false);
-      }
-      if (
-        actionDropdownRef.current &&
-        !actionDropdownRef.current.contains(event.target as Node)
-      ) {
-        setActionDropdownOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
-
-  const handlePerPageSelect = useCallback(
-    (value: string) => {
-      onPerPageChange(new Set([value]));
-      setPerPageOpen(false);
-    },
-    [onPerPageChange],
-  );
-
-  const handleRepoTypeToggle = useCallback(
-    (key: string) => {
-      const newSet = new Set(repoTypesFilter);
-      if (newSet.has(key)) {
-        newSet.delete(key);
-      } else {
-        newSet.add(key);
-      }
-      onRepoTypesFilterChange(newSet);
-    },
-    [repoTypesFilter, onRepoTypesFilterChange],
-  );
-
-  const handleActionSelect = useCallback(
-    (key: string) => {
-      onRepoActionChange(new Set([key]));
-      setActionDropdownOpen(false);
-    },
-    [onRepoActionChange],
-  );
 
   const isDisabled = selectedRepoKeys !== "all" && selectedRepoKeys.size === 0;
 
@@ -140,92 +82,60 @@ export default function RepoFilters({
   return (
     <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-2">
       {/* PER PAGE SELECTOR */}
-      <div className="w-full md:w-20" ref={perPageDropdownRef}>
-        <div
-          className="relative cursor-pointer"
-          data-testid="per-page-select"
-          onClick={() => setPerPageOpen((prev) => !prev)}
+      <div className="w-full md:w-20">
+        <Select
+          value={perPage}
+          onValueChange={(value: number | null) => {
+            if (value != null) onPerPageChange(new Set([value.toString()]));
+          }}
         >
-          <label className="sr-only" id="per-page-label">
-            Repos per page
-          </label>
-          <div
-            aria-labelledby="per-page-label"
-            className="w-full h-10 px-3 rounded-lg border border-divider bg-content1 text-foreground text-sm text-left flex items-center justify-between hover:bg-content2 transition-colors"
+          <SelectTrigger
+            className="w-full h-10 border-divider bg-content1 text-foreground hover:bg-content2"
+            data-testid="per-page-select"
           >
-            <span>{perPage}</span>
-            <ChevronDownIcon className="h-4 w-4 text-default-400" />
-          </div>
-          {perPageOpen && (
-            <ul
-              className="absolute z-50 mt-1 w-full rounded-lg border border-divider bg-content1 shadow-lg py-1 max-h-60 overflow-auto"
-              onClick={(e) => e.stopPropagation()}
-              role="listbox"
-            >
-              {PER_PAGE_OPTIONS.map((option) => (
-                <li
-                  aria-selected={perPage === option}
-                  className={`px-3 py-2 text-sm cursor-pointer hover:bg-content2 transition-colors ${
-                    perPage === option
-                      ? "bg-primary-50 text-primary font-medium"
-                      : "text-foreground"
-                  }`}
-                  data-testid={`per-page-option-${option}`}
-                  key={option}
-                  onClick={() => handlePerPageSelect(option.toString())}
-                  role="option"
-                >
-                  {option}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {PER_PAGE_OPTIONS.map((option) => (
+              <SelectItem
+                key={option}
+                value={option}
+                data-testid={`per-page-option-${option}`}
+              >
+                {option}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* REPO TYPE SELECTOR */}
-      <div
-        className="w-full md:w-44 md:flex-shrink-0"
-        ref={repoTypeDropdownRef}
-      >
-        <div
-          className="relative cursor-pointer"
-          data-testid="repo-type-select"
-          onClick={() => setRepoTypeOpen((prev) => !prev)}
+      <div className="w-full md:w-44 md:flex-shrink-0">
+        <Select
+          multiple
+          value={Array.from(repoTypesFilter)}
+          onValueChange={(values: string[]) => {
+            onRepoTypesFilterChange(new Set(values));
+          }}
         >
-          <div className="w-full h-10 px-3 rounded-lg border border-divider bg-content1 text-foreground text-sm text-left flex items-center justify-between hover:bg-content2 transition-colors">
-            <span className="truncate">{typesSummary}</span>
-            <ChevronDownIcon className="h-4 w-4 text-default-400 shrink-0" />
-          </div>
-          {repoTypeOpen && (
-            <ul
-              className="absolute z-50 mt-1 w-full rounded-lg border border-divider bg-content1 shadow-lg py-1 max-h-60 overflow-auto"
-              onClick={(e) => e.stopPropagation()}
-              role="listbox"
-            >
-              {REPO_TYPES.map((repoType) => (
-                <li
-                  aria-selected={repoTypesFilter.has(repoType.key)}
-                  className={`px-3 py-2 text-sm cursor-pointer hover:bg-content2 transition-colors flex items-center gap-2 ${
-                    repoTypesFilter.has(repoType.key)
-                      ? "text-foreground"
-                      : "text-default-400"
-                  }`}
-                  data-testid={`repo-type-select-item-${repoType.key}`}
-                  key={repoType.key}
-                  onClick={() => handleRepoTypeToggle(repoType.key)}
-                  role="option"
-                >
-                  <Checkbox
-                    checked={repoTypesFilter.has(repoType.key)}
-                    onCheckedChange={() => handleRepoTypeToggle(repoType.key)}
-                  />
-                  {repoType.label}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+          <SelectTrigger
+            className="w-full h-10 border-divider bg-content1 text-foreground hover:bg-content2"
+            data-testid="repo-type-select"
+          >
+            <SelectValue placeholder="Types">{() => typesSummary}</SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            {REPO_TYPES.map((repoType) => (
+              <SelectItem
+                key={repoType.key}
+                value={repoType.key}
+                data-testid={`repo-type-select-item-${repoType.key}`}
+              >
+                {repoType.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* SEARCH INPUT */}
@@ -257,56 +167,58 @@ export default function RepoFilters({
       {/* ACTION BUTTONS */}
       <div className="w-full md:w-auto md:flex-shrink-0">
         <div className="flex">
-          <div className="flex">
-            <Button
-              className="h-10 px-4 py-2 rounded-l-lg rounded-r-none"
-              data-testid={`repo-action-button-${isDeleteAction ? "delete" : "archive"}`}
-              disabled={isDisabled}
-              onClick={onRepoActionClick}
-              variant={isDeleteAction ? "destructive" : "warning"}
+          <Button
+            className="h-10 px-4 py-2 rounded-l-lg rounded-r-none"
+            data-testid={`repo-action-button-${isDeleteAction ? "delete" : "archive"}`}
+            disabled={isDisabled}
+            onClick={onRepoActionClick}
+            variant={isDeleteAction ? "destructive" : "warning"}
+          >
+            {REPO_ACTIONS.find((action) => selectedRepoAction.has(action.key))
+              ?.label ?? "Select Action"}
+          </Button>
+          <Select
+            value={Array.from(selectedRepoAction)[0] || "archive"}
+            onValueChange={(value: string | null) => {
+              if (value != null) onRepoActionChange(new Set([value]));
+            }}
+          >
+            <SelectTrigger
+              className="h-10 px-2 py-2 rounded-r-lg rounded-l-none border-l border-white/20 [&>svg:last-child]:hidden"
+              data-testid="repo-action-dropdown-trigger"
+              render={
+                <Button
+                  size="icon"
+                  variant={isDeleteAction ? "destructive" : "warning"}
+                />
+              }
             >
-              {REPO_ACTIONS.find((action) => selectedRepoAction.has(action.key))
-                ?.label ?? "Select Action"}
-            </Button>
-            <div className="relative" ref={actionDropdownRef}>
-              <Button
-                className="h-10 px-2 py-2 rounded-r-lg rounded-l-none border-l border-white/20"
-                data-testid="repo-action-dropdown-trigger"
-                onClick={() => setActionDropdownOpen((prev) => !prev)}
-                size="icon"
-                variant={isDeleteAction ? "destructive" : "warning"}
-              >
-                <ChevronDownIcon className="h-4 w-4" />
-              </Button>
-              {actionDropdownOpen && (
-                <div
-                  className="absolute right-0 z-50 mt-1 w-72 rounded-lg border border-divider bg-content1 shadow-lg py-1"
-                  data-testid="repo-action-dropdown-menu"
+              <ChevronDownIcon className="h-4 w-4" />
+            </SelectTrigger>
+            <SelectContent
+              align="end"
+              alignItemWithTrigger={false}
+              data-testid="repo-action-dropdown-menu"
+            >
+              {REPO_ACTIONS.map((action) => (
+                <SelectItem
+                  key={action.key}
+                  value={action.key}
+                  data-testid={`repo-action-dropdown-item-${action.key}`}
+                  className="py-2"
                 >
-                  {REPO_ACTIONS.map((action) => (
-                    <Button
-                      className={`w-full px-3 py-2 h-auto text-left justify-start rounded-none ${
-                        selectedRepoAction.has(action.key) ? "bg-content2" : ""
-                      }`}
-                      data-testid={`repo-action-dropdown-item-${action.key}`}
-                      key={action.key}
-                      onClick={() => handleActionSelect(action.key)}
-                      variant="ghost"
-                    >
-                      <div className="flex flex-col items-start">
-                        <div className="text-sm font-medium text-foreground">
-                          {action.label}
-                        </div>
-                        <div className="text-xs text-default-500">
-                          {action.description}
-                        </div>
-                      </div>
-                    </Button>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
+                  <div className="flex flex-col items-start">
+                    <div className="text-sm font-medium text-foreground">
+                      {action.label}
+                    </div>
+                    <div className="text-xs text-default-500">
+                      {action.description}
+                    </div>
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
     </div>

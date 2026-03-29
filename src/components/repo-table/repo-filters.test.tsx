@@ -183,16 +183,18 @@ describe("RepoFilters", () => {
   });
 
   it("calls onRepoActionChange when a different action is selected", async () => {
+    // base-ui Select portal items have pointer-events:none in JSDOM
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
     render(<RepoFilters {...defaultProps} />);
 
     // Find and click the dropdown trigger
     const dropdownTrigger = screen.getByTestId("repo-action-dropdown-trigger");
     if (!dropdownTrigger) throw new Error("Dropdown trigger not found");
 
-    await userEvent.click(dropdownTrigger);
+    await user.click(dropdownTrigger);
 
     // Select a different action using test ID
-    await userEvent.click(
+    await user.click(
       screen.getByTestId(`repo-action-dropdown-item-${REPO_ACTIONS[1].key}`),
     );
 
