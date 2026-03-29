@@ -1,6 +1,8 @@
 import { motion, useReducedMotion } from "framer-motion";
 import { ExternalLink, Star } from "lucide-react";
 
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Card, CardContent } from "@/components/ui/card";
 import { fadeUp, scrollRevealProps, staggerContainer } from "@/utils/motion";
 
 const testimonials = [
@@ -62,39 +64,41 @@ export function TestimonialsSection() {
           {...scrollRevealProps(staggerContainer, reduced)}
         >
           {testimonials.map((t, index) => (
-            <motion.div
-              className="bg-background border border-divider rounded-xl p-6 flex flex-col"
-              key={index}
-              variants={fadeUp}
-            >
-              <div className="flex gap-1 mb-4">
-                {Array.from({ length: t.rating }, (_, i) => (
-                  <Star
-                    className="w-4 h-4 fill-yellow-400 text-yellow-400"
-                    key={i}
-                  />
-                ))}
-              </div>
-              <p className="text-foreground mb-6 leading-relaxed flex-1">
-                &ldquo;{t.quote}&rdquo;
-              </p>
-              <div className="flex items-center gap-3 mt-auto">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--brand-blue)] to-[var(--brand-cyan)] flex items-center justify-center text-white font-semibold text-sm">
-                  {t.avatar}
-                </div>
-                <div>
-                  <div className="font-semibold">{t.handle}</div>
-                  <a
-                    className="text-sm text-default-500 hover:text-primary transition-colors inline-flex items-center gap-1"
-                    href={t.sourceUrl}
-                    rel="noopener noreferrer"
-                    target="_blank"
-                  >
-                    {t.source}
-                    <ExternalLink className="w-3 h-3" />
-                  </a>
-                </div>
-              </div>
+            <motion.div key={index} variants={fadeUp}>
+              <Card className="h-full flex flex-col">
+                <CardContent className="p-6 flex flex-col flex-1">
+                  <div className="flex gap-1 mb-4">
+                    {Array.from({ length: t.rating }, (_, i) => (
+                      <Star
+                        className="w-4 h-4 fill-yellow-400 text-yellow-400"
+                        key={i}
+                      />
+                    ))}
+                  </div>
+                  <p className="text-foreground mb-6 leading-relaxed flex-1">
+                    &ldquo;{t.quote}&rdquo;
+                  </p>
+                  <div className="flex items-center gap-3 mt-auto">
+                    <Avatar size="lg">
+                      <AvatarFallback className="bg-gradient-to-br from-[var(--brand-blue)] to-[var(--brand-cyan)] text-white font-semibold text-sm">
+                        {t.avatar}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div className="font-semibold">{t.handle}</div>
+                      <a
+                        className="text-sm text-default-500 hover:text-primary transition-colors inline-flex items-center gap-1"
+                        href={t.sourceUrl}
+                        rel="noopener noreferrer"
+                        target="_blank"
+                      >
+                        {t.source}
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </motion.div>
           ))}
         </motion.div>

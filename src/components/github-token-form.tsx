@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 import { checkTokenScopes, SCOPE_DESCRIPTIONS } from "@/utils/github-api";
 import {
@@ -170,12 +171,9 @@ export default function GitHubTokenForm({
       <div className="flex flex-col gap-4">
         {/* Token input */}
         <div className="flex flex-col gap-1.5">
-          <label
-            className="text-sm font-medium text-foreground"
-            htmlFor="personal-access-token"
-          >
+          <Label className="text-foreground" htmlFor="personal-access-token">
             Please enter your Personal Access Token
-          </label>
+          </Label>
           <div className="relative">
             <Input
               autoComplete="off"
@@ -312,7 +310,7 @@ export default function GitHubTokenForm({
           </Alert>
         )}
 
-        <label className="flex items-center gap-2 cursor-pointer">
+        <Label className="cursor-pointer">
           <input
             checked={remember}
             className="h-4 w-4 rounded border-default-300 text-primary focus:ring-primary"
@@ -322,10 +320,10 @@ export default function GitHubTokenForm({
             }}
             type="checkbox"
           />
-          <span className="text-sm text-foreground">
+          <span className="text-foreground">
             Remember me (token is stored locally, on your device)
           </span>
-        </label>
+        </Label>
       </div>
 
       <Button

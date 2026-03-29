@@ -8,12 +8,19 @@ import {
   Search,
   Trash2,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 import { useGitHubData } from "@/hooks/use-github-data";
 import { analytics } from "@/utils/analytics";
@@ -75,27 +82,10 @@ function InlinePATForm() {
   const [isValidating, setIsValidating] = useState(false);
   const [isValid, setIsValid] = useState(false);
   const [remember, setRemember] = useState(true);
-  const [showTooltip, setShowTooltip] = useState(false);
   const [showToken, setShowToken] = useState(false);
   const [scopeWarnings, setScopeWarnings] = useState<string[]>([]);
-  const tooltipRef = useRef<HTMLDivElement>(null);
   const { setPat } = useGitHubData();
   const navigate = useNavigate();
-
-  // Close tooltip on click outside
-  useEffect(() => {
-    if (!showTooltip) return;
-    function handleClick(e: MouseEvent) {
-      if (
-        tooltipRef.current &&
-        !tooltipRef.current.contains(e.target as Node)
-      ) {
-        setShowTooltip(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, [showTooltip]);
 
   // Auto-validate when token changes (with debounce)
   useEffect(() => {
@@ -270,31 +260,28 @@ function InlinePATForm() {
           onChange={(e) => setRemember(e.target.checked)}
           type="checkbox"
         />
-        <label
-          className="text-sm text-default-500 select-none"
-          htmlFor="remember-token"
-        >
+        <Label className="text-default-500" htmlFor="remember-token">
           Remember my token
-        </label>
-        <div className="relative" ref={tooltipRef}>
-          <Button
-            aria-label="Token storage info"
-            className="text-default-400 hover:text-default-600 transition-colors"
-            onClick={() => setShowTooltip(!showTooltip)}
-            type="button"
-            variant="ghost"
-            size="icon"
+        </Label>
+        <Popover>
+          <PopoverTrigger
+            render={
+              <Button
+                aria-label="Token storage info"
+                className="text-default-400 hover:text-default-600 transition-colors"
+                type="button"
+                variant="ghost"
+                size="icon"
+              />
+            }
           >
             <Info className="h-3.5 w-3.5" />
-          </Button>
-          {showTooltip && (
-            <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-3 w-64 p-3 rounded-lg bg-content1 border border-divider shadow-lg text-xs text-default-500 z-50">
-              Your token is AES-encrypted and stored only in your browser's
-              localStorage. It never leaves your device.
-              <div className="absolute left-1/2 -translate-x-1/2 -bottom-1.5 w-3 h-3 rotate-45 bg-content1 border-r border-b border-divider" />
-            </div>
-          )}
-        </div>
+          </PopoverTrigger>
+          <PopoverContent side="top" className="w-64 text-xs text-default-500">
+            Your token is AES-encrypted and stored only in your browser&apos;s
+            localStorage. It never leaves your device.
+          </PopoverContent>
+        </Popover>
       </div>
 
       <Button
@@ -388,32 +375,36 @@ export function GetStartedSection() {
 
         {/* PAT form card */}
         <motion.div
-          className="mt-16 bg-content1 border border-divider rounded-xl p-8 max-w-xl mx-auto"
+          className="mt-16 max-w-xl mx-auto"
           {...scrollRevealProps(scaleIn, reduced)}
         >
-          <h3 className="text-xl font-semibold mb-2 text-center">
-            Ready to start?
-          </h3>
-          <p className="text-sm text-default-500 text-center mb-6">
-            Paste your PAT below to load your repositories.
-          </p>
+          <Card>
+            <CardContent className="p-8">
+              <h3 className="text-xl font-semibold mb-2 text-center">
+                Ready to start?
+              </h3>
+              <p className="text-sm text-default-500 text-center mb-6">
+                Paste your PAT below to load your repositories.
+              </p>
 
-          <InlinePATForm />
+              <InlinePATForm />
 
-          <div className="flex items-center justify-center gap-6 mt-5 text-xs text-default-400">
-            <span className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-success inline-block" />
-              Stays in your browser
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-success inline-block" />
-              Never sent to a server
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-success inline-block" />
-              100% free
-            </span>
-          </div>
+              <div className="flex items-center justify-center gap-6 mt-5 text-xs text-default-400">
+                <span className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-success inline-block" />
+                  Stays in your browser
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-success inline-block" />
+                  Never sent to a server
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-success inline-block" />
+                  100% free
+                </span>
+              </div>
+            </CardContent>
+          </Card>
         </motion.div>
       </div>
     </section>

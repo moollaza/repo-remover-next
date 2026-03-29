@@ -5,6 +5,14 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { REPO_ACTIONS } from "@/config/repo-config";
 import {
   type Selection,
@@ -244,23 +252,23 @@ export default function RepoTable({
       />
 
       {/* TABLE */}
-      <div className="border border-divider rounded-xl overflow-x-auto bg-content1">
-        <table
+      <div className="border border-divider rounded-xl bg-content1">
+        <Table
           aria-label="GitHub repositories table"
-          className="w-full table-fixed text-sm"
+          className="table-fixed"
           data-testid="repo-table"
         >
-          <thead>
-            <tr className="bg-default-100 border-b border-divider">
+          <TableHeader>
+            <TableRow className="bg-default-100 border-b border-divider">
               {/* Checkbox column */}
-              <th className="w-12 px-3 py-3" scope="col">
+              <TableHead className="w-12 px-3 py-3" scope="col">
                 <Checkbox
                   aria-label="Select all"
                   checked={allSelectableSelected && selectableRepos.length > 0}
                   onCheckedChange={handleSelectAll}
                 />
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 aria-sort={
                   sortDescriptor.column === "name"
                     ? sortDescriptor.direction
@@ -281,20 +289,20 @@ export default function RepoTable({
                     </span>
                   )}
                 </span>
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="hidden xl:table-cell px-3 py-3 text-left text-xs font-semibold text-default-500 uppercase tracking-wider"
                 scope="col"
               >
                 Owner
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="hidden xl:table-cell px-3 py-3 text-left text-xs font-semibold text-default-500 uppercase tracking-wider"
                 scope="col"
               >
                 Status
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 aria-sort={
                   sortDescriptor.column === "updatedAt"
                     ? sortDescriptor.direction
@@ -315,21 +323,21 @@ export default function RepoTable({
                     </span>
                   )}
                 </span>
-              </th>
-            </tr>
-          </thead>
+              </TableHead>
+            </TableRow>
+          </TableHeader>
 
           {/* TABLE BODY */}
-          <tbody>
+          <TableBody>
             {paginatedRepos.length === 0 ? (
-              <tr>
-                <td
+              <TableRow>
+                <TableCell
                   className="px-3 py-8 text-center text-default-500"
                   colSpan={5}
                 >
                   No repos to display.
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ) : (
               paginatedRepos.map((repo) => {
                 const disabled = isRepoDisabled(repo);
@@ -337,7 +345,7 @@ export default function RepoTable({
                   selectedRepoKeys === "all" || selectedRepoKeys.has(repo.id);
 
                 return (
-                  <tr
+                  <TableRow
                     className={`border-b border-divider/50 transition-colors ${
                       disabled
                         ? "pointer-events-none opacity-50"
@@ -347,17 +355,17 @@ export default function RepoTable({
                     key={repo.id}
                   >
                     {/* Checkbox */}
-                    <td className="w-12 px-3 py-3">
+                    <TableCell className="w-12 px-3 py-3">
                       <Checkbox
                         aria-label={repo.name}
                         checked={isSelected && !disabled}
                         disabled={disabled}
                         onCheckedChange={() => handleRowSelect(repo.id)}
                       />
-                    </td>
+                    </TableCell>
 
                     {/* Repository — name + description + MOBILE-ONLY pills */}
-                    <td className="px-3 py-3">
+                    <TableCell className="px-3 py-3">
                       <div data-testid="repo-details">
                         <div className="mb-1" data-testid="repo-name">
                           <a
@@ -386,10 +394,10 @@ export default function RepoTable({
                           {repo.description ?? <i>No description</i>}
                         </div>
                       </div>
-                    </td>
+                    </TableCell>
 
                     {/* Owner — desktop only */}
-                    <td
+                    <TableCell
                       className="hidden xl:table-cell px-3 py-3"
                       data-testid="repo-owner"
                     >
@@ -407,20 +415,20 @@ export default function RepoTable({
                           {repo.owner.login}
                         </span>
                       )}
-                    </td>
+                    </TableCell>
 
                     {/* Status — desktop only */}
-                    <td className="hidden xl:table-cell px-3 py-3">
+                    <TableCell className="hidden xl:table-cell px-3 py-3">
                       <div
                         className="flex gap-1.5 flex-wrap"
                         data-testid="repo-tags"
                       >
                         <RepoBadges login={login} repo={repo} />
                       </div>
-                    </td>
+                    </TableCell>
 
                     {/* Last Updated */}
-                    <td
+                    <TableCell
                       className="px-3 py-3 text-default-400 whitespace-nowrap"
                       data-testid="repo-updated-at"
                       title={
@@ -441,13 +449,13 @@ export default function RepoTable({
                             new Date(repo.updatedAt as string),
                           )
                         : "Unknown"}
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 );
               })
             )}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
 
       {/* PAGINATION - Outside table border */}
