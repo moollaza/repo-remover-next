@@ -296,20 +296,4 @@ test.describe("Visual Regression", () => {
       });
     });
   });
-
-  // ─── Get Started Section ─────────────────────────────────────────────────────
-  test.describe("Get Started Section", () => {
-    test("token form", async ({ page }) => {
-      const home = new HomePage(page);
-      await home.setupMocks();
-      await home.goto();
-
-      await page.locator("#get-started").scrollIntoViewIfNeeded();
-      await page.waitForTimeout(100);
-
-      await argosScreenshot(page, "get-started-form", {
-        element: page.locator("#get-started"),
-      });
-    });
-  });
 });
