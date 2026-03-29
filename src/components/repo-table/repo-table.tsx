@@ -470,9 +470,10 @@ export default function RepoTable({
           >
             <Button
               aria-label="prev"
+              className="h-8 w-8 rounded-md text-muted-foreground"
               disabled={currentPage === 1}
               onClick={() => setCurrentPage(currentPage - 1)}
-              size="icon-sm"
+              size="icon"
               variant="outline"
             >
               &lsaquo;
@@ -480,10 +481,12 @@ export default function RepoTable({
             {pageNumbers.map((page) => (
               <Button
                 aria-current={page === currentPage ? "true" : undefined}
-                className={page === currentPage ? "shadow-sm" : ""}
+                className={`h-8 w-8 rounded-md text-sm font-normal ${
+                  page === currentPage ? "shadow-sm" : "text-muted-foreground"
+                }`}
                 key={page}
                 onClick={() => setCurrentPage(page)}
-                size="icon-sm"
+                size="icon"
                 variant={page === currentPage ? "default" : "outline"}
               >
                 {page}
@@ -491,9 +494,10 @@ export default function RepoTable({
             ))}
             <Button
               aria-label="next"
+              className="h-8 w-8 rounded-md text-muted-foreground"
               disabled={currentPage === totalPages}
               onClick={() => setCurrentPage(currentPage + 1)}
-              size="icon-sm"
+              size="icon"
               variant="outline"
             >
               &rsaquo;

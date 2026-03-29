@@ -102,7 +102,7 @@ export default function RepoFilters({
           >
             <SelectValue />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent alignItemWithTrigger={false} align="start">
             {PER_PAGE_OPTIONS.map((option) => (
               <SelectItem
                 key={option}
@@ -204,7 +204,8 @@ export default function RepoFilters({
               <ChevronDownIcon className="h-4 w-4" />
             </PopoverTrigger>
             <PopoverContent
-              className="w-72 p-1"
+              align="end"
+              className="w-[calc(100vw-2rem)] min-w-72 max-w-80 p-1"
               data-testid="repo-action-dropdown-menu"
             >
               {REPO_ACTIONS.map((action) => (
