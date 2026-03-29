@@ -1,8 +1,8 @@
 import { type Repository } from "@octokit/graphql-schema";
-import { useCallback, useEffect, useRef } from "react";
-import { createPortal } from "react-dom";
+import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogOverlay } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useConfirmationModal } from "@/hooks/use-confirmation-modal";
 
@@ -56,112 +56,63 @@ export default function ConfirmationModal({
     state,
   } = useConfirmationModal({ action, login, onClose, onConfirm, repos });
 
-  if (!isOpen) return null;
-
   // Use totalCount from state during progress/result (immune to SWR cache updates)
   const count = state.mode === "confirmation" ? repos.length : state.totalCount;
 
-  return createPortal(
-    <ModalOverlay
-      isDismissable={isDismissable}
-      onClose={isDismissable ? handleOnClose : undefined}
-    >
-      <div
-        className="relative w-full max-w-xl max-h-[80vh] overflow-y-auto rounded-xl bg-background border border-divider shadow-2xl"
-        data-testid={`confirmation-modal-${state.mode}`}
-      >
-        {state.mode === "confirmation" && (
-          <RepoActionConfirmation
-            action={action}
-            count={count}
-            handleConfirm={handleConfirm}
-            isCorrectUsername={state.isCorrectUsername}
-            onClose={handleOnClose}
-            repos={repos}
-            setUsername={handleSetUsername}
-            username={state.username}
-          />
-        )}
-
-        {state.mode === "progress" && (
-          <RepoActionProgress
-            action={action}
-            count={count}
-            currentRepo={state.currentRepo}
-            onStop={handleStop}
-            progress={state.progress}
-          />
-        )}
-
-        {state.mode === "result" && (
-          <RepoActionResult
-            action={action}
-            count={state.progress}
-            errors={state.errors}
-            onClose={handleOnClose}
-          />
-        )}
-      </div>
-    </ModalOverlay>,
-    document.body,
-  );
-}
-
-/**
- * Modal overlay that handles backdrop click and Escape key dismissal.
- * Also prevents body scroll while open.
- */
-function ModalOverlay({
-  children,
-  isDismissable,
-  onClose,
-}: {
-  children: React.ReactNode;
-  isDismissable: boolean;
-  onClose?: () => void;
-}) {
-  const overlayRef = useRef<HTMLDivElement>(null);
-
-  // Prevent body scroll while modal is open
-  useEffect(() => {
-    const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = originalOverflow;
-    };
-  }, []);
-
-  // Handle Escape key
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isDismissable && onClose) {
-        onClose();
-      }
-    },
-    [isDismissable, onClose],
-  );
-
-  useEffect(() => {
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [handleKeyDown]);
-
-  // Handle backdrop click
-  function handleBackdropClick(e: React.MouseEvent<HTMLDivElement>) {
-    if (e.target === overlayRef.current && isDismissable && onClose) {
-      onClose();
-    }
-  }
-
   return (
-    <div
-      ref={overlayRef}
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
-      data-testid="repo-confirmation-modal"
-      onClick={handleBackdropClick}
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        // Block dismissal during progress mode
+        if (!open && !isDismissable) return;
+        if (!open) handleOnClose();
+      }}
     >
-      {children}
-    </div>
+      <DialogPrimitive.Portal>
+        <DialogOverlay className="z-[100] bg-black/50 backdrop-blur-sm" />
+        <DialogPrimitive.Popup
+          data-testid="repo-confirmation-modal"
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+        >
+          <div
+            className="relative w-full max-w-xl max-h-[80vh] overflow-y-auto rounded-xl bg-background border border-divider shadow-2xl"
+            data-testid={`confirmation-modal-${state.mode}`}
+          >
+            {state.mode === "confirmation" && (
+              <RepoActionConfirmation
+                action={action}
+                count={count}
+                handleConfirm={handleConfirm}
+                isCorrectUsername={state.isCorrectUsername}
+                onClose={handleOnClose}
+                repos={repos}
+                setUsername={handleSetUsername}
+                username={state.username}
+              />
+            )}
+
+            {state.mode === "progress" && (
+              <RepoActionProgress
+                action={action}
+                count={count}
+                currentRepo={state.currentRepo}
+                onStop={handleStop}
+                progress={state.progress}
+              />
+            )}
+
+            {state.mode === "result" && (
+              <RepoActionResult
+                action={action}
+                count={state.progress}
+                errors={state.errors}
+                onClose={handleOnClose}
+              />
+            )}
+          </div>
+        </DialogPrimitive.Popup>
+      </DialogPrimitive.Portal>
+    </Dialog>
   );
 }
 
