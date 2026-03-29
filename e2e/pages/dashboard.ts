@@ -56,7 +56,7 @@ export class DashboardPage extends BasePage {
     this.prevPageButton = this.pagination.getByLabel("prev");
     this.table = page.getByTestId("repo-table");
     this.tableRows = this.table.locator("tbody tr");
-    this.checkboxes = this.table.locator("tbody tr input[type='checkbox']");
+    this.checkboxes = this.table.locator("tbody tr").getByRole("checkbox");
     this.repoActionDropdownItemArchive = page.getByTestId(
       "repo-action-dropdown-item-archive",
     );

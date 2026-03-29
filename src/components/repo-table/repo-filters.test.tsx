@@ -3,11 +3,13 @@ import userEvent from "@testing-library/user-event";
 import { vi } from "vitest";
 
 import RepoFilters, {
+  type SelectionSet,
+} from "@/components/repo-table/repo-filters";
+import {
   PER_PAGE_OPTIONS,
   REPO_ACTIONS,
   REPO_TYPES,
-  type SelectionSet,
-} from "@/components/repo-table/repo-filters";
+} from "@/config/repo-config";
 
 // No icon mocks needed — component uses lucide-react which renders inline SVGs
 

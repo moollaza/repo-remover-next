@@ -1,5 +1,5 @@
 import { type Repository } from "@octokit/graphql-schema";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, X } from "lucide-react";
 import { useState } from "react";
 
 import RepoTable from "@/components/repo-table/repo-table";
@@ -116,19 +116,7 @@ export default function Dashboard({
             variant="ghost"
             size="icon"
           >
-            <svg
-              className="h-4 w-4"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2}
-              viewBox="0 0 24 24"
-            >
-              <path
-                d="M6 18L18 6M6 6l12 12"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+            <X className="h-4 w-4" />
           </Button>
           <AlertTitle>
             Some organizations require SAML authentication

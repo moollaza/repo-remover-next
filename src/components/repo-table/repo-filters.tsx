@@ -5,32 +5,14 @@ import {
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import {
+  PER_PAGE_OPTIONS,
+  REPO_ACTIONS,
+  REPO_TYPES,
+} from "@/config/repo-config";
 import { type Selection, type SelectionSet } from "@/hooks/use-repo-filters";
-
-const PER_PAGE_OPTIONS = [5, 10, 20, 50, 100];
-const REPO_TYPES = [
-  { key: "isSource", label: "Sources" },
-  { key: "isPrivate", label: "Private" },
-  { key: "isInOrganization", label: "Organization" },
-  { key: "isFork", label: "Forked" },
-  { key: "isArchived", label: "Archived" },
-  { key: "isTemplate", label: "Template" },
-  { key: "isMirror", label: "Mirror" },
-  { key: "isDisabled", label: "Disabled" },
-];
-const REPO_ACTIONS = [
-  {
-    description: "This can be undone later",
-    key: "archive",
-    label: "Archive Selected Repos",
-  },
-  {
-    description: "This action is irreversible",
-    key: "delete",
-    label: "Delete Selected Repos",
-  },
-];
 
 export interface RepoFiltersProps {
   onPerPageChange: (keys: Selection) => void;
@@ -234,11 +216,9 @@ export default function RepoFilters({
                   onClick={() => handleRepoTypeToggle(repoType.key)}
                   role="option"
                 >
-                  <input
+                  <Checkbox
                     checked={repoTypesFilter.has(repoType.key)}
-                    className="rounded border-divider"
-                    onChange={() => handleRepoTypeToggle(repoType.key)}
-                    type="checkbox"
+                    onCheckedChange={() => handleRepoTypeToggle(repoType.key)}
                   />
                   {repoType.label}
                 </li>
@@ -332,6 +312,3 @@ export default function RepoFilters({
     </div>
   );
 }
-
-// Export constants for use in other components
-export { PER_PAGE_OPTIONS, REPO_ACTIONS, REPO_TYPES };

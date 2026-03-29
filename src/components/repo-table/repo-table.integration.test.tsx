@@ -1,5 +1,5 @@
 import { type Repository } from "@octokit/graphql-schema";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { BrowserRouter } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
@@ -84,9 +84,9 @@ describe("RepoTable + ConfirmationModal Integration", () => {
     expect(repoAlphaRow).toBeInTheDocument();
 
     // Find the checkbox within the row
-    const checkbox = repoAlphaRow!.querySelector('input[type="checkbox"]');
+    const checkbox = within(repoAlphaRow as HTMLElement).getByRole("checkbox");
     expect(checkbox).toBeInTheDocument();
-    await user.click(checkbox!);
+    await user.click(checkbox);
 
     // Click the archive button
     const archiveBtn = screen.getByTestId("repo-action-button-archive");
@@ -116,8 +116,8 @@ describe("RepoTable + ConfirmationModal Integration", () => {
     const repoAlphaRow = screen
       .getByText("repo-alpha")
       .closest('[data-testid="repo-row"]');
-    const checkbox = repoAlphaRow!.querySelector('input[type="checkbox"]');
-    await user.click(checkbox!);
+    const checkbox = within(repoAlphaRow as HTMLElement).getByRole("checkbox");
+    await user.click(checkbox);
 
     // Open the modal
     await user.click(screen.getByTestId("repo-action-button-archive"));

@@ -1,9 +1,11 @@
 import { RequestError } from "@octokit/request-error";
 import clsx from "clsx";
+import { Eye, EyeOff, Loader2, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -207,48 +209,9 @@ export default function GitHubTokenForm({
                   size="icon"
                 >
                   {showToken ? (
-                    <svg
-                      className="h-4 w-4"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <line
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        x1="1"
-                        x2="23"
-                        y1="1"
-                        y2="23"
-                      />
-                    </svg>
+                    <EyeOff className="h-4 w-4" />
                   ) : (
-                    <svg
-                      className="h-4 w-4"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <circle
-                        cx="12"
-                        cy="12"
-                        r="3"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
+                    <Eye className="h-4 w-4" />
                   )}
                 </Button>
                 <Button
@@ -261,19 +224,7 @@ export default function GitHubTokenForm({
                   variant="ghost"
                   size="icon"
                 >
-                  <svg
-                    className="h-4 w-4"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      d="M6 18L18 6M6 6l12 12"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
+                  <X className="h-4 w-4" />
                 </Button>
               </div>
             )}
@@ -310,15 +261,13 @@ export default function GitHubTokenForm({
           </Alert>
         )}
 
-        <Label className="cursor-pointer">
-          <input
+        <Label className="cursor-pointer flex items-center gap-2">
+          <Checkbox
             checked={remember}
-            className="h-4 w-4 rounded border-default-300 text-primary focus:ring-primary"
             data-testid="github-token-remember"
-            onChange={(e) => {
-              setRemember(e.target.checked);
+            onCheckedChange={(checked) => {
+              setRemember(checked);
             }}
-            type="checkbox"
           />
           <span className="text-foreground">
             Remember me (token is stored locally, on your device)
@@ -339,25 +288,7 @@ export default function GitHubTokenForm({
       >
         {isValidating ? (
           <span className="inline-flex items-center gap-2">
-            <svg
-              className="h-4 w-4 animate-spin"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              />
-              <path
-                className="opacity-75"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                fill="currentColor"
-              />
-            </svg>
+            <Loader2 className="h-4 w-4 animate-spin" />
             Validating...
           </span>
         ) : (

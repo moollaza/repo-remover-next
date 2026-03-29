@@ -1,6 +1,7 @@
 import { motion, useReducedMotion } from "framer-motion";
 import {
   Archive,
+  Check,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
@@ -164,16 +165,7 @@ export function ProductShowcase() {
                     className={`w-3.5 h-3.5 rounded border flex items-center justify-center ${repo.selected ? "bg-primary border-primary" : "border-divider bg-background"}`}
                   >
                     {repo.selected && (
-                      <svg className="w-2 h-2 text-white" viewBox="0 0 10 8">
-                        <path
-                          d="M1 4l2.5 2.5L9 1"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="1.5"
-                        />
-                      </svg>
+                      <Check className="w-2 h-2 text-white" strokeWidth={3} />
                     )}
                   </div>
                 </div>
