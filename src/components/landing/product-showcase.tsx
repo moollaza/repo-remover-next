@@ -8,6 +8,7 @@ import {
   Trash2,
 } from "lucide-react";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   fadeUp,
@@ -186,19 +187,19 @@ export function ProductShowcase() {
                 <div className="text-default-400 truncate">{repo.owner}</div>
                 <div className="flex items-center gap-1.5 flex-wrap">
                   {repo.private && (
-                    <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-default-100 text-default-500 border border-divider">
+                    <Badge size="xs" variant="muted">
                       Private
-                    </span>
+                    </Badge>
                   )}
                   {repo.archived && (
-                    <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
+                    <Badge size="xs" variant="warning">
                       Archived
-                    </span>
+                    </Badge>
                   )}
                   {!repo.private && !repo.archived && (
-                    <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+                    <Badge size="xs" variant="success">
                       Public
-                    </span>
+                    </Badge>
                   )}
                 </div>
                 <div className="text-default-400">{repo.updated}</div>

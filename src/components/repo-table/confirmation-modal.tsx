@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useConfirmationModal } from "@/hooks/use-confirmation-modal";
 
 interface ConfirmationModalProps {
@@ -199,12 +200,12 @@ function RepoActionConfirmation({
         </ul>
         <div className="mt-4" />
         <strong>Please type your GitHub username to confirm:</strong>
-        <input
+        <Input
           autoCapitalize="none"
           autoComplete="off"
           autoCorrect="off"
           autoFocus
-          className="mt-2 w-full rounded-lg border border-divider bg-content2 px-3 py-2 text-foreground placeholder:text-default-400 outline-none focus:ring-2 focus:ring-primary"
+          className="mt-2 h-auto bg-content2 px-3 py-2 text-foreground placeholder:text-default-400 border-divider"
           data-testid="confirmation-modal-input"
           id="username"
           name="username"

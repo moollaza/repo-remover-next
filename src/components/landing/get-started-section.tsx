@@ -11,7 +11,9 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 import { useGitHubData } from "@/hooks/use-github-data";
 import { analytics } from "@/utils/analytics";
@@ -151,9 +153,9 @@ function InlinePATForm() {
     <form className="space-y-4" onSubmit={handleSubmit}>
       <div className="relative">
         <Key className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-default-400" />
-        <input
+        <Input
           autoComplete="off"
-          className={`w-full pl-10 pr-12 py-3 rounded-lg border bg-default-100 text-sm font-mono placeholder:text-default-400 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors ${
+          className={`h-auto pl-10 pr-12 py-3 bg-default-100 text-sm font-mono placeholder:text-default-400 ${
             error
               ? "border-danger"
               : isValid
@@ -239,26 +241,24 @@ function InlinePATForm() {
       )}
 
       {scopeWarnings.length > 0 && (
-        <div
-          className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-700 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-400"
-          data-testid="scope-warnings"
-          role="alert"
-        >
-          <p className="font-medium">Missing recommended scopes:</p>
-          <ul className="mt-1 list-inside list-disc space-y-0.5 text-xs">
-            {scopeWarnings.map((warning) => (
-              <li key={warning}>{warning}</li>
-            ))}
-          </ul>
-          <a
-            className="mt-2 inline-block text-xs font-medium underline hover:no-underline"
-            href="https://github.com/settings/tokens"
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            Update token scopes on GitHub &rarr;
-          </a>
-        </div>
+        <Alert variant="warning" data-testid="scope-warnings">
+          <AlertTitle>Missing recommended scopes:</AlertTitle>
+          <AlertDescription>
+            <ul className="mt-1 list-inside list-disc space-y-0.5 text-xs">
+              {scopeWarnings.map((warning) => (
+                <li key={warning}>{warning}</li>
+              ))}
+            </ul>
+            <a
+              className="mt-2 inline-block text-xs font-medium underline hover:no-underline"
+              href="https://github.com/settings/tokens"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              Update token scopes on GitHub &rarr;
+            </a>
+          </AlertDescription>
+        </Alert>
       )}
 
       <div className="flex items-center gap-2">

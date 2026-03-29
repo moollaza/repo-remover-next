@@ -5,6 +5,7 @@ import {
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { type Selection, type SelectionSet } from "@/hooks/use-repo-filters";
 
 const PER_PAGE_OPTIONS = [5, 10, 20, 50, 100];
@@ -254,9 +255,9 @@ export default function RepoFilters({
             <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
               <MagnifyingGlassIcon className="h-5 w-5 text-default-400" />
             </div>
-            <input
+            <Input
               aria-label="Search"
-              className="w-full h-10 pl-10 pr-16 rounded-lg border border-divider bg-content1 text-foreground text-sm placeholder:text-default-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+              className="h-10 pl-10 pr-16 bg-content1 text-foreground text-sm placeholder:text-default-400 border-divider"
               data-testid="repo-search-input"
               onChange={(e) => onSearchChange(e.target.value)}
               placeholder="Search by name or description"

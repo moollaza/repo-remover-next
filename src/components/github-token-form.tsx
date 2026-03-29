@@ -2,7 +2,9 @@ import { RequestError } from "@octokit/request-error";
 import clsx from "clsx";
 import { useEffect, useState } from "react";
 
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 import { checkTokenScopes, SCOPE_DESCRIPTIONS } from "@/utils/github-api";
 import {
@@ -175,14 +177,12 @@ export default function GitHubTokenForm({
             Please enter your Personal Access Token
           </label>
           <div className="relative">
-            <input
+            <Input
               autoComplete="off"
               className={clsx(
-                "w-full rounded-lg border bg-default-100 py-2.5 pl-3 text-sm text-foreground",
+                "h-auto bg-default-100 py-2.5 pl-3 text-sm text-foreground",
                 value ? "pr-16" : "pr-3",
                 "placeholder:text-default-400",
-                "focus:outline-none focus:ring-2",
-                "transition-colors",
                 inputBorderClass,
               )}
               data-testid="github-token-input"
@@ -292,26 +292,24 @@ export default function GitHubTokenForm({
 
         {/* Scope warnings — shown when token is valid but missing recommended scopes */}
         {scopeWarnings.length > 0 && (
-          <div
-            className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-700 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-400"
-            data-testid="scope-warnings"
-            role="alert"
-          >
-            <p className="font-medium">Token is missing recommended scopes:</p>
-            <ul className="mt-1 list-inside list-disc space-y-0.5 text-xs">
-              {scopeWarnings.map((warning) => (
-                <li key={warning}>{warning}</li>
-              ))}
-            </ul>
-            <a
-              className="mt-2 inline-block text-xs font-medium underline hover:no-underline"
-              href="https://github.com/settings/tokens"
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              Update token scopes on GitHub &rarr;
-            </a>
-          </div>
+          <Alert variant="warning" data-testid="scope-warnings">
+            <AlertTitle>Token is missing recommended scopes:</AlertTitle>
+            <AlertDescription>
+              <ul className="mt-1 list-inside list-disc space-y-0.5 text-xs">
+                {scopeWarnings.map((warning) => (
+                  <li key={warning}>{warning}</li>
+                ))}
+              </ul>
+              <a
+                className="mt-2 inline-block text-xs font-medium underline hover:no-underline"
+                href="https://github.com/settings/tokens"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                Update token scopes on GitHub &rarr;
+              </a>
+            </AlertDescription>
+          </Alert>
         )}
 
         <label className="flex items-center gap-2 cursor-pointer">

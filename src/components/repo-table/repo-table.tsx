@@ -2,6 +2,7 @@ import { type Repository } from "@octokit/graphql-schema";
 import { formatDistanceToNow } from "date-fns";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { REPO_ACTIONS } from "@/config/repo-config";
@@ -20,6 +21,52 @@ import RepoFilters from "./repo-filters";
 
 interface RepositoryWithKey extends Repository {
   key: string;
+}
+
+/** Shared badge rendering for mobile and desktop repo rows */
+function RepoBadges({
+  repo,
+  login,
+  showOwner = false,
+}: {
+  login: null | string;
+  repo: Repository;
+  showOwner?: boolean;
+}) {
+  return (
+    <>
+      {showOwner && repo.owner.login !== login && (
+        <Badge size="xs" variant="muted">
+          {repo.owner.login}
+        </Badge>
+      )}
+      {repo.isPrivate && (
+        <Badge size="xs" variant="muted">
+          Private
+        </Badge>
+      )}
+      {!repo.isPrivate && !showOwner && (
+        <Badge size="xs" variant="success">
+          Public
+        </Badge>
+      )}
+      {repo.isInOrganization && (
+        <Badge size="xs" variant="muted">
+          Org
+        </Badge>
+      )}
+      {repo.isFork && (
+        <Badge size="xs" variant="muted">
+          Fork
+        </Badge>
+      )}
+      {repo.isArchived && (
+        <Badge size="xs" variant="warning">
+          Archived
+        </Badge>
+      )}
+    </>
+  );
 }
 
 interface RepoTableProps {
@@ -328,31 +375,7 @@ export default function RepoTable({
                           className="flex gap-1.5 mb-1.5 flex-wrap xl:hidden"
                           data-testid="repo-tags"
                         >
-                          {repo.owner.login !== login && (
-                            <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-default-100 text-default-500 border border-divider">
-                              {repo.owner.login}
-                            </span>
-                          )}
-                          {repo.isPrivate && (
-                            <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-default-100 text-default-500 border border-divider">
-                              Private
-                            </span>
-                          )}
-                          {repo.isInOrganization && (
-                            <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-default-100 text-default-500 border border-divider">
-                              Org
-                            </span>
-                          )}
-                          {repo.isFork && (
-                            <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-default-100 text-default-500 border border-divider">
-                              Fork
-                            </span>
-                          )}
-                          {repo.isArchived && (
-                            <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
-                              Archived
-                            </span>
-                          )}
+                          <RepoBadges login={login} repo={repo} showOwner />
                         </div>
 
                         {/* Description */}
@@ -392,31 +415,7 @@ export default function RepoTable({
                         className="flex gap-1.5 flex-wrap"
                         data-testid="repo-tags"
                       >
-                        {repo.isPrivate && (
-                          <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-default-100 text-default-500 border border-divider">
-                            Private
-                          </span>
-                        )}
-                        {!repo.isPrivate && (
-                          <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
-                            Public
-                          </span>
-                        )}
-                        {repo.isInOrganization && (
-                          <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-default-100 text-default-500 border border-divider">
-                            Org
-                          </span>
-                        )}
-                        {repo.isFork && (
-                          <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-default-100 text-default-500 border border-divider">
-                            Fork
-                          </span>
-                        )}
-                        {repo.isArchived && (
-                          <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
-                            Archived
-                          </span>
-                        )}
+                        <RepoBadges login={login} repo={repo} />
                       </div>
                     </td>
 
