@@ -470,9 +470,9 @@ export default function RepoTable({
           >
             <Button
               aria-label="prev"
-              className="px-3 py-1.5 text-sm"
               disabled={currentPage === 1}
               onClick={() => setCurrentPage(currentPage - 1)}
+              size="icon-sm"
               variant="outline"
             >
               &lsaquo;
@@ -480,11 +480,10 @@ export default function RepoTable({
             {pageNumbers.map((page) => (
               <Button
                 aria-current={page === currentPage ? "true" : undefined}
-                className={`px-3 py-1.5 text-sm ${
-                  page === currentPage ? "shadow-sm" : ""
-                }`}
+                className={page === currentPage ? "shadow-sm" : ""}
                 key={page}
                 onClick={() => setCurrentPage(page)}
+                size="icon-sm"
                 variant={page === currentPage ? "default" : "outline"}
               >
                 {page}
@@ -492,9 +491,9 @@ export default function RepoTable({
             ))}
             <Button
               aria-label="next"
-              className="px-3 py-1.5 text-sm"
               disabled={currentPage === totalPages}
               onClick={() => setCurrentPage(currentPage + 1)}
+              size="icon-sm"
               variant="outline"
             >
               &rsaquo;
