@@ -3,8 +3,15 @@ import { formatDistanceToNow } from "date-fns";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import {
   Table,
   TableBody,
@@ -460,50 +467,54 @@ export default function RepoTable({
 
       {/* PAGINATION - Outside table border */}
       {totalPages > 1 && (
-        <div
-          className="flex w-full justify-center"
-          data-testid="table-pagination"
-        >
-          <nav
-            aria-label="Pagination"
-            className="inline-flex items-center gap-1"
-          >
-            <Button
-              aria-label="prev"
-              className="h-8 w-8 rounded-md text-muted-foreground"
-              disabled={currentPage === 1}
-              onClick={() => setCurrentPage(currentPage - 1)}
-              size="icon"
-              variant="outline"
-            >
-              &lsaquo;
-            </Button>
+        <Pagination data-testid="table-pagination">
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                href="#"
+                text=""
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (currentPage > 1) setCurrentPage(currentPage - 1);
+                }}
+                aria-disabled={currentPage === 1}
+                className={
+                  currentPage === 1 ? "pointer-events-none opacity-50" : ""
+                }
+              />
+            </PaginationItem>
             {pageNumbers.map((page) => (
-              <Button
-                aria-current={page === currentPage ? "true" : undefined}
-                className={`h-8 w-8 rounded-md text-sm font-normal ${
-                  page === currentPage ? "shadow-sm" : "text-muted-foreground"
-                }`}
-                key={page}
-                onClick={() => setCurrentPage(page)}
-                size="icon"
-                variant={page === currentPage ? "default" : "outline"}
-              >
-                {page}
-              </Button>
+              <PaginationItem key={page}>
+                <PaginationLink
+                  href="#"
+                  isActive={page === currentPage}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setCurrentPage(page);
+                  }}
+                >
+                  {page}
+                </PaginationLink>
+              </PaginationItem>
             ))}
-            <Button
-              aria-label="next"
-              className="h-8 w-8 rounded-md text-muted-foreground"
-              disabled={currentPage === totalPages}
-              onClick={() => setCurrentPage(currentPage + 1)}
-              size="icon"
-              variant="outline"
-            >
-              &rsaquo;
-            </Button>
-          </nav>
-        </div>
+            <PaginationItem>
+              <PaginationNext
+                href="#"
+                text=""
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+                }}
+                aria-disabled={currentPage === totalPages}
+                className={
+                  currentPage === totalPages
+                    ? "pointer-events-none opacity-50"
+                    : ""
+                }
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
       )}
 
       {/* CONFIRMATION MODAL — login derived from first selected repo's owner if prop is null */}
