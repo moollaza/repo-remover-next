@@ -2,6 +2,7 @@ import { type Repository } from "@octokit/graphql-schema";
 import { useCallback, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 
+import { Button } from "@/components/ui/button";
 import { useConfirmationModal } from "@/hooks/use-confirmation-modal";
 
 interface ConfirmationModalProps {
@@ -214,20 +215,21 @@ function RepoActionConfirmation({
         />
       </div>
       <div className="flex justify-end gap-2 px-6 py-4 border-t border-divider">
-        <button
-          className="rounded-lg border border-divider bg-transparent px-4 py-2 text-sm font-medium text-foreground hover:bg-default-100 transition-colors"
+        <Button
+          variant="ghost"
           data-testid="confirmation-modal-cancel"
           onClick={onClose}
           type="button"
         >
           Cancel
-        </button>
-        <button
-          className={`rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+        </Button>
+        <Button
+          variant={action === "archive" ? "default" : "destructive"}
+          className={
             action === "archive"
-              ? "bg-amber-500 hover:bg-amber-600"
-              : "bg-red-500 hover:bg-red-600"
-          }`}
+              ? "bg-amber-500 text-white hover:bg-amber-600"
+              : "bg-red-500 text-white hover:bg-red-600"
+          }
           data-testid="confirmation-modal-confirm"
           disabled={!isCorrectUsername}
           name="confirm"
@@ -238,7 +240,7 @@ function RepoActionConfirmation({
         >
           I understand the consequences, {action} the repositor
           {count > 1 ? "ies" : "y"}
-        </button>
+        </Button>
       </div>
     </>
   );
@@ -288,13 +290,9 @@ function RepoActionProgress({
         </div>
       </div>
       <div className="flex justify-end px-6 py-4 border-t border-divider">
-        <button
-          className="rounded-lg border border-divider bg-transparent px-4 py-2 text-sm font-medium text-foreground hover:bg-default-100 transition-colors"
-          onClick={onStop}
-          type="button"
-        >
+        <Button variant="ghost" onClick={onStop} type="button">
           Stop
-        </button>
+        </Button>
       </div>
     </>
   );
@@ -346,14 +344,14 @@ function RepoActionResult({
         )}
       </div>
       <div className="flex justify-end gap-2 px-6 py-4 border-t border-divider">
-        <button
-          className="rounded-lg border border-divider bg-transparent px-4 py-2 text-sm font-medium text-foreground hover:bg-default-100 transition-colors"
+        <Button
+          variant="ghost"
           data-testid="repo-action-result-close"
           onClick={onClose}
           type="button"
         >
           Close
-        </button>
+        </Button>
       </div>
     </>
   );

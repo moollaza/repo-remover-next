@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 
 import { GenerateReposButton } from "@/components/generate-repos-button";
+import { Button } from "@/components/ui/button";
 import { useGitHubData } from "@/hooks/use-github-data";
 
 const homeLinks = [
@@ -177,10 +178,10 @@ function DashboardHeader({
 
           {/* User dropdown */}
           <div className="relative" ref={dropdownRef}>
-            <button
-              className="cursor-pointer transition-opacity hover:opacity-80 flex items-center gap-3"
+            <Button
+              className="cursor-pointer transition-opacity hover:opacity-80 gap-3 h-auto px-2 py-1"
               onClick={() => setDropdownOpen((prev) => !prev)}
-              type="button"
+              variant="ghost"
             >
               {/* Avatar */}
               {user?.avatarUrl ? (
@@ -209,7 +210,7 @@ function DashboardHeader({
                   {user?.login}
                 </a>
               </div>
-            </button>
+            </Button>
 
             {/* Dropdown menu */}
             {dropdownOpen && (
@@ -222,16 +223,16 @@ function DashboardHeader({
                     {user?.name}
                   </p>
                 </div>
-                <button
-                  className="w-full text-left px-4 py-2 text-sm text-danger hover:bg-danger-50 dark:hover:bg-danger-900/20 rounded-b-lg transition-colors"
+                <Button
+                  className="w-full justify-start px-4 py-2 text-danger hover:bg-danger-50 dark:hover:bg-danger-900/20 rounded-t-none rounded-b-lg transition-colors"
                   onClick={() => {
                     closeDropdown();
                     handleLogout();
                   }}
-                  type="button"
+                  variant="ghost"
                 >
                   Log Out
-                </button>
+                </Button>
               </div>
             )}
           </div>

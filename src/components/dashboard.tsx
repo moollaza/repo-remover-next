@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import RepoTable from "@/components/repo-table/repo-table";
 import RepoTableSkeleton from "@/components/repo-table/repo-table-skeleton";
+import { Button } from "@/components/ui/button";
 
 export interface DashboardProps {
   /** Whether an error occurred during data fetch */
@@ -61,18 +62,18 @@ export default function Dashboard({
         </div>
 
         {onRefresh && (
-          <button
+          <Button
             aria-label="Refresh repository data"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-divider text-sm font-medium cursor-pointer hover:bg-default-100 hover:border-default-300 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="gap-2 px-4 py-2 border-divider cursor-pointer hover:bg-default-100 hover:border-default-300 active:scale-95 transition-all"
             disabled={isLoading || isRefreshing}
             onClick={onRefresh}
-            type="button"
+            variant="ghost"
           >
             <RefreshCw
               className={`h-4 w-4 ${isLoading || isRefreshing ? "animate-spin" : ""}`}
             />
             {isLoading || isRefreshing ? "Loading..." : "Refresh"}
-          </button>
+          </Button>
         )}
       </div>
 
@@ -112,11 +113,12 @@ export default function Dashboard({
           className="mb-4 p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800 relative"
           role="status"
         >
-          <button
+          <Button
             aria-label="Dismiss SAML warning"
-            className="absolute top-3 right-3 p-1 rounded hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-colors"
+            className="absolute top-3 right-3 p-1 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-colors"
             onClick={() => setIsSamlBannerDismissed(true)}
-            type="button"
+            variant="ghost"
+            size="icon"
           >
             <svg
               className="h-4 w-4"
@@ -131,7 +133,7 @@ export default function Dashboard({
                 strokeLinejoin="round"
               />
             </svg>
-          </button>
+          </Button>
           <strong>Some organizations require SAML authentication</strong>
           <p className="mt-1 text-sm">
             Repos from{" "}

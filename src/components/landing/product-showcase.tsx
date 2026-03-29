@@ -8,6 +8,7 @@ import {
   Trash2,
 } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import {
   fadeUp,
   scaleIn,
@@ -119,14 +120,17 @@ export function ProductShowcase() {
                 <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-divider bg-background text-default-400 text-xs">
                   Visibility <ChevronDown className="w-3 h-3" />
                 </div>
-                <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-amber-400 dark:bg-amber-500 text-black text-xs font-medium">
+                <Button className="flex items-center gap-1.5 px-3 py-1.5 h-auto rounded-md bg-amber-400 dark:bg-amber-500 text-black text-xs font-medium hover:bg-amber-400/90 dark:hover:bg-amber-500/90">
                   <Archive className="w-3.5 h-3.5" />
                   Archive Selected (3)
-                </button>
-                <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-danger text-white text-xs font-medium opacity-50 cursor-not-allowed">
+                </Button>
+                <Button
+                  className="flex items-center gap-1.5 px-3 py-1.5 h-auto rounded-md bg-danger text-white text-xs font-medium opacity-50 cursor-not-allowed hover:bg-danger"
+                  disabled
+                >
                   <Trash2 className="w-3.5 h-3.5" />
                   Delete
-                </button>
+                </Button>
               </div>
             </div>
 
@@ -205,9 +209,9 @@ export function ProductShowcase() {
             <div className="flex items-center justify-between px-4 py-3 text-xs text-default-400">
               <span>Showing 5 of 127 repositories</span>
               <div className="flex items-center gap-1">
-                <button className="p-1 rounded hover:bg-default-100">
+                <Button className="p-1" size="icon-xs" variant="ghost">
                   <ChevronLeft className="w-4 h-4" />
-                </button>
+                </Button>
                 <span className="px-2 py-1 rounded bg-primary text-primary-foreground text-xs">
                   1
                 </span>
@@ -215,9 +219,9 @@ export function ProductShowcase() {
                 <span className="px-2 py-1">3</span>
                 <span className="px-2 py-1">...</span>
                 <span className="px-2 py-1">26</span>
-                <button className="p-1 rounded hover:bg-default-100">
+                <Button className="p-1" size="icon-xs" variant="ghost">
                   <ChevronRight className="w-4 h-4" />
-                </button>
+                </Button>
               </div>
             </div>
           </div>

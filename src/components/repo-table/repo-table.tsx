@@ -2,6 +2,7 @@ import { type Repository } from "@octokit/graphql-schema";
 import { formatDistanceToNow } from "date-fns";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { REPO_ACTIONS } from "@/config/repo-config";
 import {
@@ -460,39 +461,37 @@ export default function RepoTable({
             aria-label="Pagination"
             className="inline-flex items-center gap-1"
           >
-            <button
+            <Button
               aria-label="prev"
-              className="px-3 py-1.5 rounded-lg text-sm border border-divider bg-content1 text-foreground hover:bg-content2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="px-3 py-1.5 text-sm"
               disabled={currentPage === 1}
               onClick={() => setCurrentPage(currentPage - 1)}
-              type="button"
+              variant="outline"
             >
               &lsaquo;
-            </button>
+            </Button>
             {pageNumbers.map((page) => (
-              <button
+              <Button
                 aria-current={page === currentPage ? "true" : undefined}
-                className={`px-3 py-1.5 rounded-lg text-sm border transition-colors ${
-                  page === currentPage
-                    ? "bg-primary text-white border-primary shadow-sm"
-                    : "border-divider bg-content1 text-foreground hover:bg-content2"
+                className={`px-3 py-1.5 text-sm ${
+                  page === currentPage ? "shadow-sm" : ""
                 }`}
                 key={page}
                 onClick={() => setCurrentPage(page)}
-                type="button"
+                variant={page === currentPage ? "default" : "outline"}
               >
                 {page}
-              </button>
+              </Button>
             ))}
-            <button
+            <Button
               aria-label="next"
-              className="px-3 py-1.5 rounded-lg text-sm border border-divider bg-content1 text-foreground hover:bg-content2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="px-3 py-1.5 text-sm"
               disabled={currentPage === totalPages}
               onClick={() => setCurrentPage(currentPage + 1)}
-              type="button"
+              variant="outline"
             >
               &rsaquo;
-            </button>
+            </Button>
           </nav>
         </div>
       )}

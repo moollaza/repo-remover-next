@@ -2,6 +2,8 @@ import { RequestError } from "@octokit/request-error";
 import clsx from "clsx";
 import { useEffect, useState } from "react";
 
+import { Button } from "@/components/ui/button";
+
 import { checkTokenScopes, SCOPE_DESCRIPTIONS } from "@/utils/github-api";
 import {
   createThrottledOctokit,
@@ -196,13 +198,15 @@ export default function GitHubTokenForm({
             {/* Toggle visibility + Clear buttons */}
             {value && (
               <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-0.5">
-                <button
+                <Button
                   aria-label={showToken ? "Hide token" : "Show token"}
                   className="text-default-400 hover:text-default-600 transition-colors p-1"
                   onClick={() => {
                     setShowToken((prev) => !prev);
                   }}
                   type="button"
+                  variant="ghost"
+                  size="icon"
                 >
                   {showToken ? (
                     <svg
@@ -248,14 +252,16 @@ export default function GitHubTokenForm({
                       />
                     </svg>
                   )}
-                </button>
-                <button
+                </Button>
+                <Button
                   aria-label="Clear token"
                   className="text-default-400 hover:text-default-600 transition-colors p-1"
                   onClick={() => {
                     handleChange("");
                   }}
                   type="button"
+                  variant="ghost"
+                  size="icon"
                 >
                   <svg
                     className="h-4 w-4"
@@ -270,7 +276,7 @@ export default function GitHubTokenForm({
                       strokeLinejoin="round"
                     />
                   </svg>
-                </button>
+                </Button>
               </div>
             )}
           </div>
@@ -324,7 +330,7 @@ export default function GitHubTokenForm({
         </label>
       </div>
 
-      <button
+      <Button
         className={clsx(
           "w-full rounded-lg px-4 py-2.5 text-sm font-medium transition-colors",
           "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
@@ -362,7 +368,7 @@ export default function GitHubTokenForm({
         ) : (
           "Submit"
         )}
-      </button>
+      </Button>
     </form>
   );
 }

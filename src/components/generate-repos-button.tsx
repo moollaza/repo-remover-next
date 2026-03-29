@@ -1,6 +1,7 @@
 import clsx from "clsx";
 import { useState } from "react";
 
+import { Button } from "@/components/ui/button";
 import { useGitHubData } from "@/hooks/use-github-data";
 import { createThrottledOctokit, generateRepos } from "@/utils/github-utils";
 
@@ -26,11 +27,10 @@ export function GenerateReposButton() {
   }
 
   return (
-    <button
+    <Button
       className={clsx(
-        "inline-flex items-center justify-center rounded-lg border border-[var(--brand-blue)] px-4 py-2 text-sm font-medium text-[var(--brand-blue)]",
-        "hover:bg-[var(--brand-blue)] hover:text-white transition-colors",
-        "focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2",
+        "border-[var(--brand-blue)] px-4 py-2 text-sm font-medium text-[var(--brand-blue)]",
+        "hover:bg-[var(--brand-blue)] hover:text-white",
         isLoading && "opacity-70 cursor-not-allowed",
       )}
       disabled={isLoading}
@@ -44,7 +44,7 @@ export function GenerateReposButton() {
             setIsLoading(false);
           });
       }}
-      type="button"
+      variant="outline"
     >
       {isLoading ? (
         <span className="inline-flex items-center gap-2">
@@ -68,6 +68,6 @@ export function GenerateReposButton() {
       ) : (
         "Generate Random Repos"
       )}
-    </button>
+    </Button>
   );
 }
