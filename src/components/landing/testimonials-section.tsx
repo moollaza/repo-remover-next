@@ -75,7 +75,7 @@ export function TestimonialsSection() {
                       />
                     ))}
                   </div>
-                  <p className="text-foreground mb-6 leading-relaxed flex-1">
+                  <p className="text-base text-foreground mb-6 leading-relaxed flex-1">
                     &ldquo;{t.quote}&rdquo;
                   </p>
                   <div className="flex items-center gap-3 mt-auto">
