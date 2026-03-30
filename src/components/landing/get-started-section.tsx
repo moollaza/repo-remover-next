@@ -226,14 +226,8 @@ function InlinePATForm() {
         </Label>
         <Popover>
           <PopoverTrigger
-            render={
-              <Button
-                aria-label="Token storage info"
-                className="text-default-400 hover:text-default-600 transition-colors"
-                variant="ghost"
-                size="icon"
-              />
-            }
+            aria-label="Token storage info"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-md text-default-400 hover:text-default-600 hover:bg-content2 transition-colors cursor-pointer"
           >
             <Info className="h-3.5 w-3.5" />
           </PopoverTrigger>

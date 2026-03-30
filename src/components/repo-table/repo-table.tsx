@@ -472,7 +472,6 @@ export default function RepoTable({
             <PaginationItem>
               <PaginationPrevious
                 href="#"
-                text=""
                 onClick={(e) => {
                   e.preventDefault();
                   if (currentPage > 1) setCurrentPage(currentPage - 1);
@@ -500,7 +499,6 @@ export default function RepoTable({
             <PaginationItem>
               <PaginationNext
                 href="#"
-                text=""
                 onClick={(e) => {
                   e.preventDefault();
                   if (currentPage < totalPages) setCurrentPage(currentPage + 1);

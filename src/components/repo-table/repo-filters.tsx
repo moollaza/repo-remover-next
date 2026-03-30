@@ -187,19 +187,13 @@ export default function RepoFilters({
             onOpenChange={setActionDropdownOpen}
           >
             <PopoverTrigger
-              render={
-                <button
-                  className={cn(
-                    "inline-flex h-10 w-10 items-center justify-center rounded-r-lg rounded-l-none border-l border-white/20 text-sm font-medium transition-colors disabled:pointer-events-none disabled:opacity-50",
-                    isDeleteAction
-                      ? "bg-destructive text-white hover:bg-destructive/90"
-                      : "bg-amber-500 text-white hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700",
-                  )}
-                  data-testid="repo-action-dropdown-trigger"
-                  disabled={isDisabled}
-                  type="button"
-                />
-              }
+              className={cn(
+                "inline-flex h-10 w-10 items-center justify-center rounded-r-lg rounded-l-none border-l border-white/20 text-sm font-medium transition-colors cursor-pointer disabled:pointer-events-none disabled:opacity-50",
+                isDeleteAction
+                  ? "bg-destructive text-white hover:bg-destructive/90"
+                  : "bg-amber-500 text-white hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700",
+              )}
+              data-testid="repo-action-dropdown-trigger"
             >
               <ChevronDownIcon className="h-4 w-4" />
             </PopoverTrigger>
