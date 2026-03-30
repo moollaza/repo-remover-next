@@ -7,7 +7,7 @@ import { useLocation } from "react-router-dom";
 import { BrandLogo } from "@/components/brand-logo";
 import { GenerateReposButton } from "@/components/generate-repos-button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { useGitHubData } from "@/hooks/use-github-data";
 
 const homeLinks = [
@@ -87,13 +87,15 @@ function LandingHeader({ isAuthenticated }: { isAuthenticated: boolean }) {
         <div className="flex items-center gap-3">
           <LandingThemeSwitcher />
           {isAuthenticated && (
-            <Button
-              className="bg-[var(--brand-blue)] text-white hover:opacity-90"
-              render={<a href="/dashboard" />}
-              nativeButton={false}
+            <a
+              className={
+                buttonVariants({ variant: "default" }) +
+                " bg-[var(--brand-blue)] text-white hover:opacity-90"
+              }
+              href="/dashboard"
             >
               Go to Dashboard
-            </Button>
+            </a>
           )}
         </div>
       </div>
