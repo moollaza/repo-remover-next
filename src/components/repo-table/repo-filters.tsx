@@ -188,7 +188,7 @@ export default function RepoFilters({
           >
             <PopoverTrigger
               className={cn(
-                "inline-flex h-10 w-10 items-center justify-center rounded-r-lg rounded-l-none border-l border-white/20 text-sm font-medium transition-colors cursor-pointer disabled:pointer-events-none disabled:opacity-50",
+                "inline-flex size-10 shrink-0 items-center justify-center rounded-r-lg rounded-l-none border-0 border-l border-white/20 p-0 text-sm font-medium transition-colors cursor-pointer disabled:pointer-events-none disabled:opacity-50",
                 isDeleteAction
                   ? "bg-destructive text-white hover:bg-destructive/90"
                   : "bg-amber-500 text-white hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700",
