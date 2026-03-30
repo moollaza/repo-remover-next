@@ -151,7 +151,7 @@ export class DashboardPage extends BasePage {
   }
 
   async expectCurrentPage(pageNumber: number | string) {
-    await expect(this.pagination.locator('[aria-current="true"]')).toHaveText(
+    await expect(this.pagination.locator('[aria-current="page"]')).toHaveText(
       pageNumber.toString(),
     );
   }
