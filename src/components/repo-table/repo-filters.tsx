@@ -188,14 +188,14 @@ export default function RepoFilters({
           >
             <PopoverTrigger
               className={cn(
-                "inline-flex size-10 shrink-0 items-center justify-center rounded-r-lg rounded-l-none border-0 border-l border-white/20 p-0 text-sm font-medium transition-colors cursor-pointer disabled:pointer-events-none disabled:opacity-50",
+                "box-border inline-flex size-10 shrink-0 items-center justify-center rounded-r-lg rounded-l-none border-y-0 border-r-0 border-l border-white/20 p-0 text-sm font-medium transition-colors cursor-pointer",
                 isDeleteAction
                   ? "bg-destructive text-white hover:bg-destructive/90"
                   : "bg-amber-500 text-white hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700",
               )}
               data-testid="repo-action-dropdown-trigger"
             >
-              <ChevronDownIcon className="h-4 w-4" />
+              <ChevronDownIcon className="size-4" />
             </PopoverTrigger>
             <PopoverContent
               align="end"
@@ -203,9 +203,9 @@ export default function RepoFilters({
               data-testid="repo-action-dropdown-menu"
             >
               {REPO_ACTIONS.map((action) => (
-                <button
+                <Button
                   className={cn(
-                    "w-full px-3 py-2 text-left rounded-md hover:bg-content2 transition-colors",
+                    "h-auto w-full justify-start px-3 py-2",
                     selectedRepoAction.has(action.key) && "bg-content2",
                   )}
                   data-testid={`repo-action-dropdown-item-${action.key}`}
@@ -214,14 +214,17 @@ export default function RepoFilters({
                     onRepoActionChange(new Set([action.key]));
                     setActionDropdownOpen(false);
                   }}
+                  variant="ghost"
                 >
-                  <div className="text-sm font-medium text-foreground">
-                    {action.label}
+                  <div className="flex flex-col items-start">
+                    <div className="text-sm font-medium text-foreground">
+                      {action.label}
+                    </div>
+                    <div className="text-xs font-normal text-default-500">
+                      {action.description}
+                    </div>
                   </div>
-                  <div className="text-xs text-default-500">
-                    {action.description}
-                  </div>
-                </button>
+                </Button>
               ))}
             </PopoverContent>
           </Popover>

@@ -87,12 +87,13 @@ function LandingHeader({ isAuthenticated }: { isAuthenticated: boolean }) {
         <div className="flex items-center gap-3">
           <LandingThemeSwitcher />
           {isAuthenticated && (
-            <a
-              className="inline-flex items-center px-4 py-2 rounded-lg bg-[var(--brand-blue)] text-white text-sm font-medium hover:opacity-90 transition-opacity"
-              href="/dashboard"
+            <Button
+              className="bg-[var(--brand-blue)] text-white hover:opacity-90"
+              render={<a href="/dashboard" />}
+              nativeButton={false}
             >
               Go to Dashboard
-            </a>
+            </Button>
           )}
         </div>
       </div>
