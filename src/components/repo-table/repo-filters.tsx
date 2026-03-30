@@ -2,16 +2,21 @@ import {
   ChevronDown as ChevronDownIcon,
   Search as MagnifyingGlassIcon,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+  ButtonGroup,
+  ButtonGroupSeparator,
+} from "@/components/ui/button-group";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -70,7 +75,6 @@ export default function RepoFilters({
     };
   }, []);
 
-  const [actionDropdownOpen, setActionDropdownOpen] = useState(false);
   const isDisabled = selectedRepoKeys !== "all" && selectedRepoKeys.size === 0;
 
   const isDeleteAction = selectedRepoAction.has("delete");
@@ -171,9 +175,8 @@ export default function RepoFilters({
 
       {/* ACTION BUTTONS */}
       <div className="w-full md:w-auto md:flex-shrink-0">
-        <div className="flex">
+        <ButtonGroup>
           <Button
-            className="rounded-l-lg rounded-r-none"
             data-testid={`repo-action-button-${isDeleteAction ? "delete" : "archive"}`}
             disabled={isDisabled}
             onClick={onRepoActionClick}
@@ -182,53 +185,47 @@ export default function RepoFilters({
             {REPO_ACTIONS.find((action) => selectedRepoAction.has(action.key))
               ?.label ?? "Select Action"}
           </Button>
-          <Popover
-            open={actionDropdownOpen}
-            onOpenChange={setActionDropdownOpen}
-          >
-            <PopoverTrigger
-              className={cn(
-                "box-border inline-flex size-10 shrink-0 items-center justify-center rounded-r-lg rounded-l-none border-y-0 border-r-0 border-l border-white/20 p-0 text-sm font-medium transition-colors cursor-pointer",
-                isDeleteAction
-                  ? "bg-destructive text-white hover:bg-destructive/90"
-                  : "bg-amber-500 text-white hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700",
-              )}
-              data-testid="repo-action-dropdown-trigger"
+          <ButtonGroupSeparator className="bg-white/20" />
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={
+                <Button
+                  data-testid="repo-action-dropdown-trigger"
+                  size="icon"
+                  variant={isDeleteAction ? "destructive" : "warning"}
+                />
+              }
             >
               <ChevronDownIcon className="size-4" />
-            </PopoverTrigger>
-            <PopoverContent
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
               align="end"
-              className="w-[calc(100vw-2rem)] min-w-72 max-w-80 p-1"
+              className="min-w-72"
               data-testid="repo-action-dropdown-menu"
             >
-              {REPO_ACTIONS.map((action) => (
-                <Button
-                  className={cn(
-                    "h-auto w-full justify-start px-3 py-2",
-                    selectedRepoAction.has(action.key) && "bg-content2",
-                  )}
-                  data-testid={`repo-action-dropdown-item-${action.key}`}
-                  key={action.key}
-                  onClick={() => {
-                    onRepoActionChange(new Set([action.key]));
-                    setActionDropdownOpen(false);
-                  }}
-                  variant="ghost"
-                >
-                  <div className="flex flex-col items-start">
-                    <div className="text-sm font-medium text-foreground">
-                      {action.label}
-                    </div>
-                    <div className="text-xs font-normal text-default-500">
+              <DropdownMenuRadioGroup
+                value={Array.from(selectedRepoAction)[0] || "archive"}
+                onValueChange={(value) => {
+                  onRepoActionChange(new Set([value]));
+                }}
+              >
+                {REPO_ACTIONS.map((action) => (
+                  <DropdownMenuRadioItem
+                    className="flex flex-col items-start gap-0 py-2"
+                    data-testid={`repo-action-dropdown-item-${action.key}`}
+                    key={action.key}
+                    value={action.key}
+                  >
+                    <div className="text-sm font-medium">{action.label}</div>
+                    <div className="text-xs text-muted-foreground">
                       {action.description}
                     </div>
-                  </div>
-                </Button>
-              ))}
-            </PopoverContent>
-          </Popover>
-        </div>
+                  </DropdownMenuRadioItem>
+                ))}
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </ButtonGroup>
       </div>
     </div>
   );
