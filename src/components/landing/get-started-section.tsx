@@ -284,13 +284,13 @@ export function GetStartedSection() {
           className="relative"
           {...scrollRevealProps(staggerContainerWide, reduced)}
         >
-          {/* Connecting line */}
+          {/* Connecting line — desktop only */}
           <div className="absolute left-5 top-6 bottom-6 w-px bg-divider hidden sm:block" />
 
-          <div className="space-y-10">
+          <div className="space-y-8 sm:space-y-10">
             {steps.map((step, index) => (
               <motion.div
-                className="flex gap-6 items-start relative"
+                className="flex flex-col items-center text-center sm:flex-row sm:items-start sm:text-left gap-4 sm:gap-6 relative"
                 key={index}
                 variants={fadeUp}
               >
@@ -305,11 +305,8 @@ export function GetStartedSection() {
                     {step.number}
                   </div>
                 </div>
-                <div className="flex-1 pt-1 pb-2">
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <step.icon className="h-4 w-4 text-[var(--brand-blue)]" />
-                    <h3 className="text-lg font-semibold">{step.title}</h3>
-                  </div>
+                <div className="flex-1 sm:pt-1 sm:pb-2">
+                  <h3 className="text-lg font-semibold mb-1.5">{step.title}</h3>
                   <p className="text-default-500 mb-3">{step.description}</p>
                   {step.cta && (
                     <a
