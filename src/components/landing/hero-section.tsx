@@ -26,7 +26,7 @@ export function HeroSection() {
         </motion.div>
 
         <motion.h1
-          className="text-3xl sm:text-4xl md:text-6xl font-bold mb-6 leading-tight"
+          className="text-3xl sm:text-4xl md:text-6xl font-bold mb-6 leading-tight text-balance"
           variants={fadeUp}
         >
           Archive or Delete Multiple GitHub Repos,{" "}
