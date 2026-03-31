@@ -55,6 +55,16 @@ Follow-up work identified during the shadcn component adoption (PR #112). These 
 - **Why**: Not needed now — components are app-specific, not a shared library. Revisit if component count exceeds 20+ or team grows
 - **Decision**: SKIP — use Argos + Playwright for VRT instead
 
+### 9. Known Base UI composition bug: `render={<Button>}` on floating triggers
+- **What**: Using `DropdownMenuTrigger render={<Button>}` breaks Floating UI anchor resolution — positioner stays at opacity:0, position (0,0). Root cause: composing two Base UI primitives via render prop doesn't forward the ref that Menu.Positioner needs.
+- **Workaround applied**: Use `buttonVariants()` class string directly on the trigger element instead of `render={<Button>}`.
+- **Action**: Monitor `@base-ui/react` releases for a fix. Test with `render={<Button>}` again after upgrading.
+- **Affected**: Any floating component (Menu, Popover, Select, Tooltip) that tries to compose with Button via `render` prop.
+
+### 10. Pagination component adoption
+- **What**: shadcn provides `Pagination`/`PaginationLink`/`PaginationPrevious`/`PaginationNext` — already generated and used in repo-table
+- **Status**: DONE in PR #112. Uses `<a>` with `buttonVariants()` per Base UI docs (not `Button render={<a>}`)
+
 ## Priority Order
 
 1. Mobile VRT screenshots (#5) — prevents future mobile regressions
@@ -64,8 +74,15 @@ Follow-up work identified during the shadcn component adoption (PR #112). These 
 5. Spinner extraction (#3) — nice-to-have DRY improvement
 6. Row checkboxes (#7) — low impact, works fine as-is
 
+## Key Learnings
+
+- **Do NOT use `render={<Button>}` on DropdownMenuTrigger/PopoverTrigger.** Use `buttonVariants()` class string instead. Two Base UI primitives composed via `render` break ref forwarding for Floating UI anchoring.
+- **Do NOT use `Button render={<a>}` for links.** Per Base UI docs: "Links have their own semantics and should not be rendered as buttons through the render prop." Use `<a className={buttonVariants(...)}>` instead.
+- **shadcn `Card` default is white with very subtle ring.** On white/near-white backgrounds, add explicit `border border-divider shadow-sm` for visible card contrast.
+
 ## Sources
 
 - PR #112: https://github.com/moollaza/repo-remover-next/pull/112
 - shadcn docs: https://ui.shadcn.com/docs/components
 - Base UI docs: https://base-ui.com/react/components
+- Base UI composition handbook: https://base-ui.com/react/handbook/composition
