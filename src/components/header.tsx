@@ -1,10 +1,13 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { Moon, Sun, Trash2 } from "lucide-react";
+import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 
+import { BrandLogo } from "@/components/brand-logo";
 import { GenerateReposButton } from "@/components/generate-repos-button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { useGitHubData } from "@/hooks/use-github-data";
 
 const homeLinks = [
@@ -58,11 +61,8 @@ function LandingHeader({ isAuthenticated }: { isAuthenticated: boolean }) {
       data-testid="navbar"
     >
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between relative">
-        <a className="flex items-center gap-2" href="/">
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-            <Trash2 className="h-4 w-4 text-white" />
-          </div>
-          <span className="font-semibold text-lg">Repo Remover</span>
+        <a href="/">
+          <BrandLogo />
         </a>
 
         <nav className="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
@@ -88,7 +88,10 @@ function LandingHeader({ isAuthenticated }: { isAuthenticated: boolean }) {
           <LandingThemeSwitcher />
           {isAuthenticated && (
             <a
-              className="inline-flex items-center px-4 py-2 rounded-lg bg-[var(--brand-blue)] text-white text-sm font-medium hover:opacity-90 transition-opacity"
+              className={
+                buttonVariants({ variant: "default" }) +
+                " bg-[var(--brand-blue)] text-white hover:opacity-90"
+              }
               href="/dashboard"
             >
               Go to Dashboard
@@ -162,11 +165,8 @@ function DashboardHeader({
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
         {/* Brand + dev tools */}
         <div className="flex items-center gap-3">
-          <a className="flex items-center gap-2" href="/">
-            <div className="w-8 h-8 bg-[var(--brand-blue)] rounded-lg flex items-center justify-center">
-              <Trash2 className="h-4 w-4 text-white" />
-            </div>
-            <span className="font-semibold text-lg">Repo Remover</span>
+          <a href="/">
+            <BrandLogo />
           </a>
           {isDevelopment && <GenerateReposButton />}
         </div>
@@ -177,23 +177,21 @@ function DashboardHeader({
 
           {/* User dropdown */}
           <div className="relative" ref={dropdownRef}>
-            <button
-              className="cursor-pointer transition-opacity hover:opacity-80 flex items-center gap-3"
+            <Button
+              className="cursor-pointer transition-opacity hover:opacity-80 gap-3 h-auto px-2 py-1"
               onClick={() => setDropdownOpen((prev) => !prev)}
-              type="button"
+              variant="ghost"
             >
               {/* Avatar */}
-              {user?.avatarUrl ? (
-                <img
+              <Avatar className="h-8 w-8">
+                <AvatarImage
+                  src={user?.avatarUrl as string}
                   alt={`${user?.name ?? user?.login ?? "User"}'s avatar`}
-                  className="w-8 h-8 rounded-full object-cover"
-                  src={user.avatarUrl as string}
                 />
-              ) : (
-                <div className="w-8 h-8 rounded-full bg-default-200 flex items-center justify-center text-default-500 text-sm font-medium">
+                <AvatarFallback>
                   {(user?.name ?? user?.login ?? "?").charAt(0).toUpperCase()}
-                </div>
-              )}
+                </AvatarFallback>
+              </Avatar>
               {/* Name + link */}
               <div className="text-left hidden sm:block leading-tight">
                 <div className="text-sm font-medium text-foreground">
@@ -209,7 +207,7 @@ function DashboardHeader({
                   {user?.login}
                 </a>
               </div>
-            </button>
+            </Button>
 
             {/* Dropdown menu */}
             {dropdownOpen && (
@@ -222,16 +220,16 @@ function DashboardHeader({
                     {user?.name}
                   </p>
                 </div>
-                <button
-                  className="w-full text-left px-4 py-2 text-sm text-danger hover:bg-danger-50 dark:hover:bg-danger-900/20 rounded-b-lg transition-colors"
+                <Button
+                  className="w-full justify-start px-4 py-2 text-danger hover:bg-danger-50 dark:hover:bg-danger-900/20 rounded-t-none rounded-b-lg transition-colors"
                   onClick={() => {
                     closeDropdown();
                     handleLogout();
                   }}
-                  type="button"
+                  variant="ghost"
                 >
                   Log Out
-                </button>
+                </Button>
               </div>
             )}
           </div>

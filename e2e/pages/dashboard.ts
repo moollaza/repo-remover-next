@@ -56,7 +56,7 @@ export class DashboardPage extends BasePage {
     this.prevPageButton = this.pagination.getByLabel("prev");
     this.table = page.getByTestId("repo-table");
     this.tableRows = this.table.locator("tbody tr");
-    this.checkboxes = this.table.locator("tbody tr input[type='checkbox']");
+    this.checkboxes = this.table.locator("tbody tr").getByRole("checkbox");
     this.repoActionDropdownItemArchive = page.getByTestId(
       "repo-action-dropdown-item-archive",
     );
@@ -151,7 +151,7 @@ export class DashboardPage extends BasePage {
   }
 
   async expectCurrentPage(pageNumber: number | string) {
-    await expect(this.pagination.locator('[aria-current="true"]')).toHaveText(
+    await expect(this.pagination.locator('[aria-current="page"]')).toHaveText(
       pageNumber.toString(),
     );
   }
@@ -299,7 +299,7 @@ export class DashboardPage extends BasePage {
   }
 
   async getCurrentPage() {
-    return await this.pagination.locator('[aria-current="true"]').textContent();
+    return await this.pagination.locator('[aria-current="page"]').textContent();
   }
 
   /**
@@ -343,7 +343,7 @@ export class DashboardPage extends BasePage {
     // With 11 admin repos at 5/page, we expect 3 pages.
     // Personal repos alone give 2 pages. Wait for the third page button.
     await this.pagination
-      .getByRole("button", { name: "3" })
+      .getByRole("link", { name: "3" })
       .waitFor({ state: "visible", timeout: 10000 });
   }
 

@@ -2,6 +2,7 @@ import { motion, useInView, useReducedMotion } from "framer-motion";
 import { CheckSquare, Filter, Search, Shield } from "lucide-react";
 import { useRef } from "react";
 
+import { Button } from "@/components/ui/button";
 import {
   fadeUp,
   scrollRevealProps,
@@ -130,16 +131,15 @@ export function FeaturesSection() {
                   ))}
                 </ul>
                 {index === 0 && (
-                  <button
-                    className="mt-4 inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-[var(--brand-blue)] text-white font-medium text-sm hover:opacity-90 transition-opacity"
+                  <Button
+                    className="mt-4 gap-2 px-6 py-2.5 bg-[var(--brand-blue)] text-white hover:opacity-90"
                     onClick={() => {
                       const target = document.getElementById("get-started");
                       target?.scrollIntoView({ behavior: "smooth" });
                     }}
-                    type="button"
                   >
                     Try It Now
-                  </button>
+                  </Button>
                 )}
               </motion.div>
             </div>

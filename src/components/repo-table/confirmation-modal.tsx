@@ -1,7 +1,9 @@
 import { type Repository } from "@octokit/graphql-schema";
-import { useCallback, useEffect, useRef } from "react";
-import { createPortal } from "react-dom";
+import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogOverlay } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { useConfirmationModal } from "@/hooks/use-confirmation-modal";
 
 interface ConfirmationModalProps {
@@ -54,112 +56,63 @@ export default function ConfirmationModal({
     state,
   } = useConfirmationModal({ action, login, onClose, onConfirm, repos });
 
-  if (!isOpen) return null;
-
   // Use totalCount from state during progress/result (immune to SWR cache updates)
   const count = state.mode === "confirmation" ? repos.length : state.totalCount;
 
-  return createPortal(
-    <ModalOverlay
-      isDismissable={isDismissable}
-      onClose={isDismissable ? handleOnClose : undefined}
-    >
-      <div
-        className="relative w-full max-w-xl max-h-[80vh] overflow-y-auto rounded-xl bg-background border border-divider shadow-2xl"
-        data-testid={`confirmation-modal-${state.mode}`}
-      >
-        {state.mode === "confirmation" && (
-          <RepoActionConfirmation
-            action={action}
-            count={count}
-            handleConfirm={handleConfirm}
-            isCorrectUsername={state.isCorrectUsername}
-            onClose={handleOnClose}
-            repos={repos}
-            setUsername={handleSetUsername}
-            username={state.username}
-          />
-        )}
-
-        {state.mode === "progress" && (
-          <RepoActionProgress
-            action={action}
-            count={count}
-            currentRepo={state.currentRepo}
-            onStop={handleStop}
-            progress={state.progress}
-          />
-        )}
-
-        {state.mode === "result" && (
-          <RepoActionResult
-            action={action}
-            count={state.progress}
-            errors={state.errors}
-            onClose={handleOnClose}
-          />
-        )}
-      </div>
-    </ModalOverlay>,
-    document.body,
-  );
-}
-
-/**
- * Modal overlay that handles backdrop click and Escape key dismissal.
- * Also prevents body scroll while open.
- */
-function ModalOverlay({
-  children,
-  isDismissable,
-  onClose,
-}: {
-  children: React.ReactNode;
-  isDismissable: boolean;
-  onClose?: () => void;
-}) {
-  const overlayRef = useRef<HTMLDivElement>(null);
-
-  // Prevent body scroll while modal is open
-  useEffect(() => {
-    const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = originalOverflow;
-    };
-  }, []);
-
-  // Handle Escape key
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isDismissable && onClose) {
-        onClose();
-      }
-    },
-    [isDismissable, onClose],
-  );
-
-  useEffect(() => {
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [handleKeyDown]);
-
-  // Handle backdrop click
-  function handleBackdropClick(e: React.MouseEvent<HTMLDivElement>) {
-    if (e.target === overlayRef.current && isDismissable && onClose) {
-      onClose();
-    }
-  }
-
   return (
-    <div
-      ref={overlayRef}
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
-      data-testid="repo-confirmation-modal"
-      onClick={handleBackdropClick}
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        // Block dismissal during progress mode
+        if (!open && !isDismissable) return;
+        if (!open) handleOnClose();
+      }}
     >
-      {children}
-    </div>
+      <DialogPrimitive.Portal>
+        <DialogOverlay className="z-[100] bg-black/50 backdrop-blur-sm" />
+        <DialogPrimitive.Popup
+          data-testid="repo-confirmation-modal"
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+        >
+          <div
+            className="relative w-full max-w-xl max-h-[80vh] overflow-y-auto rounded-xl bg-background border border-divider shadow-2xl"
+            data-testid={`confirmation-modal-${state.mode}`}
+          >
+            {state.mode === "confirmation" && (
+              <RepoActionConfirmation
+                action={action}
+                count={count}
+                handleConfirm={handleConfirm}
+                isCorrectUsername={state.isCorrectUsername}
+                onClose={handleOnClose}
+                repos={repos}
+                setUsername={handleSetUsername}
+                username={state.username}
+              />
+            )}
+
+            {state.mode === "progress" && (
+              <RepoActionProgress
+                action={action}
+                count={count}
+                currentRepo={state.currentRepo}
+                onStop={handleStop}
+                progress={state.progress}
+              />
+            )}
+
+            {state.mode === "result" && (
+              <RepoActionResult
+                action={action}
+                count={state.progress}
+                errors={state.errors}
+                onClose={handleOnClose}
+              />
+            )}
+          </div>
+        </DialogPrimitive.Popup>
+      </DialogPrimitive.Portal>
+    </Dialog>
   );
 }
 
@@ -196,14 +149,15 @@ function RepoActionConfirmation({
             <li key={index}>{repo.name}</li>
           ))}
         </ul>
-        <div className="mt-4" />
-        <strong>Please type your GitHub username to confirm:</strong>
-        <input
+        <strong className="mt-4 block">
+          Please type your GitHub username to confirm:
+        </strong>
+        <Input
           autoCapitalize="none"
           autoComplete="off"
           autoCorrect="off"
           autoFocus
-          className="mt-2 w-full rounded-lg border border-divider bg-content2 px-3 py-2 text-foreground placeholder:text-default-400 outline-none focus:ring-2 focus:ring-primary"
+          className="mt-2 h-auto bg-content2 px-3 py-2 text-foreground placeholder:text-default-400 border-divider"
           data-testid="confirmation-modal-input"
           id="username"
           name="username"
@@ -214,31 +168,25 @@ function RepoActionConfirmation({
         />
       </div>
       <div className="flex justify-end gap-2 px-6 py-4 border-t border-divider">
-        <button
-          className="rounded-lg border border-divider bg-transparent px-4 py-2 text-sm font-medium text-foreground hover:bg-default-100 transition-colors"
+        <Button
+          variant="outline"
           data-testid="confirmation-modal-cancel"
           onClick={onClose}
-          type="button"
         >
           Cancel
-        </button>
-        <button
-          className={`rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-            action === "archive"
-              ? "bg-amber-500 hover:bg-amber-600"
-              : "bg-red-500 hover:bg-red-600"
-          }`}
+        </Button>
+        <Button
+          variant={action === "archive" ? "warning" : "destructive"}
           data-testid="confirmation-modal-confirm"
           disabled={!isCorrectUsername}
           name="confirm"
           onClick={() => {
             void handleConfirm();
           }}
-          type="button"
         >
           I understand the consequences, {action} the repositor
           {count > 1 ? "ies" : "y"}
-        </button>
+        </Button>
       </div>
     </>
   );
@@ -288,13 +236,9 @@ function RepoActionProgress({
         </div>
       </div>
       <div className="flex justify-end px-6 py-4 border-t border-divider">
-        <button
-          className="rounded-lg border border-divider bg-transparent px-4 py-2 text-sm font-medium text-foreground hover:bg-default-100 transition-colors"
-          onClick={onStop}
-          type="button"
-        >
+        <Button variant="outline" onClick={onStop}>
           Stop
-        </button>
+        </Button>
       </div>
     </>
   );
@@ -324,12 +268,10 @@ function RepoActionResult({
           {action === "archive" ? "archived" : "deleted"} successfully!
         </p>
 
-        <div className="mt-4" />
-
         {/* Report Errors */}
         {errorCount > 0 && (
           <>
-            <p>
+            <p className="mt-4">
               {errorCount} error{errorCount > 1 ? "s" : ""} occurred while{" "}
               {action === "archive" ? "archiving" : "deleting"} the following{" "}
               repositor{errorCount > 1 ? "ies" : "y"}:
@@ -346,14 +288,13 @@ function RepoActionResult({
         )}
       </div>
       <div className="flex justify-end gap-2 px-6 py-4 border-t border-divider">
-        <button
-          className="rounded-lg border border-divider bg-transparent px-4 py-2 text-sm font-medium text-foreground hover:bg-default-100 transition-colors"
+        <Button
+          variant="outline"
           data-testid="repo-action-result-close"
           onClick={onClose}
-          type="button"
         >
           Close
-        </button>
+        </Button>
       </div>
     </>
   );

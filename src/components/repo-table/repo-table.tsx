@@ -2,7 +2,24 @@ import { type Repository } from "@octokit/graphql-schema";
 import { formatDistanceToNow } from "date-fns";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { REPO_ACTIONS } from "@/config/repo-config";
 import {
   type Selection,
@@ -19,6 +36,52 @@ import RepoFilters from "./repo-filters";
 
 interface RepositoryWithKey extends Repository {
   key: string;
+}
+
+/** Shared badge rendering for mobile and desktop repo rows */
+function RepoBadges({
+  repo,
+  login,
+  showOwner = false,
+}: {
+  login: null | string;
+  repo: Repository;
+  showOwner?: boolean;
+}) {
+  return (
+    <>
+      {showOwner && repo.owner.login !== login && (
+        <Badge size="xs" variant="muted">
+          {repo.owner.login}
+        </Badge>
+      )}
+      {repo.isPrivate && (
+        <Badge size="xs" variant="muted">
+          Private
+        </Badge>
+      )}
+      {!repo.isPrivate && !showOwner && (
+        <Badge size="xs" variant="success">
+          Public
+        </Badge>
+      )}
+      {repo.isInOrganization && (
+        <Badge size="xs" variant="muted">
+          Org
+        </Badge>
+      )}
+      {repo.isFork && (
+        <Badge size="xs" variant="muted">
+          Fork
+        </Badge>
+      )}
+      {repo.isArchived && (
+        <Badge size="xs" variant="warning">
+          Archived
+        </Badge>
+      )}
+    </>
+  );
 }
 
 interface RepoTableProps {
@@ -196,23 +259,23 @@ export default function RepoTable({
       />
 
       {/* TABLE */}
-      <div className="border border-divider rounded-xl overflow-x-auto bg-content1">
-        <table
+      <div className="border border-divider rounded-xl bg-content1">
+        <Table
           aria-label="GitHub repositories table"
-          className="w-full table-fixed text-sm"
+          className="table-fixed"
           data-testid="repo-table"
         >
-          <thead>
-            <tr className="bg-default-100 border-b border-divider">
+          <TableHeader>
+            <TableRow className="bg-default-100 border-b border-divider">
               {/* Checkbox column */}
-              <th className="w-12 px-3 py-3" scope="col">
+              <TableHead className="w-12 px-3 py-3" scope="col">
                 <Checkbox
                   aria-label="Select all"
                   checked={allSelectableSelected && selectableRepos.length > 0}
                   onCheckedChange={handleSelectAll}
                 />
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 aria-sort={
                   sortDescriptor.column === "name"
                     ? sortDescriptor.direction
@@ -233,20 +296,20 @@ export default function RepoTable({
                     </span>
                   )}
                 </span>
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="hidden xl:table-cell px-3 py-3 text-left text-xs font-semibold text-default-500 uppercase tracking-wider"
                 scope="col"
               >
                 Owner
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="hidden xl:table-cell px-3 py-3 text-left text-xs font-semibold text-default-500 uppercase tracking-wider"
                 scope="col"
               >
                 Status
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 aria-sort={
                   sortDescriptor.column === "updatedAt"
                     ? sortDescriptor.direction
@@ -267,21 +330,21 @@ export default function RepoTable({
                     </span>
                   )}
                 </span>
-              </th>
-            </tr>
-          </thead>
+              </TableHead>
+            </TableRow>
+          </TableHeader>
 
           {/* TABLE BODY */}
-          <tbody>
+          <TableBody>
             {paginatedRepos.length === 0 ? (
-              <tr>
-                <td
+              <TableRow>
+                <TableCell
                   className="px-3 py-8 text-center text-default-500"
                   colSpan={5}
                 >
                   No repos to display.
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ) : (
               paginatedRepos.map((repo) => {
                 const disabled = isRepoDisabled(repo);
@@ -289,7 +352,7 @@ export default function RepoTable({
                   selectedRepoKeys === "all" || selectedRepoKeys.has(repo.id);
 
                 return (
-                  <tr
+                  <TableRow
                     className={`border-b border-divider/50 transition-colors ${
                       disabled
                         ? "pointer-events-none opacity-50"
@@ -299,17 +362,17 @@ export default function RepoTable({
                     key={repo.id}
                   >
                     {/* Checkbox */}
-                    <td className="w-12 px-3 py-3">
+                    <TableCell className="w-12 px-3 py-3">
                       <Checkbox
                         aria-label={repo.name}
                         checked={isSelected && !disabled}
                         disabled={disabled}
                         onCheckedChange={() => handleRowSelect(repo.id)}
                       />
-                    </td>
+                    </TableCell>
 
                     {/* Repository — name + description + MOBILE-ONLY pills */}
-                    <td className="px-3 py-3">
+                    <TableCell className="px-3 py-3">
                       <div data-testid="repo-details">
                         <div className="mb-1" data-testid="repo-name">
                           <a
@@ -327,31 +390,7 @@ export default function RepoTable({
                           className="flex gap-1.5 mb-1.5 flex-wrap xl:hidden"
                           data-testid="repo-tags"
                         >
-                          {repo.owner.login !== login && (
-                            <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-default-100 text-default-500 border border-divider">
-                              {repo.owner.login}
-                            </span>
-                          )}
-                          {repo.isPrivate && (
-                            <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-default-100 text-default-500 border border-divider">
-                              Private
-                            </span>
-                          )}
-                          {repo.isInOrganization && (
-                            <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-default-100 text-default-500 border border-divider">
-                              Org
-                            </span>
-                          )}
-                          {repo.isFork && (
-                            <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-default-100 text-default-500 border border-divider">
-                              Fork
-                            </span>
-                          )}
-                          {repo.isArchived && (
-                            <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
-                              Archived
-                            </span>
-                          )}
+                          <RepoBadges login={login} repo={repo} showOwner />
                         </div>
 
                         {/* Description */}
@@ -362,10 +401,10 @@ export default function RepoTable({
                           {repo.description ?? <i>No description</i>}
                         </div>
                       </div>
-                    </td>
+                    </TableCell>
 
                     {/* Owner — desktop only */}
-                    <td
+                    <TableCell
                       className="hidden xl:table-cell px-3 py-3"
                       data-testid="repo-owner"
                     >
@@ -383,44 +422,20 @@ export default function RepoTable({
                           {repo.owner.login}
                         </span>
                       )}
-                    </td>
+                    </TableCell>
 
                     {/* Status — desktop only */}
-                    <td className="hidden xl:table-cell px-3 py-3">
+                    <TableCell className="hidden xl:table-cell px-3 py-3">
                       <div
                         className="flex gap-1.5 flex-wrap"
                         data-testid="repo-tags"
                       >
-                        {repo.isPrivate && (
-                          <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-default-100 text-default-500 border border-divider">
-                            Private
-                          </span>
-                        )}
-                        {!repo.isPrivate && (
-                          <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
-                            Public
-                          </span>
-                        )}
-                        {repo.isInOrganization && (
-                          <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-default-100 text-default-500 border border-divider">
-                            Org
-                          </span>
-                        )}
-                        {repo.isFork && (
-                          <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-default-100 text-default-500 border border-divider">
-                            Fork
-                          </span>
-                        )}
-                        {repo.isArchived && (
-                          <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
-                            Archived
-                          </span>
-                        )}
+                        <RepoBadges login={login} repo={repo} />
                       </div>
-                    </td>
+                    </TableCell>
 
                     {/* Last Updated */}
-                    <td
+                    <TableCell
                       className="px-3 py-3 text-default-400 whitespace-nowrap"
                       data-testid="repo-updated-at"
                       title={
@@ -441,60 +456,63 @@ export default function RepoTable({
                             new Date(repo.updatedAt as string),
                           )
                         : "Unknown"}
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 );
               })
             )}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
 
       {/* PAGINATION - Outside table border */}
       {totalPages > 1 && (
-        <div
-          className="flex w-full justify-center"
-          data-testid="table-pagination"
-        >
-          <nav
-            aria-label="Pagination"
-            className="inline-flex items-center gap-1"
-          >
-            <button
-              aria-label="prev"
-              className="px-3 py-1.5 rounded-lg text-sm border border-divider bg-content1 text-foreground hover:bg-content2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              disabled={currentPage === 1}
-              onClick={() => setCurrentPage(currentPage - 1)}
-              type="button"
-            >
-              &lsaquo;
-            </button>
+        <Pagination data-testid="table-pagination">
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (currentPage > 1) setCurrentPage(currentPage - 1);
+                }}
+                aria-disabled={currentPage === 1}
+                className={
+                  currentPage === 1 ? "pointer-events-none opacity-50" : ""
+                }
+              />
+            </PaginationItem>
             {pageNumbers.map((page) => (
-              <button
-                aria-current={page === currentPage ? "true" : undefined}
-                className={`px-3 py-1.5 rounded-lg text-sm border transition-colors ${
-                  page === currentPage
-                    ? "bg-primary text-white border-primary shadow-sm"
-                    : "border-divider bg-content1 text-foreground hover:bg-content2"
-                }`}
-                key={page}
-                onClick={() => setCurrentPage(page)}
-                type="button"
-              >
-                {page}
-              </button>
+              <PaginationItem key={page}>
+                <PaginationLink
+                  href="#"
+                  isActive={page === currentPage}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setCurrentPage(page);
+                  }}
+                >
+                  {page}
+                </PaginationLink>
+              </PaginationItem>
             ))}
-            <button
-              aria-label="next"
-              className="px-3 py-1.5 rounded-lg text-sm border border-divider bg-content1 text-foreground hover:bg-content2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              disabled={currentPage === totalPages}
-              onClick={() => setCurrentPage(currentPage + 1)}
-              type="button"
-            >
-              &rsaquo;
-            </button>
-          </nav>
-        </div>
+            <PaginationItem>
+              <PaginationNext
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+                }}
+                aria-disabled={currentPage === totalPages}
+                className={
+                  currentPage === totalPages
+                    ? "pointer-events-none opacity-50"
+                    : ""
+                }
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
       )}
 
       {/* CONFIRMATION MODAL — login derived from first selected repo's owner if prop is null */}

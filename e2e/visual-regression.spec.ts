@@ -297,18 +297,46 @@ test.describe("Visual Regression", () => {
     });
   });
 
-  // ─── Get Started Section ─────────────────────────────────────────────────────
-  test.describe("Get Started Section", () => {
-    test("token form", async ({ page }) => {
+  // ─── Mobile Viewport Screenshots ──────────────────────────────────────────────
+  test.describe("Mobile Viewport", () => {
+    test.use({ viewport: { width: 390, height: 844 } }); // iPhone 14
+
+    test("landing page - mobile", async ({ page }) => {
       const home = new HomePage(page);
       await home.setupMocks();
       await home.goto();
+      await argosScreenshot(page, "landing-light-mobile", { fullPage: true });
+    });
 
-      await page.locator("#get-started").scrollIntoViewIfNeeded();
-      await page.waitForTimeout(100);
+    test("dashboard - mobile", async ({ page }) => {
+      const dashboard = new DashboardPage(page);
+      await dashboard.setupMocks();
+      await dashboard.goto();
+      await dashboard.waitForFullDataLoad();
+      await argosScreenshot(page, "dashboard-light-mobile", {
+        fullPage: true,
+      });
+    });
 
-      await argosScreenshot(page, "get-started-form", {
-        element: page.locator("#get-started"),
+    test("dashboard dark - mobile", async ({ page }) => {
+      const dashboard = new DashboardPage(page);
+      await dashboard.setupMocks();
+      await dashboard.goto();
+      await dashboard.waitForFullDataLoad();
+      await enableDarkTheme(page);
+      await argosScreenshot(page, "dashboard-dark-mobile", {
+        fullPage: true,
+      });
+    });
+
+    test("dashboard delete mode - mobile", async ({ page }) => {
+      const dashboard = new DashboardPage(page);
+      await dashboard.setupMocks();
+      await dashboard.goto();
+      await dashboard.waitForFullDataLoad();
+      await dashboard.selectDeleteAction();
+      await argosScreenshot(page, "dashboard-delete-mode-mobile", {
+        fullPage: true,
       });
     });
   });

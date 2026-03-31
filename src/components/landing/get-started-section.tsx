@@ -2,14 +2,28 @@ import { motion, useReducedMotion } from "framer-motion";
 import {
   CheckSquare,
   ExternalLink,
+  Eye,
+  EyeOff,
   Info,
   Key,
   Loader2,
   Search,
   Trash2,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 import { useGitHubData } from "@/hooks/use-github-data";
 import { analytics } from "@/utils/analytics";
@@ -71,27 +85,10 @@ function InlinePATForm() {
   const [isValidating, setIsValidating] = useState(false);
   const [isValid, setIsValid] = useState(false);
   const [remember, setRemember] = useState(true);
-  const [showTooltip, setShowTooltip] = useState(false);
   const [showToken, setShowToken] = useState(false);
   const [scopeWarnings, setScopeWarnings] = useState<string[]>([]);
-  const tooltipRef = useRef<HTMLDivElement>(null);
   const { setPat } = useGitHubData();
   const navigate = useNavigate();
-
-  // Close tooltip on click outside
-  useEffect(() => {
-    if (!showTooltip) return;
-    function handleClick(e: MouseEvent) {
-      if (
-        tooltipRef.current &&
-        !tooltipRef.current.contains(e.target as Node)
-      ) {
-        setShowTooltip(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, [showTooltip]);
 
   // Auto-validate when token changes (with debounce)
   useEffect(() => {
@@ -149,9 +146,9 @@ function InlinePATForm() {
     <form className="space-y-4" onSubmit={handleSubmit}>
       <div className="relative">
         <Key className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-default-400" />
-        <input
+        <Input
           autoComplete="off"
-          className={`w-full pl-10 pr-12 py-3 rounded-lg border bg-default-100 text-sm font-mono placeholder:text-default-400 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors ${
+          className={`h-auto pl-10 pr-12 py-3 bg-default-100 text-sm font-mono placeholder:text-default-400 ${
             error
               ? "border-danger"
               : isValid
@@ -168,57 +165,19 @@ function InlinePATForm() {
         />
         <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
           {token && (
-            <button
+            <Button
               aria-label={showToken ? "Hide token" : "Show token"}
               className="text-default-400 hover:text-default-600 transition-colors p-0.5"
               onClick={() => setShowToken((prev) => !prev)}
-              type="button"
+              variant="ghost"
+              size="icon"
             >
               {showToken ? (
-                <svg
-                  className="h-4 w-4"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <line
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    x1="1"
-                    x2="23"
-                    y1="1"
-                    y2="23"
-                  />
-                </svg>
+                <EyeOff className="h-4 w-4" />
               ) : (
-                <svg
-                  className="h-4 w-4"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <circle
-                    cx="12"
-                    cy="12"
-                    r="3"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                <Eye className="h-4 w-4" />
               )}
-            </button>
+            </Button>
           )}
           {isValidating && (
             <Loader2 className="h-4 w-4 text-default-400 animate-spin" />
@@ -235,74 +194,63 @@ function InlinePATForm() {
       )}
 
       {scopeWarnings.length > 0 && (
-        <div
-          className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-700 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-400"
-          data-testid="scope-warnings"
-          role="alert"
-        >
-          <p className="font-medium">Missing recommended scopes:</p>
-          <ul className="mt-1 list-inside list-disc space-y-0.5 text-xs">
-            {scopeWarnings.map((warning) => (
-              <li key={warning}>{warning}</li>
-            ))}
-          </ul>
-          <a
-            className="mt-2 inline-block text-xs font-medium underline hover:no-underline"
-            href="https://github.com/settings/tokens"
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            Update token scopes on GitHub &rarr;
-          </a>
-        </div>
+        <Alert variant="warning" data-testid="scope-warnings">
+          <AlertTitle>Missing recommended scopes:</AlertTitle>
+          <AlertDescription>
+            <ul className="mt-1 list-inside list-disc space-y-0.5 text-xs">
+              {scopeWarnings.map((warning) => (
+                <li key={warning}>{warning}</li>
+              ))}
+            </ul>
+            <a
+              className="mt-2 inline-block text-xs font-medium underline hover:no-underline"
+              href="https://github.com/settings/tokens"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              Update token scopes on GitHub &rarr;
+            </a>
+          </AlertDescription>
+        </Alert>
       )}
 
       <div className="flex items-center gap-2">
-        <input
+        <Checkbox
           checked={remember}
-          className="h-4 w-4 rounded border-default-300 accent-[var(--brand-blue)]"
           data-testid="github-token-remember"
           id="remember-token"
-          onChange={(e) => setRemember(e.target.checked)}
-          type="checkbox"
+          onCheckedChange={(checked) => setRemember(checked)}
         />
-        <label
-          className="text-sm text-default-500 select-none"
-          htmlFor="remember-token"
-        >
+        <Label className="text-default-500" htmlFor="remember-token">
           Remember my token
-        </label>
-        <div className="relative" ref={tooltipRef}>
-          <button
+        </Label>
+        <Popover>
+          <PopoverTrigger
             aria-label="Token storage info"
-            className="text-default-400 hover:text-default-600 transition-colors"
-            onClick={() => setShowTooltip(!showTooltip)}
-            type="button"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-md text-default-400 hover:text-default-600 hover:bg-content2 transition-colors cursor-pointer"
           >
             <Info className="h-3.5 w-3.5" />
-          </button>
-          {showTooltip && (
-            <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-3 w-64 p-3 rounded-lg bg-content1 border border-divider shadow-lg text-xs text-default-500 z-50">
-              Your token is AES-encrypted and stored only in your browser's
-              localStorage. It never leaves your device.
-              <div className="absolute left-1/2 -translate-x-1/2 -bottom-1.5 w-3 h-3 rotate-45 bg-content1 border-r border-b border-divider" />
-            </div>
-          )}
-        </div>
+          </PopoverTrigger>
+          <PopoverContent side="top" className="w-64 text-xs text-default-500">
+            Your token is AES-encrypted and stored only in your browser&apos;s
+            localStorage. It never leaves your device.
+          </PopoverContent>
+        </Popover>
       </div>
 
-      <button
-        className={`w-full py-3 rounded-lg font-medium text-base transition-all ${
+      <Button
+        className={`w-full h-12 text-base ${
           canSubmit
             ? "bg-[var(--brand-blue)] text-white hover:opacity-90 shadow-sm"
-            : "bg-default-200 text-default-400 cursor-not-allowed"
+            : "bg-default-200 text-default-500 cursor-not-allowed"
         }`}
         data-testid="github-token-submit"
         disabled={!canSubmit}
+        size="lg"
         type="submit"
       >
         {isValidating ? "Validating..." : "Load My Repositories"}
-      </button>
+      </Button>
     </form>
   );
 }
@@ -382,32 +330,36 @@ export function GetStartedSection() {
 
         {/* PAT form card */}
         <motion.div
-          className="mt-16 bg-content1 border border-divider rounded-xl p-8 max-w-xl mx-auto"
+          className="mt-16 max-w-xl mx-auto"
           {...scrollRevealProps(scaleIn, reduced)}
         >
-          <h3 className="text-xl font-semibold mb-2 text-center">
-            Ready to start?
-          </h3>
-          <p className="text-sm text-default-500 text-center mb-6">
-            Paste your PAT below to load your repositories.
-          </p>
+          <Card>
+            <CardContent className="p-8">
+              <h3 className="text-xl font-semibold mb-2 text-center">
+                Ready to start?
+              </h3>
+              <p className="text-sm text-default-500 text-center mb-6">
+                Paste your PAT below to load your repositories.
+              </p>
 
-          <InlinePATForm />
+              <InlinePATForm />
 
-          <div className="flex items-center justify-center gap-6 mt-5 text-xs text-default-400">
-            <span className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-success inline-block" />
-              Stays in your browser
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-success inline-block" />
-              Never sent to a server
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-success inline-block" />
-              100% free
-            </span>
-          </div>
+              <div className="flex items-center justify-center gap-6 mt-5 text-xs text-default-400">
+                <span className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-success inline-block" />
+                  Stays in your browser
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-success inline-block" />
+                  Never sent to a server
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-success inline-block" />
+                  100% free
+                </span>
+              </div>
+            </CardContent>
+          </Card>
         </motion.div>
       </div>
     </section>

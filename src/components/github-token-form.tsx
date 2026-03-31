@@ -1,6 +1,13 @@
 import { RequestError } from "@octokit/request-error";
-import clsx from "clsx";
+import { Eye, EyeOff, Loader2, X } from "lucide-react";
 import { useEffect, useState } from "react";
+
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 
 import { checkTokenScopes, SCOPE_DESCRIPTIONS } from "@/utils/github-api";
 import {
@@ -157,7 +164,7 @@ export default function GitHubTokenForm({
 
   return (
     <form
-      className={clsx("flex flex-col gap-10", className)}
+      className={cn("flex flex-col gap-10", className)}
       data-testid="github-token-form"
       onSubmit={(e) => {
         handleSubmit(e);
@@ -166,21 +173,16 @@ export default function GitHubTokenForm({
       <div className="flex flex-col gap-4">
         {/* Token input */}
         <div className="flex flex-col gap-1.5">
-          <label
-            className="text-sm font-medium text-foreground"
-            htmlFor="personal-access-token"
-          >
+          <Label className="text-foreground" htmlFor="personal-access-token">
             Please enter your Personal Access Token
-          </label>
+          </Label>
           <div className="relative">
-            <input
+            <Input
               autoComplete="off"
-              className={clsx(
-                "w-full rounded-lg border bg-default-100 py-2.5 pl-3 text-sm text-foreground",
+              className={cn(
+                "h-auto bg-default-100 py-2.5 pl-3 text-sm text-foreground",
                 value ? "pr-16" : "pr-3",
                 "placeholder:text-default-400",
-                "focus:outline-none focus:ring-2",
-                "transition-colors",
                 inputBorderClass,
               )}
               data-testid="github-token-input"
@@ -196,81 +198,34 @@ export default function GitHubTokenForm({
             {/* Toggle visibility + Clear buttons */}
             {value && (
               <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-0.5">
-                <button
+                <Button
                   aria-label={showToken ? "Hide token" : "Show token"}
                   className="text-default-400 hover:text-default-600 transition-colors p-1"
                   onClick={() => {
                     setShowToken((prev) => !prev);
                   }}
                   type="button"
+                  variant="ghost"
+                  size="icon"
                 >
                   {showToken ? (
-                    <svg
-                      className="h-4 w-4"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <line
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        x1="1"
-                        x2="23"
-                        y1="1"
-                        y2="23"
-                      />
-                    </svg>
+                    <EyeOff className="h-4 w-4" />
                   ) : (
-                    <svg
-                      className="h-4 w-4"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <circle
-                        cx="12"
-                        cy="12"
-                        r="3"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
+                    <Eye className="h-4 w-4" />
                   )}
-                </button>
-                <button
+                </Button>
+                <Button
                   aria-label="Clear token"
                   className="text-default-400 hover:text-default-600 transition-colors p-1"
                   onClick={() => {
                     handleChange("");
                   }}
                   type="button"
+                  variant="ghost"
+                  size="icon"
                 >
-                  <svg
-                    className="h-4 w-4"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      d="M6 18L18 6M6 6l12 12"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </button>
+                  <X className="h-4 w-4" />
+                </Button>
               </div>
             )}
           </div>
@@ -279,90 +234,68 @@ export default function GitHubTokenForm({
             <p className="text-xs text-danger">{validationMessage}</p>
           )}
           {/* Description */}
-          <p className={clsx("text-xs", descriptionColorClass)}>
+          <p className={cn("text-xs", descriptionColorClass)}>
             {inputDescription}
           </p>
         </div>
 
         {/* Scope warnings — shown when token is valid but missing recommended scopes */}
         {scopeWarnings.length > 0 && (
-          <div
-            className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-700 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-400"
-            data-testid="scope-warnings"
-            role="alert"
-          >
-            <p className="font-medium">Token is missing recommended scopes:</p>
-            <ul className="mt-1 list-inside list-disc space-y-0.5 text-xs">
-              {scopeWarnings.map((warning) => (
-                <li key={warning}>{warning}</li>
-              ))}
-            </ul>
-            <a
-              className="mt-2 inline-block text-xs font-medium underline hover:no-underline"
-              href="https://github.com/settings/tokens"
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              Update token scopes on GitHub &rarr;
-            </a>
-          </div>
+          <Alert variant="warning" data-testid="scope-warnings">
+            <AlertTitle>Token is missing recommended scopes:</AlertTitle>
+            <AlertDescription>
+              <ul className="mt-1 list-inside list-disc space-y-0.5 text-xs">
+                {scopeWarnings.map((warning) => (
+                  <li key={warning}>{warning}</li>
+                ))}
+              </ul>
+              <a
+                className="mt-2 inline-block text-xs font-medium underline hover:no-underline"
+                href="https://github.com/settings/tokens"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                Update token scopes on GitHub &rarr;
+              </a>
+            </AlertDescription>
+          </Alert>
         )}
 
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input
+        <Label className="cursor-pointer flex items-center gap-2">
+          <Checkbox
             checked={remember}
-            className="h-4 w-4 rounded border-default-300 text-primary focus:ring-primary"
             data-testid="github-token-remember"
-            onChange={(e) => {
-              setRemember(e.target.checked);
+            onCheckedChange={(checked) => {
+              setRemember(checked);
             }}
-            type="checkbox"
           />
-          <span className="text-sm text-foreground">
+          <span className="text-foreground">
             Remember me (token is stored locally, on your device)
           </span>
-        </label>
+        </Label>
       </div>
 
-      <button
-        className={clsx(
-          "w-full rounded-lg px-4 py-2.5 text-sm font-medium transition-colors",
-          "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
+      <Button
+        className={cn(
+          "w-full",
           !isTokenValid || isValidating
             ? "bg-primary/50 text-white/70 cursor-not-allowed"
             : "bg-primary text-white hover:bg-primary/90",
         )}
         data-testid="github-token-submit"
         disabled={!isTokenValid || isValidating}
+        size="lg"
         type="submit"
       >
         {isValidating ? (
           <span className="inline-flex items-center gap-2">
-            <svg
-              className="h-4 w-4 animate-spin"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              />
-              <path
-                className="opacity-75"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                fill="currentColor"
-              />
-            </svg>
+            <Loader2 className="h-4 w-4 animate-spin" />
             Validating...
           </span>
         ) : (
           "Submit"
         )}
-      </button>
+      </Button>
     </form>
   );
 }

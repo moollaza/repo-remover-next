@@ -1,4 +1,6 @@
-import { Github, Heart, Trash2 } from "lucide-react";
+import { Github, Heart } from "lucide-react";
+
+import { BrandLogo } from "@/components/brand-logo";
 
 function BlueskyIcon({ className }: { className?: string }) {
   return (
@@ -22,12 +24,7 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-6 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="col-span-1 md:col-span-2">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <Trash2 className="h-4 w-4 text-white" />
-              </div>
-              <span className="font-semibold text-lg">Repo Remover</span>
-            </div>
+            <BrandLogo className="mb-4" />
             <p className="text-default-500 mb-4 max-w-md">
               The easiest way to archive and delete multiple GitHub
               repositories. Built with love by developers, for developers.

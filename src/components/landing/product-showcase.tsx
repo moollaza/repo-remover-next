@@ -1,6 +1,7 @@
 import { motion, useReducedMotion } from "framer-motion";
 import {
   Archive,
+  Check,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
@@ -8,6 +9,8 @@ import {
   Trash2,
 } from "lucide-react";
 
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   fadeUp,
   scaleIn,
@@ -119,14 +122,20 @@ export function ProductShowcase() {
                 <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-divider bg-background text-default-400 text-xs">
                   Visibility <ChevronDown className="w-3 h-3" />
                 </div>
-                <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-amber-400 dark:bg-amber-500 text-black text-xs font-medium">
+                <Button
+                  className="flex items-center gap-1.5 px-3 py-1.5 h-auto rounded-md text-xs"
+                  variant="warning"
+                >
                   <Archive className="w-3.5 h-3.5" />
                   Archive Selected (3)
-                </button>
-                <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-danger text-white text-xs font-medium opacity-50 cursor-not-allowed">
+                </Button>
+                <Button
+                  className="flex items-center gap-1.5 px-3 py-1.5 h-auto rounded-md bg-danger text-white text-xs font-medium opacity-50 cursor-not-allowed hover:bg-danger"
+                  disabled
+                >
                   <Trash2 className="w-3.5 h-3.5" />
                   Delete
-                </button>
+                </Button>
               </div>
             </div>
 
@@ -156,16 +165,7 @@ export function ProductShowcase() {
                     className={`w-3.5 h-3.5 rounded border flex items-center justify-center ${repo.selected ? "bg-primary border-primary" : "border-divider bg-background"}`}
                   >
                     {repo.selected && (
-                      <svg className="w-2 h-2 text-white" viewBox="0 0 10 8">
-                        <path
-                          d="M1 4l2.5 2.5L9 1"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="1.5"
-                        />
-                      </svg>
+                      <Check className="w-2 h-2 text-white" strokeWidth={3} />
                     )}
                   </div>
                 </div>
@@ -182,19 +182,19 @@ export function ProductShowcase() {
                 <div className="text-default-400 truncate">{repo.owner}</div>
                 <div className="flex items-center gap-1.5 flex-wrap">
                   {repo.private && (
-                    <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-default-100 text-default-500 border border-divider">
+                    <Badge size="xs" variant="muted">
                       Private
-                    </span>
+                    </Badge>
                   )}
                   {repo.archived && (
-                    <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
+                    <Badge size="xs" variant="warning">
                       Archived
-                    </span>
+                    </Badge>
                   )}
                   {!repo.private && !repo.archived && (
-                    <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+                    <Badge size="xs" variant="success">
                       Public
-                    </span>
+                    </Badge>
                   )}
                 </div>
                 <div className="text-default-400">{repo.updated}</div>
@@ -205,9 +205,9 @@ export function ProductShowcase() {
             <div className="flex items-center justify-between px-4 py-3 text-xs text-default-400">
               <span>Showing 5 of 127 repositories</span>
               <div className="flex items-center gap-1">
-                <button className="p-1 rounded hover:bg-default-100">
+                <Button className="p-1" size="icon-xs" variant="ghost">
                   <ChevronLeft className="w-4 h-4" />
-                </button>
+                </Button>
                 <span className="px-2 py-1 rounded bg-primary text-primary-foreground text-xs">
                   1
                 </span>
@@ -215,9 +215,9 @@ export function ProductShowcase() {
                 <span className="px-2 py-1">3</span>
                 <span className="px-2 py-1">...</span>
                 <span className="px-2 py-1">26</span>
-                <button className="p-1 rounded hover:bg-default-100">
+                <Button className="p-1" size="icon-xs" variant="ghost">
                   <ChevronRight className="w-4 h-4" />
-                </button>
+                </Button>
               </div>
             </div>
           </div>
