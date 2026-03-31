@@ -239,13 +239,14 @@ function InlinePATForm() {
       </div>
 
       <Button
-        className={`w-full py-3 text-base ${
+        className={`w-full h-12 text-base ${
           canSubmit
             ? "bg-[var(--brand-blue)] text-white hover:opacity-90 shadow-sm"
             : "bg-default-200 text-default-500 cursor-not-allowed"
         }`}
         data-testid="github-token-submit"
         disabled={!canSubmit}
+        size="lg"
         type="submit"
       >
         {isValidating ? "Validating..." : "Load My Repositories"}

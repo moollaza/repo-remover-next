@@ -277,13 +277,14 @@ export default function GitHubTokenForm({
 
       <Button
         className={cn(
-          "w-full px-4 py-2.5",
+          "w-full",
           !isTokenValid || isValidating
             ? "bg-primary/50 text-white/70 cursor-not-allowed"
             : "bg-primary text-white hover:bg-primary/90",
         )}
         data-testid="github-token-submit"
         disabled={!isTokenValid || isValidating}
+        size="lg"
         type="submit"
       >
         {isValidating ? (

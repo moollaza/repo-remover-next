@@ -65,7 +65,7 @@ export function TestimonialsSection() {
         >
           {testimonials.map((t, index) => (
             <motion.div key={index} variants={fadeUp}>
-              <Card className="h-full flex flex-col py-0 gap-0">
+              <Card className="h-full flex flex-col py-0 gap-0 bg-content1 ring-divider">
                 <CardContent className="p-6 flex flex-col flex-1">
                   <div className="flex gap-1 mb-4">
                     {Array.from({ length: t.rating }, (_, i) => (
