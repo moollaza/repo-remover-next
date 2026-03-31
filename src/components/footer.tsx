@@ -21,7 +21,7 @@ export default function Footer() {
       className="w-full border-t border-divider bg-default-50/50"
       data-testid="footer"
     >
-      <div className="max-w-7xl mx-auto px-6 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="col-span-1 md:col-span-2">
             <BrandLogo className="mb-4" />

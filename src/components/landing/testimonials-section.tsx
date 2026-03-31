@@ -39,14 +39,14 @@ export function TestimonialsSection() {
   const reduced = useReducedMotion();
 
   return (
-    <section className="w-full px-6 py-20 bg-default-50">
+    <section className="w-full px-4 sm:px-6 py-16 sm:py-20 bg-default-50">
       <div className="max-w-7xl mx-auto">
         <motion.div
           className="text-center mb-16"
           {...scrollRevealProps(staggerContainer, reduced)}
         >
           <motion.h2
-            className="text-3xl md:text-4xl font-bold mb-4"
+            className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4"
             variants={fadeUp}
           >
             What Developers Are Saying

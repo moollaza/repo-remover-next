@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { Moon, Sun } from "lucide-react";
+import { Menu, Moon, Sun, X } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
@@ -50,21 +50,59 @@ function LandingThemeSwitcher() {
   );
 }
 
+function MobileNavLink({
+  href,
+  label,
+  onNavigate,
+}: {
+  href: string;
+  label: string;
+  onNavigate: () => void;
+}) {
+  return (
+    <a
+      className="block px-4 py-3 text-base font-medium text-default-600 hover:text-foreground hover:bg-default-100 rounded-lg transition-colors"
+      href={href}
+      onClick={(e) => {
+        e.preventDefault();
+        onNavigate();
+        const target = document.querySelector(href);
+        target?.scrollIntoView({ behavior: "smooth" });
+      }}
+    >
+      {label}
+    </a>
+  );
+}
+
 /**
- * Landing page header — plain HTML matching the Figma design.
- * Taller, sticky with backdrop blur, logo icon, spacious nav.
+ * Landing page header with hamburger menu on mobile.
+ * Sticky with backdrop blur, centered nav on desktop, slide-down menu on mobile.
  */
 function LandingHeader({ isAuthenticated }: { isAuthenticated: boolean }) {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Close on Escape
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") setMobileMenuOpen(false);
+    }
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [mobileMenuOpen]);
+
   return (
     <header
       className="w-full border-b border-divider bg-background/80 backdrop-blur-sm sticky top-0 z-50"
       data-testid="navbar"
     >
-      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between relative">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between relative">
         <a href="/">
           <BrandLogo />
         </a>
 
+        {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
           {homeLinks.map((link) => (
             <motion.a
@@ -84,21 +122,59 @@ function LandingHeader({ isAuthenticated }: { isAuthenticated: boolean }) {
           ))}
         </nav>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <LandingThemeSwitcher />
           {isAuthenticated && (
             <a
               className={
-                buttonVariants({ variant: "default" }) +
-                " bg-[var(--brand-blue)] text-white hover:opacity-90"
+                buttonVariants({ variant: "default", size: "sm" }) +
+                " bg-[var(--brand-blue)] text-white hover:opacity-90 text-xs sm:text-sm"
               }
               href="/dashboard"
             >
-              Go to Dashboard
+              <span className="sm:hidden">Dashboard</span>
+              <span className="hidden sm:inline">Go to Dashboard</span>
             </a>
           )}
+          {/* Hamburger — mobile only */}
+          <button
+            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+            className="md:hidden rounded-lg p-1.5 hover:bg-default-100 transition-colors"
+            onClick={() => setMobileMenuOpen((prev) => !prev)}
+            type="button"
+          >
+            {mobileMenuOpen ? (
+              <X className="h-5 w-5" />
+            ) : (
+              <Menu className="h-5 w-5" />
+            )}
+          </button>
         </div>
       </div>
+
+      {/* Mobile menu */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.nav
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2, ease: "easeInOut" }}
+            className="md:hidden overflow-hidden border-t border-divider bg-background"
+          >
+            <div className="px-4 py-3 space-y-1">
+              {homeLinks.map((link) => (
+                <MobileNavLink
+                  href={link.href}
+                  key={link.href}
+                  label={link.label}
+                  onNavigate={() => setMobileMenuOpen(false)}
+                />
+              ))}
+            </div>
+          </motion.nav>
+        )}
+      </AnimatePresence>
     </header>
   );
 }
@@ -162,7 +238,7 @@ function DashboardHeader({
       className="w-full border-b border-divider bg-background/80 backdrop-blur-sm sticky top-0 z-50"
       data-testid="navbar"
     >
-      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between">
         {/* Brand + dev tools */}
         <div className="flex items-center gap-3">
           <a href="/">

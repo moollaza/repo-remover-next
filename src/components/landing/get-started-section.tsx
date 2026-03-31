@@ -259,14 +259,14 @@ export function GetStartedSection() {
   const reduced = useReducedMotion();
 
   return (
-    <section className="w-full px-6 py-20" id="get-started">
+    <section className="w-full px-4 sm:px-6 py-16 sm:py-20" id="get-started">
       <div className="max-w-5xl mx-auto">
         <motion.div
           className="text-center mb-16"
           {...scrollRevealProps(staggerContainer, reduced)}
         >
           <motion.h2
-            className="text-3xl md:text-4xl font-bold mb-4"
+            className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4"
             variants={fadeUp}
           >
             Get Started in Under 2 Minutes
@@ -344,17 +344,17 @@ export function GetStartedSection() {
 
               <InlinePATForm />
 
-              <div className="flex items-center justify-center gap-6 mt-5 text-xs text-default-400">
-                <span className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-success inline-block" />
+              <div className="grid grid-cols-3 gap-3 sm:gap-6 mt-5 text-[11px] sm:text-xs text-default-400 text-center">
+                <span className="flex flex-col sm:flex-row items-center gap-1 sm:gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-success inline-block shrink-0" />
                   Stays in your browser
                 </span>
-                <span className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-success inline-block" />
+                <span className="flex flex-col sm:flex-row items-center gap-1 sm:gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-success inline-block shrink-0" />
                   Never sent to a server
                 </span>
-                <span className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-success inline-block" />
+                <span className="flex flex-col sm:flex-row items-center gap-1 sm:gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-success inline-block shrink-0" />
                   100% free
                 </span>
               </div>
