@@ -299,7 +299,7 @@ export class DashboardPage extends BasePage {
   }
 
   async getCurrentPage() {
-    return await this.pagination.locator('[aria-current="true"]').textContent();
+    return await this.pagination.locator('[aria-current="page"]').textContent();
   }
 
   /**
@@ -343,7 +343,7 @@ export class DashboardPage extends BasePage {
     // With 11 admin repos at 5/page, we expect 3 pages.
     // Personal repos alone give 2 pages. Wait for the third page button.
     await this.pagination
-      .getByRole("button", { name: "3" })
+      .getByRole("link", { name: "3" })
       .waitFor({ state: "visible", timeout: 10000 });
   }
 
