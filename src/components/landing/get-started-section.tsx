@@ -344,16 +344,16 @@ export function GetStartedSection() {
 
               <InlinePATForm />
 
-              <div className="grid grid-cols-3 gap-3 sm:gap-6 mt-5 text-[11px] sm:text-xs text-default-400 text-center">
-                <span className="flex flex-col sm:flex-row items-center gap-1 sm:gap-1.5">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-6 mt-5 text-xs text-default-400">
+                <span className="flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-success inline-block shrink-0" />
                   Stays in your browser
                 </span>
-                <span className="flex flex-col sm:flex-row items-center gap-1 sm:gap-1.5">
+                <span className="flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-success inline-block shrink-0" />
                   Never sent to a server
                 </span>
-                <span className="flex flex-col sm:flex-row items-center gap-1 sm:gap-1.5">
+                <span className="flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-success inline-block shrink-0" />
                   100% free
                 </span>
