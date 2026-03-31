@@ -175,8 +175,9 @@ export default function RepoFilters({
 
       {/* ACTION BUTTONS */}
       <div className="w-full md:w-auto md:flex-shrink-0">
-        <ButtonGroup>
+        <ButtonGroup className="w-full md:w-auto">
           <Button
+            className="flex-1 md:flex-initial"
             data-testid={`repo-action-button-${isDeleteAction ? "delete" : "archive"}`}
             disabled={isDisabled}
             onClick={onRepoActionClick}

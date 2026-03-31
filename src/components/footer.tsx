@@ -22,8 +22,8 @@ export default function Footer() {
       data-testid="footer"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div className="col-span-1 md:col-span-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="col-span-1 sm:col-span-2">
             <BrandLogo className="mb-4" />
             <p className="text-default-500 mb-4 max-w-md">
               The easiest way to archive and delete multiple GitHub

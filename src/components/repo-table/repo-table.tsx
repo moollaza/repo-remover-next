@@ -259,7 +259,7 @@ export default function RepoTable({
       />
 
       {/* TABLE */}
-      <div className="border border-divider rounded-xl bg-content1">
+      <div className="border border-divider rounded-xl bg-content1 overflow-hidden">
         <Table
           aria-label="GitHub repositories table"
           className="table-fixed"
@@ -298,7 +298,7 @@ export default function RepoTable({
                 </span>
               </TableHead>
               <TableHead
-                className="hidden xl:table-cell px-3 py-3 text-left text-xs font-semibold text-default-500 uppercase tracking-wider"
+                className="hidden lg:table-cell px-3 py-3 text-left text-xs font-semibold text-default-500 uppercase tracking-wider"
                 scope="col"
               >
                 Owner
@@ -385,9 +385,9 @@ export default function RepoTable({
                           </a>
                         </div>
 
-                        {/* Mobile-only: show pills inline (hidden on lg:) */}
+                        {/* Mobile-only: show pills inline (hidden on lg+) */}
                         <div
-                          className="flex gap-1.5 mb-1.5 flex-wrap xl:hidden"
+                          className="flex gap-1.5 mb-1.5 flex-wrap lg:hidden"
                           data-testid="repo-tags"
                         >
                           <RepoBadges login={login} repo={repo} showOwner />
@@ -405,7 +405,7 @@ export default function RepoTable({
 
                     {/* Owner — desktop only */}
                     <TableCell
-                      className="hidden xl:table-cell px-3 py-3"
+                      className="hidden lg:table-cell px-3 py-3"
                       data-testid="repo-owner"
                     >
                       {repo.owner.login !== login ? (
