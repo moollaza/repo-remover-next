@@ -190,6 +190,7 @@ export default function RepoFilters({
             <DropdownMenuTrigger
               render={
                 <Button
+                  className="size-10 min-w-0 shrink-0"
                   data-testid="repo-action-dropdown-trigger"
                   size="icon"
                   variant={isDeleteAction ? "destructive" : "warning"}
