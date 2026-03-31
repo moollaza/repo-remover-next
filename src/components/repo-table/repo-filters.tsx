@@ -4,7 +4,7 @@ import {
 } from "lucide-react";
 import { useEffect, useRef } from "react";
 
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   ButtonGroup,
   ButtonGroupSeparator,
@@ -188,14 +188,11 @@ export default function RepoFilters({
           <ButtonGroupSeparator className="bg-white/20" />
           <DropdownMenu>
             <DropdownMenuTrigger
-              render={
-                <Button
-                  className="size-10 min-w-0 shrink-0"
-                  data-testid="repo-action-dropdown-trigger"
-                  size="icon"
-                  variant={isDeleteAction ? "destructive" : "warning"}
-                />
-              }
+              className={buttonVariants({
+                variant: isDeleteAction ? "destructive" : "warning",
+                size: "icon",
+              })}
+              data-testid="repo-action-dropdown-trigger"
             >
               <ChevronDownIcon className="size-4" />
             </DropdownMenuTrigger>
