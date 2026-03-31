@@ -113,14 +113,17 @@ export function FeaturesSection() {
                   <AnimatedIcon icon={feature.icon} />
                 </div>
               </motion.div>
-              <motion.div className="flex-1" variants={fadeUp}>
+              <motion.div
+                className="flex-1 text-center lg:text-left"
+                variants={fadeUp}
+              >
                 <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4">
                   {feature.title}
                 </h2>
                 <p className="text-lg text-default-500 mb-6">
                   {feature.description}
                 </p>
-                <ul className="space-y-3 mb-8">
+                <ul className="space-y-3 mb-8 text-left w-fit mx-auto lg:mx-0">
                   {feature.benefits.map((benefit, i) => (
                     <li className="flex items-start gap-3" key={i}>
                       <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
@@ -131,15 +134,17 @@ export function FeaturesSection() {
                   ))}
                 </ul>
                 {index === 0 && (
-                  <Button
-                    className="mt-4 gap-2 px-6 py-2.5 bg-[var(--brand-blue)] text-white hover:opacity-90"
-                    onClick={() => {
-                      const target = document.getElementById("get-started");
-                      target?.scrollIntoView({ behavior: "smooth" });
-                    }}
-                  >
-                    Try It Now
-                  </Button>
+                  <div>
+                    <Button
+                      className="w-full sm:w-auto mt-4 gap-2 px-6 py-2.5 bg-[var(--brand-blue)] text-white hover:opacity-90"
+                      onClick={() => {
+                        const target = document.getElementById("get-started");
+                        target?.scrollIntoView({ behavior: "smooth" });
+                      }}
+                    >
+                      Try It Now
+                    </Button>
+                  </div>
                 )}
               </motion.div>
             </div>
