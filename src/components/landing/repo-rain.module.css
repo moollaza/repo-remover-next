@@ -1,0 +1,41 @@
+@keyframes repo-rain-float {
+  0% {
+    transform: translateY(0) translateX(0) rotate(0deg);
+    opacity: 0;
+  }
+  5% {
+    opacity: 0.5;
+  }
+  85% {
+    opacity: 0.5;
+  }
+  100% {
+    transform: translateY(calc(-100vh - 300px)) translateX(var(--drift-x, 0px))
+      rotate(var(--drift-rotate, 0deg));
+    opacity: 0;
+  }
+}
+
+.container {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.card {
+  position: absolute;
+  bottom: -250px;
+  pointer-events: auto;
+  cursor: pointer;
+  animation: repo-rain-float var(--duration, 30s) var(--delay, 0s) infinite
+    linear;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    animation: none;
+    display: none;
+  }
+}
