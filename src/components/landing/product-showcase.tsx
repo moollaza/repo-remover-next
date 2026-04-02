@@ -1,6 +1,5 @@
 import { motion, useReducedMotion } from "framer-motion";
 
-import { MockDashboardPreview } from "@/components/landing/mock-dashboard-preview";
 import {
   fadeUp,
   scaleIn,
@@ -48,9 +47,11 @@ export function ProductShowcase() {
           {...scrollRevealProps(scaleIn, reduced)}
         >
           <div className="absolute inset-0 bg-gradient-to-r from-[var(--brand-blue)] to-[var(--brand-cyan)] blur-3xl opacity-10 dark:opacity-20 rounded-3xl" />
-          <div className="relative">
-            <MockDashboardPreview />
-          </div>
+          <img
+            alt="Repo Remover dashboard showing repository management with search, filters, and bulk actions"
+            className="relative rounded-xl border border-divider shadow-2xl w-full"
+            src="/images/dashboard-screenshot.png"
+          />
         </motion.div>
 
         {/* Feature highlights below */}
