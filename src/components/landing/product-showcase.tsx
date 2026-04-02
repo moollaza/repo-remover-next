@@ -1,4 +1,5 @@
 import { motion, useReducedMotion } from "framer-motion";
+import { useTheme } from "next-themes";
 
 import {
   fadeUp,
@@ -9,6 +10,8 @@ import {
 
 export function ProductShowcase() {
   const reduced = useReducedMotion();
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
 
   return (
     <section
@@ -47,10 +50,25 @@ export function ProductShowcase() {
           {...scrollRevealProps(scaleIn, reduced)}
         >
           <div className="absolute inset-0 bg-gradient-to-r from-[var(--brand-blue)] to-[var(--brand-cyan)] blur-3xl opacity-10 dark:opacity-20 rounded-3xl" />
+          {/* Desktop screenshot */}
           <img
             alt="Repo Remover dashboard showing repository management with search, filters, and bulk actions"
-            className="relative rounded-xl border border-divider shadow-2xl w-full"
-            src="/images/dashboard-screenshot.png"
+            className="relative rounded-xl border border-divider shadow-2xl w-full hidden sm:block"
+            src={
+              isDark
+                ? "/images/dashboard-dark.png"
+                : "/images/dashboard-light.png"
+            }
+          />
+          {/* Mobile screenshot */}
+          <img
+            alt="Repo Remover dashboard on mobile showing repository list with badges and actions"
+            className="relative rounded-xl border border-divider shadow-2xl w-full sm:hidden max-w-[320px] mx-auto"
+            src={
+              isDark
+                ? "/images/dashboard-mobile-dark.png"
+                : "/images/dashboard-mobile-light.png"
+            }
           />
         </motion.div>
 
