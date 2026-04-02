@@ -1,5 +1,6 @@
 import { motion, useReducedMotion } from "framer-motion";
 import {
+  Check,
   CheckSquare,
   ExternalLink,
   Eye,
@@ -341,17 +342,17 @@ export function GetStartedSection() {
 
               <InlinePATForm />
 
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-6 mt-5 text-xs text-default-400">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-center gap-1.5 sm:gap-6 mt-5 text-xs text-default-400">
                 <span className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-success inline-block shrink-0" />
+                  <Check className="h-3.5 w-3.5 text-success shrink-0" />
                   Stays in your browser
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-success inline-block shrink-0" />
+                  <Check className="h-3.5 w-3.5 text-success shrink-0" />
                   Never sent to a server
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-success inline-block shrink-0" />
+                  <Check className="h-3.5 w-3.5 text-success shrink-0" />
                   100% free
                 </span>
               </div>

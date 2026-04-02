@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ArrowRight, Github } from "lucide-react";
+import { ArrowRight, Check, Github } from "lucide-react";
 
 import { fadeUp, staggerContainer } from "@/utils/motion";
 
@@ -73,14 +73,23 @@ export function HeroSection() {
         </motion.div>
 
         <motion.div
-          className="mt-8 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs sm:text-sm text-default-600"
+          className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-x-4 text-xs sm:text-sm text-default-600"
           variants={fadeUp}
         >
-          <span>Free forever</span>
-          <span className="w-1 h-1 rounded-full bg-default-300" />
-          <span>100% in-browser</span>
-          <span className="w-1 h-1 rounded-full bg-default-300" />
-          <span>Token never leaves your device</span>
+          <span className="inline-flex items-center gap-1.5">
+            <Check className="h-3.5 w-3.5 text-[var(--brand-blue)] sm:hidden" />
+            Free forever
+          </span>
+          <span className="hidden sm:block w-1 h-1 rounded-full bg-default-300" />
+          <span className="inline-flex items-center gap-1.5">
+            <Check className="h-3.5 w-3.5 text-[var(--brand-blue)] sm:hidden" />
+            100% in-browser
+          </span>
+          <span className="hidden sm:block w-1 h-1 rounded-full bg-default-300" />
+          <span className="inline-flex items-center gap-1.5">
+            <Check className="h-3.5 w-3.5 text-[var(--brand-blue)] sm:hidden" />
+            Token never leaves your device
+          </span>
         </motion.div>
       </motion.div>
     </section>

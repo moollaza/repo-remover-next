@@ -23,12 +23,18 @@ export function GenerateReposButton() {
     typeof window !== "undefined" &&
     new URLSearchParams(window.location.search).has("demo");
 
-  if ((!import.meta.env.DEV && !hasDemoParam) || !octokit) {
+  const isE2E =
+    typeof window !== "undefined" &&
+    (window as unknown as Record<string, unknown>).__E2E_PLAIN_STORAGE__ ===
+      true;
+
+  if ((!import.meta.env.DEV && !hasDemoParam) || !octokit || isE2E) {
     return null;
   }
 
   return (
     <Button
+      data-testid="generate-repos-button"
       className={cn(
         "border-[var(--brand-blue)] px-4 py-2 text-sm font-medium text-[var(--brand-blue)]",
         "hover:bg-[var(--brand-blue)] hover:text-white",
