@@ -16,7 +16,7 @@ const faqs = [
   },
   {
     answer:
-      "Archiving is reversible on GitHub. Deletion is permanent, so Repo Remover asks you to type your username before it will delete anything.",
+      "Both archive and delete require you to type your username first. Archiving is reversible on GitHub anytime. Deletion is permanent — there is no undo.",
     question: "Can I undo a deletion?",
   },
   {

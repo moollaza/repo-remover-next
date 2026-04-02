@@ -68,7 +68,7 @@ export function CTASection() {
               </motion.a>
             </motion.div>
             <motion.p className="text-sm text-white/70 mt-6" variants={fadeUp}>
-              Free and open source · No sign-up · Runs in your browser
+              250,000+ repos cleaned up · Trusted by 25,000+ developers
             </motion.p>
           </motion.div>
         </motion.div>

@@ -55,12 +55,12 @@ const features = [
   },
   {
     benefits: [
+      "Both actions require typing your username to confirm",
       "Archiving is always reversible through GitHub",
-      "Deletion requires explicit username confirmation",
-      "Review your full selection before any action executes",
+      "Review your full selection before anything runs",
     ],
     description:
-      "Archive is reversible. Delete requires typing your username. You see exactly which repos are affected before anything runs.",
+      "Every bulk action requires typing your username to confirm. Archiving is reversible. You see exactly which repos are affected before anything executes.",
     icon: Shield,
     title: "Safer Destructive Actions",
   },
