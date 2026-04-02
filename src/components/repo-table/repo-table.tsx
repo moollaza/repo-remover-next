@@ -315,7 +315,7 @@ export default function RepoTable({
                     ? sortDescriptor.direction
                     : "none"
                 }
-                className="px-3 py-3 text-left text-xs font-semibold text-default-500 uppercase tracking-wider cursor-pointer select-none hover:bg-default-200 transition-colors"
+                className="w-24 sm:w-auto px-3 py-3 text-left text-xs font-semibold text-default-500 uppercase tracking-wider cursor-pointer select-none hover:bg-default-200 transition-colors"
                 data-sortable="true"
                 onClick={() => handleSortChange("updatedAt")}
                 scope="col"
@@ -436,7 +436,7 @@ export default function RepoTable({
 
                     {/* Last Updated */}
                     <TableCell
-                      className="px-3 py-3 text-default-400 whitespace-nowrap"
+                      className="px-3 py-3 text-default-400 sm:whitespace-nowrap"
                       data-testid="repo-updated-at"
                       title={
                         repo.updatedAt

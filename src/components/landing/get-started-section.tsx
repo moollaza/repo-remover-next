@@ -342,19 +342,21 @@ export function GetStartedSection() {
 
               <InlinePATForm />
 
-              <div className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-center gap-1.5 sm:gap-6 mt-5 text-xs text-default-400">
-                <span className="flex items-center gap-1.5">
-                  <Check className="h-3.5 w-3.5 text-success shrink-0" />
-                  Stays in your browser
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <Check className="h-3.5 w-3.5 text-success shrink-0" />
-                  Never sent to a server
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <Check className="h-3.5 w-3.5 text-success shrink-0" />
-                  100% free
-                </span>
+              <div className="flex justify-center mt-5">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-1.5 sm:gap-6 text-xs text-default-400">
+                  <span className="flex items-center gap-1.5">
+                    <Check className="h-3.5 w-3.5 text-success shrink-0" />
+                    Stays in your browser
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <Check className="h-3.5 w-3.5 text-success shrink-0" />
+                    Never sent to a server
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <Check className="h-3.5 w-3.5 text-success shrink-0" />
+                    100% free
+                  </span>
+                </div>
               </div>
             </CardContent>
           </Card>
