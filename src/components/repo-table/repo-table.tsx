@@ -268,7 +268,10 @@ export default function RepoTable({
           <TableHeader>
             <TableRow className="bg-default-100 border-b border-divider">
               {/* Checkbox column */}
-              <TableHead className="w-12 px-3 py-3" scope="col">
+              <TableHead
+                className="w-8 sm:w-12 px-1.5 sm:px-3 py-3"
+                scope="col"
+              >
                 <Checkbox
                   aria-label="Select all"
                   checked={allSelectableSelected && selectableRepos.length > 0}
@@ -321,7 +324,8 @@ export default function RepoTable({
                 scope="col"
               >
                 <span className="inline-flex items-center gap-1">
-                  Last Updated
+                  <span className="sm:hidden">Updated</span>
+                  <span className="hidden sm:inline">Last Updated</span>
                   {sortDescriptor.column === "updatedAt" && (
                     <span className="text-default-400">
                       {sortDescriptor.direction === "ascending"
@@ -362,7 +366,7 @@ export default function RepoTable({
                     key={repo.id}
                   >
                     {/* Checkbox */}
-                    <TableCell className="w-12 px-3 py-3">
+                    <TableCell className="w-8 sm:w-12 px-1.5 sm:px-3 py-3">
                       <Checkbox
                         aria-label={repo.name}
                         checked={isSelected && !disabled}
