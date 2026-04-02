@@ -21,7 +21,7 @@ export function HeroSection() {
             <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--brand-blue)]" />
           </span>
           <span className="text-sm text-default-500">
-            Built for side projects, stale forks, and repo sprawl
+            250,000+ repos cleaned up by 25,000+ developers
           </span>
         </motion.div>
 
@@ -29,9 +29,9 @@ export function HeroSection() {
           className="text-4xl md:text-6xl font-bold mb-6 leading-tight"
           variants={fadeUp}
         >
-          GitHub makes you clean up repos{" "}
+          Clean up your GitHub{" "}
           <span className="bg-gradient-to-r from-[var(--brand-blue)] to-[var(--brand-cyan)] bg-clip-text text-transparent">
-            one by one.
+            without touching repos one by one
           </span>
         </motion.h1>
 
@@ -39,8 +39,9 @@ export function HeroSection() {
           className="text-lg md:text-xl text-default-500 mb-10 max-w-2xl mx-auto leading-relaxed"
           variants={fadeUp}
         >
-          Archive or delete dozens of repositories from one screen. Repo Remover
-          runs in your browser, so your token goes straight to GitHub.
+          Select the repos you&apos;re done with and clean them up in bulk — one
+          developer deleted 100 in a single session. Your token never leaves
+          your browser.
         </motion.p>
 
         <motion.div
@@ -78,7 +79,7 @@ export function HeroSection() {
         >
           <span>Free and open source</span>
           <span className="w-1 h-1 rounded-full bg-default-300" />
-          <span>Runs in your browser</span>
+          <span>Works with org repos</span>
           <span className="w-1 h-1 rounded-full bg-default-300" />
           <span>No sign-up required</span>
         </motion.div>

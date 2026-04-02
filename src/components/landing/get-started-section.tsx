@@ -60,7 +60,7 @@ const steps = [
   },
   {
     description:
-      "Filter your list, check the repos you want, then archive or delete them in bulk.",
+      "Filter your list, check the repos you want, and clean them up in one go.",
     icon: CheckSquare,
     number: "3",
     title: "Select and Clean Up",
@@ -267,7 +267,7 @@ export function GetStartedSection() {
             className="text-lg text-default-500 max-w-2xl mx-auto text-balance"
             variants={fadeUp}
           >
-            No install. No sign-up. Just a GitHub token and a browser.
+            No install. No sign-up. Just a GitHub token and two minutes.
           </motion.p>
         </motion.div>
 

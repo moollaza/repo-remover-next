@@ -44,14 +44,14 @@ function AnimatedIcon({
 const features = [
   {
     benefits: [
-      "Personal and organization repos in one table",
+      "Personal, org, forked, and archived repos loaded automatically",
       "Sort by name or last updated",
       "Pagination keeps large accounts usable",
     ],
     description:
-      "Personal repos, org repos, public, private, forks, archived. Load them into one sortable table instead of jumping between GitHub pages.",
+      "GitHub scatters your repos across profiles, orgs, and settings pages. Repo Remover loads them all \u2014 personal, org, forked, archived \u2014 into one sortable table.",
     icon: CheckSquare,
-    title: "Everything in One View",
+    title: "Stop Jumping Between Pages",
   },
   {
     benefits: [
@@ -71,18 +71,18 @@ const features = [
       "Useful for side projects, experiments, and stale org repos",
     ],
     description:
-      "GitHub makes cleanup painfully manual. Repo Remover lets you filter, select, and act on dozens from one screen.",
+      "No shell scripts, no clicking through settings pages one by one. Filter, check the boxes, and clean up in minutes instead of hours.",
     icon: Clock,
     title: "Cleanup Without Scripts",
   },
   {
     benefits: [
       "No accounts, no tracking, no cookies",
-      "Open source code you can audit",
-      "Optional token storage is encrypted locally",
+      "MIT-licensed \u2014 audit it yourself",
+      "Token encryption uses AES-GCM in localStorage",
     ],
     description:
-      "Repo Remover runs client-side. Your token goes from your browser to GitHub, and the code is public if you want to inspect it.",
+      "There is no server between you and GitHub. Your token is never stored unless you opt in to local encryption. The source code is public.",
     icon: Code,
     title: "Private by Design",
   },

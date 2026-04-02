@@ -26,8 +26,8 @@ export default function Footer() {
           <div className="col-span-1 md:col-span-2">
             <BrandLogo className="mb-4" />
             <p className="text-default-500 mb-4 max-w-md">
-              The easiest way to archive and delete multiple GitHub
-              repositories. Built with love by developers, for developers.
+              The fastest way to clean up your GitHub repositories. Free, open
+              source, and built for developers.
             </p>
             <div className="flex items-center gap-4">
               <a

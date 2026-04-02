@@ -89,14 +89,13 @@ export function ProductShowcase() {
             className="text-3xl md:text-4xl font-bold mb-4"
             variants={fadeUp}
           >
-            One Table. Every Repo. Full Control.
+            Find It. Select It. Done.
           </motion.h2>
           <motion.p
             className="text-lg text-default-500 max-w-2xl mx-auto"
             variants={fadeUp}
           >
-            Personal, org, public, private, archived — all in one sortable,
-            searchable view.
+            Search, filter, and bulk-select across every repo you own.
           </motion.p>
         </motion.div>
 
@@ -246,7 +245,7 @@ export function ProductShowcase() {
             <div className="text-2xl mb-2">✅</div>
             <h3 className="font-semibold mb-1">Act on Many at Once</h3>
             <p className="text-sm text-default-500">
-              Select repos, then archive or delete in bulk
+              Select repos, then clean them up in one batch
             </p>
           </motion.div>
         </motion.div>

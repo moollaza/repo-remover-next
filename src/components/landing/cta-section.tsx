@@ -36,8 +36,8 @@ export function CTASection() {
               className="text-lg md:text-xl mb-10 text-white/90 max-w-2xl mx-auto"
               variants={fadeUp}
             >
-              Archive the keepers. Delete the experiments. Do it from one
-              screen, in your browser.
+              Archive the keepers. Delete the experiments. It takes about two
+              minutes.
             </motion.p>
             <motion.div
               className="flex flex-col sm:flex-row items-center justify-center gap-4"
@@ -68,7 +68,7 @@ export function CTASection() {
               </motion.a>
             </motion.div>
             <motion.p className="text-sm text-white/70 mt-6" variants={fadeUp}>
-              250,000+ repos cleaned up · Trusted by 25,000+ developers
+              Trusted by 25,000+ developers · Free and open source
             </motion.p>
           </motion.div>
         </motion.div>
