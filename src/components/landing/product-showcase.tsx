@@ -89,14 +89,14 @@ export function ProductShowcase() {
             className="text-3xl md:text-4xl font-bold mb-4"
             variants={fadeUp}
           >
-            All Your Repos in One View
+            One Table. Every Repo. Full Control.
           </motion.h2>
           <motion.p
             className="text-lg text-default-500 max-w-2xl mx-auto"
             variants={fadeUp}
           >
-            Browse your repositories in an organized table. Search, filter,
-            select, and take action.
+            Personal, org, public, private, archived — all in one sortable,
+            searchable view.
           </motion.p>
         </motion.div>
 
@@ -230,23 +230,23 @@ export function ProductShowcase() {
         >
           <motion.div className="text-center" variants={fadeUp}>
             <div className="text-2xl mb-2">⚡</div>
-            <h3 className="font-semibold mb-1">Instant Search</h3>
+            <h3 className="font-semibold mb-1">Find Fast</h3>
             <p className="text-sm text-default-500">
-              Find repos by name or description in milliseconds
+              Type a name, see results instantly
             </p>
           </motion.div>
           <motion.div className="text-center" variants={fadeUp}>
             <div className="text-2xl mb-2">🎯</div>
-            <h3 className="font-semibold mb-1">Smart Filtering</h3>
+            <h3 className="font-semibold mb-1">Narrow It Down</h3>
             <p className="text-sm text-default-500">
-              Filter by type, visibility, and more
+              Filter by type, visibility, or status
             </p>
           </motion.div>
           <motion.div className="text-center" variants={fadeUp}>
             <div className="text-2xl mb-2">✅</div>
-            <h3 className="font-semibold mb-1">Bulk Actions</h3>
+            <h3 className="font-semibold mb-1">Act on Many at Once</h3>
             <p className="text-sm text-default-500">
-              Select multiple repos and act on them at once
+              Select repos, then archive or delete in bulk
             </p>
           </motion.div>
         </motion.div>

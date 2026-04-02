@@ -30,14 +30,14 @@ export function CTASection() {
               className="text-3xl md:text-5xl font-bold mb-6"
               variants={fadeUp}
             >
-              Ready to Clean Up Your GitHub?
+              Clean up the repos you stopped thinking about months ago.
             </motion.h2>
             <motion.p
               className="text-lg md:text-xl mb-10 text-white/90 max-w-2xl mx-auto"
               variants={fadeUp}
             >
-              Trusted by 25,000+ developers. No sign-up, no backend, no
-              tracking. Free and open source, forever.
+              Archive the keepers. Delete the experiments. Do it from one
+              screen, in your browser.
             </motion.p>
             <motion.div
               className="flex flex-col sm:flex-row items-center justify-center gap-4"
@@ -53,7 +53,7 @@ export function CTASection() {
                 whileTap={{ scale: 0.98 }}
               >
                 <Github className="h-5 w-5" />
-                Get Started Now
+                Start Cleaning Up
                 <ArrowRight className="h-4 w-4" />
               </motion.button>
               <motion.a
@@ -68,8 +68,7 @@ export function CTASection() {
               </motion.a>
             </motion.div>
             <motion.p className="text-sm text-white/70 mt-6" variants={fadeUp}>
-              Free forever · Your token stays in your browser · No servers, no
-              tracking
+              Free and open source · No sign-up · Runs in your browser
             </motion.p>
           </motion.div>
         </motion.div>

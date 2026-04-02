@@ -49,13 +49,13 @@ export function TestimonialsSection() {
             className="text-3xl md:text-4xl font-bold mb-4"
             variants={fadeUp}
           >
-            What Developers Are Saying
+            Developers Who Cleaned Up
           </motion.h2>
           <motion.p
             className="text-lg text-default-500 max-w-2xl mx-auto"
             variants={fadeUp}
           >
-            Real reviews from developers who use Repo Remover.
+            Real reviews from the community.
           </motion.p>
         </motion.div>
 

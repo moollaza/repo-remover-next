@@ -8,7 +8,6 @@ import {
   Key,
   Loader2,
   Search,
-  Trash2,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -47,31 +46,24 @@ const steps = [
       label: "Generate PAT on GitHub",
     },
     description:
-      "Create a GitHub PAT with the permissions needed to manage your repositories.",
+      "Create a GitHub Personal Access Token with the scopes needed to manage repositories.",
     icon: Key,
     number: "1",
-    title: "Generate a Personal Access Token",
+    title: "Create a Token",
   },
   {
     description:
-      "Paste your PAT into Repo Remover. It stays in your browser — we never see it, log it, or send it anywhere.",
+      "Paste the token below. Repo Remover validates it in-browser and loads your repositories.",
     icon: Search,
     number: "2",
-    title: "Paste Your Token & Load Repos",
+    title: "Load Your Repos",
   },
   {
     description:
-      "Use search and filters to locate old repos. Check the ones you want to archive or delete.",
+      "Filter your list, check the repos you want, then archive or delete them in bulk.",
     icon: CheckSquare,
     number: "3",
-    title: "Find & Select What to Remove",
-  },
-  {
-    description:
-      "Confirm your choices and Repo Remover handles the rest. No page reloads, no waiting.",
-    icon: Trash2,
-    number: "4",
-    title: "Archive or Delete in One Click",
+    title: "Select and Clean Up",
   },
 ];
 
@@ -232,8 +224,8 @@ function InlinePATForm() {
             <Info className="h-3.5 w-3.5" />
           </PopoverTrigger>
           <PopoverContent side="top" className="w-64 text-xs text-default-500">
-            Your token is AES-encrypted and stored only in your browser&apos;s
-            localStorage. It never leaves your device.
+            If you choose to remember your token, it is encrypted with AES-GCM
+            in localStorage. It never leaves your browser.
           </PopoverContent>
         </Popover>
       </div>
@@ -269,14 +261,13 @@ export function GetStartedSection() {
             className="text-3xl md:text-4xl font-bold mb-4"
             variants={fadeUp}
           >
-            Get Started in Under 2 Minutes
+            Three Steps. Cleaner GitHub.
           </motion.h2>
           <motion.p
             className="text-lg text-default-500 max-w-2xl mx-auto text-balance"
             variants={fadeUp}
           >
-            No installs, no sign-up, no server. Just a token in your browser and
-            you're ready to go.
+            No install. No sign-up. Just a GitHub token and a browser.
           </motion.p>
         </motion.div>
 
@@ -336,10 +327,10 @@ export function GetStartedSection() {
           <Card>
             <CardContent className="p-8">
               <h3 className="text-xl font-semibold mb-2 text-center">
-                Ready to start?
+                Paste your token
               </h3>
               <p className="text-sm text-default-500 text-center mb-6">
-                Paste your PAT below to load your repositories.
+                Load your repositories without leaving the page.
               </p>
 
               <InlinePATForm />
@@ -347,15 +338,15 @@ export function GetStartedSection() {
               <div className="flex items-center justify-center gap-6 mt-5 text-xs text-default-400">
                 <span className="flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-success inline-block" />
-                  Stays in your browser
+                  Runs locally
                 </span>
                 <span className="flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-success inline-block" />
-                  Never sent to a server
+                  Optional encrypted storage
                 </span>
                 <span className="flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-success inline-block" />
-                  100% free
+                  Free forever
                 </span>
               </div>
             </CardContent>
