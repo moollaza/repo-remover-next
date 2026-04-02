@@ -21,7 +21,7 @@ export function HeroSection() {
             <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--brand-blue)]" />
           </span>
           <span className="text-sm text-default-500">
-            250,000+ repos managed and counting
+            Built for side projects, stale forks, and repo sprawl
           </span>
         </motion.div>
 
@@ -29,9 +29,9 @@ export function HeroSection() {
           className="text-4xl md:text-6xl font-bold mb-6 leading-tight"
           variants={fadeUp}
         >
-          Archive or Delete Multiple GitHub Repos,{" "}
+          Clean up GitHub{" "}
           <span className="bg-gradient-to-r from-[var(--brand-blue)] to-[var(--brand-cyan)] bg-clip-text text-transparent">
-            Instantly
+            in one pass.
           </span>
         </motion.h1>
 
@@ -39,8 +39,9 @@ export function HeroSection() {
           className="text-lg md:text-xl text-default-500 mb-10 max-w-2xl mx-auto leading-relaxed"
           variants={fadeUp}
         >
-          Search, filter, and bulk-manage hundreds of repositories in one place.
-          Zero-knowledge — your token never leaves your browser.
+          Load every repo into one table, cut the list down fast, and archive or
+          delete in bulk. No scripts, no tab maze, and no backend handling your
+          token.
         </motion.p>
 
         <motion.div
@@ -56,7 +57,7 @@ export function HeroSection() {
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.98 }}
           >
-            Get Started
+            Start Cleaning Up
             <ArrowRight className="h-4 w-4" />
           </motion.button>
           <motion.a
@@ -76,11 +77,11 @@ export function HeroSection() {
           className="mt-8 flex items-center justify-center gap-4 text-sm text-default-600"
           variants={fadeUp}
         >
-          <span>Free forever</span>
+          <span>Free and open source</span>
           <span className="w-1 h-1 rounded-full bg-default-300" />
-          <span>100% in-browser</span>
+          <span>Direct GitHub API calls</span>
           <span className="w-1 h-1 rounded-full bg-default-300" />
-          <span>Your token never leaves your device</span>
+          <span>No sign-up required</span>
         </motion.div>
       </motion.div>
     </section>

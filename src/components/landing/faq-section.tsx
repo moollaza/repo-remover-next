@@ -11,32 +11,31 @@ import { fadeUp, scrollRevealProps, staggerContainer } from "@/utils/motion";
 const faqs = [
   {
     answer:
-      "Yes! Repo Remover is completely free and open source. There are no hidden fees, premium tiers, or paid features.",
-    question: "Is Repo Remover really free?",
+      "Repo Remover uses your token in the browser to call the GitHub API directly. There is no server in the middle. If you choose Remember my token, it is encrypted with AES-GCM before it is stored in localStorage.",
+    question: "Is my token safe?",
   },
   {
     answer:
-      "Completely safe. Your token is only ever used in your browser to call the GitHub API — it's never sent to any server, logged, or stored anywhere outside your device.",
-    question: "Is my data safe? Do you store my GitHub credentials?",
+      "Archiving is reversible on GitHub. Deletion is permanent, so Repo Remover asks you to type your username before it will delete anything.",
+    question: "Can I undo deletions?",
   },
   {
     answer:
-      "Archiving is fully reversible — you can unarchive repositories anytime through GitHub. However, deletions are permanent. That's why we show a confirmation dialog with username verification before any deletion.",
-    question: "Can I undo deletions or archiving?",
+      "Yes. If your token has the right scopes, you'll see repos from every organization you belong to alongside your personal repos.",
+    question: "Does it work with org repos?",
   },
   {
     answer:
-      "Yes! Repo Remover works with both personal and organization repositories, as long as your token has the necessary permissions.",
-    question: "Does this work with organization repositories?",
+      "The app paginates large lists and lets you filter before selecting. In practice, the limits come from the GitHub API and your browser, not an arbitrary cap inside Repo Remover.",
+    question: "How many repos can I manage?",
+  },
+  {
+    answer: "Yes. Repo Remover is free and open source, with no premium tier.",
+    question: "Is it really free?",
   },
   {
     answer:
-      "There's no limit. Whether you have 10 or 1,000+ repositories, Repo Remover handles them all with search, filtering, and pagination.",
-    question: "How many repositories can I manage at once?",
-  },
-  {
-    answer:
-      "No. Repo Remover runs entirely in your browser. Just visit the site, paste your GitHub Personal Access Token, and start cleaning up.",
+      "No. Open the site, paste a token, and start cleaning up. It works in any modern browser.",
     question: "Do I need to install anything?",
   },
 ];
@@ -55,10 +54,10 @@ export function FAQSection() {
             className="text-3xl md:text-4xl font-bold mb-4"
             variants={fadeUp}
           >
-            Frequently Asked Questions
+            Questions before you delete anything?
           </motion.h2>
           <motion.p className="text-lg text-default-500" variants={fadeUp}>
-            Everything you need to know about Repo Remover
+            Short answers to the trust and safety questions.
           </motion.p>
         </motion.div>
 

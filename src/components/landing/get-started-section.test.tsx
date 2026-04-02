@@ -11,7 +11,9 @@ describe("GetStartedSection", () => {
     render(<GetStartedSection />);
 
     expect(
-      screen.getByRole("heading", { name: /get started/i }),
+      screen.getByRole("heading", {
+        name: /from token to cleanup in three steps\./i,
+      }),
     ).toBeInTheDocument();
   });
 
