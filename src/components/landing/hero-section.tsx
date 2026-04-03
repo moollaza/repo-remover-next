@@ -21,15 +21,16 @@ export function HeroSection() {
             <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--brand-blue)]" />
           </span>
           <span className="text-sm text-default-500">
-            Built for side projects, stale forks, and repo sprawl
+            250,000+ repos cleaned&nbsp;up!
           </span>
         </motion.div>
 
         <motion.h1
-          className="text-3xl sm:text-4xl md:text-6xl font-bold mb-6 leading-tight text-pretty"
+          className="text-3xl sm:text-4xl md:text-6xl font-bold mb-6 leading-tight"
           variants={fadeUp}
         >
-          The bulk cleanup tool{" "}
+          The bulk cleanup tool
+          <br />
           <span className="bg-gradient-to-r from-[var(--brand-blue)] to-[var(--brand-cyan)] bg-clip-text text-transparent">
             GitHub should have&nbsp;built.
           </span>

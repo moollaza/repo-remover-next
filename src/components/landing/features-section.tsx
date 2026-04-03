@@ -1,5 +1,5 @@
 import { motion, useInView, useReducedMotion } from "framer-motion";
-import { Clock, Code, CheckSquare, Shield } from "lucide-react";
+import { CheckSquare, Filter, Search, Shield } from "lucide-react";
 import { useRef } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -44,48 +44,47 @@ function AnimatedIcon({
 const features = [
   {
     benefits: [
-      "Personal and organization repos in one table",
-      "Sort by name or last updated",
-      "Pagination keeps large accounts usable",
+      "Search across all your repositories instantly",
+      "Filter by name and description",
+      "See results update in real-time as you type",
     ],
     description:
-      "Personal repos, org repos, forks, and archived projects all show up in one table so cleanup starts with context, not guesswork.",
+      "Find any repository instantly by name or description. No more scrolling through endless lists.",
+    icon: Search,
+    title: "Instant Search",
+  },
+  {
+    benefits: [
+      "Filter by visibility (public, private, archived)",
+      "Sort by any column with a single click",
+      "Combine multiple filters for precise results",
+    ],
+    description:
+      "Show only private repos, archived projects, or forks. Sort by name or last updated. Combine filters for precise results.",
+    icon: Filter,
+    title: "Advanced Filtering & Sorting",
+  },
+  {
+    benefits: [
+      "Select individual repos or use 'select all'",
+      "Archive or delete multiple repos simultaneously",
+      "Confirmation dialogs prevent accidents",
+    ],
+    description:
+      "Select repos with checkboxes and act on all of them at once. Archive dozens or delete test repos in a single click.",
     icon: CheckSquare,
-    title: "See Every Repo at Once",
+    title: "Bulk Operations Made Simple",
   },
   {
     benefits: [
-      "Archiving is always reversible through GitHub",
-      "Deletion requires explicit username confirmation",
-      "Review your full selection before any action executes",
+      "Your token stays in your browser only",
+      "No server, no backend, no data collection",
+      "Open source code you can read and audit",
     ],
     description:
-      "Archive is reversible. Delete requires typing your username. You review the exact repos affected before anything runs.",
+      "Your token never leaves your browser. It's used directly to call the GitHub API client-side — no backend, no server, nothing to intercept.",
     icon: Shield,
-    title: "Delete with Guardrails",
-  },
-  {
-    benefits: [
-      "No shell scripts to write or maintain",
-      "Built-in throttling handles GitHub API rate limits",
-      "Useful for side projects, experiments, and stale org repos",
-    ],
-    description:
-      "Instead of opening repo after repo, you filter once, select what matters, and clean up from one screen.",
-    icon: Clock,
-    title: "Skip the Manual Grind",
-  },
-  {
-    benefits: [
-      "No account to create",
-      "No cookies required",
-      "No backend handling your token",
-      "Open source code you can audit",
-    ],
-    description:
-      "Repo Remover stays client-side. Your token goes from your browser to GitHub, and optional saved tokens are encrypted locally.",
-    icon: Code,
-    title: "Private by Design",
+    title: "100% Private & Secure",
   },
 ];
 

@@ -44,24 +44,24 @@ const steps = [
   {
     cta: {
       href: "https://github.com/settings/tokens/new?scopes=repo,delete_repo,read:org&description=Repo+Remover",
-      label: "Create token on GitHub",
+      label: "Generate PAT on GitHub",
     },
     description:
-      "Create a GitHub Personal Access Token with the repo access needed for the repositories you want to manage.",
+      "Create a GitHub PAT with the permissions needed to manage your repositories.",
     icon: Key,
     number: "1",
-    title: "Create a Token",
+    title: "Generate a Personal Access Token",
   },
   {
     description:
-      "Paste the token below. Repo Remover validates it in the browser and loads your repositories.",
+      "Paste your PAT into Repo Remover. It stays in your browser — we never see it, log it, or send it anywhere.",
     icon: Search,
     number: "2",
-    title: "Load Your Repos",
+    title: "Paste Your Token & Load Repos",
   },
   {
     description:
-      "Search, filter, and select what should stay, be archived, or be deleted.",
+      "Search, filter, and select what should be archived, or deleted. Confirm your choices and Repo Remover handles the rest.",
     icon: CheckSquare,
     number: "3",
     title: "Review and Clean Up",
@@ -225,8 +225,8 @@ function InlinePATForm() {
             <Info className="h-3.5 w-3.5" />
           </PopoverTrigger>
           <PopoverContent side="top" className="w-64 text-xs text-default-500">
-            If you choose to remember your token, it is encrypted with AES-GCM
-            in localStorage. It never leaves your browser.
+            Your token is AES-encrypted and stored only in your browser&apos;s
+            localStorage. It never leaves your device.
           </PopoverContent>
         </Popover>
       </div>
@@ -262,14 +262,14 @@ export function GetStartedSection() {
             className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4"
             variants={fadeUp}
           >
-            From token to cleanup in three steps.
+            Get Started in Under 2 Minutes
           </motion.h2>
           <motion.p
             className="text-lg text-default-500 max-w-2xl mx-auto text-balance"
             variants={fadeUp}
           >
-            No install, no account, and no backend setup. Just a GitHub token
-            and the repos you want to review.
+            No installs, no sign-up, no server. Just a token in your browser and
+            you're ready to go.
           </motion.p>
         </motion.div>
 
@@ -326,10 +326,10 @@ export function GetStartedSection() {
           <Card>
             <CardContent className="p-8">
               <h3 className="text-xl font-semibold mb-2 text-center">
-                Paste a token to load your repos
+                Ready to start?
               </h3>
               <p className="text-sm text-default-500 text-center mb-6">
-                Review everything before you make a change.
+                Paste your PAT below to load your repositories.
               </p>
 
               <InlinePATForm />

@@ -27,20 +27,20 @@ export function ProductShowcase() {
             className="inline-block px-3 py-1 text-xs rounded-full bg-[var(--brand-blue)]/10 text-[var(--brand-blue)] border border-[var(--brand-blue)]/20 mb-4"
             variants={fadeUp}
           >
-            See the workflow
+            See it in action
           </motion.span>
           <motion.h2
             className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4"
             variants={fadeUp}
           >
-            Review everything before you change anything.
+            All Your Repos in One View
           </motion.h2>
           <motion.p
             className="text-lg text-default-500 max-w-2xl mx-auto"
             variants={fadeUp}
           >
-            Personal repos, org repos, public repos, private repos, forks, and
-            archived projects all land in one sortable view.
+            Browse your repositories in an organized table. Search, filter,
+            select, and take action.
           </motion.p>
         </motion.div>
 
@@ -79,23 +79,23 @@ export function ProductShowcase() {
         >
           <motion.div className="text-center" variants={fadeUp}>
             <div className="text-2xl mb-2">⚡</div>
-            <h3 className="font-semibold mb-1">Search in Seconds</h3>
+            <h3 className="font-semibold mb-1">Instant Search</h3>
             <p className="text-sm text-default-500">
-              Type a name and narrow the list immediately
+              Find repos by name or description in milliseconds
             </p>
           </motion.div>
           <motion.div className="text-center" variants={fadeUp}>
             <div className="text-2xl mb-2">🎯</div>
-            <h3 className="font-semibold mb-1">Filter the Mess</h3>
+            <h3 className="font-semibold mb-1">Smart Filtering</h3>
             <p className="text-sm text-default-500">
-              Sort by what matters and cut the list down fast
+              Filter by type, visibility, and more
             </p>
           </motion.div>
           <motion.div className="text-center" variants={fadeUp}>
             <div className="text-2xl mb-2">✅</div>
-            <h3 className="font-semibold mb-1">Act with Context</h3>
+            <h3 className="font-semibold mb-1">Bulk Actions</h3>
             <p className="text-sm text-default-500">
-              Review the selection, then archive or delete in bulk
+              Select multiple repos and act on them at once
             </p>
           </motion.div>
         </motion.div>
