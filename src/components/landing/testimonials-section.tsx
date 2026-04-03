@@ -39,7 +39,7 @@ export function TestimonialsSection() {
   const reduced = useReducedMotion();
 
   return (
-    <section className="w-full px-6 sm:px-8 py-16 sm:py-20 bg-default-50">
+    <section className="w-full px-6 sm:px-8 py-16 sm:py-20 bg-blue-50 dark:bg-blue-950/30">
       <div className="max-w-5xl mx-auto">
         <motion.div
           className="text-center mb-16"
