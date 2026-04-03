@@ -4,15 +4,16 @@ import { useReducer } from "react";
 
 export const REPOS_PER_ROUND = 10;
 export const MAX_MISSES = 4;
-export const BASE_FLIGHT_DURATION = 5; // seconds — slow enough to click comfortably in round 1
-export const SPEED_MULTIPLIER = 0.88; // gentler speed ramp between rounds
+export const BASE_FLIGHT_DURATION = 6; // seconds — very comfortable in round 1
+export const SPEED_MULTIPLIER = 0.86; // ~14% faster each round
 export const LURE_INTERVAL_MS = 10_000;
 export const LURE_FLIGHT_DURATION = 4;
-export const SPAWN_INTERVAL_MS = 1400; // ms between card spawns — gives breathing room
+export const SPAWN_INTERVAL_MS = 1800; // ms between spawns — leisurely in round 1
+export const ROUND_TRANSITION_MS = 2000;
 
 // ── Types ──
 
-export type GamePhase = "idle" | "playing" | "game-over";
+export type GamePhase = "idle" | "playing" | "round-transition" | "game-over";
 
 export interface GameState {
   phase: GamePhase;
@@ -27,6 +28,7 @@ export type GameAction =
   | { type: "START" }
   | { type: "HIT" }
   | { type: "MISS" }
+  | { type: "NEXT_ROUND" }
   | { type: "EXIT" };
 
 // ── Reducer ──
@@ -57,14 +59,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           totalCleaned: state.totalCleaned + 1,
           resolvedThisRound: resolved,
         };
-        // Advance round when all cards resolved
         if (resolved >= REPOS_PER_ROUND) {
-          return {
-            ...nextState,
-            round: state.round + 1,
-            misses: 0,
-            resolvedThisRound: 0,
-          };
+          return { ...nextState, phase: "round-transition" };
         }
         return nextState;
       }
@@ -79,13 +75,12 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
             phase: "game-over",
           };
         }
-        // Advance round when all cards resolved (even with misses)
         if (resolved >= REPOS_PER_ROUND) {
           return {
             ...state,
-            misses: 0,
-            resolvedThisRound: 0,
-            round: state.round + 1,
+            misses,
+            resolvedThisRound: resolved,
+            phase: "round-transition",
           };
         }
         return { ...state, misses, resolvedThisRound: resolved };
@@ -95,6 +90,21 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       }
       return state;
     }
+
+    case "round-transition":
+      if (action.type === "NEXT_ROUND") {
+        return {
+          ...state,
+          phase: "playing",
+          round: state.round + 1,
+          misses: 0,
+          resolvedThisRound: 0,
+        };
+      }
+      if (action.type === "EXIT") {
+        return initialState;
+      }
+      return state;
 
     case "game-over":
       if (action.type === "START") {

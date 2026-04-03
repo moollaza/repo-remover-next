@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Crosshair, X } from "lucide-react";
+import { Crosshair, Share2, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
@@ -9,6 +9,7 @@ import {
   BASE_FLIGHT_DURATION,
   MAX_MISSES,
   REPOS_PER_ROUND,
+  ROUND_TRANSITION_MS,
   SPAWN_INTERVAL_MS,
   SPEED_MULTIPLIER,
   useGameState,
@@ -27,11 +28,12 @@ interface FlyingCard {
   hitStyle: "archive" | "delete";
 }
 
-interface ScorePop {
+interface HitPop {
   id: string;
   x: number;
   y: number;
   points: number;
+  action: "Archived" | "Deleted";
 }
 
 let nextCardId = 0;
@@ -39,6 +41,7 @@ let nextCardId = 0;
 function createFlyingCard(): FlyingCard {
   const entry =
     REPO_RAIN_POOL[Math.floor(Math.random() * REPO_RAIN_POOL.length)];
+  const style = Math.random() > 0.5 ? "archive" : "delete";
   return {
     id: `hunt-${nextCardId++}`,
     entry,
@@ -46,7 +49,7 @@ function createFlyingCard(): FlyingCard {
     driftY: (Math.random() - 0.5) * 40,
     rotate: (Math.random() - 0.5) * 6,
     flipped: Math.random() > 0.5,
-    hitStyle: nextCardId % 2 === 0 ? "archive" : "delete",
+    hitStyle: style,
   };
 }
 
@@ -67,6 +70,28 @@ const hitVariants = {
   },
 };
 
+// ── Share helper ──
+
+function shareScore(score: number, repos: number, rounds: number) {
+  const text = `I cleaned ${repos} repos in ${rounds} round${rounds > 1 ? "s" : ""} and scored ${score} points in Repo Hunt! 🎯\n\nCan you beat my score?`;
+  const url = window.location.origin;
+
+  if (navigator.share) {
+    navigator.share({ text, url }).catch(() => {
+      // User cancelled or share failed — fall back to clipboard
+      copyToClipboard(text, url);
+    });
+  } else {
+    copyToClipboard(text, url);
+  }
+}
+
+function copyToClipboard(text: string, url: string) {
+  navigator.clipboard.writeText(`${text}\n${url}`).catch(() => {
+    // Clipboard write may fail in non-secure contexts — silently ignore
+  });
+}
+
 // ── Main Component ──
 
 interface RepoHuntProps {
@@ -76,8 +101,9 @@ interface RepoHuntProps {
 export default function RepoHunt({ onExit }: RepoHuntProps) {
   const [state, dispatch] = useGameState();
   const [cards, setCards] = useState<FlyingCard[]>([]);
-  const [scorePops, setScorePops] = useState<ScorePop[]>([]);
+  const [hitPops, setHitPops] = useState<HitPop[]>([]);
   const [showIntro, setShowIntro] = useState(true);
+  const [shared, setShared] = useState(false);
   const spawnedRef = useRef(0);
   const hitCountRef = useRef(0);
   const intervalsRef = useRef<Set<number>>(new Set());
@@ -121,6 +147,16 @@ export default function RepoHunt({ onExit }: RepoHuntProps) {
     };
   }, [state.phase, state.round, spawnInterval]);
 
+  // Round transition: auto-advance after delay
+  useEffect(() => {
+    if (state.phase !== "round-transition") return;
+    setCards([]);
+    const id = window.setTimeout(() => {
+      dispatch({ type: "NEXT_ROUND" });
+    }, ROUND_TRANSITION_MS);
+    return () => clearTimeout(id);
+  }, [state.phase, dispatch]);
+
   // Cleanup intervals on unmount
   useEffect(() => {
     return () => {
@@ -140,30 +176,31 @@ export default function RepoHunt({ onExit }: RepoHuntProps) {
     return () => document.removeEventListener("keydown", handler);
   }, [dispatch, onExit]);
 
-  // Clean up score pops after animation
+  // Clean up hit pops after animation
   useEffect(() => {
-    if (scorePops.length === 0) return;
+    if (hitPops.length === 0) return;
     const id = window.setTimeout(() => {
-      setScorePops((prev) => prev.slice(1));
-    }, 700);
+      setHitPops((prev) => prev.slice(1));
+    }, 800);
     return () => clearTimeout(id);
-  }, [scorePops.length]);
+  }, [hitPops.length]);
 
   const handleHit = useCallback(
-    (cardId: string, e: React.MouseEvent) => {
+    (card: FlyingCard, e: React.MouseEvent) => {
       hitCountRef.current++;
-      setCards((prev) => prev.filter((c) => c.id !== cardId));
+      setCards((prev) => prev.filter((c) => c.id !== card.id));
       dispatch({ type: "HIT" });
 
       const rect = arenaRef.current?.getBoundingClientRect();
       if (rect) {
-        setScorePops((prev) => [
+        setHitPops((prev) => [
           ...prev,
           {
             id: `pop-${hitCountRef.current}`,
             x: e.clientX - rect.left,
             y: e.clientY - rect.top,
             points: state.round * 10,
+            action: card.hitStyle === "archive" ? "Archived" : "Deleted",
           },
         ]);
       }
@@ -186,6 +223,7 @@ export default function RepoHunt({ onExit }: RepoHuntProps) {
 
   const handlePlayAgain = useCallback(() => {
     setShowIntro(false);
+    setShared(false);
     dispatch({ type: "START" });
   }, [dispatch]);
 
@@ -223,8 +261,26 @@ export default function RepoHunt({ onExit }: RepoHuntProps) {
         )}
       </AnimatePresence>
 
-      {/* HUD - always visible during play */}
-      {state.phase === "playing" && (
+      {/* Round transition banner */}
+      <AnimatePresence>
+        {state.phase === "round-transition" && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.05 }}
+            transition={{ type: "spring", stiffness: 400, damping: 25 }}
+            className="absolute inset-0 z-40 flex flex-col items-center justify-center bg-background/80"
+          >
+            <p className="font-mono text-5xl font-bold text-foreground">
+              ROUND {state.round + 1}
+            </p>
+            <p className="mt-3 text-lg text-default-500">Get ready...</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* HUD - visible during play and round transition */}
+      {(state.phase === "playing" || state.phase === "round-transition") && (
         <div className="flex items-center justify-between px-6 py-4 font-mono text-sm">
           <span className="text-lg text-default-500">
             SCORE: {String(state.score).padStart(3, "0")}
@@ -270,7 +326,7 @@ export default function RepoHunt({ onExit }: RepoHuntProps) {
                   } as React.CSSProperties
                 }
                 exit={hitVariants[card.hitStyle]}
-                onClick={(e) => handleHit(card.id, e)}
+                onClick={(e) => handleHit(card, e)}
                 onAnimationEnd={() => handleMiss(card.id)}
               >
                 <div
@@ -296,14 +352,16 @@ export default function RepoHunt({ onExit }: RepoHuntProps) {
           </AnimatePresence>
         )}
 
-        {/* Score popups */}
-        {scorePops.map((pop) => (
+        {/* Hit popups — show action + points */}
+        {hitPops.map((pop) => (
           <span
             key={pop.id}
-            className={`${styles.scorePop} text-success`}
+            className={`${styles.scorePop} ${
+              pop.action === "Archived" ? "text-warning" : "text-danger"
+            }`}
             style={{ left: pop.x, top: pop.y }}
           >
-            +{pop.points}
+            {pop.action}! +{pop.points}
           </span>
         ))}
       </div>
@@ -334,9 +392,20 @@ export default function RepoHunt({ onExit }: RepoHuntProps) {
             <p className="mt-2 text-default-400">
               Now clean your <em>real</em> ones.
             </p>
-            <div className="mt-10 flex justify-center gap-4">
+            <div className="mt-10 flex flex-wrap justify-center gap-3">
               <Button size="lg" onClick={handlePlayAgain}>
                 Play Again
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={() => {
+                  setShared(true);
+                  shareScore(state.score, state.totalCleaned, state.round);
+                }}
+              >
+                <Share2 className="mr-2 h-4 w-4" />
+                {shared ? "Copied!" : "Share Score"}
               </Button>
               <Button
                 size="lg"

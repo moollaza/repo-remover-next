@@ -27,7 +27,7 @@ describe("gameReducer", () => {
   test("HIT increments score and totalCleaned", () => {
     const playing: GameState = { ...initialState, phase: "playing" };
     const state = gameReducer(playing, { type: "HIT" });
-    expect(state.score).toBe(10); // round 1 * 10
+    expect(state.score).toBe(10);
     expect(state.totalCleaned).toBe(1);
     expect(state.resolvedThisRound).toBe(1);
   });
@@ -56,16 +56,32 @@ describe("gameReducer", () => {
     expect(state.phase).toBe("game-over");
   });
 
-  test("resolving all cards in a round advances to next round", () => {
+  test("resolving all cards transitions to round-transition", () => {
     const playing: GameState = {
       ...initialState,
       phase: "playing",
       resolvedThisRound: REPOS_PER_ROUND - 1,
     };
     const state = gameReducer(playing, { type: "HIT" });
+    expect(state.phase).toBe("round-transition");
+    expect(state.resolvedThisRound).toBe(REPOS_PER_ROUND);
+  });
+
+  test("NEXT_ROUND from round-transition advances round and resets", () => {
+    const transition: GameState = {
+      ...initialState,
+      phase: "round-transition",
+      round: 1,
+      misses: 2,
+      resolvedThisRound: REPOS_PER_ROUND,
+      score: 80,
+    };
+    const state = gameReducer(transition, { type: "NEXT_ROUND" });
+    expect(state.phase).toBe("playing");
     expect(state.round).toBe(2);
-    expect(state.resolvedThisRound).toBe(0);
     expect(state.misses).toBe(0);
+    expect(state.resolvedThisRound).toBe(0);
+    expect(state.score).toBe(80); // score preserved
   });
 
   test("EXIT from playing returns to idle", () => {
