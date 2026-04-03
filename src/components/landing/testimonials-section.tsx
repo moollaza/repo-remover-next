@@ -55,7 +55,7 @@ export function TestimonialsSection() {
             className="text-lg text-default-500 max-w-2xl mx-auto"
             variants={fadeUp}
           >
-            Feedback from Product Hunt and GitHub.
+            Real feedback from real developers.
           </motion.p>
         </motion.div>
 

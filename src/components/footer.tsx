@@ -41,11 +41,11 @@ export default function Footer() {
               >
                 <img
                   alt="Repo Remover - Archive or delete multiple GitHub repos with a single click. | Product Hunt"
-                  className="h-8"
+                  className="h-8 w-auto"
                   height={32}
                   loading="lazy"
                   src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=159117&theme=light&t=1775226012179"
-                  width={175}
+                  width={150}
                 />
               </a>
             </div>

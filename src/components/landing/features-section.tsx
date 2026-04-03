@@ -78,13 +78,13 @@ const features = [
   {
     benefits: [
       "Your token stays in your browser only",
-      "No server, no backend, no data collection",
+      "No server, no backend, no personal data collected",
       "Open source code you can read and audit",
     ],
     description:
       "Your token never leaves your browser. It's used directly to call the GitHub API client-side — no backend, no server, nothing to intercept.",
     icon: Shield,
-    title: "100% Private & Secure",
+    title: "Private & Secure",
   },
 ];
 

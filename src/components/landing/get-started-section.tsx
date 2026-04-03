@@ -225,8 +225,8 @@ function InlinePATForm() {
             <Info className="h-3.5 w-3.5" />
           </PopoverTrigger>
           <PopoverContent side="top" className="w-64 text-xs text-default-500">
-            Your token is AES-encrypted and stored only in your browser&apos;s
-            localStorage. It never leaves your device.
+            Your token is encrypted locally before being saved to your browser.
+            It is never sent to a server.
           </PopoverContent>
         </Popover>
       </div>
