@@ -1,4 +1,3 @@
-// filepath: /Users/zaahirmoolla/projects/repo-remover-next/e2e/pages/base-page.ts
 import { expect, type Locator, type Page } from "@playwright/test";
 
 export class BasePage {
@@ -111,7 +110,7 @@ export class BasePage {
     );
     await this.expectFooterLink(
       "Feedback",
-      "mailto:hello@quickbudget.xyz?subject=Repo%20Remover%20Feedback",
+      "mailto:hello@reporemover.xyz?subject=Repo%20Remover%20Feedback",
     );
   }
 }
