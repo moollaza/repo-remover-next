@@ -12,10 +12,10 @@ export function CTASection() {
   const reduced = useReducedMotion();
 
   return (
-    <section className="w-full px-6 py-20">
+    <section className="w-full px-6 sm:px-8 py-16 sm:py-20">
       <div className="max-w-4xl mx-auto">
         <motion.div
-          className="rounded-2xl p-12 md:p-16 text-center bg-gradient-to-br from-[var(--brand-blue)] to-[var(--brand-cyan)] dark:from-[var(--brand-blue)]/90 dark:to-[var(--brand-cyan)]/80 text-white relative overflow-hidden shadow-2xl"
+          className="rounded-2xl p-8 sm:p-12 md:p-16 text-center bg-gradient-to-br from-[var(--brand-blue)] to-[var(--brand-cyan)] dark:from-[var(--brand-blue)]/90 dark:to-[var(--brand-cyan)]/80 text-white relative overflow-hidden shadow-2xl"
           {...scrollRevealProps(scaleIn, reduced)}
         >
           {/* Decorative blurs */}
@@ -27,7 +27,7 @@ export function CTASection() {
             {...scrollRevealProps(staggerContainer, reduced)}
           >
             <motion.h2
-              className="text-3xl md:text-5xl font-bold mb-6"
+              className="text-2xl sm:text-3xl md:text-5xl font-bold mb-6"
               variants={fadeUp}
             >
               Start with the repos you already know can go.
@@ -44,7 +44,7 @@ export function CTASection() {
               variants={fadeUp}
             >
               <motion.button
-                className="inline-flex items-center gap-2 px-8 py-3 rounded-lg bg-white text-[var(--brand-blue)] font-medium text-base hover:bg-white/90 transition-colors"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3 rounded-lg bg-white text-[var(--brand-blue)] font-medium text-sm sm:text-base hover:bg-white/90 transition-colors"
                 onClick={() => {
                   const target = document.getElementById("get-started");
                   target?.scrollIntoView({ behavior: "smooth" });
@@ -57,7 +57,7 @@ export function CTASection() {
                 <ArrowRight className="h-4 w-4" />
               </motion.button>
               <motion.a
-                className="inline-flex items-center gap-2 px-8 py-3 rounded-lg border border-white/30 text-white font-medium text-base hover:bg-white/10 transition-colors"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3 rounded-lg border border-white/30 text-white font-medium text-sm sm:text-base hover:bg-white/10 transition-colors"
                 href="https://github.com/moollaza/repo-remover"
                 rel="noopener noreferrer"
                 target="_blank"

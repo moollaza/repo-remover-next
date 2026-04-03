@@ -49,8 +49,8 @@ export default function Dashboard({
 
   return (
     <section className="py-10 flex-grow">
-      <div className="flex items-center justify-between mb-8">
-        <div>
+      <div className="flex items-start sm:items-center justify-between gap-4 mb-8">
+        <div className="min-w-0">
           <h1
             className="text-2xl font-semibold"
             data-testid="repo-table-header"
@@ -65,7 +65,7 @@ export default function Dashboard({
         {onRefresh && (
           <Button
             aria-label="Refresh repository data"
-            className="gap-2 px-4 py-2 border-divider cursor-pointer hover:bg-default-100 hover:border-default-300 active:scale-95 transition-all"
+            className="shrink-0 gap-2 px-4 py-2 border-divider cursor-pointer hover:bg-default-100 hover:border-default-300 active:scale-95 transition-all"
             disabled={isLoading || isRefreshing}
             onClick={onRefresh}
             variant="ghost"

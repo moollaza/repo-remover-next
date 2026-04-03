@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "skills": {
+    "comp-analysis": {
+      "source": "anthropics/knowledge-work-plugins",
+      "sourceType": "github",
+      "computedHash": "80e36f673ea23acc78413cd1e9f94ed112f9ba29e22e44dc24e526eef8bc9e1e"
+    },
+    "competitive-brief": {
+      "source": "anthropics/knowledge-work-plugins",
+      "sourceType": "github",
+      "computedHash": "5cbd5b8ad2d9234fba1a149ad90e2889539e3f74d2cc66710f0bf92c23c9de3f"
+    },
+    "content-strategy": {
+      "source": "coreyhaines31/marketingskills",
+      "sourceType": "github",
+      "computedHash": "be124f3733b037fb8d859f275454ecd1c590759ef9ab184bea35ba1a0a38e14c"
+    },
+    "copy-validator": {
+      "source": "shipshitdev/library",
+      "sourceType": "github",
+      "computedHash": "03731335cbbe8554db46326c30e7101c84117e1c3875e2d7086921b818463067"
+    },
+    "ux-writing": {
+      "source": "content-designer/ux-writing-skill",
+      "sourceType": "github",
+      "computedHash": "977ceabeaa96b01db3a0e6a531d3ae65cf3f1415cfc4ec6e91bb945c4e5bd18b"
+    }
+  }
+}

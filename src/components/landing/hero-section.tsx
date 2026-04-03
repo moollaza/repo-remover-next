@@ -1,11 +1,11 @@
 import { motion } from "framer-motion";
-import { ArrowRight, Github } from "lucide-react";
+import { ArrowRight, Check, Github } from "lucide-react";
 
 import { fadeUp, staggerContainer } from "@/utils/motion";
 
 export function HeroSection() {
   return (
-    <section className="w-full px-6 py-20 md:py-28">
+    <section className="w-full px-6 sm:px-8 py-16 md:py-28">
       <motion.div
         animate="visible"
         className="max-w-5xl mx-auto text-center"
@@ -26,7 +26,7 @@ export function HeroSection() {
         </motion.div>
 
         <motion.h1
-          className="text-4xl md:text-6xl font-bold mb-6 leading-tight"
+          className="text-3xl sm:text-4xl md:text-6xl font-bold mb-6 leading-tight text-balance"
           variants={fadeUp}
         >
           The bulk cleanup{" "}
@@ -49,7 +49,7 @@ export function HeroSection() {
           variants={fadeUp}
         >
           <motion.button
-            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-lg bg-[var(--brand-blue)] text-white font-medium text-base hover:opacity-90 transition-opacity shadow-sm"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3 sm:py-3.5 rounded-lg bg-[var(--brand-blue)] text-white font-medium text-sm sm:text-base hover:opacity-90 transition-opacity shadow-sm"
             onClick={() => {
               const target = document.getElementById("get-started");
               target?.scrollIntoView({ behavior: "smooth" });
@@ -61,7 +61,7 @@ export function HeroSection() {
             <ArrowRight className="h-4 w-4" />
           </motion.button>
           <motion.a
-            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-lg border border-divider text-foreground font-medium text-base hover:bg-default-100 transition-colors"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3 sm:py-3.5 rounded-lg border border-divider text-foreground font-medium text-sm sm:text-base hover:bg-default-100 transition-colors"
             href="https://github.com/moollaza/repo-remover"
             rel="noopener noreferrer"
             target="_blank"
@@ -74,14 +74,23 @@ export function HeroSection() {
         </motion.div>
 
         <motion.div
-          className="mt-8 flex items-center justify-center gap-4 text-sm text-default-600"
+          className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-x-4 text-xs sm:text-sm text-default-600"
           variants={fadeUp}
         >
-          <span>Free and open source</span>
-          <span className="w-1 h-1 rounded-full bg-default-300" />
-          <span>Direct GitHub API calls</span>
-          <span className="w-1 h-1 rounded-full bg-default-300" />
-          <span>No sign-up required</span>
+          <span className="inline-flex items-center gap-1.5">
+            <Check className="h-3.5 w-3.5 text-[var(--brand-blue)] sm:hidden" />
+            Free forever
+          </span>
+          <span className="hidden sm:block w-1 h-1 rounded-full bg-default-300" />
+          <span className="inline-flex items-center gap-1.5">
+            <Check className="h-3.5 w-3.5 text-[var(--brand-blue)] sm:hidden" />
+            100% in-browser
+          </span>
+          <span className="hidden sm:block w-1 h-1 rounded-full bg-default-300" />
+          <span className="inline-flex items-center gap-1.5">
+            <Check className="h-3.5 w-3.5 text-[var(--brand-blue)] sm:hidden" />
+            Token never leaves your device
+          </span>
         </motion.div>
       </motion.div>
     </section>

@@ -30,7 +30,7 @@ function AnimatedIcon({
       animate={visible ? { scale: 1, opacity: 1 } : { scale: 0.8, opacity: 0 }}
       transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
       whileHover={{ rotate: [0, -5, 5, 0], transition: { duration: 0.4 } }}
-      className="[&_svg]:w-24 [&_svg]:h-24 [&_svg]:text-white"
+      className="[&_svg]:w-16 [&_svg]:h-16 sm:[&_svg]:w-20 sm:[&_svg]:h-20 md:[&_svg]:w-24 md:[&_svg]:h-24 [&_svg]:text-white"
       style={{
         strokeDasharray: visible ? "none" : "200",
         strokeDashoffset: visible ? "0" : "200",
@@ -96,32 +96,35 @@ export function FeaturesSection() {
     <section className="w-full" id="features">
       {features.map((feature, index) => (
         <div
-          className={`w-full px-6 py-20 ${index % 2 === 1 ? "bg-default-50" : ""}`}
+          className={`w-full px-6 sm:px-8 py-14 sm:py-20 ${index % 2 === 1 ? "bg-default-50" : ""}`}
           key={index}
         >
           <motion.div
-            className="max-w-7xl mx-auto"
+            className="max-w-5xl mx-auto"
             {...scrollRevealProps(staggerContainerWide, reduced)}
           >
             <div
-              className={`flex flex-col ${index % 2 === 1 ? "lg:flex-row-reverse" : "lg:flex-row"} items-center gap-12 lg:gap-16`}
+              className={`flex flex-col ${index % 2 === 1 ? "md:flex-row-reverse" : "md:flex-row"} items-center gap-8 sm:gap-12 md:gap-16`}
             >
               <motion.div
                 className="flex-1 flex justify-center"
                 variants={fadeUp}
               >
-                <div className="w-48 h-48 rounded-2xl bg-gradient-to-br from-[var(--brand-blue)] to-[var(--brand-cyan)] dark:from-[var(--brand-blue)]/80 dark:to-[var(--brand-cyan)]/80 flex items-center justify-center shadow-xl">
+                <div className="w-36 h-36 sm:w-40 sm:h-40 md:w-48 md:h-48 rounded-2xl bg-gradient-to-br from-[var(--brand-blue)] to-[var(--brand-cyan)] dark:from-[var(--brand-blue)]/80 dark:to-[var(--brand-cyan)]/80 flex items-center justify-center shadow-xl">
                   <AnimatedIcon icon={feature.icon} />
                 </div>
               </motion.div>
-              <motion.div className="flex-1" variants={fadeUp}>
-                <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              <motion.div
+                className="flex-1 text-center md:text-left"
+                variants={fadeUp}
+              >
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4">
                   {feature.title}
                 </h2>
-                <p className="text-lg text-default-500 mb-6">
+                <p className="text-lg text-default-500 mb-6 text-balance">
                   {feature.description}
                 </p>
-                <ul className="space-y-3 mb-8">
+                <ul className="space-y-3 mb-8 text-left w-fit mx-auto md:mx-0">
                   {feature.benefits.map((benefit, i) => (
                     <li className="flex items-start gap-3" key={i}>
                       <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
@@ -132,15 +135,17 @@ export function FeaturesSection() {
                   ))}
                 </ul>
                 {index === 0 && (
-                  <Button
-                    className="mt-4 gap-2 px-6 py-2.5 bg-[var(--brand-blue)] text-white hover:opacity-90"
-                    onClick={() => {
-                      const target = document.getElementById("get-started");
-                      target?.scrollIntoView({ behavior: "smooth" });
-                    }}
-                  >
-                    Try It Now
-                  </Button>
+                  <div>
+                    <Button
+                      className="w-full sm:w-auto mt-4 gap-2 px-6 py-2.5 bg-[var(--brand-blue)] text-white hover:opacity-90"
+                      onClick={() => {
+                        const target = document.getElementById("get-started");
+                        target?.scrollIntoView({ behavior: "smooth" });
+                      }}
+                    >
+                      Try It Now
+                    </Button>
+                  </div>
                 )}
               </motion.div>
             </div>
