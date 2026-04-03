@@ -34,6 +34,20 @@ export default function Footer() {
               >
                 <BlueskyIcon className="h-5 w-5" />
               </a>
+              <a
+                href="https://www.producthunt.com/products/repo-remover/launches/repo-remover?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-repo-remover"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                <img
+                  alt="Repo Remover - Archive or delete multiple GitHub repos with a single click. | Product Hunt"
+                  className="h-8 w-auto"
+                  height={32}
+                  loading="lazy"
+                  src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=159117&theme=light&t=1775226012179"
+                  width={150}
+                />
+              </a>
             </div>
           </div>
 

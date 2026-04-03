@@ -39,7 +39,7 @@ export function TestimonialsSection() {
   const reduced = useReducedMotion();
 
   return (
-    <section className="w-full px-6 sm:px-8 py-16 sm:py-20 bg-default-50">
+    <section className="w-full px-6 sm:px-8 py-16 sm:py-20 bg-blue-50 dark:bg-blue-950/30">
       <div className="max-w-5xl mx-auto">
         <motion.div
           className="text-center mb-16"
@@ -49,13 +49,13 @@ export function TestimonialsSection() {
             className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4"
             variants={fadeUp}
           >
-            What Developers Are Saying
+            They cleaned up. You're next.
           </motion.h2>
           <motion.p
             className="text-lg text-default-500 max-w-2xl mx-auto"
             variants={fadeUp}
           >
-            Real reviews from developers who use Repo Remover.
+            Real feedback from real developers.
           </motion.p>
         </motion.div>
 

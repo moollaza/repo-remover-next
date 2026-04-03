@@ -23,17 +23,18 @@ export function HeroSection() {
             <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--brand-blue)]" />
           </span>
           <span className="text-sm text-default-500">
-            250,000+ repos managed and counting
+            250,000+ repos cleaned&nbsp;up!
           </span>
         </motion.div>
 
         <motion.h1
-          className="text-3xl sm:text-4xl md:text-6xl font-bold mb-6 leading-tight text-balance"
+          className="text-3xl sm:text-4xl md:text-6xl font-bold mb-6 leading-tight"
           variants={fadeUp}
         >
-          Archive or Delete Multiple GitHub Repos,{" "}
+          The bulk cleanup tool
+          <br />
           <span className="bg-gradient-to-r from-[var(--brand-blue)] to-[var(--brand-cyan)] bg-clip-text text-transparent">
-            Instantly
+            GitHub should have&nbsp;built.
           </span>
         </motion.h1>
 
@@ -41,8 +42,8 @@ export function HeroSection() {
           className="text-lg md:text-xl text-default-500 mb-10 max-w-2xl mx-auto leading-relaxed"
           variants={fadeUp}
         >
-          Search, filter, and bulk-manage hundreds of repositories in one place.
-          Zero-knowledge — your token never leaves your browser.
+          25,000+ developers stopped deleting repos one by one. Review, archive,
+          or delete in bulk from one screen — free, open source, and secure.
         </motion.p>
 
         <motion.div
@@ -58,7 +59,7 @@ export function HeroSection() {
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.98 }}
           >
-            Get Started
+            Start Cleaning Up
             <ArrowRight className="h-4 w-4" />
           </motion.button>
           <motion.a

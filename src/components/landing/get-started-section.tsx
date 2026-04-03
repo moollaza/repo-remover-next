@@ -9,7 +9,6 @@ import {
   LoaderCircle,
   Search,
   SquareCheckBig,
-  Trash2,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -62,17 +61,10 @@ const steps = [
   },
   {
     description:
-      "Use search and filters to locate old repos. Check the ones you want to archive or delete.",
+      "Search, filter, and select what should be archived, or deleted. Confirm your choices and Repo Remover handles the rest.",
     icon: SquareCheckBig,
     number: "3",
-    title: "Find & Select What to Remove",
-  },
-  {
-    description:
-      "Confirm your choices and Repo Remover handles the rest. No page reloads, no waiting.",
-    icon: Trash2,
-    number: "4",
-    title: "Archive or Delete in One Click",
+    title: "Review and Clean Up",
   },
 ];
 
@@ -233,8 +225,8 @@ function InlinePATForm() {
             <Info className="h-3.5 w-3.5" />
           </PopoverTrigger>
           <PopoverContent side="top" className="w-64 text-xs text-default-500">
-            Your token is AES-encrypted and stored only in your browser&apos;s
-            localStorage. It never leaves your device.
+            Your token is encrypted locally before being saved to your browser.
+            It is never sent to a server.
           </PopoverContent>
         </Popover>
       </div>
