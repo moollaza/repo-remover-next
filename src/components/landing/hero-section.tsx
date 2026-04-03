@@ -26,12 +26,12 @@ export function HeroSection() {
         </motion.div>
 
         <motion.h1
-          className="text-3xl sm:text-4xl md:text-6xl font-bold mb-6 leading-tight text-balance"
+          className="text-3xl sm:text-4xl md:text-6xl font-bold mb-6 leading-tight text-pretty"
           variants={fadeUp}
         >
-          The bulk cleanup{" "}
+          The bulk cleanup tool{" "}
           <span className="bg-gradient-to-r from-[var(--brand-blue)] to-[var(--brand-cyan)] bg-clip-text text-transparent">
-            GitHub should have built.
+            GitHub should have&nbsp;built.
           </span>
         </motion.h1>
 
