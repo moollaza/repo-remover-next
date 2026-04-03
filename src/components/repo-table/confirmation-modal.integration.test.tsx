@@ -116,9 +116,8 @@ describe("ConfirmationModal Integration — Full Execution Flow", () => {
       ).toBeInTheDocument();
     });
 
-    // Verify MSW intercepted the actual REST calls
-    expect(archivedRepos).toContain("repo-one");
-    expect(archivedRepos).toContain("repo-two");
+    // Verify MSW intercepted exactly the expected REST calls — no extras
+    expect(archivedRepos).toEqual(["repo-one", "repo-two"]);
     expect(deletedRepos).toHaveLength(0);
 
     // Result should show success
@@ -145,8 +144,8 @@ describe("ConfirmationModal Integration — Full Execution Flow", () => {
       ).toBeInTheDocument();
     });
 
-    expect(deletedRepos).toContain("repo-one");
-    expect(deletedRepos).toContain("repo-two");
+    // Verify exactly the expected repos were deleted — no extras
+    expect(deletedRepos).toEqual(["repo-one", "repo-two"]);
     expect(archivedRepos).toHaveLength(0);
   });
 
@@ -178,5 +177,148 @@ describe("ConfirmationModal Integration — Full Execution Flow", () => {
       screen.getByText(/1 out of 2 repos archived successfully/i),
     ).toBeInTheDocument();
     expect(screen.getByText(/1 error occurred/i)).toBeInTheDocument();
+  });
+
+  it("stops batch early on 401 — does not attempt remaining repos", async () => {
+    // 5 repos to make the early-stop obvious
+    const manyRepos: Repository[] = Array.from({ length: 5 }, (_, i) =>
+      createMockRepo({ id: `r${i + 1}`, name: `repo-${i + 1}` }),
+    );
+
+    let callCount = 0;
+    server.use(
+      http.patch("https://api.github.com/repos/:owner/:repo", () => {
+        callCount++;
+        // First repo succeeds, second returns 401 (expired token)
+        if (callCount === 1) {
+          return HttpResponse.json({ archived: true });
+        }
+        return HttpResponse.json(
+          { message: "Bad credentials" },
+          { status: 401 },
+        );
+      }),
+    );
+
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    render(
+      <BrowserRouter>
+        <GitHubContext.Provider value={{ ...mockContext, repos: manyRepos }}>
+          <ConfirmationModal
+            {...baseProps}
+            action="archive"
+            repos={manyRepos}
+          />
+        </GitHubContext.Provider>
+      </BrowserRouter>,
+    );
+
+    const input = screen.getByTestId("confirmation-modal-input");
+    await user.type(input, "testuser");
+    await user.click(screen.getByTestId("confirmation-modal-confirm"));
+
+    await vi.advanceTimersByTimeAsync(15_000);
+
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("confirmation-modal-result"),
+      ).toBeInTheDocument();
+    });
+
+    // Only 2 API calls made (1 success + 1 failure), not 5
+    expect(callCount).toBe(2);
+    // Result shows the 401 error
+    expect(screen.getByText(/1 error/i)).toBeInTheDocument();
+  });
+
+  it("stop button halts batch — remaining repos are not processed", async () => {
+    // 5 repos so we have time to click Stop mid-batch
+    const manyRepos: Repository[] = Array.from({ length: 5 }, (_, i) =>
+      createMockRepo({ id: `r${i + 1}`, name: `repo-${i + 1}` }),
+    );
+
+    const tracked: string[] = [];
+    server.use(
+      http.patch("https://api.github.com/repos/:owner/:repo", ({ params }) => {
+        tracked.push(params.repo as string);
+        return HttpResponse.json({ archived: true });
+      }),
+    );
+
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    render(
+      <BrowserRouter>
+        <GitHubContext.Provider value={{ ...mockContext, repos: manyRepos }}>
+          <ConfirmationModal
+            {...baseProps}
+            action="archive"
+            repos={manyRepos}
+          />
+        </GitHubContext.Provider>
+      </BrowserRouter>,
+    );
+
+    const input = screen.getByTestId("confirmation-modal-input");
+    await user.type(input, "testuser");
+    await user.click(screen.getByTestId("confirmation-modal-confirm"));
+
+    // Wait for progress mode
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("confirmation-modal-progress"),
+      ).toBeInTheDocument();
+    });
+
+    // Advance past ~2 repos (each = API call + 1s delay)
+    await vi.advanceTimersByTimeAsync(2_500);
+
+    // Click the Stop button
+    await user.click(screen.getByText("Stop"));
+
+    // Advance remaining time so the loop finishes
+    await vi.advanceTimersByTimeAsync(15_000);
+
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("confirmation-modal-result"),
+      ).toBeInTheDocument();
+    });
+
+    // Not all 5 repos were processed
+    expect(tracked.length).toBeLessThan(5);
+    expect(tracked.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("shows correct result when all repos fail", async () => {
+    // Override: all repos fail with 403
+    server.use(
+      http.patch("https://api.github.com/repos/:owner/:repo", () => {
+        return HttpResponse.json(
+          { message: "Must have admin rights" },
+          { status: 403 },
+        );
+      }),
+    );
+
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    renderModal("archive");
+
+    const input = screen.getByTestId("confirmation-modal-input");
+    await user.type(input, "testuser");
+    await user.click(screen.getByTestId("confirmation-modal-confirm"));
+
+    await vi.advanceTimersByTimeAsync(10_000);
+
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("confirmation-modal-result"),
+      ).toBeInTheDocument();
+    });
+
+    // 0 successes, all failures
+    expect(
+      screen.getByText(/0 out of 2 repos archived successfully/i),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/2 errors? occurred/i)).toBeInTheDocument();
   });
 });

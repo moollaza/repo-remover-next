@@ -103,15 +103,13 @@ describe("GitHub Utils", () => {
       });
     });
 
-    it("should handle errors", async () => {
+    it("should propagate errors from the API", async () => {
       const error = new Error("Permission denied");
       mockUpdate.mockRejectedValueOnce(error);
 
       await expect(
         archiveRepo(mockOctokit as Octokit, mockRepo),
-      ).rejects.toThrow(
-        `Failed to archive ${mockRepo.name}: Permission denied`,
-      );
+      ).rejects.toThrow("Permission denied");
     });
   });
 
@@ -125,15 +123,13 @@ describe("GitHub Utils", () => {
       });
     });
 
-    it("should handle errors", async () => {
+    it("should propagate errors from the API", async () => {
       const error = new Error("Repository not found");
       mockDelete.mockRejectedValueOnce(error);
 
       await expect(
         deleteRepo(mockOctokit as Octokit, mockRepo),
-      ).rejects.toThrow(
-        `Failed to delete ${mockRepo.name}: Repository not found`,
-      );
+      ).rejects.toThrow("Repository not found");
     });
   });
 
