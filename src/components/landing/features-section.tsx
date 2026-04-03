@@ -1,5 +1,5 @@
 import { motion, useInView, useReducedMotion } from "framer-motion";
-import { CheckSquare, Filter, Search, Shield } from "lucide-react";
+import { Funnel, Search, Shield, SquareCheckBig } from "lucide-react";
 import { useRef } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -61,7 +61,7 @@ const features = [
     ],
     description:
       "Show only private repos, archived projects, or forks. Sort by name or last updated. Combine filters for precise results.",
-    icon: Filter,
+    icon: Funnel,
     title: "Advanced Filtering & Sorting",
   },
   {
@@ -72,7 +72,7 @@ const features = [
     ],
     description:
       "Select repos with checkboxes and act on all of them at once. Archive dozens or delete test repos in a single click.",
-    icon: CheckSquare,
+    icon: SquareCheckBig,
     title: "Bulk Operations Made Simple",
   },
   {

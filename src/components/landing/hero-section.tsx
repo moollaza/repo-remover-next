@@ -1,5 +1,7 @@
 import { motion } from "framer-motion";
-import { ArrowRight, Check, Github } from "lucide-react";
+import { ArrowRight, Check } from "lucide-react";
+
+import { GithubIcon } from "@/components/icons";
 
 import { fadeUp, staggerContainer } from "@/utils/motion";
 
@@ -68,7 +70,7 @@ export function HeroSection() {
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.98 }}
           >
-            <Github className="h-5 w-5" />
+            <GithubIcon className="h-5 w-5" />
             View on GitHub
           </motion.a>
         </motion.div>

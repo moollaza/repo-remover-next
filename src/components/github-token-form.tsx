@@ -1,5 +1,5 @@
 import { RequestError } from "@octokit/request-error";
-import { Eye, EyeOff, Loader2, X } from "lucide-react";
+import { Eye, EyeOff, LoaderCircle, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -289,7 +289,7 @@ export default function GitHubTokenForm({
       >
         {isValidating ? (
           <span className="inline-flex items-center gap-2">
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <LoaderCircle className="h-4 w-4 animate-spin" />
             Validating...
           </span>
         ) : (

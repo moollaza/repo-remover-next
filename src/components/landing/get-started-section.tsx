@@ -1,14 +1,14 @@
 import { motion, useReducedMotion } from "framer-motion";
 import {
   Check,
-  CheckSquare,
   ExternalLink,
   Eye,
   EyeOff,
   Info,
   Key,
-  Loader2,
+  LoaderCircle,
   Search,
+  SquareCheckBig,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -62,7 +62,7 @@ const steps = [
   {
     description:
       "Search, filter, and select what should be archived, or deleted. Confirm your choices and Repo Remover handles the rest.",
-    icon: CheckSquare,
+    icon: SquareCheckBig,
     number: "3",
     title: "Review and Clean Up",
   },
@@ -173,7 +173,7 @@ function InlinePATForm() {
             </Button>
           )}
           {isValidating && (
-            <Loader2 className="h-4 w-4 text-default-400 animate-spin" />
+            <LoaderCircle className="h-4 w-4 text-default-400 animate-spin" />
           )}
         </div>
       </div>
