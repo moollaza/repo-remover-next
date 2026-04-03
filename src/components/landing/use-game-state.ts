@@ -28,6 +28,7 @@ export type GameAction =
   | { type: "START" }
   | { type: "HIT" }
   | { type: "MISS" }
+  | { type: "ADVANCE_ROUND" }
   | { type: "NEXT_ROUND" }
   | { type: "EXIT" };
 
@@ -52,38 +53,32 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
     case "playing": {
       if (action.type === "HIT") {
-        const resolved = state.resolvedThisRound + 1;
-        const nextState = {
+        return {
           ...state,
           score: state.score + state.round * 10,
           totalCleaned: state.totalCleaned + 1,
-          resolvedThisRound: resolved,
+          resolvedThisRound: state.resolvedThisRound + 1,
         };
-        if (resolved >= REPOS_PER_ROUND) {
-          return { ...nextState, phase: "round-transition" };
-        }
-        return nextState;
       }
       if (action.type === "MISS") {
         const misses = state.misses + 1;
-        const resolved = state.resolvedThisRound + 1;
         if (misses >= MAX_MISSES) {
           return {
             ...state,
             misses,
-            resolvedThisRound: resolved,
+            resolvedThisRound: state.resolvedThisRound + 1,
             phase: "game-over",
           };
         }
-        if (resolved >= REPOS_PER_ROUND) {
-          return {
-            ...state,
-            misses,
-            resolvedThisRound: resolved,
-            phase: "round-transition",
-          };
-        }
-        return { ...state, misses, resolvedThisRound: resolved };
+        return {
+          ...state,
+          misses,
+          resolvedThisRound: state.resolvedThisRound + 1,
+        };
+      }
+      // Dispatched by component when all cards are off screen
+      if (action.type === "ADVANCE_ROUND") {
+        return { ...state, phase: "round-transition" };
       }
       if (action.type === "EXIT") {
         return initialState;

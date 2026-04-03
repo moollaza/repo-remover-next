@@ -181,10 +181,21 @@ export default function RepoHunt({ onExit }: RepoHuntProps) {
     };
   }, [state.phase, state.round, spawnInterval]);
 
-  // Round transition: show countdown then advance
+  // Advance round when all spawned cards have left the screen
+  useEffect(() => {
+    if (
+      state.phase === "playing" &&
+      spawnedRef.current >= REPOS_PER_ROUND &&
+      cards.length === 0 &&
+      state.resolvedThisRound >= REPOS_PER_ROUND
+    ) {
+      dispatch({ type: "ADVANCE_ROUND" });
+    }
+  }, [state.phase, state.resolvedThisRound, cards.length, dispatch]);
+
+  // Round transition: show banner then advance
   useEffect(() => {
     if (state.phase !== "round-transition") return;
-    setCards([]);
     const id = window.setTimeout(() => {
       dispatch({ type: "NEXT_ROUND" });
     }, ROUND_TRANSITION_MS);

@@ -56,15 +56,25 @@ describe("gameReducer", () => {
     expect(state.phase).toBe("game-over");
   });
 
-  test("resolving all cards transitions to round-transition", () => {
+  test("resolving all cards does NOT auto-transition (waits for ADVANCE_ROUND)", () => {
     const playing: GameState = {
       ...initialState,
       phase: "playing",
       resolvedThisRound: REPOS_PER_ROUND - 1,
     };
     const state = gameReducer(playing, { type: "HIT" });
-    expect(state.phase).toBe("round-transition");
+    expect(state.phase).toBe("playing");
     expect(state.resolvedThisRound).toBe(REPOS_PER_ROUND);
+  });
+
+  test("ADVANCE_ROUND from playing transitions to round-transition", () => {
+    const playing: GameState = {
+      ...initialState,
+      phase: "playing",
+      resolvedThisRound: REPOS_PER_ROUND,
+    };
+    const state = gameReducer(playing, { type: "ADVANCE_ROUND" });
+    expect(state.phase).toBe("round-transition");
   });
 
   test("NEXT_ROUND from round-transition advances round and resets", () => {
