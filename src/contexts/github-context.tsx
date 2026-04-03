@@ -3,7 +3,7 @@ import { createContext } from "react";
 import { type KeyedMutator } from "swr";
 
 import { type GitHubFetcherResult } from "@/providers/github-data-provider";
-import { type LoadingProgress } from "@/utils/github-api";
+import { type LoadingProgress } from "@/github";
 
 /**
  * Context type for GitHub data and authentication

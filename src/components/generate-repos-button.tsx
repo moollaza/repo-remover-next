@@ -4,7 +4,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useGitHubData } from "@/hooks/use-github-data";
 import { cn } from "@/lib/utils";
-import { createThrottledOctokit, generateRepos } from "@/utils/github-utils";
+import { createThrottledOctokit } from "@/github";
+import { generateRepos } from "@/github/dev-tools";
 
 /**
  * This component generates random repositories for the user

@@ -69,17 +69,16 @@ Uses CSS custom properties defined in `globals.css` with Tailwind utility classe
 
 **Current Refactor Targets:**
 
-- `ConfirmationModal` (456 LOC) — extract sub-components and reducer
-- `RepoTable` (373 LOC) — extract `useRepoFilters`, `useRepoPagination` hooks
-- `GitHubDataProvider` (218 LOC) — extract storage logic
+- `ConfirmationModal` (301 LOC) — extract sub-components and reducer
+- `RepoTable` (535 LOC) — extract sub-components (table header, row, bulk actions)
 
 ## File Organization
 
-- `src/app/` — Next.js app router pages and layouts
+- `src/github/` — GitHub API module (queries, scopes, fetcher, client, mutations)
 - `src/components/` — reusable UI components with co-located tests
 - `src/contexts/` — React contexts for state management
 - `src/providers/` — data providers and higher-order components
-- `src/utils/` — utility functions including GitHub API helpers
+- `src/utils/` — generic utilities (analytics, debug, motion, secure-storage, sanitize-tokens)
 - `src/mocks/` — MSW handlers and test fixtures
 
 ## React Best Practices

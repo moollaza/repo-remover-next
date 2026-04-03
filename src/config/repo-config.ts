@@ -14,11 +14,6 @@ export const COLUMNS = {
 } as const;
 
 /**
- * Column rendering order for the table
- */
-export const COLUMN_ORDER = [COLUMNS.name, COLUMNS.updatedAt] as const;
-
-/**
  * Available options for number of items per page
  */
 export const PER_PAGE_OPTIONS = [5, 10, 20, 50, 100] as const;
@@ -53,8 +48,3 @@ export const REPO_ACTIONS = [
     label: "Delete Selected Repos",
   },
 ] as const;
-
-// Type exports for type safety
-export type ColumnKey = keyof typeof COLUMNS;
-export type RepoActionKey = (typeof REPO_ACTIONS)[number]["key"];
-export type RepoTypeKey = (typeof REPO_TYPES)[number]["key"];

@@ -48,7 +48,7 @@ vi.mock("@octokit/plugin-paginate-graphql", () => ({
 }));
 
 // Import after mocking so the module-level ThrottledOctokit uses the mock
-import { createThrottledOctokit } from "./github-utils";
+import { createThrottledOctokit } from "./client";
 
 describe("createThrottledOctokit", () => {
   beforeEach(() => {

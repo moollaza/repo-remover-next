@@ -15,22 +15,29 @@ import {
   getValidPersonalAccessToken,
   MOCK_REPOS,
 } from "@/mocks/static-fixtures";
-import { fetchGitHubData } from "@/utils/github-api";
-import { archiveRepo, deleteRepo } from "@/utils/github-utils";
-import { createThrottledOctokit } from "@/utils/github-utils";
+import {
+  archiveRepo,
+  createThrottledOctokit,
+  deleteRepo,
+  fetchGitHubDataWithProgress,
+} from "@/github";
 
 const VALID_PAT = getValidPersonalAccessToken();
+const noopProgress = () => {};
 
-// Note: fetchGitHubData catches errors internally via fetchRepositories and converts
+// Note: fetchGitHubDataWithProgress catches errors internally via fetchRepositories and converts
 // null repos to [] via ?? []. So when GraphQL errors occur, result.error is set and
 // result.repos is [] (empty), not null.
 
 describe("GraphQL error scenario handlers", () => {
   describe("graphqlUnauthorizedHandler (401)", () => {
-    it("causes fetchGitHubData to return an error with no repos", async () => {
+    it("causes fetchGitHubDataWithProgress to return an error with no repos", async () => {
       server.use(graphqlUnauthorizedHandler());
 
-      const result = await fetchGitHubData(["testuser", VALID_PAT]);
+      const result = await fetchGitHubDataWithProgress(
+        ["testuser", VALID_PAT],
+        noopProgress,
+      );
 
       expect(result.error).not.toBeNull();
       expect(result.repos).toEqual([]);
@@ -38,20 +45,26 @@ describe("GraphQL error scenario handlers", () => {
   });
 
   describe("graphqlForbiddenHandler (403 scope error)", () => {
-    it("causes fetchGitHubData to return an error on all-query override", async () => {
+    it("causes fetchGitHubDataWithProgress to return an error on all-query override", async () => {
       server.use(graphqlForbiddenHandler());
 
-      const result = await fetchGitHubData(["testuser", VALID_PAT]);
+      const result = await fetchGitHubDataWithProgress(
+        ["testuser", VALID_PAT],
+        noopProgress,
+      );
 
       expect(result.error).not.toBeNull();
     });
   });
 
   describe("graphqlRateLimitHandler (429)", () => {
-    it("causes fetchGitHubData to return an error with no repos", async () => {
+    it("causes fetchGitHubDataWithProgress to return an error with no repos", async () => {
       server.use(graphqlRateLimitHandler("30"));
 
-      const result = await fetchGitHubData(["testuser", VALID_PAT]);
+      const result = await fetchGitHubDataWithProgress(
+        ["testuser", VALID_PAT],
+        noopProgress,
+      );
 
       expect(result.error).not.toBeNull();
       expect(result.repos).toEqual([]);
@@ -59,10 +72,13 @@ describe("GraphQL error scenario handlers", () => {
   });
 
   describe("graphqlServerErrorHandler (500)", () => {
-    it("causes fetchGitHubData to return an error with no repos", async () => {
+    it("causes fetchGitHubDataWithProgress to return an error with no repos", async () => {
       server.use(graphqlServerErrorHandler());
 
-      const result = await fetchGitHubData(["testuser", VALID_PAT]);
+      const result = await fetchGitHubDataWithProgress(
+        ["testuser", VALID_PAT],
+        noopProgress,
+      );
 
       expect(result.error).not.toBeNull();
       expect(result.repos).toEqual([]);
@@ -70,10 +86,13 @@ describe("GraphQL error scenario handlers", () => {
   });
 
   describe("graphqlNetworkErrorHandler (network failure)", () => {
-    it("causes fetchGitHubData to return an error with no repos", async () => {
+    it("causes fetchGitHubDataWithProgress to return an error with no repos", async () => {
       server.use(graphqlNetworkErrorHandler());
 
-      const result = await fetchGitHubData(["testuser", VALID_PAT]);
+      const result = await fetchGitHubDataWithProgress(
+        ["testuser", VALID_PAT],
+        noopProgress,
+      );
 
       expect(result.error).not.toBeNull();
       expect(result.repos).toEqual([]);

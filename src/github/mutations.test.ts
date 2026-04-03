@@ -12,14 +12,9 @@ vi.mock("@/utils/analytics", () => ({
 
 import { analytics } from "@/utils/analytics";
 
-// Import the functions we want to test
-import {
-  archiveRepo,
-  deleteRepo,
-  generateRepos,
-  isValidGitHubToken,
-  processRepo,
-} from "./github-utils";
+import { isValidGitHubToken } from "./client";
+import { generateRepos } from "./dev-tools";
+import { archiveRepo, deleteRepo, processRepo } from "./mutations";
 
 describe("GitHub Utils", () => {
   let mockOctokit: Partial<Octokit>;

@@ -27,11 +27,12 @@ import {
 
 import { useGitHubData } from "@/hooks/use-github-data";
 import { analytics } from "@/utils/analytics";
-import { checkTokenScopes, SCOPE_DESCRIPTIONS } from "@/utils/github-api";
 import {
+  checkTokenScopes,
   createThrottledOctokit,
   isValidGitHubToken,
-} from "@/utils/github-utils";
+  SCOPE_DESCRIPTIONS,
+} from "@/github";
 import {
   fadeUp,
   scaleIn,
