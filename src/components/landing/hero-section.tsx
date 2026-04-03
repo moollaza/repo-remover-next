@@ -41,8 +41,7 @@ export function HeroSection() {
           variants={fadeUp}
         >
           25,000+ developers stopped deleting repos one by one. Review, archive,
-          or delete in bulk from one screen — free, open source, and your token
-          never leaves your browser.
+          or delete in bulk from one screen — free, open source, and secure.
         </motion.p>
 
         <motion.div
