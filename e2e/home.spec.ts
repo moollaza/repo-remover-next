@@ -21,11 +21,11 @@ test.describe("Home Page", () => {
     await expect(home.navbar.getByText("Repo Remover")).toBeVisible();
     await expect(home.navbar.getByText("Test User")).not.toBeVisible();
 
-    await home.expectHeading("Archive or Delete Multiple GitHub Repos,");
+    await home.expectHeading("Clean up GitHub");
 
-    // Token form is now in the "Get Started" section further down the page
-    // Scroll down to verify it's there
-    await home.page.getByText("Ready to start?").scrollIntoViewIfNeeded();
+    // Token form is further down the page. Scroll directly to the form instead
+    // of anchoring the test to marketing copy.
+    await home.tokenFormInput.scrollIntoViewIfNeeded();
     await home.expectSubmitDisabled();
   });
 
