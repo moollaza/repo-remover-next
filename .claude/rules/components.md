@@ -67,11 +67,6 @@ Uses CSS custom properties defined in `globals.css` with Tailwind utility classe
 | 200-300 LOC   | Consider — extract hooks or sub-components   |
 | > 300 LOC     | Refactor — definitely extract logic to hooks |
 
-**Current Refactor Targets:**
-
-- `ConfirmationModal` (301 LOC) — extract sub-components and reducer
-- `RepoTable` (535 LOC) — extract sub-components (table header, row, bulk actions)
-
 ## File Organization
 
 - `src/github/` — GitHub API module (queries, scopes, fetcher, client, mutations)
