@@ -1,0 +1,65 @@
+@keyframes fly-across {
+  0% {
+    transform: translateX(-220px) translateY(0) rotate(0deg);
+    opacity: 0;
+  }
+  3% {
+    opacity: 1;
+  }
+  97% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(calc(100vw + 220px)) translateY(var(--drift-y, 0px))
+      rotate(var(--rotate, 0deg));
+    opacity: 0;
+  }
+}
+
+@keyframes lure-fly {
+  0% {
+    transform: translateX(-220px);
+    opacity: 0;
+  }
+  5% {
+    opacity: 1;
+  }
+  95% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(calc(100vw + 220px));
+    opacity: 0;
+  }
+}
+
+.flyingCard {
+  position: absolute;
+  left: 0;
+  pointer-events: auto;
+  cursor: pointer;
+  animation: fly-across var(--flight-duration, 3.5s) linear forwards;
+  z-index: 10;
+}
+
+.flyingCard.flipped {
+  left: auto;
+  right: 0;
+  animation-direction: reverse;
+}
+
+.lureCard {
+  position: absolute;
+  pointer-events: auto;
+  cursor: pointer;
+  animation: lure-fly 4s linear forwards;
+  z-index: 10;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flyingCard,
+  .lureCard {
+    animation: none;
+    display: none;
+  }
+}
