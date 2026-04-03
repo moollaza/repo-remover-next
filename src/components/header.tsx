@@ -128,7 +128,7 @@ function LandingHeader({ isAuthenticated }: { isAuthenticated: boolean }) {
             <a
               className={
                 buttonVariants({ variant: "default", size: "sm" }) +
-                " bg-[var(--brand-blue)] text-white hover:opacity-90 text-xs sm:text-sm"
+                " py-2 bg-[var(--brand-blue)] text-white hover:opacity-90 text-xs sm:text-sm"
               }
               href="/dashboard"
             >

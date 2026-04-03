@@ -103,7 +103,7 @@ export function FeaturesSection() {
             {...scrollRevealProps(staggerContainerWide, reduced)}
           >
             <div
-              className={`flex flex-col ${index % 2 === 1 ? "lg:flex-row-reverse" : "lg:flex-row"} items-center gap-8 sm:gap-12 lg:gap-16`}
+              className={`flex flex-col ${index % 2 === 1 ? "md:flex-row-reverse" : "md:flex-row"} items-center gap-8 sm:gap-12 md:gap-16`}
             >
               <motion.div
                 className="flex-1 flex justify-center"
@@ -114,16 +114,16 @@ export function FeaturesSection() {
                 </div>
               </motion.div>
               <motion.div
-                className="flex-1 text-center lg:text-left"
+                className="flex-1 text-center md:text-left"
                 variants={fadeUp}
               >
                 <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4">
                   {feature.title}
                 </h2>
-                <p className="text-lg text-default-500 mb-6">
+                <p className="text-lg text-default-500 mb-6 text-balance">
                   {feature.description}
                 </p>
-                <ul className="space-y-3 mb-8 text-left w-fit mx-auto lg:mx-0">
+                <ul className="space-y-3 mb-8 text-left w-fit mx-auto md:mx-0">
                   {feature.benefits.map((benefit, i) => (
                     <li className="flex items-start gap-3" key={i}>
                       <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">

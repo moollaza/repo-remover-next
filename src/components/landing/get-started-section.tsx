@@ -311,7 +311,7 @@ export function GetStartedSection() {
                   <p className="text-default-500 mb-3">{step.description}</p>
                   {step.cta && (
                     <a
-                      className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-divider text-sm font-medium hover:bg-default-50 transition-colors"
+                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 transition-colors shadow-sm"
                       href={step.cta.href}
                       rel="noopener noreferrer"
                       target="_blank"
