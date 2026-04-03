@@ -27,6 +27,13 @@ interface FlyingCard {
   hitStyle: "archive" | "delete";
 }
 
+interface ScorePop {
+  id: string;
+  x: number;
+  y: number;
+  points: number;
+}
+
 let nextCardId = 0;
 
 function createFlyingCard(): FlyingCard {
@@ -35,7 +42,7 @@ function createFlyingCard(): FlyingCard {
   return {
     id: `hunt-${nextCardId++}`,
     entry,
-    topPercent: 10 + Math.random() * 75,
+    topPercent: 10 + Math.random() * 65,
     driftY: (Math.random() - 0.5) * 40,
     rotate: (Math.random() - 0.5) * 6,
     flipped: Math.random() > 0.5,
@@ -48,14 +55,15 @@ function createFlyingCard(): FlyingCard {
 const hitVariants = {
   archive: {
     opacity: 0,
-    scale: 0.8,
-    y: 40,
-    transition: { duration: 0.3 },
+    scale: 0.7,
+    y: 50,
+    transition: { type: "spring" as const, stiffness: 300, damping: 25 },
   },
   delete: {
-    scale: [1, 1.2, 0],
-    opacity: [1, 1, 0],
-    transition: { duration: 0.35 },
+    scale: [1, 1.3, 0],
+    opacity: [1, 0.8, 0],
+    rotate: [0, 8, -4],
+    transition: { duration: 0.4 },
   },
 };
 
@@ -68,9 +76,11 @@ interface RepoHuntProps {
 export default function RepoHunt({ onExit }: RepoHuntProps) {
   const [state, dispatch] = useGameState();
   const [cards, setCards] = useState<FlyingCard[]>([]);
+  const [scorePops, setScorePops] = useState<ScorePop[]>([]);
   const spawnedRef = useRef(0);
   const hitCountRef = useRef(0);
   const intervalsRef = useRef<Set<number>>(new Set());
+  const arenaRef = useRef<HTMLDivElement>(null);
 
   const flightDuration =
     BASE_FLIGHT_DURATION * Math.pow(SPEED_MULTIPLIER, state.round - 1);
@@ -127,13 +137,36 @@ export default function RepoHunt({ onExit }: RepoHuntProps) {
     return () => document.removeEventListener("keydown", handler);
   }, [dispatch, onExit]);
 
+  // Clean up score pops after animation
+  useEffect(() => {
+    if (scorePops.length === 0) return;
+    const id = window.setTimeout(() => {
+      setScorePops((prev) => prev.slice(1));
+    }, 700);
+    return () => clearTimeout(id);
+  }, [scorePops.length]);
+
   const handleHit = useCallback(
-    (cardId: string) => {
+    (cardId: string, e: React.MouseEvent) => {
       hitCountRef.current++;
       setCards((prev) => prev.filter((c) => c.id !== cardId));
       dispatch({ type: "HIT" });
+
+      // Show floating score popup at click position
+      const rect = arenaRef.current?.getBoundingClientRect();
+      if (rect) {
+        setScorePops((prev) => [
+          ...prev,
+          {
+            id: `pop-${hitCountRef.current}`,
+            x: e.clientX - rect.left,
+            y: e.clientY - rect.top,
+            points: state.round * 10,
+          },
+        ]);
+      }
     },
-    [dispatch],
+    [dispatch, state.round],
   );
 
   const handleMiss = useCallback(
@@ -151,7 +184,8 @@ export default function RepoHunt({ onExit }: RepoHuntProps) {
 
   return (
     <div
-      className="relative min-h-[400px] md:min-h-[500px] cursor-crosshair"
+      ref={arenaRef}
+      className="relative min-h-[400px] md:min-h-[500px] cursor-crosshair rounded-2xl border border-dashed border-divider bg-default-50/50"
       aria-hidden="true"
       role="presentation"
       data-testid="repo-hunt-arena"
@@ -201,10 +235,12 @@ export default function RepoHunt({ onExit }: RepoHuntProps) {
                 } as React.CSSProperties
               }
               exit={hitVariants[card.hitStyle]}
-              onClick={() => handleHit(card.id)}
+              onClick={(e) => handleHit(card.id, e)}
               onAnimationEnd={() => handleMiss(card.id)}
             >
-              <div className="w-44 rounded-lg bg-card/80 px-3 py-2 ring-1 ring-foreground/10 shadow-sm">
+              <div
+                className={`${styles.cardInner} w-44 rounded-lg bg-card/90 px-3 py-2 ring-1 ring-foreground/10 shadow-md`}
+              >
                 <p className="truncate text-sm font-medium text-foreground">
                   {card.entry.name}
                 </p>
@@ -225,12 +261,23 @@ export default function RepoHunt({ onExit }: RepoHuntProps) {
         </AnimatePresence>
       )}
 
+      {/* Score popups */}
+      {scorePops.map((pop) => (
+        <span
+          key={pop.id}
+          className={`${styles.scorePop} text-success`}
+          style={{ left: pop.x, top: pop.y }}
+        >
+          +{pop.points}
+        </span>
+      ))}
+
       {/* Game Over */}
       {state.phase === "game-over" && (
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-background/90"
+          className="absolute inset-0 z-30 flex flex-col items-center justify-center rounded-2xl bg-background/90"
         >
           <p className="font-mono text-5xl font-bold text-foreground">
             {state.score}

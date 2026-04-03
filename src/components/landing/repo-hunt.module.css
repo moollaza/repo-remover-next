@@ -16,6 +16,19 @@
   }
 }
 
+@keyframes wobble {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-4px) rotate(1.5deg);
+  }
+  75% {
+    transform: translateY(4px) rotate(-1.5deg);
+  }
+}
+
 @keyframes lure-fly {
   0% {
     transform: translateX(-220px);
@@ -33,12 +46,23 @@
   }
 }
 
+@keyframes score-pop {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-30px) scale(1.2);
+  }
+}
+
 .flyingCard {
   position: absolute;
   left: 0;
   pointer-events: auto;
   cursor: pointer;
-  animation: fly-across var(--flight-duration, 3.5s) linear forwards;
+  animation: fly-across var(--flight-duration, 5s) linear forwards;
   z-index: 10;
 }
 
@@ -46,6 +70,19 @@
   left: auto;
   right: 0;
   animation-direction: reverse;
+}
+
+/* Inner card content wobbles while flying — gives a "fluttering" feel */
+.cardInner {
+  animation: wobble 1.2s ease-in-out infinite;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.cardInner:hover {
+  transform: scale(1.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
 }
 
 .lureCard {
@@ -56,10 +93,30 @@
   z-index: 10;
 }
 
+/* Lure also wobbles */
+.lureInner {
+  animation: wobble 1s ease-in-out infinite;
+}
+
+.scorePop {
+  position: absolute;
+  pointer-events: none;
+  z-index: 30;
+  animation: score-pop 0.6s ease-out forwards;
+  font-family: monospace;
+  font-weight: bold;
+  font-size: 1.25rem;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .flyingCard,
   .lureCard {
     animation: none;
     display: none;
+  }
+
+  .cardInner,
+  .lureInner {
+    animation: none;
   }
 }

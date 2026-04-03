@@ -181,7 +181,9 @@ function LureCard({ onActivate, onHover }: LureCardProps) {
       role="presentation"
       aria-hidden="true"
     >
-      <div className="w-44 rounded-lg bg-card/80 px-3 py-2 ring-1 ring-foreground/10 shadow-md">
+      <div
+        className={`${styles.lureInner} w-44 rounded-lg bg-card/80 px-3 py-2 ring-1 ring-foreground/10 shadow-md`}
+      >
         <p className="truncate text-sm font-medium text-foreground">
           {entry.name}
         </p>
