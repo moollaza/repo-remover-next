@@ -167,22 +167,20 @@ export function useConfirmationModal({
           },
           { revalidate: false },
         );
-      } catch (error) {
-        if (error instanceof Error) {
-          debug.error(`Failed to ${action} the repo:`, error);
-          dispatch({
-            payload: { error, repository: repo },
-            type: "ADD_ERROR",
-          });
+      } catch (thrown) {
+        const error =
+          thrown instanceof Error ? thrown : new Error(String(thrown));
+        debug.error(`Failed to ${action} the repo:`, error);
+        dispatch({
+          payload: { error, repository: repo },
+          type: "ADD_ERROR",
+        });
 
-          if (error instanceof RequestError && error.status === 401) {
-            debug.error(
-              "Authentication failed — stopping batch early. Token may have expired.",
-            );
-            break;
-          }
-        } else {
-          debug.error("An unknown error occurred");
+        if (thrown instanceof RequestError && thrown.status === 401) {
+          debug.error(
+            "Authentication failed — stopping batch early. Token may have expired.",
+          );
+          break;
         }
       } finally {
         dispatch({

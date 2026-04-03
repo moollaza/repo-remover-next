@@ -102,9 +102,9 @@ export default function RepoTable({
   const onOpen = useCallback(() => setIsOpen(true), []);
   const onClose = useCallback(() => setIsOpen(false), []);
 
-  // For debugging purposes
+  // For debugging purposes — DEV only to avoid leaking repo metadata in production
   useEffect(() => {
-    if (repos?.length) {
+    if (import.meta.env.DEV && repos?.length) {
       (window as unknown as { repos: typeof repos } & Window).repos = repos;
       debug.group("Repos", true);
       debug.table(repos);

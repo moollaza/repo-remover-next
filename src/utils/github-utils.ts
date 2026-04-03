@@ -108,37 +108,21 @@ export const archiveRepo = async (
   octokit: Octokit,
   repo: Repository,
 ): Promise<void> => {
-  try {
-    await octokit.rest.repos.update({
-      archived: true,
-      owner: repo.owner.login,
-      repo: repo.name,
-    });
-  } catch (error) {
-    const errorMessage = (error as Error).message;
-    debug.error(errorMessage);
-    throw new Error(
-      `Failed to archive ${repo.name}: ${(error as Error).message}`,
-    );
-  }
+  await octokit.rest.repos.update({
+    archived: true,
+    owner: repo.owner.login,
+    repo: repo.name,
+  });
 };
 
 export const deleteRepo = async (
   octokit: Octokit,
   repo: Repository,
 ): Promise<void> => {
-  try {
-    await octokit.rest.repos.delete({
-      owner: repo.owner.login,
-      repo: repo.name,
-    });
-  } catch (error) {
-    const errorMessage = (error as Error).message;
-    debug.error(errorMessage);
-    throw new Error(
-      `Failed to delete ${repo.name}: ${(error as Error).message}`,
-    );
-  }
+  await octokit.rest.repos.delete({
+    owner: repo.owner.login,
+    repo: repo.name,
+  });
 };
 
 export const processRepo = async (
