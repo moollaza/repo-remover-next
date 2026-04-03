@@ -81,4 +81,4 @@ This app follows a **zero-knowledge architecture** — all GitHub API calls happ
 
 ## Questions?
 
-Open an issue or email [hello@reporemover.xyz](mailto:hello@reporemover.xyz).
+[Open an issue](https://github.com/moollaza/repo-remover/issues) — we're happy to help.
