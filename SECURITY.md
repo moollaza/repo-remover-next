@@ -47,7 +47,7 @@ If you discover a security vulnerability, please report it responsibly. **Do not
 Repo Remover follows a **zero-knowledge architecture**:
 
 - All GitHub API calls are made client-side in the browser
-- No backend server, no data collection, no cookies
+- No backend server, no cookies, no user-identifiable data collection
 - Tokens are never transmitted to any server
 - Optional "Remember Me" uses AES-GCM encryption in localStorage
 - Error monitoring (Sentry) scrubs tokens and PII before transmission
