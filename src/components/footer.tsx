@@ -107,7 +107,7 @@ export default function Footer() {
               <li>
                 <a
                   className="hover:text-foreground transition-colors"
-                  href="mailto:hello@quickbudget.xyz?subject=Repo%20Remover%20Feedback"
+                  href="mailto:hello@reporemover.xyz?subject=Repo%20Remover%20Feedback"
                 >
                   Feedback
                 </a>

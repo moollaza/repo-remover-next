@@ -2,6 +2,25 @@
   "name": "repo-remover",
   "version": "0.1.0",
   "private": true,
+  "description": "Bulk view, archive, and delete GitHub repositories. Zero-knowledge, client-side only.",
+  "license": "MIT",
+  "author": "Zaahir Moolla",
+  "homepage": "https://reporemover.xyz",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/moollaza/repo-remover.git"
+  },
+  "bugs": {
+    "url": "https://github.com/moollaza/repo-remover/issues"
+  },
+  "keywords": [
+    "github",
+    "repository",
+    "archive",
+    "delete",
+    "bulk",
+    "management"
+  ],
   "type": "module",
   "engines": {
     "node": ">=22"

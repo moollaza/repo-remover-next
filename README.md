@@ -67,6 +67,22 @@ bun run test:all         # Unit + E2E
 - [Fathom Analytics](https://usefathom.com/ref/E83PFO) — privacy-focused analytics ([public dashboard](https://app.usefathom.com/share/ikjnvhai/repo+remover))
 - Deployed on [Cloudflare Workers](https://workers.cloudflare.com/)
 
+## Contributing
+
+Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for setup instructions and guidelines.
+
+## Security
+
+See [SECURITY.md](SECURITY.md) for our security policy and how to report vulnerabilities.
+
+## AI-assisted development
+
+This repo includes [Claude Code](https://claude.ai/code) configuration in `.claude/` and `CLAUDE.md`. These files help AI-assisted contributors follow project conventions. They're optional — you don't need Claude Code to contribute.
+
 ## Author
 
 Zaahir Moolla ([@zmoolla](https://bsky.app/profile/zmoolla.bsky.social), [zaahir.ca](https://zaahir.ca))
+
+## License
+
+[MIT](LICENSE)
