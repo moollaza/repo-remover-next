@@ -13,14 +13,6 @@
   "bugs": {
     "url": "https://github.com/moollaza/repo-remover/issues"
   },
-  "keywords": [
-    "github",
-    "repository",
-    "archive",
-    "delete",
-    "bulk",
-    "management"
-  ],
   "type": "module",
   "engines": {
     "node": ">=22"
