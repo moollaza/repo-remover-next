@@ -1,14 +1,14 @@
 import { motion, useReducedMotion } from "framer-motion";
 import {
   Check,
-  CheckSquare,
   ExternalLink,
   Eye,
   EyeOff,
   Info,
   Key,
-  Loader2,
+  LoaderCircle,
   Search,
+  SquareCheckBig,
   Trash2,
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -63,7 +63,7 @@ const steps = [
   {
     description:
       "Use search and filters to locate old repos. Check the ones you want to archive or delete.",
-    icon: CheckSquare,
+    icon: SquareCheckBig,
     number: "3",
     title: "Find & Select What to Remove",
   },
@@ -181,7 +181,7 @@ function InlinePATForm() {
             </Button>
           )}
           {isValidating && (
-            <Loader2 className="h-4 w-4 text-default-400 animate-spin" />
+            <LoaderCircle className="h-4 w-4 text-default-400 animate-spin" />
           )}
         </div>
       </div>

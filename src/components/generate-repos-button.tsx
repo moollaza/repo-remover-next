@@ -1,4 +1,4 @@
-import { Loader2 } from "lucide-react";
+import { LoaderCircle } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -55,7 +55,7 @@ export function GenerateReposButton() {
     >
       {isLoading ? (
         <span className="inline-flex items-center gap-2">
-          <Loader2 className="h-4 w-4 animate-spin" />
+          <LoaderCircle className="h-4 w-4 animate-spin" />
           Generating...
         </span>
       ) : (

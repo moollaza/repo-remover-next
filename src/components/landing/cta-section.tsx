@@ -1,5 +1,7 @@
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowRight, Github } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+
+import { GithubIcon } from "@/components/icons";
 
 import {
   fadeUp,
@@ -52,7 +54,7 @@ export function CTASection() {
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.98 }}
               >
-                <Github className="h-5 w-5" />
+                <GithubIcon className="h-5 w-5" />
                 Get Started Now
                 <ArrowRight className="h-4 w-4" />
               </motion.button>
