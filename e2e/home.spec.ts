@@ -21,7 +21,7 @@ test.describe("Home Page", () => {
     await expect(home.navbar.getByText("Repo Remover")).toBeVisible();
     await expect(home.navbar.getByText("Test User")).not.toBeVisible();
 
-    await home.expectHeading("Clean up GitHub");
+    await home.expectHeading("The bulk cleanup");
 
     // Token form is further down the page. Scroll directly to the form instead
     // of anchoring the test to marketing copy.

@@ -29,9 +29,9 @@ export function HeroSection() {
           className="text-4xl md:text-6xl font-bold mb-6 leading-tight"
           variants={fadeUp}
         >
-          Clean up GitHub{" "}
+          The bulk cleanup{" "}
           <span className="bg-gradient-to-r from-[var(--brand-blue)] to-[var(--brand-cyan)] bg-clip-text text-transparent">
-            in one pass.
+            GitHub should have built.
           </span>
         </motion.h1>
 
@@ -39,9 +39,9 @@ export function HeroSection() {
           className="text-lg md:text-xl text-default-500 mb-10 max-w-2xl mx-auto leading-relaxed"
           variants={fadeUp}
         >
-          Load every repo into one table, cut the list down fast, and archive or
-          delete in bulk. No scripts, no tab maze, and no backend handling your
-          token.
+          25,000+ developers stopped deleting repos one by one. Review, archive,
+          or delete in bulk from one screen — free, open source, and your token
+          never leaves your browser.
         </motion.p>
 
         <motion.div
