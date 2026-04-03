@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Crosshair, Share2, X } from "lucide-react";
+import { Check, Crosshair, Link2, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
@@ -70,26 +70,62 @@ const hitVariants = {
   },
 };
 
-// ── Share helper ──
+// ── Share helpers ──
 
-function shareScore(score: number, repos: number, rounds: number) {
-  const text = `I cleaned ${repos} repos in ${rounds} round${rounds > 1 ? "s" : ""} and scored ${score} points in Repo Hunt! 🎯\n\nCan you beat my score?`;
-  const url = window.location.origin;
-
-  if (navigator.share) {
-    navigator.share({ text, url }).catch(() => {
-      // User cancelled or share failed — fall back to clipboard
-      copyToClipboard(text, url);
-    });
-  } else {
-    copyToClipboard(text, url);
-  }
+function getShareText(score: number, repos: number, rounds: number) {
+  return `I cleaned ${repos} repos in ${rounds} round${rounds > 1 ? "s" : ""} and scored ${score} points in Repo Hunt!\n\nCan you beat my score?`;
 }
 
-function copyToClipboard(text: string, url: string) {
-  navigator.clipboard.writeText(`${text}\n${url}`).catch(() => {
-    // Clipboard write may fail in non-secure contexts — silently ignore
-  });
+function shareToTwitter(score: number, repos: number, rounds: number) {
+  const text = getShareText(score, repos, rounds);
+  const url = window.location.origin;
+  window.open(
+    `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`,
+    "_blank",
+    "width=550,height=420",
+  );
+}
+
+function shareToLinkedIn(url: string) {
+  window.open(
+    `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`,
+    "_blank",
+    "width=550,height=420",
+  );
+}
+
+function copyShareLink(score: number, repos: number, rounds: number) {
+  const text = getShareText(score, repos, rounds);
+  const url = window.location.origin;
+  return navigator.clipboard.writeText(`${text}\n${url}`).then(
+    () => true,
+    () => false,
+  );
+}
+
+// ── Countdown Hook ──
+
+function useCountdown(onComplete: () => void) {
+  const [count, setCount] = useState<number | "GO" | null>(3);
+
+  useEffect(() => {
+    if (count === null) return;
+    if (count === "GO") {
+      const id = window.setTimeout(() => {
+        setCount(null);
+        onComplete();
+      }, 500);
+      return () => clearTimeout(id);
+    }
+    const id = window.setTimeout(() => {
+      if (count === 1) setCount("GO");
+      else setCount(count - 1);
+    }, 700);
+    return () => clearTimeout(id);
+  }, [count, onComplete]);
+
+  const restart = useCallback(() => setCount(3), []);
+  return { count, restart };
 }
 
 // ── Main Component ──
@@ -102,26 +138,24 @@ export default function RepoHunt({ onExit }: RepoHuntProps) {
   const [state, dispatch] = useGameState();
   const [cards, setCards] = useState<FlyingCard[]>([]);
   const [hitPops, setHitPops] = useState<HitPop[]>([]);
-  const [showIntro, setShowIntro] = useState(true);
-  const [shared, setShared] = useState(false);
+  const [showShareMenu, setShowShareMenu] = useState(false);
+  const [copied, setCopied] = useState(false);
   const spawnedRef = useRef(0);
   const hitCountRef = useRef(0);
   const intervalsRef = useRef<Set<number>>(new Set());
   const arenaRef = useRef<HTMLDivElement>(null);
 
+  const startGame = useCallback(() => {
+    dispatch({ type: "START" });
+  }, [dispatch]);
+
+  const { count: countdown, restart: restartCountdown } =
+    useCountdown(startGame);
+
   const flightDuration =
     BASE_FLIGHT_DURATION * Math.pow(SPEED_MULTIPLIER, state.round - 1);
   const spawnInterval =
     SPAWN_INTERVAL_MS * Math.pow(SPEED_MULTIPLIER, state.round - 1);
-
-  // Show intro briefly, then start
-  useEffect(() => {
-    const id = window.setTimeout(() => {
-      setShowIntro(false);
-      dispatch({ type: "START" });
-    }, 1800);
-    return () => clearTimeout(id);
-  }, []); // eslint-disable-line -- mount only
 
   // Spawn cards at interval during play
   useEffect(() => {
@@ -147,7 +181,7 @@ export default function RepoHunt({ onExit }: RepoHuntProps) {
     };
   }, [state.phase, state.round, spawnInterval]);
 
-  // Round transition: auto-advance after delay
+  // Round transition: show countdown then advance
   useEffect(() => {
     if (state.phase !== "round-transition") return;
     setCards([]);
@@ -222,41 +256,48 @@ export default function RepoHunt({ onExit }: RepoHuntProps) {
   }, [dispatch, onExit]);
 
   const handlePlayAgain = useCallback(() => {
-    setShowIntro(false);
-    setShared(false);
-    dispatch({ type: "START" });
-  }, [dispatch]);
+    setShowShareMenu(false);
+    setCopied(false);
+    restartCountdown();
+  }, [restartCountdown]);
 
   return (
     <div
       ref={arenaRef}
-      className="fixed inset-0 z-[100] flex flex-col bg-background cursor-crosshair"
+      className={`fixed inset-0 z-[100] flex flex-col bg-background ${styles.crosshairCursor}`}
       aria-hidden="true"
       role="presentation"
       data-testid="repo-hunt-arena"
     >
-      {/* Intro screen */}
+      {/* Initial countdown overlay */}
       <AnimatePresence>
-        {showIntro && (
+        {countdown !== null && state.phase === "idle" && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="absolute inset-0 z-40 flex flex-col items-center justify-center bg-background"
           >
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ type: "spring", stiffness: 300, damping: 20 }}
-            >
-              <Crosshair className="mx-auto h-12 w-12 text-default-400 mb-4" />
-              <h2 className="text-center font-mono text-4xl font-bold tracking-wider text-foreground">
-                REPO HUNT
-              </h2>
-              <p className="mt-3 text-center text-default-500">
-                Click the repos to clean them up!
-              </p>
-            </motion.div>
+            <Crosshair className="mx-auto h-10 w-10 text-default-300 mb-6" />
+            <h2 className="text-center font-mono text-3xl font-bold tracking-wider text-default-400 mb-8">
+              REPO HUNT
+            </h2>
+            <AnimatePresence mode="wait">
+              <motion.span
+                key={String(countdown)}
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 1.5, opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className={`font-mono font-bold ${
+                  countdown === "GO"
+                    ? "text-5xl text-success"
+                    : "text-7xl text-foreground"
+                }`}
+              >
+                {countdown === "GO" ? "GO!" : countdown}
+              </motion.span>
+            </AnimatePresence>
           </motion.div>
         )}
       </AnimatePresence>
@@ -269,7 +310,7 @@ export default function RepoHunt({ onExit }: RepoHuntProps) {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 1.05 }}
             transition={{ type: "spring", stiffness: 400, damping: 25 }}
-            className="absolute inset-0 z-40 flex flex-col items-center justify-center bg-background/80"
+            className={`absolute inset-0 z-40 flex flex-col items-center justify-center bg-background/80 ${styles.arena}`}
           >
             <p className="font-mono text-5xl font-bold text-foreground">
               ROUND {state.round + 1}
@@ -308,8 +349,8 @@ export default function RepoHunt({ onExit }: RepoHuntProps) {
         </div>
       )}
 
-      {/* Game arena - fills remaining space */}
-      <div className="relative flex-1 overflow-hidden">
+      {/* Game arena with pixel dot grid */}
+      <div className={`relative flex-1 overflow-hidden ${styles.arena}`}>
         {/* Flying cards */}
         {state.phase === "playing" && (
           <AnimatePresence>
@@ -352,7 +393,7 @@ export default function RepoHunt({ onExit }: RepoHuntProps) {
           </AnimatePresence>
         )}
 
-        {/* Hit popups — show action + points */}
+        {/* Hit popups */}
         {hitPops.map((pop) => (
           <span
             key={pop.id}
@@ -371,7 +412,7 @@ export default function RepoHunt({ onExit }: RepoHuntProps) {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-background/95"
+          className={`absolute inset-0 z-30 flex flex-col items-center justify-center bg-background/95 ${styles.arena}`}
         >
           <motion.div
             initial={{ scale: 0.9, y: 20 }}
@@ -392,21 +433,80 @@ export default function RepoHunt({ onExit }: RepoHuntProps) {
             <p className="mt-2 text-default-400">
               Now clean your <em>real</em> ones.
             </p>
+
             <div className="mt-10 flex flex-wrap justify-center gap-3">
               <Button size="lg" onClick={handlePlayAgain}>
                 Play Again
               </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                onClick={() => {
-                  setShared(true);
-                  shareScore(state.score, state.totalCleaned, state.round);
-                }}
-              >
-                <Share2 className="mr-2 h-4 w-4" />
-                {shared ? "Copied!" : "Share Score"}
-              </Button>
+              <div className="relative">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  onClick={() => setShowShareMenu((v) => !v)}
+                >
+                  Share
+                </Button>
+                {/* Share popup */}
+                <AnimatePresence>
+                  {showShareMenu && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute bottom-full left-1/2 mb-2 -translate-x-1/2 rounded-lg bg-card p-2 shadow-xl ring-1 ring-foreground/10"
+                    >
+                      <div className="flex gap-1">
+                        <button
+                          onClick={() =>
+                            shareToTwitter(
+                              state.score,
+                              state.totalCleaned,
+                              state.round,
+                            )
+                          }
+                          className="cursor-pointer rounded-md px-3 py-2 text-sm font-medium text-foreground hover:bg-default-100 transition-colors whitespace-nowrap"
+                        >
+                          X / Twitter
+                        </button>
+                        <button
+                          onClick={() =>
+                            shareToLinkedIn(window.location.origin)
+                          }
+                          className="cursor-pointer rounded-md px-3 py-2 text-sm font-medium text-foreground hover:bg-default-100 transition-colors whitespace-nowrap"
+                        >
+                          LinkedIn
+                        </button>
+                        <button
+                          onClick={() => {
+                            void copyShareLink(
+                              state.score,
+                              state.totalCleaned,
+                              state.round,
+                            ).then(() => {
+                              setCopied(true);
+                              setTimeout(() => setCopied(false), 2000);
+                            });
+                          }}
+                          className="cursor-pointer rounded-md px-3 py-2 text-sm font-medium text-foreground hover:bg-default-100 transition-colors whitespace-nowrap flex items-center gap-1.5"
+                        >
+                          {copied ? (
+                            <>
+                              <Check className="h-3.5 w-3.5 text-success" />
+                              Copied!
+                            </>
+                          ) : (
+                            <>
+                              <Link2 className="h-3.5 w-3.5" />
+                              Copy Link
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
               <Button
                 size="lg"
                 variant="outline"
