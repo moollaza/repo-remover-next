@@ -24,29 +24,40 @@ export function HeroSection() {
   const isMobile = useMediaQuery("(max-width: 767px)");
   const showLure = !prefersReduced && !isMobile && !gameActive;
 
+  // Lock scroll when game is active
+  useEffect(() => {
+    if (gameActive) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [gameActive]);
+
   return (
     <section className="relative w-full overflow-hidden px-6 py-20 md:py-28">
-      {gameActive ? (
-        <Suspense fallback={null}>
-          <RepoHunt onExit={() => setGameActive(false)} />
-        </Suspense>
-      ) : (
-        <HeroContent />
-      )}
+      <HeroContent />
       {showLure && (
         <LureCard
           onActivate={() => setGameActive(true)}
           onHover={() => {
-            // Prefetch game chunk on hover for zero-delay activation
             import("./repo-hunt");
           }}
         />
+      )}
+      {/* Full-screen game overlay */}
+      {gameActive && (
+        <Suspense fallback={null}>
+          <RepoHunt onExit={() => setGameActive(false)} />
+        </Suspense>
       )}
     </section>
   );
 }
 
-// ── Hero Content (extracted for conditional render) ──
+// ── Hero Content ──
 
 function HeroContent() {
   return (
@@ -147,7 +158,6 @@ function LureCard({ onActivate, onHover }: LureCardProps) {
   const showLure = useCallback(() => {
     setEntry(REPO_RAIN_POOL[Math.floor(Math.random() * REPO_RAIN_POOL.length)]);
     setVisible(true);
-    // Hide after flight completes
     const hideId = window.setTimeout(() => {
       setVisible(false);
     }, LURE_FLIGHT_DURATION * 1000);
@@ -155,10 +165,8 @@ function LureCard({ onActivate, onHover }: LureCardProps) {
   }, []);
 
   useEffect(() => {
-    // Show first lure after a short delay
     const initialDelay = window.setTimeout(() => {
       showLure();
-      // Then repeat
       intervalRef.current = window.setInterval(() => {
         showLure();
       }, LURE_INTERVAL_MS);
