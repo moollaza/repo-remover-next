@@ -15,11 +15,8 @@ export const archiveRepo = async (
       repo: repo.name,
     });
   } catch (error) {
-    const errorMessage = (error as Error).message;
-    debug.error(errorMessage);
-    throw new Error(
-      `Failed to archive ${repo.name}: ${(error as Error).message}`,
-    );
+    debug.error((error as Error).message);
+    throw error;
   }
 };
 
@@ -33,11 +30,8 @@ export const deleteRepo = async (
       repo: repo.name,
     });
   } catch (error) {
-    const errorMessage = (error as Error).message;
-    debug.error(errorMessage);
-    throw new Error(
-      `Failed to delete ${repo.name}: ${(error as Error).message}`,
-    );
+    debug.error((error as Error).message);
+    throw error;
   }
 };
 

@@ -265,7 +265,7 @@ function RepoActionResult({
       <div className="px-6 py-4 text-foreground">
         <p>
           {count - errorCount} out of {count} repos{" "}
-          {action === "archive" ? "archived" : "deleted"} successfully!
+          {action === "archive" ? "archived" : "deleted"} successfully.
         </p>
 
         {/* Report Errors */}
