@@ -95,11 +95,11 @@ export function FeaturesSection() {
     <section className="w-full" id="features">
       {features.map((feature, index) => (
         <div
-          className={`w-full px-4 sm:px-6 py-14 sm:py-20 ${index % 2 === 1 ? "bg-default-50" : ""}`}
+          className={`w-full px-6 sm:px-8 py-14 sm:py-20 ${index % 2 === 1 ? "bg-default-50" : ""}`}
           key={index}
         >
           <motion.div
-            className="max-w-7xl mx-auto"
+            className="max-w-5xl mx-auto"
             {...scrollRevealProps(staggerContainerWide, reduced)}
           >
             <div

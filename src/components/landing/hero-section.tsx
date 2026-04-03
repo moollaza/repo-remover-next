@@ -5,7 +5,7 @@ import { fadeUp, staggerContainer } from "@/utils/motion";
 
 export function HeroSection() {
   return (
-    <section className="w-full px-4 sm:px-6 py-16 md:py-28">
+    <section className="w-full px-6 sm:px-8 py-16 md:py-28">
       <motion.div
         animate="visible"
         className="max-w-5xl mx-auto text-center"

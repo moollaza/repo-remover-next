@@ -12,7 +12,7 @@ export function CTASection() {
   const reduced = useReducedMotion();
 
   return (
-    <section className="w-full px-4 sm:px-6 py-16 sm:py-20">
+    <section className="w-full px-6 sm:px-8 py-16 sm:py-20">
       <div className="max-w-4xl mx-auto">
         <motion.div
           className="rounded-2xl p-8 sm:p-12 md:p-16 text-center bg-gradient-to-br from-[var(--brand-blue)] to-[var(--brand-cyan)] dark:from-[var(--brand-blue)]/90 dark:to-[var(--brand-cyan)]/80 text-white relative overflow-hidden shadow-2xl"

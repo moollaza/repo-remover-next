@@ -45,7 +45,7 @@ export function FAQSection() {
   const reduced = useReducedMotion();
 
   return (
-    <section className="w-full px-4 sm:px-6 py-16 sm:py-20">
+    <section className="w-full px-6 sm:px-8 py-16 sm:py-20">
       <div className="max-w-3xl mx-auto">
         <motion.div
           className="text-center mb-12"

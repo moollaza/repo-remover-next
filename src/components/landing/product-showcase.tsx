@@ -15,10 +15,10 @@ export function ProductShowcase() {
 
   return (
     <section
-      className="w-full px-4 sm:px-6 py-16 sm:py-20 bg-gradient-to-b from-background to-default-50"
+      className="w-full px-6 sm:px-8 py-16 sm:py-20 bg-gradient-to-b from-background to-default-50"
       id="how-it-works"
     >
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-5xl mx-auto">
         <motion.div
           className="text-center mb-12"
           {...scrollRevealProps(staggerContainer, reduced)}
@@ -46,7 +46,7 @@ export function ProductShowcase() {
 
         {/* Glow + UI mockup */}
         <motion.div
-          className="relative max-w-5xl mx-auto"
+          className="relative"
           {...scrollRevealProps(scaleIn, reduced)}
         >
           <div className="absolute inset-0 bg-gradient-to-r from-[var(--brand-blue)] to-[var(--brand-cyan)] blur-3xl opacity-10 dark:opacity-20 rounded-3xl" />
@@ -63,7 +63,7 @@ export function ProductShowcase() {
           {/* Mobile screenshot */}
           <img
             alt="Repo Remover dashboard on mobile showing repository list with badges and actions"
-            className="relative rounded-xl border border-divider shadow-2xl w-full sm:hidden max-w-[320px] mx-auto"
+            className="relative rounded-xl border border-divider shadow-2xl w-full sm:hidden"
             src={
               isDark
                 ? "/images/dashboard-mobile-dark.png"
@@ -74,7 +74,7 @@ export function ProductShowcase() {
 
         {/* Feature highlights below */}
         <motion.div
-          className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12 max-w-5xl mx-auto"
+          className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12"
           {...scrollRevealProps(staggerContainer, reduced)}
         >
           <motion.div className="text-center" variants={fadeUp}>

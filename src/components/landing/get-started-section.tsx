@@ -260,7 +260,7 @@ export function GetStartedSection() {
   const reduced = useReducedMotion();
 
   return (
-    <section className="w-full px-4 sm:px-6 py-16 sm:py-20" id="get-started">
+    <section className="w-full px-6 sm:px-8 py-16 sm:py-20" id="get-started">
       <div className="max-w-5xl mx-auto">
         <motion.div
           className="text-center mb-16"
