@@ -11,10 +11,8 @@ import useSWR from "swr";
 import { GitHubContext, GitHubContextType } from "@/contexts/github-context";
 import { analytics } from "@/utils/analytics";
 import { debug } from "@/utils/debug";
-import {
-  fetchGitHubDataWithProgress,
-  type LoadingProgress,
-} from "@/utils/github-api";
+import { fetchGitHubDataWithProgress } from "@/github/fetcher";
+import { type LoadingProgress } from "@/github/types";
 import { secureStorage } from "@/utils/secure-storage";
 
 const IS_DEV = import.meta.env.DEV;
@@ -82,11 +80,6 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
     }
 
     void loadStoredData();
-
-    // Cleanup function
-    return () => {
-      // Any cleanup needed when component unmounts
-    };
   }, []);
 
   // Derived authentication state

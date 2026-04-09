@@ -102,9 +102,9 @@ export default function RepoTable({
   const onOpen = useCallback(() => setIsOpen(true), []);
   const onClose = useCallback(() => setIsOpen(false), []);
 
-  // For debugging purposes
+  // For debugging purposes — DEV only to avoid leaking repo metadata in production
   useEffect(() => {
-    if (repos?.length) {
+    if (import.meta.env.DEV && repos?.length) {
       (window as unknown as { repos: typeof repos } & Window).repos = repos;
       debug.group("Repos", true);
       debug.table(repos);
@@ -259,7 +259,7 @@ export default function RepoTable({
       />
 
       {/* TABLE */}
-      <div className="border border-divider rounded-xl bg-content1">
+      <div className="border border-divider rounded-xl bg-content1 overflow-hidden">
         <Table
           aria-label="GitHub repositories table"
           className="table-fixed"
@@ -268,7 +268,10 @@ export default function RepoTable({
           <TableHeader>
             <TableRow className="bg-default-100 border-b border-divider">
               {/* Checkbox column */}
-              <TableHead className="w-12 px-3 py-3" scope="col">
+              <TableHead
+                className="w-8 sm:w-12 px-1.5 sm:px-3 py-3"
+                scope="col"
+              >
                 <Checkbox
                   aria-label="Select all"
                   checked={allSelectableSelected && selectableRepos.length > 0}
@@ -298,7 +301,7 @@ export default function RepoTable({
                 </span>
               </TableHead>
               <TableHead
-                className="hidden xl:table-cell px-3 py-3 text-left text-xs font-semibold text-default-500 uppercase tracking-wider"
+                className="hidden lg:table-cell px-3 py-3 text-left text-xs font-semibold text-default-500 uppercase tracking-wider"
                 scope="col"
               >
                 Owner
@@ -315,13 +318,14 @@ export default function RepoTable({
                     ? sortDescriptor.direction
                     : "none"
                 }
-                className="px-3 py-3 text-left text-xs font-semibold text-default-500 uppercase tracking-wider cursor-pointer select-none hover:bg-default-200 transition-colors"
+                className="w-24 sm:w-auto px-3 py-3 text-left text-xs font-semibold text-default-500 uppercase tracking-wider cursor-pointer select-none hover:bg-default-200 transition-colors"
                 data-sortable="true"
                 onClick={() => handleSortChange("updatedAt")}
                 scope="col"
               >
                 <span className="inline-flex items-center gap-1">
-                  Last Updated
+                  <span className="sm:hidden">Updated</span>
+                  <span className="hidden sm:inline">Last Updated</span>
                   {sortDescriptor.column === "updatedAt" && (
                     <span className="text-default-400">
                       {sortDescriptor.direction === "ascending"
@@ -362,7 +366,7 @@ export default function RepoTable({
                     key={repo.id}
                   >
                     {/* Checkbox */}
-                    <TableCell className="w-12 px-3 py-3">
+                    <TableCell className="w-8 sm:w-12 px-1.5 sm:px-3 py-3">
                       <Checkbox
                         aria-label={repo.name}
                         checked={isSelected && !disabled}
@@ -385,9 +389,9 @@ export default function RepoTable({
                           </a>
                         </div>
 
-                        {/* Mobile-only: show pills inline (hidden on lg:) */}
+                        {/* Mobile-only: show pills inline (hidden on lg+) */}
                         <div
-                          className="flex gap-1.5 mb-1.5 flex-wrap xl:hidden"
+                          className="flex gap-1.5 mb-1.5 flex-wrap lg:hidden"
                           data-testid="repo-tags"
                         >
                           <RepoBadges login={login} repo={repo} showOwner />
@@ -405,7 +409,7 @@ export default function RepoTable({
 
                     {/* Owner — desktop only */}
                     <TableCell
-                      className="hidden xl:table-cell px-3 py-3"
+                      className="hidden lg:table-cell px-3 py-3"
                       data-testid="repo-owner"
                     >
                       {repo.owner.login !== login ? (
@@ -436,7 +440,7 @@ export default function RepoTable({
 
                     {/* Last Updated */}
                     <TableCell
-                      className="px-3 py-3 text-default-400 whitespace-nowrap"
+                      className="px-3 py-3 text-default-400 sm:whitespace-nowrap"
                       data-testid="repo-updated-at"
                       title={
                         repo.updatedAt

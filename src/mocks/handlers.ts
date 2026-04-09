@@ -1,4 +1,4 @@
-import { http, HttpResponse } from "msw";
+import { graphql, http, HttpResponse } from "msw";
 
 import {
   getValidPersonalAccessToken,
@@ -9,6 +9,7 @@ import {
 
 // --- Error scenario handler factories ---
 // Use these with server.use() in individual tests to override default handlers.
+// These intentionally use http.post to override ALL GraphQL operations.
 
 /** Returns a GraphQL handler that responds with a 403 insufficient scopes error */
 export function graphqlForbiddenHandler(
@@ -110,110 +111,92 @@ export function restUnauthorizedHandler() {
   ];
 }
 
+// Scope GraphQL handlers to the GitHub API endpoint
+const github = graphql.link("https://api.github.com/graphql");
+
+function unauthorizedResponse() {
+  return HttpResponse.json(
+    { errors: [{ message: "Bad credentials" }] },
+    { status: 401 },
+  );
+}
+
 export const handlers = [
-  // Handle GraphQL requests - User repositories
-  http.post("https://api.github.com/graphql", async ({ request }) => {
+  // Auth guard: reject invalid tokens before operation-specific handlers
+  http.post("https://api.github.com/graphql", ({ request }) => {
     const authHeader = request.headers.get("Authorization");
-
-    // Check for valid token
     if (!authHeader?.includes(getValidPersonalAccessToken())) {
-      return HttpResponse.json({ message: "Bad credentials" }, { status: 401 });
+      return unauthorizedResponse();
     }
+    // Valid token — fall through to operation-specific handlers
+    return undefined;
+  }),
 
-    const body = (await request.json()) as {
-      query: string;
-      variables?: unknown;
-    };
-
-    // Handle different GraphQL queries
-    if (body.query.includes("getCurrentUser")) {
-      return HttpResponse.json({
-        data: {
-          viewer: MOCK_USER,
-        },
-      });
-    }
-
-    if (body.query.includes("getRepositories")) {
-      return HttpResponse.json({
-        data: {
-          user: {
-            ...MOCK_USER,
-            repositories: {
-              nodes: MOCK_REPOS,
-              pageInfo: {
-                endCursor: null,
-                hasNextPage: false,
-              },
-            },
-          },
-        },
-      });
-    }
-
-    if (body.query.includes("getOrganizations")) {
-      return HttpResponse.json({
-        data: {
-          user: {
-            organizations: {
-              nodes: MOCK_ORGANIZATIONS,
-              pageInfo: {
-                endCursor: null,
-                hasNextPage: false,
-              },
-            },
-          },
-        },
-      });
-    }
-
-    if (body.query.includes("getOrgRepositories")) {
-      const variables = body.variables as { org?: string } | undefined;
-      const orgLogin = variables?.org ?? "testorg";
-      const matchingOrg = MOCK_ORGANIZATIONS.find((o) => o.login === orgLogin);
-
-      if (!matchingOrg) {
-        return HttpResponse.json(
-          {
-            data: null,
-            errors: [
-              {
-                message: `Could not resolve to an Organization with the login of '${orgLogin}'.`,
-                type: "NOT_FOUND",
-              },
-            ],
-          },
-          { status: 200 },
-        );
-      }
-
-      const orgRepos = MOCK_REPOS.filter(
-        (repo) => repo.owner.login === orgLogin,
-      );
-      return HttpResponse.json({
-        data: {
-          organization: {
-            login: matchingOrg.login,
-            repositories: {
-              nodes: orgRepos,
-              pageInfo: {
-                endCursor: null,
-                hasNextPage: false,
-              },
-            },
-            url: matchingOrg.url,
-          },
-        },
-      });
-    }
-
-    // Default response
+  // GraphQL operation-based handlers (matches on operation name, not string content)
+  github.query("getCurrentUser", () => {
     return HttpResponse.json({
-      data: {},
+      data: { viewer: MOCK_USER },
     });
   }),
 
-  // Handle REST API repository operations
+  github.query("getRepositories", () => {
+    return HttpResponse.json({
+      data: {
+        user: {
+          ...MOCK_USER,
+          repositories: {
+            nodes: MOCK_REPOS,
+            pageInfo: { endCursor: null, hasNextPage: false },
+          },
+        },
+      },
+    });
+  }),
+
+  github.query("getOrganizations", () => {
+    return HttpResponse.json({
+      data: {
+        user: {
+          organizations: {
+            nodes: MOCK_ORGANIZATIONS,
+            pageInfo: { endCursor: null, hasNextPage: false },
+          },
+        },
+      },
+    });
+  }),
+
+  github.query("getOrgRepositories", ({ variables }) => {
+    const orgLogin = (variables as { org?: string }).org ?? "testorg";
+    const matchingOrg = MOCK_ORGANIZATIONS.find((o) => o.login === orgLogin);
+
+    if (!matchingOrg) {
+      return HttpResponse.json({
+        data: null,
+        errors: [
+          {
+            message: `Could not resolve to an Organization with the login of '${orgLogin}'.`,
+          },
+        ],
+      });
+    }
+
+    const orgRepos = MOCK_REPOS.filter((repo) => repo.owner.login === orgLogin);
+    return HttpResponse.json({
+      data: {
+        organization: {
+          login: matchingOrg.login,
+          repositories: {
+            nodes: orgRepos,
+            pageInfo: { endCursor: null, hasNextPage: false },
+          },
+          url: matchingOrg.url,
+        },
+      },
+    });
+  }),
+
+  // REST handlers
   http.patch("https://api.github.com/repos/:owner/:repo", () => {
     return HttpResponse.json({
       archived: true,
@@ -227,7 +210,6 @@ export const handlers = [
     });
   }),
 
-  // Handle rate limit check (used for scope detection)
   http.get("https://api.github.com/rate_limit", ({ request }) => {
     const authHeader = request.headers.get("Authorization");
 
@@ -251,7 +233,6 @@ export const handlers = [
     );
   }),
 
-  // Handle user authentication
   http.get("https://api.github.com/user", ({ request }) => {
     const authHeader = request.headers.get("Authorization");
 

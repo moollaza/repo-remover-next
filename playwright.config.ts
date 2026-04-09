@@ -21,7 +21,10 @@ export default defineConfig({
   reporter: [
     [process.env.CI ? "dot" : "list"],
     ["html", { open: "never" }],
-    ["@argos-ci/playwright/reporter", { uploadToArgos: !!process.env.CI }],
+    [
+      "@argos-ci/playwright/reporter",
+      { uploadToArgos: !!process.env.ARGOS_TOKEN },
+    ],
   ],
 
   // Global timeout for tests (30 seconds)

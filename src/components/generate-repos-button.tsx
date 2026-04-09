@@ -1,10 +1,11 @@
-import { Loader2 } from "lucide-react";
+import { LoaderCircle } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { useGitHubData } from "@/hooks/use-github-data";
 import { cn } from "@/lib/utils";
-import { createThrottledOctokit, generateRepos } from "@/utils/github-utils";
+import { createThrottledOctokit } from "@/github/client";
+import { generateRepos } from "@/github/dev-tools";
 
 /**
  * This component generates random repositories for the user
@@ -19,16 +20,18 @@ export function GenerateReposButton() {
   const octokit = pat ? createThrottledOctokit(pat) : null;
   const [isLoading, setIsLoading] = useState(false);
 
-  const hasDemoParam =
+  const isE2E =
     typeof window !== "undefined" &&
-    new URLSearchParams(window.location.search).has("demo");
+    (window as unknown as Record<string, unknown>).__E2E_PLAIN_STORAGE__ ===
+      true;
 
-  if ((!import.meta.env.DEV && !hasDemoParam) || !octokit) {
+  if (!import.meta.env.DEV || !octokit || isE2E) {
     return null;
   }
 
   return (
     <Button
+      data-testid="generate-repos-button"
       className={cn(
         "border-[var(--brand-blue)] px-4 py-2 text-sm font-medium text-[var(--brand-blue)]",
         "hover:bg-[var(--brand-blue)] hover:text-white",
@@ -49,7 +52,7 @@ export function GenerateReposButton() {
     >
       {isLoading ? (
         <span className="inline-flex items-center gap-2">
-          <Loader2 className="h-4 w-4 animate-spin" />
+          <LoaderCircle className="h-4 w-4 animate-spin" />
           Generating...
         </span>
       ) : (

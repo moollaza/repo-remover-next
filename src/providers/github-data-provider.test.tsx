@@ -13,7 +13,7 @@ import {
 } from "@/mocks/static-fixtures";
 import { analytics } from "@/utils/analytics";
 import { debug } from "@/utils/debug";
-import { fetchGitHubDataWithProgress } from "@/utils/github-api";
+import { fetchGitHubDataWithProgress } from "@/github/fetcher";
 import { secureStorage } from "@/utils/secure-storage";
 
 import { GitHubDataProvider } from "./github-data-provider";
@@ -36,7 +36,7 @@ vi.mock("@/utils/debug", () => ({
   },
 }));
 
-vi.mock("@/utils/github-api", () => ({
+vi.mock("@/github/fetcher", () => ({
   fetchGitHubDataWithProgress: vi.fn(),
 }));
 
@@ -599,7 +599,7 @@ describe("GitHubDataProvider", () => {
     it("isRefreshing=true when progress is active with existing data", async () => {
       // Capture the progress callback so we can control it
       let progressCallback:
-        | ((progress: import("@/utils/github-api").LoadingProgress) => void)
+        | ((progress: import("@/github/types").LoadingProgress) => void)
         | null = null;
       mockFetch.mockImplementation(async (_key, onProgress) => {
         progressCallback = onProgress as typeof progressCallback;

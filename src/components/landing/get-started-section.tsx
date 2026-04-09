@@ -1,16 +1,16 @@
 import { motion, useReducedMotion } from "framer-motion";
 import {
-  CheckSquare,
+  Check,
   ExternalLink,
   Eye,
   EyeOff,
   Info,
   Key,
-  Loader2,
+  LoaderCircle,
   Search,
-  Trash2,
+  SquareCheckBig,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -25,13 +25,10 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
+import { isValidGitHubToken } from "@/github/client";
 import { useGitHubData } from "@/hooks/use-github-data";
+import { useTokenValidation } from "@/hooks/use-token-validation";
 import { analytics } from "@/utils/analytics";
-import { checkTokenScopes, SCOPE_DESCRIPTIONS } from "@/utils/github-api";
-import {
-  createThrottledOctokit,
-  isValidGitHubToken,
-} from "@/utils/github-utils";
 import {
   fadeUp,
   scaleIn,
@@ -61,17 +58,10 @@ const steps = [
   },
   {
     description:
-      "Use search and filters to locate old repos. Check the ones you want to archive or delete.",
-    icon: CheckSquare,
+      "Search, filter, and select what should be archived, or deleted. Confirm your choices and Repo Remover handles the rest.",
+    icon: SquareCheckBig,
     number: "3",
-    title: "Find & Select What to Remove",
-  },
-  {
-    description:
-      "Confirm your choices and Repo Remover handles the rest. No page reloads, no waiting.",
-    icon: Trash2,
-    number: "4",
-    title: "Archive or Delete in One Click",
+    title: "Review and Clean Up",
   },
 ];
 
@@ -81,55 +71,12 @@ const steps = [
  */
 function InlinePATForm() {
   const [token, setToken] = useState("");
-  const [error, setError] = useState<null | string>(null);
-  const [isValidating, setIsValidating] = useState(false);
-  const [isValid, setIsValid] = useState(false);
   const [remember, setRemember] = useState(true);
   const [showToken, setShowToken] = useState(false);
-  const [scopeWarnings, setScopeWarnings] = useState<string[]>([]);
   const { setPat } = useGitHubData();
   const navigate = useNavigate();
-
-  // Auto-validate when token changes (with debounce)
-  useEffect(() => {
-    if (!token || !isValidGitHubToken(token)) {
-      setIsValid(false);
-      if (token && token.length > 5) {
-        setError("Invalid token format");
-      } else {
-        setError(null);
-      }
-      return;
-    }
-
-    setError(null);
-    setIsValidating(true);
-
-    const timeout = setTimeout(() => {
-      const octokit = createThrottledOctokit(token);
-      Promise.all([
-        octokit.rest.users.getAuthenticated(),
-        checkTokenScopes(octokit),
-      ])
-        .then(([, scopeResult]) => {
-          setIsValid(true);
-          setIsValidating(false);
-          // Show scope warnings (non-blocking)
-          const warnings = scopeResult.missingScopes
-            .map((scope) => SCOPE_DESCRIPTIONS[scope])
-            .filter(Boolean);
-          setScopeWarnings(warnings);
-        })
-        .catch(() => {
-          setError("Invalid or expired token");
-          setIsValid(false);
-          setIsValidating(false);
-          setScopeWarnings([]);
-        });
-    }, 500);
-
-    return () => clearTimeout(timeout);
-  }, [token]);
+  const { error, isValid, isValidating, scopeWarnings } =
+    useTokenValidation(token);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -141,6 +88,11 @@ function InlinePATForm() {
   }
 
   const canSubmit = isValid && !isValidating;
+  const formatError =
+    token.length > 5 && !isValidGitHubToken(token)
+      ? "Invalid token format"
+      : null;
+  const displayError = error ?? formatError;
 
   return (
     <form className="space-y-4" onSubmit={handleSubmit}>
@@ -149,7 +101,7 @@ function InlinePATForm() {
         <Input
           autoComplete="off"
           className={`h-auto pl-10 pr-12 py-3 bg-default-100 text-sm font-mono placeholder:text-default-400 ${
-            error
+            displayError
               ? "border-danger"
               : isValid
                 ? "border-emerald-600"
@@ -180,12 +132,12 @@ function InlinePATForm() {
             </Button>
           )}
           {isValidating && (
-            <Loader2 className="h-4 w-4 text-default-400 animate-spin" />
+            <LoaderCircle className="h-4 w-4 text-default-400 animate-spin" />
           )}
         </div>
       </div>
 
-      {error && <p className="text-xs text-danger">{error}</p>}
+      {displayError && <p className="text-xs text-danger">{displayError}</p>}
 
       {isValid && (
         <p className="text-xs text-emerald-700 dark:text-emerald-400">
@@ -232,8 +184,8 @@ function InlinePATForm() {
             <Info className="h-3.5 w-3.5" />
           </PopoverTrigger>
           <PopoverContent side="top" className="w-64 text-xs text-default-500">
-            Your token is AES-encrypted and stored only in your browser&apos;s
-            localStorage. It never leaves your device.
+            Your token is encrypted locally before being saved to your browser.
+            It is never sent to a server.
           </PopoverContent>
         </Popover>
       </div>
@@ -259,14 +211,14 @@ export function GetStartedSection() {
   const reduced = useReducedMotion();
 
   return (
-    <section className="w-full px-6 py-20" id="get-started">
+    <section className="w-full px-6 sm:px-8 py-16 sm:py-20" id="get-started">
       <div className="max-w-5xl mx-auto">
         <motion.div
           className="text-center mb-16"
           {...scrollRevealProps(staggerContainer, reduced)}
         >
           <motion.h2
-            className="text-3xl md:text-4xl font-bold mb-4"
+            className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4"
             variants={fadeUp}
           >
             Get Started in Under 2 Minutes
@@ -284,13 +236,13 @@ export function GetStartedSection() {
           className="relative"
           {...scrollRevealProps(staggerContainerWide, reduced)}
         >
-          {/* Connecting line */}
+          {/* Connecting line — desktop only */}
           <div className="absolute left-5 top-6 bottom-6 w-px bg-divider hidden sm:block" />
 
-          <div className="space-y-10">
+          <div className="space-y-8 sm:space-y-10">
             {steps.map((step, index) => (
               <motion.div
-                className="flex gap-6 items-start relative"
+                className="flex flex-col items-center text-center sm:flex-row sm:items-start sm:text-left gap-4 sm:gap-6 relative"
                 key={index}
                 variants={fadeUp}
               >
@@ -305,15 +257,12 @@ export function GetStartedSection() {
                     {step.number}
                   </div>
                 </div>
-                <div className="flex-1 pt-1 pb-2">
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <step.icon className="h-4 w-4 text-[var(--brand-blue)]" />
-                    <h3 className="text-lg font-semibold">{step.title}</h3>
-                  </div>
+                <div className="flex-1 sm:pt-1 sm:pb-2">
+                  <h3 className="text-lg font-semibold mb-1.5">{step.title}</h3>
                   <p className="text-default-500 mb-3">{step.description}</p>
                   {step.cta && (
                     <a
-                      className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-divider text-sm font-medium hover:bg-default-50 transition-colors"
+                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 transition-colors shadow-sm"
                       href={step.cta.href}
                       rel="noopener noreferrer"
                       target="_blank"
@@ -344,19 +293,21 @@ export function GetStartedSection() {
 
               <InlinePATForm />
 
-              <div className="flex items-center justify-center gap-6 mt-5 text-xs text-default-400">
-                <span className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-success inline-block" />
-                  Stays in your browser
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-success inline-block" />
-                  Never sent to a server
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-success inline-block" />
-                  100% free
-                </span>
+              <div className="flex justify-center mt-5">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-1.5 sm:gap-6 text-xs text-default-400">
+                  <span className="flex items-center gap-1.5">
+                    <Check className="h-3.5 w-3.5 text-success shrink-0" />
+                    Stays in your browser
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <Check className="h-3.5 w-3.5 text-success shrink-0" />
+                    Never sent to a server
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <Check className="h-3.5 w-3.5 text-success shrink-0" />
+                    100% free
+                  </span>
+                </div>
               </div>
             </CardContent>
           </Card>
