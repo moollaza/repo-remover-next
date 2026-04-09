@@ -6,7 +6,7 @@ import { App } from "./app";
 import "./globals.css";
 import { sentryBeforeSend } from "./utils/sentry-before-send";
 
-// Sentry initialization — privacy-first
+// Sentry initialization — privacy-first, scrubs tokens and PII
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 const SENTRY_DSN = import.meta.env.VITE_SENTRY_DSN;
 if (SENTRY_DSN && import.meta.env.PROD) {
