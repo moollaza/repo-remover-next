@@ -15,12 +15,8 @@ import {
   getValidPersonalAccessToken,
   MOCK_REPOS,
 } from "@/mocks/static-fixtures";
-import {
-  archiveRepo,
-  createThrottledOctokit,
-  deleteRepo,
-  fetchGitHubDataWithProgress,
-} from "@/github";
+import { createThrottledOctokit, fetchGitHubDataWithProgress } from "@/github";
+import { archiveRepo, deleteRepo } from "@/github/mutations";
 
 const VALID_PAT = getValidPersonalAccessToken();
 const noopProgress = () => {};

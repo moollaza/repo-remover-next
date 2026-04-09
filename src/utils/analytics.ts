@@ -73,5 +73,3 @@ export const analytics = {
    */
   trackTokenValidated: () => track("token_validated"),
 };
-
-export default analytics;
