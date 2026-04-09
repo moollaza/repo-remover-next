@@ -10,7 +10,7 @@ import {
   Search,
   SquareCheckBig,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -25,10 +25,10 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
+import { isValidGitHubToken } from "@/github/client";
 import { useGitHubData } from "@/hooks/use-github-data";
+import { useTokenValidation } from "@/hooks/use-token-validation";
 import { analytics } from "@/utils/analytics";
-import { createThrottledOctokit, isValidGitHubToken } from "@/github/client";
-import { checkTokenScopes, SCOPE_DESCRIPTIONS } from "@/github/scopes";
 import {
   fadeUp,
   scaleIn,
@@ -71,55 +71,12 @@ const steps = [
  */
 function InlinePATForm() {
   const [token, setToken] = useState("");
-  const [error, setError] = useState<null | string>(null);
-  const [isValidating, setIsValidating] = useState(false);
-  const [isValid, setIsValid] = useState(false);
   const [remember, setRemember] = useState(true);
   const [showToken, setShowToken] = useState(false);
-  const [scopeWarnings, setScopeWarnings] = useState<string[]>([]);
   const { setPat } = useGitHubData();
   const navigate = useNavigate();
-
-  // Auto-validate when token changes (with debounce)
-  useEffect(() => {
-    if (!token || !isValidGitHubToken(token)) {
-      setIsValid(false);
-      if (token && token.length > 5) {
-        setError("Invalid token format");
-      } else {
-        setError(null);
-      }
-      return;
-    }
-
-    setError(null);
-    setIsValidating(true);
-
-    const timeout = setTimeout(() => {
-      const octokit = createThrottledOctokit(token);
-      Promise.all([
-        octokit.rest.users.getAuthenticated(),
-        checkTokenScopes(octokit),
-      ])
-        .then(([, scopeResult]) => {
-          setIsValid(true);
-          setIsValidating(false);
-          // Show scope warnings (non-blocking)
-          const warnings = scopeResult.missingScopes
-            .map((scope) => SCOPE_DESCRIPTIONS[scope])
-            .filter(Boolean);
-          setScopeWarnings(warnings);
-        })
-        .catch(() => {
-          setError("Invalid or expired token");
-          setIsValid(false);
-          setIsValidating(false);
-          setScopeWarnings([]);
-        });
-    }, 500);
-
-    return () => clearTimeout(timeout);
-  }, [token]);
+  const { error, isValid, isValidating, scopeWarnings } =
+    useTokenValidation(token);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -131,6 +88,11 @@ function InlinePATForm() {
   }
 
   const canSubmit = isValid && !isValidating;
+  const formatError =
+    token.length > 5 && !isValidGitHubToken(token)
+      ? "Invalid token format"
+      : null;
+  const displayError = error ?? formatError;
 
   return (
     <form className="space-y-4" onSubmit={handleSubmit}>
@@ -139,7 +101,7 @@ function InlinePATForm() {
         <Input
           autoComplete="off"
           className={`h-auto pl-10 pr-12 py-3 bg-default-100 text-sm font-mono placeholder:text-default-400 ${
-            error
+            displayError
               ? "border-danger"
               : isValid
                 ? "border-emerald-600"
@@ -175,7 +137,7 @@ function InlinePATForm() {
         </div>
       </div>
 
-      {error && <p className="text-xs text-danger">{error}</p>}
+      {displayError && <p className="text-xs text-danger">{displayError}</p>}
 
       {isValid && (
         <p className="text-xs text-emerald-700 dark:text-emerald-400">

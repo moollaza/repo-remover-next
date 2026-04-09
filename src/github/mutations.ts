@@ -45,18 +45,6 @@ export const processRepo = async (
   repo: Repository,
   action: "archive" | "delete",
 ): Promise<void> => {
-  if (!octokit) {
-    throw new Error("Octokit instance is required");
-  }
-
-  if (!repo) {
-    throw new Error("Repository is required");
-  }
-
-  if (!action) {
-    throw new Error("Action is required");
-  }
-
   debug.log(`Processing ${action} for ${repo.name}...`);
 
   if (action === "archive") {

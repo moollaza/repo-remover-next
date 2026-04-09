@@ -80,11 +80,6 @@ export const GitHubDataProvider: React.FC<GitHubProviderProps> = ({
     }
 
     void loadStoredData();
-
-    // Cleanup function
-    return () => {
-      // Any cleanup needed when component unmounts
-    };
   }, []);
 
   // Derived authentication state

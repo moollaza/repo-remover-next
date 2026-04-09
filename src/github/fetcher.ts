@@ -26,14 +26,14 @@ import {
   type UserRepositoriesResponse,
 } from "./queries";
 import { checkTokenScopes, combineWarnings } from "./scopes";
-import { type FetchResult, type LoadingProgress, type User } from "./types";
+import { type AppUser, type FetchResult, type LoadingProgress } from "./types";
 
 function toUser(data: {
   avatarUrl: string;
   id: string;
   login: string;
   name?: string;
-}): User {
+}): AppUser {
   return {
     avatarUrl: data.avatarUrl,
     id: data.id,
@@ -60,7 +60,7 @@ export async function fetchGitHubDataWithProgress(
   const samlProtectedOrgs: string[] = [];
   const scopeLimitedOrgs: string[] = [];
   let userLogin = login;
-  let userData: null | User = null;
+  let userData: AppUser | null = null;
 
   try {
     if (!userLogin) {
@@ -274,7 +274,7 @@ async function fetchRepositories(
 ): Promise<{
   error: Error | null;
   repos: null | Repository[];
-  userData: null | User;
+  userData: AppUser | null;
 }> {
   try {
     const result = await paginateGraphQLQuery<UserRepositoriesResponse>(

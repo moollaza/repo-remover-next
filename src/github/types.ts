@@ -10,11 +10,14 @@ export interface LoadingProgress {
   orgsTotal: number;
   repos: Repository[];
   stage: "complete" | "orgs" | "personal";
-  user: null | User;
+  user: AppUser | null;
 }
 
-/** Subset of GitHub user profile data used throughout the app. */
-export interface User {
+/**
+ * Subset of GitHub user profile data used by the app.
+ * Named `AppUser` to avoid shadowing `@octokit/graphql-schema`'s `User` type.
+ */
+export interface AppUser {
   avatarUrl: string;
   id: string;
   login: string;
@@ -28,7 +31,7 @@ export interface FetchResult {
   permissionWarning?: string;
   repos: null | Repository[];
   samlProtectedOrgs?: string[];
-  user: null | User;
+  user: AppUser | null;
 }
 
 /** Result of checking a classic PAT's OAuth scopes against required scopes. */
