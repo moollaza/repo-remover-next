@@ -3,7 +3,7 @@ import { HomePage } from "@e2e/pages/home";
 import { mockLocalStorage } from "@e2e/utils/github-api-mocks";
 import { expect, test } from "@playwright/test";
 
-import { mockUser } from "@/mocks/static-fixtures";
+import { MOCK_USER as MOCK_USER } from "@/mocks/static-fixtures";
 
 test.describe("Layout Components", () => {
   test.describe("Header", () => {
@@ -25,7 +25,7 @@ test.describe("Layout Components", () => {
         await home.expectDashboardButtonNotVisible();
 
         // User profile should not be visible when not logged in
-        await home.expectUserProfileNotVisible(mockUser.name, mockUser.login);
+        await home.expectUserProfileNotVisible(MOCK_USER.name, MOCK_USER.login);
       });
 
       test("shows dashboard button when logged in", async ({ page }) => {
@@ -53,7 +53,10 @@ test.describe("Layout Components", () => {
         await dashboard.expectBrandVisible();
 
         // User profile should be visible
-        await dashboard.expectUserProfileVisible(mockUser.name, mockUser.login);
+        await dashboard.expectUserProfileVisible(
+          MOCK_USER.name,
+          MOCK_USER.login,
+        );
 
         // Navigation links should not be visible on dashboard
         await dashboard.expectNavLinkNotVisible("Features");
