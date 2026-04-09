@@ -2,7 +2,7 @@ import { DashboardPage } from "@e2e/pages/dashboard";
 import { mockArchiveRepo, mockDeleteRepo } from "@e2e/utils/github-api-mocks";
 import { expect, test } from "@playwright/test";
 
-import { MOCK_REPOS as MOCK_REPOS } from "@/mocks/static-fixtures";
+import { MOCK_REPOS } from "@/mocks/static-fixtures";
 
 test.describe("Dashboard Page", () => {
   let dashboard: DashboardPage;

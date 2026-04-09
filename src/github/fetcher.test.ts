@@ -8,11 +8,9 @@ import {
   MOCK_REPOS,
   MOCK_USER,
 } from "@/mocks/static-fixtures";
-import {
-  checkTokenScopes,
-  createThrottledOctokit,
-  fetchGitHubDataWithProgress,
-} from "@/github";
+import { createThrottledOctokit } from "@/github/client";
+import { fetchGitHubDataWithProgress } from "@/github/fetcher";
+import { checkTokenScopes } from "@/github/scopes";
 
 const VALID_PAT = getValidPersonalAccessToken();
 

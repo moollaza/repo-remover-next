@@ -9,12 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
-import {
-  checkTokenScopes,
-  createThrottledOctokit,
-  isValidGitHubToken,
-  SCOPE_DESCRIPTIONS,
-} from "@/github";
+import { createThrottledOctokit, isValidGitHubToken } from "@/github/client";
+import { checkTokenScopes, SCOPE_DESCRIPTIONS } from "@/github/scopes";
 
 interface GitHubTokenFormProps {
   className?: string;

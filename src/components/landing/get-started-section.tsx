@@ -27,12 +27,8 @@ import {
 
 import { useGitHubData } from "@/hooks/use-github-data";
 import { analytics } from "@/utils/analytics";
-import {
-  checkTokenScopes,
-  createThrottledOctokit,
-  isValidGitHubToken,
-  SCOPE_DESCRIPTIONS,
-} from "@/github";
+import { createThrottledOctokit, isValidGitHubToken } from "@/github/client";
+import { checkTokenScopes, SCOPE_DESCRIPTIONS } from "@/github/scopes";
 import {
   fadeUp,
   scaleIn,

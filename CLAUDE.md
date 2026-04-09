@@ -49,7 +49,7 @@ Plans go in `docs/plans/`. Solutions go in `docs/solutions/`.
 
 - **Presentational/Container split**: `page.tsx` (container) + `dashboard.tsx` (presentational)
 - **Custom hooks**: `use-repo-filters.ts`, `use-repo-pagination.ts` — extract logic from components >200 LOC
-- **GitHub API module**: `src/github/` — queries, scopes, fetcher, client, mutations (barrel via `@/github`)
+- **GitHub API module**: `src/github/` — queries, scopes, fetcher, client, mutations, types
 - **Theme**: CSS custom properties in `globals.css`, dark mode via `class` strategy with `next-themes`
 - **Token storage**: AES-GCM encrypted in localStorage (`src/utils/secure-storage.ts`)
 - **Data flow**: React Context (`GitHubContext`) + SWR for caching → Octokit GraphQL → GitHub API

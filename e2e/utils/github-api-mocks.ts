@@ -2,8 +2,8 @@ import { type Page } from "@playwright/test";
 
 import {
   getValidPersonalAccessToken,
-  MOCK_REPOS as MOCK_REPOS,
-  MOCK_USER as MOCK_USER,
+  MOCK_REPOS,
+  MOCK_USER,
 } from "@/mocks/static-fixtures";
 
 export async function mockArchiveRepo(

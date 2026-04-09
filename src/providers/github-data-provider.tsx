@@ -11,7 +11,8 @@ import useSWR from "swr";
 import { GitHubContext, GitHubContextType } from "@/contexts/github-context";
 import { analytics } from "@/utils/analytics";
 import { debug } from "@/utils/debug";
-import { fetchGitHubDataWithProgress, type LoadingProgress } from "@/github";
+import { fetchGitHubDataWithProgress } from "@/github/fetcher";
+import { type LoadingProgress } from "@/github/types";
 import { secureStorage } from "@/utils/secure-storage";
 
 const IS_DEV = import.meta.env.DEV;

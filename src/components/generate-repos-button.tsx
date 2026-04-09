@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useGitHubData } from "@/hooks/use-github-data";
 import { cn } from "@/lib/utils";
-import { createThrottledOctokit } from "@/github";
+import { createThrottledOctokit } from "@/github/client";
 import { generateRepos } from "@/github/dev-tools";
 
 /**

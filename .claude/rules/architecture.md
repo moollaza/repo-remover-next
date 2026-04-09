@@ -14,7 +14,7 @@ description: Architecture review findings, priority recommendations, GitHub API 
 
 ## Key Components Structure
 
-- **GitHub API Module**: `src/github/` — queries, scopes, fetcher, client, mutations (barrel via `@/github`)
+- **GitHub API Module**: `src/github/` — queries, scopes, fetcher, client, mutations, types
 - **Data Provider Layer**: `GitHubDataProvider` wraps the app and manages API calls and state
 - **Context Layer**: `GitHubContext` provides typed access to user data, repositories, and authentication state
 - **Component Layer**: Reusable UI components built with Tailwind CSS
