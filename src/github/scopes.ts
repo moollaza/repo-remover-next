@@ -54,7 +54,7 @@ export async function checkTokenScopes(
   }
 }
 
-export function buildScopeWarnings(missingScopes: string[]): string[] {
+function buildScopeWarnings(missingScopes: string[]): string[] {
   return missingScopes
     .map((scope) => {
       const desc = SCOPE_DESCRIPTIONS[scope];

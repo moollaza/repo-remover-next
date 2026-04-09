@@ -28,6 +28,21 @@ import {
 import { checkTokenScopes, combineWarnings } from "./scopes";
 import { type FetchResult, type LoadingProgress, type User } from "./types";
 
+function toUser(data: {
+  avatarUrl: string;
+  id: string;
+  login: string;
+  name?: string;
+}): User {
+  return {
+    avatarUrl: data.avatarUrl,
+    id: data.id,
+    login: data.login,
+    name: data.name ?? data.login,
+    url: `https://github.com/${data.login}`,
+  };
+}
+
 /**
  * Fetches GitHub data with progressive loading callbacks.
  */
@@ -42,12 +57,8 @@ export async function fetchGitHubDataWithProgress(
   }
 
   const octokit = createThrottledOctokit(pat);
-
-  // Track SAML-protected and scope-limited orgs across all org fetches
   const samlProtectedOrgs: string[] = [];
   const scopeLimitedOrgs: string[] = [];
-
-  // Get user login
   let userLogin = login;
   let userData: null | User = null;
 
@@ -58,7 +69,6 @@ export async function fetchGitHubDataWithProgress(
       userLogin = userResponse.viewer.login;
     }
 
-    // 1. Fetch personal repos AND check token scopes in parallel
     const [userRepoResult, scopeResult] = await Promise.all([
       fetchRepositories(octokit, userLogin),
       checkTokenScopes(octokit),
@@ -66,7 +76,6 @@ export async function fetchGitHubDataWithProgress(
     userData = userRepoResult.userData;
     let allRepos: Repository[] = userRepoResult.repos ?? [];
 
-    // Report personal repos immediately
     onProgress({
       orgsLoaded: 0,
       orgsTotal: 0,
@@ -75,7 +84,6 @@ export async function fetchGitHubDataWithProgress(
       user: userData,
     });
 
-    // 2. Fetch orgs list
     let orgs: { login: string; url: string }[] = [];
     let permissionError: null | string = null;
 
@@ -92,7 +100,6 @@ export async function fetchGitHubDataWithProgress(
       }
     }
 
-    // 3. Fetch org repos in PARALLEL
     if (orgs.length > 0) {
       let completedOrgs = 0;
 
@@ -105,6 +112,7 @@ export async function fetchGitHubDataWithProgress(
         );
 
         completedOrgs++;
+        // concat (not push) so each onProgress gets an immutable snapshot
         allRepos = allRepos.concat(orgRepos);
 
         onProgress({
@@ -122,7 +130,6 @@ export async function fetchGitHubDataWithProgress(
       await Promise.all(orgReposPromises);
     }
 
-    // Final update
     onProgress({
       orgsLoaded: orgs.length,
       orgsTotal: orgs.length,
@@ -277,13 +284,7 @@ async function fetchRepositories(
     );
 
     const { user } = result;
-    const userData: User = {
-      avatarUrl: user.avatarUrl,
-      id: user.id,
-      login: user.login,
-      name: user.name ?? user.login,
-      url: `https://github.com/${user.login}`,
-    };
+    const userData = toUser(user);
 
     return {
       error: null,
@@ -300,23 +301,18 @@ async function fetchRepositories(
           ?.user?.repositories?.nodes ?? null;
 
       let userData = null;
-      type PartialUserData = { name?: string } & Pick<
-        User,
-        "avatarUrl" | "id" | "login"
-      >;
-      interface ErrorData {
-        user?: PartialUserData;
-      }
-
-      if ((error.data as ErrorData)?.user) {
-        const user = (error.data as { user: PartialUserData }).user;
-        userData = {
-          avatarUrl: user.avatarUrl,
-          id: user.id,
-          login: user.login,
-          name: user.name ?? user.login,
-          url: `https://github.com/${user.login}`,
-        };
+      const partialUser = (
+        error.data as {
+          user?: {
+            avatarUrl: string;
+            id: string;
+            login: string;
+            name?: string;
+          };
+        }
+      )?.user;
+      if (partialUser) {
+        userData = toUser(partialUser);
       }
 
       return {

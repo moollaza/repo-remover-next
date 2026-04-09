@@ -114,8 +114,6 @@ export const GET_ORG_REPOS = `
   }
 `;
 
-// Response types for GraphQL queries
-
 export interface CurrentUserResponse {
   viewer: {
     avatarUrl: string;
@@ -152,7 +150,7 @@ export interface OrgRepositoriesResponse {
   };
 }
 
-export interface RepositoriesResponse {
+export interface UserRepositoriesResponse {
   user: {
     avatarUrl: string;
     bioHTML: string;
@@ -167,8 +165,4 @@ export interface RepositoriesResponse {
       };
     };
   };
-}
-
-export interface UserRepositoriesResponse {
-  user: RepositoriesResponse["user"];
 }
