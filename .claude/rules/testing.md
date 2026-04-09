@@ -50,8 +50,9 @@ The custom `render` function:
 
 ## MSW Mocking Best Practices
 
-- Use operation-based handlers: `graphql.query('GetRepositories', ...)`
-- Avoid string matching: `if (body.query.includes(...))`
+- Default handlers use operation-based matching: `graphql.query('getRepositories', ...)`
+- Scoped to GitHub API: `graphql.link("https://api.github.com/graphql")`
+- Error handler factories use `http.post` catch-all (intentionally overrides all operations)
 - Use named scenarios for error cases
 
 ## New Component Checklist

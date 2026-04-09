@@ -5,7 +5,8 @@ import { useCallback, useMemo, useReducer, useRef } from "react";
 import { useGitHubData } from "@/hooks/use-github-data";
 import { analytics } from "@/utils/analytics";
 import { debug } from "@/utils/debug";
-import { createThrottledOctokit, processRepo } from "@/utils/github-utils";
+import { createThrottledOctokit } from "@/github/client";
+import { processRepo } from "@/github/mutations";
 
 // --- Types ---
 

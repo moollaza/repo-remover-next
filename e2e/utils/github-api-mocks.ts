@@ -2,8 +2,8 @@ import { type Page } from "@playwright/test";
 
 import {
   getValidPersonalAccessToken,
-  mockRepos,
-  mockUser,
+  MOCK_REPOS,
+  MOCK_USER,
 } from "@/mocks/static-fixtures";
 
 export async function mockArchiveRepo(
@@ -83,21 +83,21 @@ export async function mockGraphQLRepos(page: Page): Promise<void> {
 
     if (body.query.includes("getCurrentUser")) {
       return void route.fulfill({
-        json: { data: { viewer: mockUser } },
+        json: { data: { viewer: MOCK_USER } },
       });
     }
 
     if (body.query.includes("getRepositories")) {
       // Only return user-owned repos here. Org repos come via getOrgRepositories
       // to avoid duplicates (the real API returns org repos in both queries).
-      const userRepos = mockRepos.filter(
-        (r) => r.owner.login === mockUser.login,
+      const userRepos = MOCK_REPOS.filter(
+        (r) => r.owner.login === MOCK_USER.login,
       );
       return void route.fulfill({
         json: {
           data: {
             user: {
-              ...mockUser,
+              ...MOCK_USER,
               repositories: {
                 nodes: userRepos,
                 pageInfo: { endCursor: null, hasNextPage: false },
@@ -126,8 +126,8 @@ export async function mockGraphQLRepos(page: Page): Promise<void> {
     }
 
     if (body.query.includes("getOrgRepositories")) {
-      const orgRepos = mockRepos.filter(
-        (r) => r.owner.login !== mockUser.login,
+      const orgRepos = MOCK_REPOS.filter(
+        (r) => r.owner.login !== MOCK_USER.login,
       );
       return void route.fulfill({
         json: {
@@ -155,7 +155,7 @@ export async function mockGraphQLReposEmpty(page: Page): Promise<void> {
 
     if (body.query.includes("getCurrentUser")) {
       return void route.fulfill({
-        json: { data: { viewer: mockUser } },
+        json: { data: { viewer: MOCK_USER } },
       });
     }
 
@@ -164,7 +164,7 @@ export async function mockGraphQLReposEmpty(page: Page): Promise<void> {
         json: {
           data: {
             user: {
-              ...mockUser,
+              ...MOCK_USER,
               repositories: {
                 nodes: [],
                 pageInfo: { endCursor: null, hasNextPage: false },
@@ -240,7 +240,7 @@ export async function mockLocalStorage(page: Page) {
 export async function mockOctokitInit(page: Page) {
   await page.route("https://api.github.com/user", (route) => {
     void route.fulfill({
-      json: mockUser,
+      json: MOCK_USER,
       status: 200,
     });
   });

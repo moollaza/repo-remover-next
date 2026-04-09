@@ -230,10 +230,7 @@ export const MOCK_ORGANIZATIONS = [
   },
 ];
 
-// Export commonly used subsets
-export const mockUser = MOCK_USER;
-export const mockRepos = MOCK_REPOS;
-export const mockUsers = [MOCK_USER]; // For compatibility
+// Extended fixture set for pagination testing
 export const manyMockRepos: MockRepository[] = [
   ...MOCK_REPOS,
   ...Array.from({ length: 10 }, (_, i) =>

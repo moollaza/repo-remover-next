@@ -320,8 +320,7 @@ export default function Header() {
   const { isAuthenticated, logout, user } = useGitHubData();
 
   const isDashboard = pathname === "/dashboard";
-  const hasDemoParam = new URLSearchParams(window.location.search).has("demo");
-  const isDevelopment = import.meta.env.DEV || hasDemoParam;
+  const isDevelopment = import.meta.env.DEV;
 
   function handleLogout() {
     logout();

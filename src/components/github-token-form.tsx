@@ -1,6 +1,5 @@
-import { RequestError } from "@octokit/request-error";
 import { Eye, EyeOff, LoaderCircle, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -9,11 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
-import { checkTokenScopes, SCOPE_DESCRIPTIONS } from "@/utils/github-api";
-import {
-  createThrottledOctokit,
-  isValidGitHubToken,
-} from "@/utils/github-utils";
+import { isValidGitHubToken } from "@/github/client";
+import { useTokenValidation } from "@/hooks/use-token-validation";
 
 interface GitHubTokenFormProps {
   className?: string;
@@ -28,107 +24,18 @@ export default function GitHubTokenForm({
   onValueChange,
   value,
 }: GitHubTokenFormProps) {
-  const [error, setError] = useState<null | string>(null);
-  const [isValidating, setIsValidating] = useState(false);
-  const [isTokenValid, setIsTokenValid] = useState(false);
-  const [username, setUsername] = useState<null | string>(null);
   const [remember, setRemember] = useState(true);
-  const [lastValidatedToken, setLastValidatedToken] = useState<null | string>(
-    null,
-  );
   const [showToken, setShowToken] = useState(false);
-  const [scopeWarnings, setScopeWarnings] = useState<string[]>([]);
+  const { error, isValid, isValidating, scopeWarnings, username } =
+    useTokenValidation(value);
 
-  // Handle value change
   const handleChange = (newValue: string) => {
     onValueChange(newValue);
-    if (error) setError(null);
-    if (!newValue) {
-      setIsTokenValid(false);
-      setUsername(null);
-      setLastValidatedToken(null);
-      setScopeWarnings([]);
-    }
   };
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const validateToken = async () => {
-      if (!value) {
-        setIsTokenValid(false);
-        setUsername(null);
-        setLastValidatedToken(null);
-        return;
-      }
-
-      if (!isValidGitHubToken(value) || value === lastValidatedToken) {
-        return;
-      }
-
-      setIsValidating(true);
-      setError(null);
-
-      try {
-        const octokit = createThrottledOctokit(value);
-        const [{ data: userData }, scopeResult] = await Promise.all([
-          octokit.users.getAuthenticated(),
-          checkTokenScopes(octokit),
-        ]);
-
-        if (isMounted) {
-          setIsTokenValid(true);
-          setUsername(userData.login);
-          setLastValidatedToken(value);
-
-          // Show scope warnings (non-blocking — token is still valid)
-          const warnings = scopeResult.missingScopes
-            .map((scope) => SCOPE_DESCRIPTIONS[scope])
-            .filter(Boolean);
-          setScopeWarnings(warnings);
-        }
-      } catch (err) {
-        if (isMounted) {
-          setIsTokenValid(false);
-          setUsername(null);
-
-          // Differentiate 401 (bad token) from server/network errors
-          const status = err instanceof RequestError ? err.status : undefined;
-
-          if (status === 401) {
-            setError("Invalid or expired token");
-          } else if (status !== undefined && status >= 500) {
-            setError("GitHub API is unavailable — please try again later");
-          } else {
-            setError(
-              "GitHub API is unavailable — please check your connection",
-            );
-          }
-
-          setLastValidatedToken(value);
-        }
-      } finally {
-        if (isMounted) {
-          setIsValidating(false);
-        }
-      }
-    };
-
-    const timeoutId = setTimeout(() => {
-      void validateToken();
-    }, 500);
-
-    return () => {
-      isMounted = false;
-      clearTimeout(timeoutId);
-    };
-  }, [value, lastValidatedToken]);
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-
-    if (!value || !isTokenValid) return;
-
+    if (!value || !isValid) return;
     onSubmit(value, remember);
   }
 
@@ -147,20 +54,20 @@ export default function GitHubTokenForm({
 
   if (isValidating) {
     inputDescription = "Validating token...";
-  } else if (isTokenValid && username) {
+  } else if (isValid && username) {
     inputDescription = `Token is valid. Welcome ${username}, click submit to continue!`;
   }
 
   // Border/ring color based on state
   const inputBorderClass = showValidationError
     ? "border-danger focus:ring-danger"
-    : isTokenValid && username
+    : isValid && username
       ? "border-success focus:ring-success"
       : "border-default-300 focus:ring-primary";
 
   // Description text color based on state
   const descriptionColorClass =
-    isTokenValid && username ? "text-success" : "text-default-400";
+    isValid && username ? "text-success" : "text-default-400";
 
   return (
     <form
@@ -278,12 +185,12 @@ export default function GitHubTokenForm({
       <Button
         className={cn(
           "w-full",
-          !isTokenValid || isValidating
+          !isValid || isValidating
             ? "bg-primary/50 text-white/70 cursor-not-allowed"
             : "bg-primary text-white hover:bg-primary/90",
         )}
         data-testid="github-token-submit"
-        disabled={!isTokenValid || isValidating}
+        disabled={!isValid || isValidating}
         size="lg"
         type="submit"
       >

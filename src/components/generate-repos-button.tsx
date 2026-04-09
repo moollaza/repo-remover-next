@@ -4,7 +4,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useGitHubData } from "@/hooks/use-github-data";
 import { cn } from "@/lib/utils";
-import { createThrottledOctokit, generateRepos } from "@/utils/github-utils";
+import { createThrottledOctokit } from "@/github/client";
+import { generateRepos } from "@/github/dev-tools";
 
 /**
  * This component generates random repositories for the user
@@ -19,16 +20,12 @@ export function GenerateReposButton() {
   const octokit = pat ? createThrottledOctokit(pat) : null;
   const [isLoading, setIsLoading] = useState(false);
 
-  const hasDemoParam =
-    typeof window !== "undefined" &&
-    new URLSearchParams(window.location.search).has("demo");
-
   const isE2E =
     typeof window !== "undefined" &&
     (window as unknown as Record<string, unknown>).__E2E_PLAIN_STORAGE__ ===
       true;
 
-  if ((!import.meta.env.DEV && !hasDemoParam) || !octokit || isE2E) {
+  if (!import.meta.env.DEV || !octokit || isE2E) {
     return null;
   }
 
