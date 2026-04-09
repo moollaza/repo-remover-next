@@ -14,6 +14,15 @@
 }
 
 /*
+ * z-index scale:
+ *   z-[-1]  — decorative background (repo rain)
+ *   z-0     — default (page content, sections)
+ *   z-10    — local stacking contexts (step indicators, content over decorative blurs)
+ *   z-50    — header, dropdowns, popovers, select menus
+ *   z-[100] — modals, confirmation dialogs
+ */
+
+/*
  * Color tokens — replaces @heroui/theme plugin.
  * Values extracted from @heroui/theme source (zinc, blue, purple, green, yellow, red scales).
  * Tailwind CSS 4 @theme with --color-* namespace: hex values support opacity modifiers automatically.

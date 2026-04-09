@@ -1,0 +1,163 @@
+@keyframes fly-across {
+  0% {
+    transform: translateX(-220px) translateY(0) rotate(0deg);
+    opacity: 0;
+  }
+  3% {
+    opacity: 1;
+  }
+  97% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(calc(100vw + 220px)) translateY(var(--drift-y, 0px))
+      rotate(var(--rotate, 0deg));
+    opacity: 0;
+  }
+}
+
+@keyframes wobble {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-4px) rotate(1.5deg);
+  }
+  75% {
+    transform: translateY(4px) rotate(-1.5deg);
+  }
+}
+
+@keyframes lure-fly {
+  0% {
+    transform: translateX(-220px);
+    opacity: 0;
+  }
+  5% {
+    opacity: 1;
+  }
+  95% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(calc(100vw + 220px));
+    opacity: 0;
+  }
+}
+
+@keyframes score-pop {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-30px) scale(1.2);
+  }
+}
+
+@keyframes countdown-pulse {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  40% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Pixel art dot grid background */
+.arena {
+  background-image: radial-gradient(
+    circle,
+    var(--dot-color, rgba(0, 0, 0, 0.04)) 1px,
+    transparent 1px
+  );
+  background-size: 28px 28px;
+}
+
+:global(.dark) .arena {
+  --dot-color: rgba(255, 255, 255, 0.04);
+}
+
+/* Custom crosshair cursor — dark by default */
+.crosshairCursor {
+  cursor:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cline x1='12' y1='2' x2='12' y2='9' stroke='%23555' stroke-width='1.5' stroke-linecap='round'/%3E%3Cline x1='12' y1='15' x2='12' y2='22' stroke='%23555' stroke-width='1.5' stroke-linecap='round'/%3E%3Cline x1='2' y1='12' x2='9' y2='12' stroke='%23555' stroke-width='1.5' stroke-linecap='round'/%3E%3Cline x1='15' y1='12' x2='22' y2='12' stroke='%23555' stroke-width='1.5' stroke-linecap='round'/%3E%3Ccircle cx='12' cy='12' r='3' fill='none' stroke='%23555' stroke-width='1.5'/%3E%3C/svg%3E")
+      12 12,
+    crosshair;
+}
+
+.flyingCard {
+  position: absolute;
+  left: 0;
+  pointer-events: auto;
+  /* Red crosshair on hover over cards */
+  cursor:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cline x1='12' y1='2' x2='12' y2='9' stroke='%23ef4444' stroke-width='2' stroke-linecap='round'/%3E%3Cline x1='12' y1='15' x2='12' y2='22' stroke='%23ef4444' stroke-width='2' stroke-linecap='round'/%3E%3Cline x1='2' y1='12' x2='9' y2='12' stroke='%23ef4444' stroke-width='2' stroke-linecap='round'/%3E%3Cline x1='15' y1='12' x2='22' y2='12' stroke='%23ef4444' stroke-width='2' stroke-linecap='round'/%3E%3Ccircle cx='12' cy='12' r='3' fill='none' stroke='%23ef4444' stroke-width='2'/%3E%3C/svg%3E")
+      12 12,
+    crosshair;
+  animation: fly-across var(--flight-duration, 5s) linear forwards;
+  z-index: 10;
+}
+
+.flyingCard.flipped {
+  left: auto;
+  right: 0;
+  animation-direction: reverse;
+}
+
+/* Inner card content wobbles while flying — gives a "fluttering" feel */
+.cardInner {
+  animation: wobble 1.2s ease-in-out infinite;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.cardInner:hover {
+  transform: scale(1.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.lureCard {
+  position: absolute;
+  pointer-events: auto;
+  cursor: pointer;
+  animation: lure-fly 4s linear forwards;
+  z-index: 10;
+}
+
+/* Lure also wobbles */
+.lureInner {
+  animation: wobble 1s ease-in-out infinite;
+}
+
+.scorePop {
+  position: absolute;
+  pointer-events: none;
+  z-index: 30;
+  animation: score-pop 0.6s ease-out forwards;
+  font-family: monospace;
+  font-weight: bold;
+  font-size: 1.25rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flyingCard,
+  .lureCard {
+    animation: none;
+    display: none;
+  }
+
+  .cardInner,
+  .lureInner {
+    animation: none;
+  }
+}
