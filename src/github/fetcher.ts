@@ -1,3 +1,14 @@
+/**
+ * Data fetching orchestration for GitHub repositories and organizations.
+ *
+ * Fetches in three stages with progressive callbacks:
+ * 1. Personal repos + token scope check (parallel)
+ * 2. Organization list
+ * 3. Organization repos (all orgs in parallel)
+ *
+ * Gracefully handles SAML-protected and scope-limited orgs by skipping them
+ * and surfacing warnings rather than failing the entire fetch.
+ */
 import { GraphqlResponseError } from "@octokit/graphql";
 import { type Repository } from "@octokit/graphql-schema";
 
@@ -146,8 +157,7 @@ export async function fetchGitHubDataWithProgress(
   }
 }
 
-// --- Extracted helper functions ---
-
+/** Paginates through all organizations the user belongs to. */
 async function fetchAllOrganizations(
   octokit: ThrottledOctokitType,
   userLogin: string,
@@ -186,6 +196,10 @@ async function fetchAllOrganizations(
   return orgs;
 }
 
+/**
+ * Paginates through all repos for a single org.
+ * On SAML or scope errors, records the org in the tracking arrays and returns partial results.
+ */
 async function fetchAllOrgRepos(
   octokit: ThrottledOctokitType,
   orgLogin: string,
@@ -246,6 +260,7 @@ async function fetchAllOrgRepos(
   return repos;
 }
 
+/** Fetches user repos with pagination. Returns partial data on GraphQL errors. */
 async function fetchRepositories(
   octokit: ThrottledOctokitType,
   userLogin: string,
@@ -322,6 +337,7 @@ async function fetchRepositories(
   }
 }
 
+/** Type-safe wrapper around Octokit's untyped graphql.paginate. */
 async function paginateGraphQLQuery<T>(
   octokit: ThrottledOctokitType,
   query: string,

@@ -1,3 +1,7 @@
+/**
+ * GraphQL query strings and response types for the GitHub API.
+ * Operation names (getRepositories, getCurrentUser, etc.) must match the MSW handlers in mocks/handlers.ts.
+ */
 import { type Repository } from "@octokit/graphql-schema";
 
 export const GET_REPOS = `

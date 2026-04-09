@@ -1,3 +1,7 @@
+/**
+ * Repository mutation operations (archive, delete).
+ * Re-throws original errors to preserve RequestError type for 401 early-stop detection.
+ */
 import { type Repository } from "@octokit/graphql-schema";
 import { type Octokit } from "@octokit/rest";
 
@@ -35,6 +39,7 @@ export const deleteRepo = async (
   }
 };
 
+/** Dispatches archive or delete for a single repo and tracks the analytics event. */
 export const processRepo = async (
   octokit: Octokit,
   repo: Repository,

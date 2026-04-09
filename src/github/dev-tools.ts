@@ -1,3 +1,7 @@
+/**
+ * Dev-only utilities for testing. Not used in production.
+ * Creates test repositories via the GitHub API for manual QA.
+ */
 import { type Octokit } from "@octokit/rest";
 
 import { debug } from "@/utils/debug";
@@ -53,6 +57,7 @@ export async function generateRepos(
         name: `${template.name}-${Date.now()}-${i}`,
         private: template.private,
       });
+      // Delay between creates to avoid hitting rate limits
       await new Promise((resolve) => setTimeout(resolve, 500));
     }
   } catch (error) {

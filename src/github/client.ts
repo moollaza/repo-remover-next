@@ -1,3 +1,6 @@
+/**
+ * Octokit client factory with rate-limit throttling and GraphQL pagination.
+ */
 import { paginateGraphQL } from "@octokit/plugin-paginate-graphql";
 import { throttling } from "@octokit/plugin-throttling";
 import { Octokit } from "@octokit/rest";
@@ -8,6 +11,11 @@ export const ThrottledOctokit = Octokit.plugin(throttling, paginateGraphQL);
 
 export type ThrottledOctokitType = InstanceType<typeof ThrottledOctokit>;
 
+/**
+ * Validates a GitHub Personal Access Token format.
+ * Supports fine-grained tokens (github_pat_) and classic tokens (ghp_, gho_, ghu_, ghs_, ghr_).
+ * See: https://github.blog/changelog/2021-03-31-authentication-token-format-updates-are-generally-available/
+ */
 export function isValidGitHubToken(token: string): boolean {
   if (!token) return false;
 
@@ -31,6 +39,7 @@ export function isValidGitHubToken(token: string): boolean {
   return /^[a-zA-Z0-9]+$/.test(token.slice(matchedPrefix.length));
 }
 
+/** Creates an Octokit instance with rate-limit throttling (retries once) and GraphQL pagination. */
 export function createThrottledOctokit(
   token: string,
 ): InstanceType<typeof ThrottledOctokit> {
